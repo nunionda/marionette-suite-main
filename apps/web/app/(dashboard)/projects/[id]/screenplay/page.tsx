@@ -47,18 +47,18 @@ interface ReviewChecklist {
 
 interface ScreenplayData {
   id: string
-  project_id: string
-  current_step: number
+  projectId: string
+  currentStep: number
   idea: string
   outline: string | null
   characters: Character[]
-  scene_logs: SceneLog[]
+  sceneLogs: string | null
   draft: string | null
-  draft_version: number
+  draftVersion: number
   review: ReviewChecklist | null
   feedback: string | null
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
 }
 
 interface Project {
@@ -73,6 +73,31 @@ interface SequenceCard {
   content: string
 }
 
+interface Cut {
+  cut_number: number
+  shot_type: string
+  camera_angle: string
+  camera_movement: string
+  duration: number
+  subject: string
+  action: string
+  image_prompt: string
+  video_prompt: string
+}
+
+interface DPScene {
+  scene_number: number
+  sequence: number
+  setting: string
+  time_of_day: string
+  camera_angle: string
+  action_description: string
+  dialogue: string | null
+  image_prompt: string
+  video_prompt: string
+  cuts: Cut[]
+}
+
 // ─── Constants ───
 
 const STEPS = [
@@ -81,6 +106,7 @@ const STEPS = [
   { key: 3, label: "트리트먼트", labelEn: "Treatment" },
   { key: 4, label: "집필", labelEn: "Screenplay" },
   { key: 5, label: "피드백", labelEn: "Review" },
+  { key: 6, label: "연출기획", labelEn: "Direction Plan" },
 ] as const
 
 const SEQUENCE_COLORS = [
@@ -187,10 +213,14 @@ export default function ScreenplayPage() {
   // Step 4 state
   const [editingDraft, setEditingDraft] = useState(false)
   const [draftEdit, setDraftEdit] = useState("")
-  const [activeScene, setActiveScene] = useState(1)
 
   // Step 5 state
   const [feedbackText, setFeedbackText] = useState("")
+
+  // Step 6 state
+  const [dpScenes, setDpScenes] = useState<DPScene[]>([])
+  const [generatingStage, setGeneratingStage] = useState<string | null>(null)
+  const [activeStage, setActiveStage] = useState(1)
 
   // ─── Data Loading ───
 
@@ -202,10 +232,15 @@ export default function ScreenplayPage() {
       ])
       setProject(proj)
       setScreenplay(sp)
-      setActiveStep(sp.current_step || 1)
+      setActiveStep(sp.currentStep || 1)
       setIdea(sp.idea || proj.idea || "")
       if (sp.draft) setDraftEdit(sp.draft)
       if (sp.outline) setOutlineEdit(sp.outline)
+      // Load direction plan data
+      if ((proj as Record<string, unknown>).direction_plan_json) {
+        const dpJson = (proj as Record<string, unknown>).direction_plan_json as { scenes?: DPScene[] }
+        if (dpJson?.scenes) setDpScenes(dpJson.scenes)
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load")
     } finally {
@@ -278,18 +313,20 @@ export default function ScreenplayPage() {
     }
   }
 
-  const generateTreatment = async () => {
-    setGenerating(true)
+  const [generatingSeq, setGeneratingSeq] = useState<number | null>(null)
+
+  const generateSequenceTreatment = async (seq: number) => {
+    setGeneratingSeq(seq)
     setError(null)
     try {
-      const updated = await fetchAPI<ScreenplayData>(`/api/screenplay/${projectId}/treatment`, {
+      const updated = await fetchAPI<ScreenplayData>(`/api/screenplay/${projectId}/treatment/${seq}`, {
         method: "POST",
       })
       setScreenplay(updated)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Treatment generation failed")
+      setError(err instanceof Error ? err.message : `Sequence ${seq} generation failed`)
     } finally {
-      setGenerating(false)
+      setGeneratingSeq(null)
     }
   }
 
@@ -323,6 +360,22 @@ export default function ScreenplayPage() {
     }
   }
 
+  const resetDraft = async () => {
+    const confirmed = window.confirm("대본을 초기화하시겠습니까? 현재 작성된 모든 씬이 삭제됩니다.")
+    if (!confirmed) return
+    setError(null)
+    try {
+      await fetchAPI(`/api/screenplay/${projectId}/draft`, {
+        method: "DELETE",
+      })
+      setScreenplay((prev) => prev ? { ...prev, draft: null, draftVersion: 1 } : prev)
+      setDraftEdit("")
+      setEditingDraft(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Reset failed")
+    }
+  }
+
   const advanceStep = async (nextStep: number) => {
     setError(null)
     try {
@@ -341,7 +394,7 @@ export default function ScreenplayPage() {
     setGenerating(true)
     setError(null)
     try {
-      const updated = await fetchAPI<ScreenplayData>(`/api/screenplay/${projectId}/draft`, {
+      const updated = await fetchAPI<ScreenplayData>(`/api/screenplay/${projectId}/apply-feedback`, {
         method: "POST",
         body: JSON.stringify({ feedback: feedbackText }),
       })
@@ -352,6 +405,68 @@ export default function ScreenplayPage() {
       setError(err instanceof Error ? err.message : "Feedback application failed")
     } finally {
       setGenerating(false)
+    }
+  }
+
+  // ─── Direction Plan API Actions ───
+
+  const generateSequenceDP = async (seq: number) => {
+    setGeneratingStage(`seq-${seq}`)
+    try {
+      const data = await fetchAPI<{ directionPlan: { scenes: DPScene[] } }>(
+        `/api/screenplay/${projectId}/direction-plan/sequence/${seq}`,
+        { method: "POST" }
+      )
+      if (data.directionPlan?.scenes) setDpScenes(data.directionPlan.scenes)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed")
+    } finally {
+      setGeneratingStage(null)
+    }
+  }
+
+  const generateSceneCuts = async (sceneNumber: number) => {
+    setGeneratingStage(`cuts-${sceneNumber}`)
+    try {
+      const data = await fetchAPI<{ directionPlan: { scenes: DPScene[] } }>(
+        `/api/screenplay/${projectId}/direction-plan/scene/${sceneNumber}/cuts`,
+        { method: "POST" }
+      )
+      if (data.directionPlan?.scenes) setDpScenes(data.directionPlan.scenes)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed")
+    } finally {
+      setGeneratingStage(null)
+    }
+  }
+
+  const generateCutPrompts = async (sceneNumber: number, cutNumber: number) => {
+    setGeneratingStage(`prompts-${sceneNumber}-${cutNumber}`)
+    try {
+      const data = await fetchAPI<{ directionPlan: { scenes: DPScene[] } }>(
+        `/api/screenplay/${projectId}/direction-plan/scene/${sceneNumber}/cut/${cutNumber}/prompts`,
+        { method: "POST" }
+      )
+      if (data.directionPlan?.scenes) setDpScenes(data.directionPlan.scenes)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed")
+    } finally {
+      setGeneratingStage(null)
+    }
+  }
+
+  const generateSceneAll = async (sceneNumber: number) => {
+    setGeneratingStage(`all-${sceneNumber}`)
+    try {
+      const data = await fetchAPI<{ directionPlan: { scenes: DPScene[] } }>(
+        `/api/screenplay/${projectId}/direction-plan/scene/${sceneNumber}/generate-all`,
+        { method: "POST" }
+      )
+      if (data.directionPlan?.scenes) setDpScenes(data.directionPlan.scenes)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed")
+    } finally {
+      setGeneratingStage(null)
     }
   }
 
@@ -376,10 +491,10 @@ export default function ScreenplayPage() {
     )
   }
 
-  const completedSteps = screenplay?.current_step ?? 1
+  const completedSteps = screenplay?.currentStep ?? 1
 
   return (
-    <div className="max-w-7xl">
+    <div style={{ maxWidth: "1600px" }}>
       {/* Back button */}
       <button
         onClick={() => router.push(`/projects/${projectId}`)}
@@ -407,7 +522,7 @@ export default function ScreenplayPage() {
         {/* Main Content */}
         <div className="flex-1 min-w-0">
           {/* 5-Step Progress Tracker */}
-          <div className="mb-6 flex items-center gap-0 rounded-xl border border-gray-800 bg-gray-900/50 p-1">
+          <div className="mb-6 flex items-center gap-0 rounded-xl border border-gray-800 bg-gray-900/50 p-1 overflow-x-auto">
             {STEPS.map((step, i) => {
               const isCompleted = step.key < completedSteps
               const isActive = step.key === activeStep
@@ -437,8 +552,8 @@ export default function ScreenplayPage() {
                     }`}>
                       {isCompleted ? "\u2713" : step.key}
                     </span>
-                    <span className="hidden md:inline">{step.label}</span>
-                    <span className="hidden lg:inline text-xs text-gray-500">({step.labelEn})</span>
+                    <span className="hidden md:inline whitespace-nowrap text-xs">{step.label}</span>
+                    <span className="hidden xl:inline whitespace-nowrap text-xs text-gray-500">({step.labelEn})</span>
                   </button>
                   {i < STEPS.length - 1 && (
                     <div className={`h-px w-4 flex-shrink-0 ${isCompleted ? "bg-green-500" : "bg-gray-700"}`} />
@@ -505,17 +620,30 @@ export default function ScreenplayPage() {
 
           {activeStep === 3 && (
             <Step3Treatment
-              sceneLogs={screenplay?.scene_logs ?? []}
-              onGenerate={generateTreatment}
+              sceneLogs={(() => { try { return screenplay?.sceneLogs ? JSON.parse(screenplay.sceneLogs) as SceneLog[] : [] } catch { return [] } })()}
+              outline={screenplay?.outline ?? ""}
+              onGenerateSequence={generateSequenceTreatment}
+              onSaveSceneLogs={async (text: string) => {
+                try {
+                  const updated = await fetchAPI<ScreenplayData>(`/api/screenplay/${projectId}/treatment-text`, {
+                    method: "PUT",
+                    body: JSON.stringify({ sceneLogs: text }),
+                  })
+                  setScreenplay(updated)
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Save failed")
+                }
+              }}
               onApprove={() => advanceStep(4)}
-              generating={generating}
+              generatingSeq={generatingSeq}
             />
           )}
 
           {activeStep === 4 && (
             <Step4Screenplay
               draft={screenplay?.draft ?? null}
-              draftVersion={screenplay?.draft_version ?? 1}
+              draftVersion={screenplay?.draftVersion ?? 1}
+              totalTreatmentScenes={(() => { try { return screenplay?.sceneLogs ? (JSON.parse(screenplay.sceneLogs) as SceneLog[]).length : 120 } catch { return 120 } })()}
               editingDraft={editingDraft}
               draftEdit={draftEdit}
               onDraftEditChange={setDraftEdit}
@@ -528,22 +656,52 @@ export default function ScreenplayPage() {
                 }
               }}
               onCancelEdit={() => setEditingDraft(false)}
-              activeScene={activeScene}
-              onSceneChange={setActiveScene}
               onWriteNext={writeNextScenes}
+              onSaveDraft={saveDraft}
+              onResetDraft={resetDraft}
               onApprove={() => advanceStep(5)}
               generating={generating}
             />
           )}
 
-          {activeStep === 5 && (
-            <Step5Review
-              review={screenplay?.review ?? null}
-              feedbackText={feedbackText}
-              onFeedbackChange={setFeedbackText}
-              onApplyFeedback={applyFeedback}
-              onFinalize={() => router.push(`/projects/${projectId}`)}
-              generating={generating}
+          {activeStep === 5 && (() => {
+            // Auto-generate review checklist from draft data
+            const draft = screenplay?.draft ?? ""
+            const draftScenes = (draft.match(/S#\d+\./g) ?? []).length
+            const treatmentScenes = (() => { try { return screenplay?.sceneLogs ? (JSON.parse(screenplay.sceneLogs) as SceneLog[]).length : 0 } catch { return 0 } })()
+            const hasCharacters = Array.isArray(screenplay?.characters) && screenplay.characters.length > 0
+            const hasMasterFormat = /###\s*S#\d+\./.test(draft)
+            const autoReview: ReviewChecklist = {
+              character_consistency: hasCharacters,
+              master_scene_format: hasMasterFormat,
+              scene_count: draftScenes,
+              target_scenes: treatmentScenes || 120,
+              pacing_check: draftScenes >= (treatmentScenes || 120) * 0.8,
+            }
+            return (
+              <Step5Review
+                review={autoReview}
+                feedbackText={feedbackText}
+                onFeedbackChange={setFeedbackText}
+                onApplyFeedback={applyFeedback}
+                onFinalize={() => advanceStep(6)}
+                generating={generating}
+              />
+            )
+          })()}
+
+          {activeStep === 6 && (
+            <Step6DirectionPlan
+              dpScenes={dpScenes}
+              outline={screenplay?.outline ?? ""}
+              activeStage={activeStage}
+              setActiveStage={setActiveStage}
+              generatingStage={generatingStage}
+              onGenerateSequence={generateSequenceDP}
+              onGenerateCuts={generateSceneCuts}
+              onGeneratePrompts={generateCutPrompts}
+              onGenerateAll={generateSceneAll}
+              onFinish={() => router.push(`/projects/${projectId}`)}
             />
           )}
         </div>
@@ -555,9 +713,10 @@ export default function ScreenplayPage() {
             <div className="space-y-2">
               <ArtifactItem label="Outline" done={!!screenplay?.outline} />
               <ArtifactItem label="Characters" done={(screenplay?.characters?.length ?? 0) > 0} />
-              <ArtifactItem label="Scene Logs" done={(screenplay?.scene_logs?.length ?? 0) > 0} />
+              <ArtifactItem label="Scene Logs" done={!!screenplay?.sceneLogs} />
               <ArtifactItem label="Draft" done={!!screenplay?.draft} />
               <ArtifactItem label="Review" done={!!screenplay?.review} />
+              <ArtifactItem label="Direction Plan" done={dpScenes.length > 0} />
             </div>
           </div>
         </div>
@@ -656,7 +815,7 @@ function Step1Planning({
               className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 font-mono text-sm text-gray-200 focus:border-blue-500 focus:outline-none"
             />
           ) : (
-            <pre className="whitespace-pre-wrap rounded-lg bg-gray-950 p-4 text-sm text-gray-300 leading-relaxed">
+            <pre className="whitespace-pre-wrap rounded-lg bg-gray-950 p-4 text-sm text-gray-300 leading-relaxed overflow-y-auto" style={{ maxHeight: "calc(100vh - 400px)" }}>
               {outline}
             </pre>
           )}
@@ -920,18 +1079,58 @@ function CharacterForm({ character, onChange }: { character: Character; onChange
   )
 }
 
-// ─── Step 3: Treatment ───
+// ─── Step 3: Treatment (시퀀스별 생성) ───
+
+function sceneLogsToText(logs: SceneLog[]): string {
+  const grouped: Record<number, SceneLog[]> = {}
+  for (const log of logs) {
+    const seq = log.sequence ?? 1
+    if (!grouped[seq]) grouped[seq] = []
+    grouped[seq].push(log)
+  }
+  const lines: string[] = []
+  for (const seqStr of Object.keys(grouped).sort((a, b) => Number(a) - Number(b))) {
+    const seq = Number(seqStr)
+    const seqLogs = grouped[seq] ?? []
+    const title = seqLogs[0]?.sequence_title ?? `시퀀스 ${seq}`
+    lines.push(`### 시퀀스 ${seq}: ${title}`)
+    for (const log of seqLogs) {
+      lines.push(`S#${log.scene_number}. ${log.location} - ${log.time_of_day}: ${log.summary}`)
+    }
+    lines.push("")
+  }
+  return lines.join("\n")
+}
 
 function Step3Treatment({
-  sceneLogs, onGenerate, onApprove, generating,
+  sceneLogs, outline, onGenerateSequence, onSaveSceneLogs, onApprove, generatingSeq,
 }: {
   sceneLogs: SceneLog[]
-  onGenerate: () => void
+  outline: string
+  onGenerateSequence: (seq: number) => void
+  onSaveSceneLogs: (text: string) => void
   onApprove: () => void
-  generating: boolean
+  generatingSeq: number | null
 }) {
-  const [collapsed, setCollapsed] = useState<Record<number, boolean>>({})
+  const [expandedSeq, setExpandedSeq] = useState<number | null>(null)
+  const [editingText, setEditingText] = useState(false)
+  const [textEdit, setTextEdit] = useState("")
 
+  // Parse sequence titles from outline
+  const sequenceTitles: Record<number, string> = {}
+  const seqPattern = /###\s*\d+\.\s*시퀀스\s*\d+[:\s]*(.+)/g
+  let match: RegExpExecArray | null
+  let seqIdx = 1
+  while ((match = seqPattern.exec(outline)) !== null) {
+    sequenceTitles[seqIdx] = match[1].trim()
+    seqIdx++
+  }
+  // Fallback if no sequences found
+  for (let i = 1; i <= 8; i++) {
+    if (!sequenceTitles[i]) sequenceTitles[i] = `시퀀스 ${i}`
+  }
+
+  // Group scenes by sequence
   const grouped = sceneLogs.reduce<Record<number, SceneLog[]>>((acc, log) => {
     const seq = log.sequence ?? 1
     if (!acc[seq]) acc[seq] = []
@@ -939,72 +1138,115 @@ function Step3Treatment({
     return acc
   }, {})
 
-  const toggleCollapse = (seq: number) => {
-    setCollapsed((prev) => ({ ...prev, [seq]: !prev[seq] }))
-  }
+  const totalScenes = sceneLogs.length
+  const completedSequences = Object.keys(grouped).length
 
   return (
     <div className="space-y-6">
+      {/* Progress Header */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Scene Logs (Treatment)</h2>
-          <button
-            onClick={onGenerate}
-            disabled={generating}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
-          >
-            {generating ? (
-              <span className="flex items-center gap-2">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                Generating...
-              </span>
-            ) : "Generate Scene Logs"}
-          </button>
+          <div>
+            <h2 className="text-lg font-semibold">Scene Logs (Treatment)</h2>
+            <p className="mt-1 text-sm text-gray-400">
+              시퀀스별로 씬 로그를 생성하세요 ({completedSequences}/8 시퀀스 완료, {totalScenes}씬)
+            </p>
+          </div>
         </div>
 
-        {sceneLogs.length === 0 && !generating && (
-          <p className="text-sm text-gray-500">No scene logs yet. Click &quot;Generate Scene Logs&quot; to create the treatment.</p>
-        )}
-
-        {/* Skeleton Loading */}
-        {generating && sceneLogs.length === 0 && (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-lg bg-gray-800 p-4">
-                <div className="mb-2 h-4 w-48 rounded bg-gray-700" />
-                <div className="h-3 w-full rounded bg-gray-700" />
-                <div className="mt-1 h-3 w-3/4 rounded bg-gray-700" />
+        {/* Scene Logs Text View */}
+        {sceneLogs.length > 0 && (
+          <div className="mb-6 rounded-xl border border-gray-800 bg-gray-900 p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">씬 로그 전체 보기</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    if (editingText) {
+                      onSaveSceneLogs(textEdit)
+                      setEditingText(false)
+                    } else {
+                      setTextEdit(sceneLogsToText(sceneLogs))
+                      setEditingText(true)
+                    }
+                  }}
+                  className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:text-white transition"
+                >
+                  {editingText ? "Save" : "Edit"}
+                </button>
+                {editingText && (
+                  <button
+                    onClick={() => setEditingText(false)}
+                    className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:text-white transition"
+                  >
+                    Cancel
+                  </button>
+                )}
               </div>
-            ))}
+            </div>
+            {editingText ? (
+              <textarea
+                value={textEdit}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setTextEdit(e.target.value)}
+                rows={20}
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 font-mono text-sm text-gray-200 focus:border-blue-500 focus:outline-none"
+              />
+            ) : (
+              <pre className="overflow-y-auto whitespace-pre-wrap rounded-lg bg-gray-950 p-4 text-sm text-gray-300 leading-relaxed" style={{ maxHeight: "calc(100vh - 400px)" }}>
+                {sceneLogsToText(sceneLogs)}
+              </pre>
+            )}
           </div>
         )}
 
-        {/* Grouped Scene Logs */}
-        <div className="space-y-3">
-          {Object.entries(grouped).map(([seqStr, logs]) => {
-            const seq = parseInt(seqStr)
-            const isCollapsed = collapsed[seq]
-            const firstScene = logs[0]?.scene_number ?? 0
-            const lastScene = logs[logs.length - 1]?.scene_number ?? 0
-            const seqTitle = logs[0]?.sequence_title ?? `Sequence ${seq}`
+        {/* Sequence Cards Grid */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {Array.from({ length: 8 }).map((_, i) => {
+            const seq = i + 1
+            const seqScenes = grouped[seq] ?? []
+            const isDone = seqScenes.length > 0
+            const isGenerating = generatingSeq === seq
+            const isExpanded = expandedSeq === seq
 
             return (
-              <div key={seq} className={`rounded-lg border border-gray-800 ${SEQUENCE_COLORS[(seq - 1) % 8]}`}>
-                <button
-                  onClick={() => toggleCollapse(seq)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-left"
-                >
+              <div key={seq} className={`rounded-lg border ${SEQUENCE_COLORS[(seq - 1) % 8]} transition`}>
+                <div className="flex items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-2">
                     <span className="rounded bg-gray-800 px-2 py-0.5 text-xs font-bold text-gray-300">SEQ {seq}</span>
-                    <span className="text-sm font-medium text-gray-200">{seqTitle}</span>
-                    <span className="text-xs text-gray-500">(S#{firstScene} ~ S#{lastScene})</span>
+                    <span className="text-sm font-medium text-gray-200">{sequenceTitles[seq]}</span>
                   </div>
-                  <span className="text-xs text-gray-500">{isCollapsed ? "\u25B6" : "\u25BC"}</span>
-                </button>
+                  <div className="flex items-center gap-2">
+                    {isDone && (
+                      <button
+                        onClick={() => setExpandedSeq(isExpanded ? null : seq)}
+                        className="text-xs text-gray-400 hover:text-white"
+                      >
+                        {seqScenes.length}씬 {isExpanded ? "▲" : "▼"}
+                      </button>
+                    )}
+                    {isDone ? (
+                      <span className="rounded bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">✓ 완료</span>
+                    ) : (
+                      <button
+                        onClick={() => onGenerateSequence(seq)}
+                        disabled={generatingSeq !== null}
+                        className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                      >
+                        {isGenerating ? (
+                          <span className="flex items-center gap-1.5">
+                            <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                            생성 중...
+                          </span>
+                        ) : "생성하기"}
+                      </button>
+                    )}
+                  </div>
+                </div>
 
-                {!isCollapsed && (
-                  <div className="space-y-2 px-4 pb-4">
-                    {logs.map((log) => (
+                {/* Expanded Scene List */}
+                {isExpanded && seqScenes.length > 0 && (
+                  <div className="space-y-2 border-t border-gray-800 px-4 py-3">
+                    {seqScenes.map((log) => (
                       <div key={log.scene_number} className="rounded-lg bg-gray-950 p-3">
                         <div className="mb-1 flex flex-wrap items-center gap-2">
                           <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">
@@ -1016,8 +1258,6 @@ function Step3Treatment({
                           </span>
                         </div>
                         <p className="text-sm text-gray-400">{log.summary}</p>
-
-                        {/* Breakdown Badges */}
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {log.breakdown?.cast?.map((c) => (
                             <span key={c} className="rounded bg-red-500/15 px-1.5 py-0.5 text-xs text-red-400">{c}</span>
@@ -1040,7 +1280,7 @@ function Step3Treatment({
       </div>
 
       {/* Approve */}
-      {sceneLogs.length > 0 && (
+      {totalScenes > 0 && (
         <button
           onClick={onApprove}
           className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-green-700"
@@ -1055,161 +1295,260 @@ function Step3Treatment({
 // ─── Step 4: Screenplay ───
 
 function Step4Screenplay({
-  draft, draftVersion, editingDraft, draftEdit, onDraftEditChange,
-  onToggleEdit, onCancelEdit, activeScene, onSceneChange, onWriteNext, onApprove, generating,
+  draft, draftVersion, totalTreatmentScenes, editingDraft, draftEdit, onDraftEditChange,
+  onToggleEdit, onCancelEdit, onWriteNext, onSaveDraft, onResetDraft, onApprove, generating,
 }: {
   draft: string | null
   draftVersion: number
+  totalTreatmentScenes: number
   editingDraft: boolean
   draftEdit: string
   onDraftEditChange: (v: string) => void
   onToggleEdit: () => void
   onCancelEdit: () => void
-  activeScene: number
-  onSceneChange: (n: number) => void
   onWriteNext: () => void
+  onSaveDraft: () => void
+  onResetDraft: () => void
   onApprove: () => void
   generating: boolean
 }) {
-  // Extract scene numbers from draft text
-  const sceneNumbers: number[] = []
+  const [activeScene, setActiveScene] = useState(1)
+
+  // Extract scene info (number + location preview) from draft text
+  const scenes: { num: number; location: string }[] = []
   if (draft) {
-    const matches = draft.matchAll(/S#(\d+)\./g)
+    const matches = draft.matchAll(/S#(\d+)\.\s*(.+)/g)
     for (const match of matches) {
       const num = parseInt(match[1])
-      if (!sceneNumbers.includes(num)) sceneNumbers.push(num)
+      if (!scenes.find((s) => s.num === num)) {
+        const location = match[2].split("-")[0].trim().slice(0, 12)
+        scenes.push({ num, location })
+      }
     }
   }
 
+  const sceneCount = scenes.length
+  const lastScene = scenes.length > 0 ? scenes[scenes.length - 1].num : 0
+  const nextStart = lastScene + 1
+  const nextEnd = lastScene + 5
+  const isComplete = sceneCount >= totalTreatmentScenes && totalTreatmentScenes > 0
+
   const formattedLines = draft ? parseScreenplayFormatting(draft) : []
+
+  const scrollToScene = (num: number) => {
+    setActiveScene(num)
+    const el = document.getElementById(`scene-${num}`)
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
+  }
 
   return (
     <div className="space-y-6">
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h2 className="text-lg font-semibold">Screenplay</h2>
-            <span className="rounded bg-gray-800 px-2 py-0.5 text-xs text-gray-400">
-              Draft v{draftVersion}
-            </span>
+      <div className="flex gap-0 rounded-xl border border-gray-800 bg-gray-900 overflow-hidden" style={{ height: "calc(100vh - 280px)" }}>
+        {/* Scene Sidebar */}
+        <div className="w-48 flex-shrink-0 border-r border-gray-800 bg-gray-900/50 flex flex-col">
+          <div className="p-3 border-b border-gray-800">
+            <p className="text-xs text-gray-500 font-medium">씬 목록</p>
+            <p className="text-sm font-semibold text-gray-300 mt-1">
+              진행: <span className="text-blue-400">{sceneCount}</span>/{totalTreatmentScenes}씬
+            </p>
+            {sceneCount > 0 && (
+              <div className="mt-2 h-1.5 w-full rounded-full bg-gray-800">
+                <div
+                  className="h-1.5 rounded-full bg-blue-500 transition-all"
+                  style={{ width: `${Math.min((sceneCount / totalTreatmentScenes) * 100, 100)}%` }}
+                />
+              </div>
+            )}
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={onWriteNext}
-              disabled={generating}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
-            >
-              {generating ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  Writing...
-                </span>
-              ) : "Write Next 5 Scenes"}
-            </button>
-            {draft && (
+
+          <div className="flex-1 overflow-y-auto p-2 space-y-0.5">
+            {scenes.map((scene) => (
               <button
-                onClick={onToggleEdit}
-                className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:text-white transition"
+                key={scene.num}
+                onClick={() => scrollToScene(scene.num)}
+                className={`w-full text-left rounded px-2 py-1.5 text-xs transition flex items-center gap-1.5 ${
+                  activeScene === scene.num
+                    ? "bg-blue-600/20 text-blue-400"
+                    : "text-gray-400 hover:bg-gray-800 hover:text-gray-200"
+                }`}
               >
-                {editingDraft ? "Save" : "Edit"}
+                <span className="font-mono font-bold shrink-0">S#{scene.num}</span>
+                <span className="truncate">{scene.location}</span>
+                {activeScene === scene.num && <span className="ml-auto shrink-0">&#9654;</span>}
+              </button>
+            ))}
+            {scenes.length === 0 && !generating && (
+              <p className="text-xs text-gray-600 text-center py-4">아직 작성된 씬이 없습니다</p>
+            )}
+          </div>
+
+          <div className="p-2 border-t border-gray-800 space-y-1.5">
+            {isComplete ? (
+              <div className="w-full rounded-lg bg-green-600/20 border border-green-500/30 px-2 py-2 text-xs font-medium text-green-400 text-center">
+                전체 씬 작성 완료
+              </div>
+            ) : (
+              <button
+                onClick={onWriteNext}
+                disabled={generating}
+                className="w-full rounded-lg bg-blue-600 px-2 py-2 text-xs font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+              >
+                {generating ? (
+                  <span className="flex items-center justify-center gap-1.5">
+                    <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    작성 중...
+                  </span>
+                ) : (
+                  <>다음 5씬 작성<br /><span className="text-blue-200/70">(S#{nextStart}~S#{nextEnd})</span></>
+                )}
               </button>
             )}
-            {editingDraft && (
+            {draft && (
               <button
-                onClick={onCancelEdit}
-                className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:text-white transition"
+                onClick={onResetDraft}
+                className="w-full rounded-lg border border-red-500/30 px-2 py-1.5 text-xs text-red-400 transition hover:bg-red-500/10"
               >
-                Cancel
+                처음부터 다시 쓰기
               </button>
             )}
           </div>
         </div>
 
-        {/* Scene Navigation */}
-        {sceneNumbers.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-1.5">
-            {sceneNumbers.map((num) => (
-              <button
-                key={num}
-                onClick={() => onSceneChange(num)}
-                className={`rounded px-2.5 py-1 text-xs font-medium transition ${
-                  activeScene === num
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
-                }`}
-              >
-                S#{num}
-              </button>
-            ))}
+        {/* Main Viewer */}
+        <div className="flex-1 flex flex-col min-h-0">
+          {/* Header Bar */}
+          <div className="flex items-center justify-between p-4 border-b border-gray-800">
+            <div className="flex items-center gap-3">
+              <h2 className="text-lg font-semibold">Screenplay</h2>
+              <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs font-medium text-blue-400">
+                Draft v{draftVersion}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              {draft && !editingDraft && (
+                <button
+                  onClick={onToggleEdit}
+                  className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:text-white transition"
+                >
+                  Edit
+                </button>
+              )}
+              {editingDraft && (
+                <>
+                  <button
+                    onClick={onSaveDraft}
+                    className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={onCancelEdit}
+                    className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:text-white transition"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        )}
 
-        {/* Draft Display */}
-        {!draft && !generating && (
-          <p className="text-sm text-gray-500">No draft yet. Click &quot;Write Next 5 Scenes&quot; to begin.</p>
-        )}
+          {/* Content Area */}
+          <div className="flex-1 overflow-y-auto p-6">
+            {!draft && !generating && (
+              <p className="text-sm text-gray-500">
+                아직 대본이 없습니다. 왼쪽 사이드바에서 &quot;다음 5씬 작성&quot;을 클릭하여 시작하세요.
+              </p>
+            )}
 
-        {generating && !draft && (
-          <div className="space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="animate-pulse rounded-lg bg-gray-800 p-4">
-                <div className="mb-2 h-4 w-32 rounded bg-gray-700" />
-                <div className="h-3 w-full rounded bg-gray-700" />
-                <div className="mt-1 h-3 w-5/6 rounded bg-gray-700" />
-                <div className="mt-1 h-3 w-2/3 rounded bg-gray-700" />
+            {generating && !draft && (
+              <div className="space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <div key={i} className="animate-pulse rounded-lg bg-gray-800 p-4">
+                    <div className="mb-2 h-4 w-32 rounded bg-gray-700" />
+                    <div className="h-3 w-full rounded bg-gray-700" />
+                    <div className="mt-1 h-3 w-5/6 rounded bg-gray-700" />
+                    <div className="mt-1 h-3 w-2/3 rounded bg-gray-700" />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        )}
+            )}
 
-        {draft && editingDraft ? (
-          <textarea
-            value={draftEdit}
-            onChange={(e) => onDraftEditChange(e.target.value)}
-            rows={30}
-            className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 font-mono text-sm text-gray-200 focus:border-blue-500 focus:outline-none"
-          />
-        ) : draft ? (
-          <div className="rounded-lg bg-gray-950 p-6 font-mono text-sm leading-relaxed">
-            {formattedLines.map((line, i) => {
-              switch (line.type) {
-                case "heading":
-                  return (
-                    <div key={i} className="mb-3 mt-6 first:mt-0">
-                      <span className="mr-2 rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">
-                        {line.content.split(".")[0]}
-                      </span>
-                      <span className="font-bold text-gray-200">{line.content.split(".").slice(1).join(".").trim()}</span>
-                    </div>
-                  )
-                case "action":
-                  return <p key={i} className="my-1 text-gray-500 italic">{line.content}</p>
-                case "character":
-                  return <p key={i} className="mb-0.5 mt-3 font-bold text-yellow-400">{line.content}</p>
-                case "dialogue":
-                  return <p key={i} className="mb-2 pl-8 text-gray-200">{line.content}</p>
-                case "camera":
-                  return (
-                    <div key={i} className="my-1">
-                      <span className="rounded bg-blue-500/15 px-1.5 py-0.5 text-xs text-blue-400">{line.content}</span>
-                    </div>
-                  )
-                default:
-                  return <p key={i} className="my-1 text-gray-300">{line.content}</p>
-              }
-            })}
+            {draft && editingDraft ? (
+              <textarea
+                value={draftEdit}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onDraftEditChange(e.target.value)}
+                rows={30}
+                className="w-full rounded-lg border border-gray-700 bg-gray-800 px-4 py-3 font-mono text-sm text-gray-200 focus:border-blue-500 focus:outline-none"
+              />
+            ) : draft ? (
+              <div className="rounded-lg bg-gray-950 p-6 font-mono text-sm leading-relaxed">
+                {formattedLines.map((line, i) => {
+                  switch (line.type) {
+                    case "heading": {
+                      const sceneNumMatch = line.content.match(/^S#(\d+)/)
+                      const sceneId = sceneNumMatch ? `scene-${sceneNumMatch[1]}` : undefined
+                      return (
+                        <div key={i} id={sceneId} className="mb-3 mt-6 first:mt-0 scroll-mt-4">
+                          <span className="mr-2 rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">
+                            {line.content.split(".")[0]}
+                          </span>
+                          <span className="font-bold text-gray-200">{line.content.split(".").slice(1).join(".").trim()}</span>
+                        </div>
+                      )
+                    }
+                    case "action":
+                      return <p key={i} className="my-1 text-gray-500 italic">{line.content}</p>
+                    case "character":
+                      return <p key={i} className="mb-0.5 mt-3 font-bold text-yellow-400">{line.content}</p>
+                    case "dialogue":
+                      return <p key={i} className="mb-2 pl-8 text-gray-200">{line.content}</p>
+                    case "camera":
+                      return (
+                        <div key={i} className="my-1">
+                          <span className="rounded bg-blue-500/15 px-1.5 py-0.5 text-xs text-blue-400">{line.content}</span>
+                        </div>
+                      )
+                    default:
+                      return <p key={i} className="my-1 text-gray-300">{line.content}</p>
+                  }
+                })}
+              </div>
+            ) : null}
           </div>
-        ) : null}
+        </div>
       </div>
 
-      {/* Approve */}
-      {draft && (
-        <button
-          onClick={onApprove}
-          className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-green-700"
-        >
-          Approve &amp; Next Step &rarr;
-        </button>
+      {/* Completion Signal */}
+      {isComplete && (
+        <div className="rounded-xl border border-green-500/30 bg-green-500/10 p-6">
+          <div className="flex items-center gap-3 mb-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white text-lg">✓</span>
+            <div>
+              <h3 className="text-lg font-semibold text-green-400">대본 작성 완료</h3>
+              <p className="text-sm text-green-300/70">
+                트리트먼트 기준 {totalTreatmentScenes}씬 중 {sceneCount}씬이 작성되었습니다.
+              </p>
+            </div>
+          </div>
+          <p className="text-sm text-gray-400 mb-4">
+            대본을 검토한 후 승인 버튼을 눌러 다음 단계(피드백)로 진행하세요.
+          </p>
+          <button
+            onClick={onApprove}
+            className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-green-700"
+          >
+            대본 승인 &amp; 피드백 단계로 &rarr;
+          </button>
+        </div>
+      )}
+
+      {/* Not yet complete */}
+      {draft && !isComplete && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-4">
+          <p className="text-sm text-gray-400">
+            트리트먼트 기준 {totalTreatmentScenes}씬 중 {sceneCount}씬 작성됨 — 나머지 {totalTreatmentScenes - sceneCount}씬을 계속 작성하세요.
+          </p>
+        </div>
       )}
     </div>
   )
@@ -1297,10 +1636,399 @@ function Step5Review({
             onClick={onFinalize}
             className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-green-700"
           >
-            Finalize &rarr; Generate DirectionPlan
+            Finalize &rarr; Direction Plan
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ─── Step 6: Direction Plan ───
+
+function Step6DirectionPlan({
+  dpScenes, outline, activeStage, setActiveStage, generatingStage,
+  onGenerateSequence, onGenerateCuts, onGeneratePrompts, onGenerateAll, onFinish,
+}: {
+  dpScenes: DPScene[]
+  outline: string
+  activeStage: number
+  setActiveStage: (n: number) => void
+  generatingStage: string | null
+  onGenerateSequence: (seq: number) => void
+  onGenerateCuts: (sceneNumber: number) => void
+  onGeneratePrompts: (sceneNumber: number, cutNumber: number) => void
+  onGenerateAll: (sceneNumber: number) => void
+  onFinish: () => void
+}) {
+  const [expandedScene, setExpandedScene] = useState<number | null>(null)
+  const [editingPrompt, setEditingPrompt] = useState<string | null>(null)
+  const [promptEdit, setPromptEdit] = useState({ image: "", video: "" })
+
+  // Parse sequence titles from outline
+  const sequenceTitles: Record<number, string> = {}
+  const seqPattern = /###\s*\d+\.\s*시퀀스\s*\d+[:\s]*(.+)/g
+  let match: RegExpExecArray | null
+  let seqIdx = 1
+  while ((match = seqPattern.exec(outline)) !== null) {
+    sequenceTitles[seqIdx] = match[1].trim()
+    seqIdx++
+  }
+  for (let i = 1; i <= 8; i++) {
+    if (!sequenceTitles[i]) sequenceTitles[i] = `시퀀스 ${i}`
+  }
+
+  // Group scenes by sequence
+  const grouped = dpScenes.reduce<Record<number, DPScene[]>>((acc, scene) => {
+    const seq = scene.sequence ?? 1
+    if (!acc[seq]) acc[seq] = []
+    acc[seq].push(scene)
+    return acc
+  }, {})
+
+  const STAGE_TABS = [
+    { key: 1, label: "시퀀스 분석" },
+    { key: 2, label: "컷 설계" },
+    { key: 3, label: "프롬프트" },
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* Sub-stage Navigator */}
+      <div className="flex gap-2 mb-4">
+        {STAGE_TABS.map((s) => (
+          <button
+            key={s.key}
+            onClick={() => setActiveStage(s.key)}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+              activeStage === s.key
+                ? "bg-blue-600/20 text-blue-400 ring-1 ring-blue-500/30"
+                : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-white"
+            }`}
+          >
+            <span className={`mr-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold ${
+              activeStage === s.key ? "bg-blue-500 text-white" : "bg-gray-700 text-gray-400"
+            }`}>
+              {s.key}
+            </span>
+            {s.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Stage 1: Sequence Analysis */}
+      {activeStage === 1 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">시퀀스별 씬 분석</h2>
+            <p className="mt-1 text-sm text-gray-400">
+              각 시퀀스를 분석하여 씬별 연출 기획을 생성합니다
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {Array.from({ length: 8 }).map((_, i) => {
+              const seq = i + 1
+              const seqScenes = grouped[seq] ?? []
+              const isDone = seqScenes.length > 0
+              const isGenerating = generatingStage === `seq-${seq}`
+
+              return (
+                <div key={seq} className={`rounded-lg border ${SEQUENCE_COLORS[(seq - 1) % 8]} transition`}>
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="rounded bg-gray-800 px-2 py-0.5 text-xs font-bold text-gray-300">SEQ {seq}</span>
+                      <span className="text-sm font-medium text-gray-200">{sequenceTitles[seq]}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {isDone ? (
+                        <span className="rounded bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                          {seqScenes.length}씬 완료
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => onGenerateSequence(seq)}
+                          disabled={generatingStage !== null}
+                          className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                        >
+                          {isGenerating ? (
+                            <span className="flex items-center gap-1.5">
+                              <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                              분석 중...
+                            </span>
+                          ) : "분석하기"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Stage 2: Cut Design */}
+      {activeStage === 2 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">씬별 컷 설계</h2>
+            <p className="mt-1 text-sm text-gray-400">
+              각 씬의 컷을 설계합니다 ({dpScenes.length}씬)
+            </p>
+          </div>
+
+          {dpScenes.length === 0 ? (
+            <p className="text-sm text-gray-500">먼저 시퀀스 분석을 완료하세요.</p>
+          ) : (
+            <div className="space-y-3">
+              {dpScenes.map((scene) => {
+                const isExpanded = expandedScene === scene.scene_number
+                const hasCuts = scene.cuts && scene.cuts.length > 0
+                const isGeneratingCuts = generatingStage === `cuts-${scene.scene_number}`
+                const isGeneratingAll = generatingStage === `all-${scene.scene_number}`
+
+                return (
+                  <div key={scene.scene_number} className={`rounded-lg border ${SEQUENCE_COLORS[((scene.sequence ?? 1) - 1) % 8]}`}>
+                    <div
+                      className="flex items-center justify-between px-4 py-3 cursor-pointer"
+                      onClick={() => setExpandedScene(isExpanded ? null : scene.scene_number)}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">
+                          S#{scene.scene_number}
+                        </span>
+                        <span className="text-sm text-gray-300">{scene.setting}</span>
+                        <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">
+                          {scene.time_of_day}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {hasCuts && (
+                          <span className="rounded bg-green-500/20 px-2 py-0.5 text-xs font-medium text-green-400">
+                            {scene.cuts.length} cuts
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-500">{isExpanded ? "▲" : "▼"}</span>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="space-y-2 border-t border-gray-800 px-4 py-3">
+                        <div className="mb-2 text-xs text-gray-400">
+                          <p>{scene.action_description}</p>
+                          {scene.dialogue && (
+                            <p className="mt-1 italic text-gray-500">{scene.dialogue}</p>
+                          )}
+                        </div>
+
+                        {hasCuts ? (
+                          <div className="space-y-2">
+                            {scene.cuts.map((cut) => (
+                              <div key={cut.cut_number} className="rounded-lg bg-gray-950 p-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-xs font-bold text-purple-400">
+                                    CUT {cut.cut_number}
+                                  </span>
+                                  <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">{cut.shot_type}</span>
+                                  <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">{cut.camera_angle}</span>
+                                  <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">{cut.camera_movement}</span>
+                                  <span className="ml-auto text-xs text-gray-500">{cut.duration}s</span>
+                                </div>
+                                <p className="text-xs text-gray-400">
+                                  <span className="font-medium text-gray-300">Subject:</span> {cut.subject}
+                                </p>
+                                <p className="text-xs text-gray-400">
+                                  <span className="font-medium text-gray-300">Action:</span> {cut.action}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => onGenerateCuts(scene.scene_number)}
+                              disabled={generatingStage !== null}
+                              className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
+                            >
+                              {isGeneratingCuts ? (
+                                <span className="flex items-center gap-1.5">
+                                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                  생성 중...
+                                </span>
+                              ) : "컷 설계하기"}
+                            </button>
+                            <button
+                              onClick={() => onGenerateAll(scene.scene_number)}
+                              disabled={generatingStage !== null}
+                              className="rounded-lg border border-gray-700 px-3 py-1.5 text-xs text-gray-400 hover:text-white transition disabled:opacity-50"
+                            >
+                              {isGeneratingAll ? (
+                                <span className="flex items-center gap-1.5">
+                                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                  전체 생성 중...
+                                </span>
+                              ) : "전체 생성"}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Stage 3: Prompts */}
+      {activeStage === 3 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">프롬프트 확인</h2>
+            <p className="mt-1 text-sm text-gray-400">
+              각 컷의 이미지/비디오 프롬프트를 확인하고 편집합니다
+            </p>
+          </div>
+
+          {dpScenes.length === 0 ? (
+            <p className="text-sm text-gray-500">먼저 시퀀스 분석과 컷 설계를 완료하세요.</p>
+          ) : (
+            <div className="space-y-4">
+              {dpScenes.map((scene) => {
+                const hasCuts = scene.cuts && scene.cuts.length > 0
+
+                return (
+                  <div key={scene.scene_number} className={`rounded-lg border ${SEQUENCE_COLORS[((scene.sequence ?? 1) - 1) % 8]}`}>
+                    <div className="px-4 py-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">
+                          S#{scene.scene_number}
+                        </span>
+                        <span className="text-sm text-gray-300">{scene.setting}</span>
+                        <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">
+                          {scene.time_of_day}
+                        </span>
+                      </div>
+
+                      {/* Scene-level prompts */}
+                      {scene.image_prompt && (
+                        <div className="mb-2 rounded bg-gray-950 p-2">
+                          <span className="text-xs font-medium text-cyan-400">Scene Image Prompt:</span>
+                          <p className="text-xs text-gray-400 mt-0.5">{scene.image_prompt}</p>
+                        </div>
+                      )}
+
+                      {hasCuts && (
+                        <div className="space-y-2 mt-2">
+                          {scene.cuts.map((cut) => {
+                            const editKey = `${scene.scene_number}-${cut.cut_number}`
+                            const isEditing = editingPrompt === editKey
+                            const isRegenerating = generatingStage === `prompts-${scene.scene_number}-${cut.cut_number}`
+
+                            return (
+                              <div key={cut.cut_number} className="rounded-lg bg-gray-950 p-3">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-xs font-bold text-purple-400">
+                                      CUT {cut.cut_number}
+                                    </span>
+                                    <span className="text-xs text-gray-500">{cut.shot_type} / {cut.camera_angle}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1.5">
+                                    <button
+                                      onClick={() => {
+                                        if (isEditing) {
+                                          setEditingPrompt(null)
+                                        } else {
+                                          setEditingPrompt(editKey)
+                                          setPromptEdit({ image: cut.image_prompt, video: cut.video_prompt })
+                                        }
+                                      }}
+                                      className="rounded border border-gray-700 px-2 py-0.5 text-xs text-gray-400 hover:text-white transition"
+                                    >
+                                      {isEditing ? "Done" : "Edit"}
+                                    </button>
+                                    <button
+                                      onClick={() => onGeneratePrompts(scene.scene_number, cut.cut_number)}
+                                      disabled={generatingStage !== null}
+                                      className="rounded border border-gray-700 px-2 py-0.5 text-xs text-gray-400 hover:text-white transition disabled:opacity-50"
+                                    >
+                                      {isRegenerating ? (
+                                        <span className="flex items-center gap-1">
+                                          <span className="h-2.5 w-2.5 animate-spin rounded-full border border-white/30 border-t-white" />
+                                        </span>
+                                      ) : "Regen"}
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {isEditing ? (
+                                  <div className="space-y-2">
+                                    <div>
+                                      <label className="mb-1 block text-xs text-cyan-400">Image Prompt</label>
+                                      <textarea
+                                        value={promptEdit.image}
+                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPromptEdit({ ...promptEdit, image: e.target.value })}
+                                        rows={3}
+                                        className="w-full rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-xs text-gray-200 focus:border-blue-500 focus:outline-none"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="mb-1 block text-xs text-orange-400">Video Prompt</label>
+                                      <textarea
+                                        value={promptEdit.video}
+                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPromptEdit({ ...promptEdit, video: e.target.value })}
+                                        rows={3}
+                                        className="w-full rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-xs text-gray-200 focus:border-blue-500 focus:outline-none"
+                                      />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div className="space-y-1.5">
+                                    {cut.image_prompt && (
+                                      <div>
+                                        <span className="text-xs font-medium text-cyan-400">Image:</span>
+                                        <p className="text-xs text-gray-400 mt-0.5">{cut.image_prompt}</p>
+                                      </div>
+                                    )}
+                                    {cut.video_prompt && (
+                                      <div>
+                                        <span className="text-xs font-medium text-orange-400">Video:</span>
+                                        <p className="text-xs text-gray-400 mt-0.5">{cut.video_prompt}</p>
+                                      </div>
+                                    )}
+                                    {!cut.image_prompt && !cut.video_prompt && (
+                                      <p className="text-xs text-gray-600 italic">No prompts generated yet</p>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })}
+                        </div>
+                      )}
+
+                      {!hasCuts && (
+                        <p className="text-xs text-gray-600 italic">No cuts designed yet. Go to Stage 2 first.</p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Bottom: Navigate to Pre-Production */}
+      <button
+        onClick={onFinish}
+        className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-green-700"
+      >
+        Pre-Production으로 이동 &rarr;
+      </button>
     </div>
   )
 }

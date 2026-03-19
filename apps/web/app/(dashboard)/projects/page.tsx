@@ -43,12 +43,20 @@ export default function ProjectsPage() {
             Manage your AI film production projects
           </p>
         </div>
-        <Link
-          href="/projects/new"
-          className="rounded-lg bg-white px-4 py-2 text-sm font-medium text-gray-950 transition-colors hover:bg-gray-200"
-        >
-          + New Project
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/projects/brainstorm"
+            className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:from-amber-600 hover:to-orange-600"
+          >
+            💡 브레인스토밍
+          </Link>
+          <Link
+            href="/projects/new"
+            className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition hover:text-white hover:border-gray-500"
+          >
+            + 직접 입력
+          </Link>
+        </div>
       </div>
 
       {loading && (

@@ -7,6 +7,7 @@ const navItems = [
   { href: "/projects", label: "Projects", icon: "🎬" },
   { href: "/pipeline", label: "Pipeline", icon: "⚙️" },
   { href: "/agents", label: "Agents", icon: "🤖" },
+  { href: "/logline-guide", label: "Logline Guide", icon: "📝" },
 ];
 
 export default function DashboardLayout({

@@ -17,8 +17,21 @@ export type ProjectStatus = (typeof ProjectStatus)[keyof typeof ProjectStatus];
 // Scene & DirectionPlan (from src/models/schemas.py)
 // ---------------------------------------------------------------------------
 
+export interface Cut {
+  cut_number: number;
+  shot_type: string;         // WIDE SHOT, CLOSE UP, MEDIUM SHOT, etc.
+  camera_angle: string;      // Eye level, High angle, Low angle, Dutch angle
+  camera_movement: string;   // Static, Pan, Tilt, Dolly, Crane, Steadicam
+  duration: number;          // seconds (3-8)
+  subject: string;
+  action: string;
+  image_prompt: string;
+  video_prompt: string;
+}
+
 export interface Scene {
   scene_number: number;
+  sequence?: number;
   setting: string;
   time_of_day: string;
   camera_angle: string;
@@ -26,6 +39,7 @@ export interface Scene {
   dialogue: string | null;
   image_prompt: string;
   video_prompt: string;
+  cuts?: Cut[];
 }
 
 export interface DirectionPlan {

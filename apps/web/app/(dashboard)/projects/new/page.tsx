@@ -1,22 +1,25 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, Suspense } from "react";
+import Link from "next/link";
 import { fetchAPI } from "../../../../lib/api";
 
 interface ProjectResponse {
   id: string;
 }
 
-export default function NewProjectPage() {
+function NewProjectForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [title, setTitle] = useState("");
-  const [genre, setGenre] = useState("");
-  const [logline, setLogline] = useState("");
-  const [idea, setIdea] = useState("");
+  const fromBrainstorm = searchParams.has("title");
+  const [title, setTitle] = useState(searchParams.get("title") || "");
+  const [genre, setGenre] = useState(searchParams.get("genre") || "");
+  const [logline, setLogline] = useState(searchParams.get("logline") || "");
+  const [idea, setIdea] = useState(searchParams.get("idea") || "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,13 +42,31 @@ export default function NewProjectPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <button
-        onClick={() => router.push("/projects")}
+        onClick={() => router.push(fromBrainstorm ? "/projects/brainstorm" : "/projects")}
         className="mb-4 text-sm text-gray-400 transition-colors hover:text-white"
       >
-        &larr; Back to Projects
+        &larr; {fromBrainstorm ? "브레인스토밍으로 돌아가기" : "프로젝트 목록으로"}
       </button>
 
-      <h1 className="mb-6 text-2xl font-bold">New Project</h1>
+      <h1 className="mb-6 text-2xl font-bold">새 프로젝트 생성</h1>
+
+      {fromBrainstorm && (
+        <div className="mb-4 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3 text-sm text-green-400">
+          ✨ 브레인스토밍에서 생성된 컨셉이 자동 입력되었습니다. 확인 후 프로젝트를 생성하세요.
+        </div>
+      )}
+
+      {!fromBrainstorm && (
+        <Link
+          href="/projects/brainstorm"
+          className="mb-6 block rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm transition hover:border-amber-500/50 hover:bg-amber-500/10"
+        >
+          <span className="flex items-center gap-2">
+            <span>💡</span>
+            <span>아이디어가 없으신가요? <span className="text-amber-400 font-medium">브레인스토밍으로 시작하기 →</span></span>
+          </span>
+        </Link>
+      )}
 
       {error && (
         <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
@@ -130,5 +151,13 @@ export default function NewProjectPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function NewProjectPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-20 text-gray-400">Loading...</div>}>
+      <NewProjectForm />
+    </Suspense>
   );
 }

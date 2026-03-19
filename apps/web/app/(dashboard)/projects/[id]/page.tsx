@@ -119,7 +119,7 @@ export default function ProjectDetailPage() {
     fetchAPI<Project>(`/api/projects/${id}`)
       .then((p) => {
         setProject(p)
-        setActivePhase(p.direction_plan_json ? "pre-production" : "development")
+        setActivePhase("development")
       })
       .catch((err: Error) => setError(err.message))
       .finally(() => setLoading(false))
@@ -213,7 +213,6 @@ export default function ProjectDetailPage() {
       <div className="mb-6 flex items-center gap-0 rounded-xl border border-gray-800 bg-gray-900/50 p-1">
         {PHASES.map((phase, i) => {
           const phaseIndex = PHASES.findIndex((p) => p.key === getPhaseFromStatus(project.status))
-          const currentIndex = PHASES.findIndex((p) => p.key === activePhase)
           const isCompleted = i < phaseIndex || (project.status === "COMPLETED" && i <= 3)
           const isCurrent = phase.key === activePhase
           const isLocked = !hasDirectionPlan && i > 0
@@ -401,34 +400,31 @@ function DevelopmentTab({
           <div>
             <h2 className="text-lg font-semibold">시나리오 개발 (Screenplay Development)</h2>
             <p className="mt-1 text-sm text-gray-400">
-              5단계 워크플로우: 기획 → 인물설계 → 트리트먼트 → 집필 → 피드백
+              6단계 워크플로우: 기획 → 인물설계 → 트리트먼트 → 집필 → 피드백 → 연출기획
             </p>
           </div>
           <span className="ml-auto text-gray-500">→</span>
         </div>
       </Link>
 
-      {/* ScriptWriter Action */}
+      {/* Direction Plan Status */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <h2 className="mb-2 text-lg font-semibold">Generate Direction Plan</h2>
-        <p className="mb-4 text-sm text-gray-400">
-          AI ScriptWriter가 아이디어를 기반으로 씬별 연출기획안(DirectionPlan)을 자동 생성합니다.
-          각 씬에 대한 image_prompt, video_prompt, 대사, 카메라 설정이 포함됩니다.
-        </p>
-        {project.direction_plan_json && (
-          <p className="mb-4 text-sm text-green-400">
-            ✅ Direction Plan 생성 완료 ({project.direction_plan_json.scenes.length}개 씬) — 재실행하면 덮어쓰기됩니다.
-          </p>
+        <h2 className="mb-2 text-lg font-semibold">연출기획안 (Direction Plan)</h2>
+        {project.direction_plan_json ? (
+          <div>
+            <p className="mb-3 text-sm text-green-400">
+              ✅ Direction Plan 생성 완료 ({project.direction_plan_json.scenes?.length ?? 0}개 씬)
+            </p>
+            <p className="text-xs text-gray-500">시나리오 개발 6단계(연출기획)에서 씬/컷별로 관리할 수 있습니다.</p>
+          </div>
+        ) : (
+          <div>
+            <p className="mb-3 text-sm text-gray-400">
+              시나리오 개발을 완료한 후, 6단계(연출기획)에서 시퀀스 → 씬 → 컷 단위로 연출기획안을 생성합니다.
+            </p>
+            <p className="text-xs text-gray-500">시나리오 개발 → 피드백 완료 → 연출기획 단계에서 생성하세요.</p>
+          </div>
         )}
-        {error && <p className="mb-4 text-sm text-red-400">{error}</p>}
-        <button
-          onClick={onRunScriptWriter}
-          disabled={runningPipeline || !project.idea}
-          className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
-        >
-          {runningPipeline ? "Generating..." : project.direction_plan_json ? "Re-generate Direction Plan" : "Generate Direction Plan"}
-        </button>
-        {!project.idea && <p className="mt-2 text-xs text-yellow-400">아이디어를 먼저 입력하세요.</p>}
       </div>
     </div>
   )

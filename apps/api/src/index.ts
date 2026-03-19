@@ -6,6 +6,8 @@ import { pipelineRoutes } from "./routes/pipeline.ts"
 import { agentRoutes } from "./routes/agents.ts"
 import { assetRoutes } from "./routes/assets.ts"
 import { screenplayRoutes } from "./routes/screenplay.ts"
+import { brainstormRoutes } from "./routes/brainstorm.ts"
+import { loglineRoutes } from "./routes/logline.ts"
 import { errorHandler } from "./middleware/error-handler.ts"
 
 const app = new Hono()
@@ -21,5 +23,7 @@ app.route("/api/pipeline", pipelineRoutes)
 app.route("/api/agents", agentRoutes)
 app.route("/api/assets", assetRoutes)
 app.route("/api/screenplay", screenplayRoutes)
+app.route("/api/brainstorm", brainstormRoutes)
+app.route("/api/logline", loglineRoutes)
 
-export default { port: 3001, fetch: app.fetch }
+export default { port: 3001, fetch: app.fetch, idleTimeout: 255 }
