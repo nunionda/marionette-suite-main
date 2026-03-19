@@ -1,0 +1,138 @@
+import { prisma } from "@marionette/db"
+import { AIGateway } from "@marionette/ai-gateway"
+import { GeminiProvider } from "@marionette/ai-gateway/providers/gemini.js"
+import { createAgentRegistry, PipelineOrchestrator } from "@marionette/agents"
+import type { PipelineRunResponse, StepResult, RunStatus } from "@marionette/shared/types/pipeline.ts"
+import { NotFoundError } from "../middleware/error-handler.ts"
+
+// ─── Singleton gateway + orchestrator ───
+
+let gateway: AIGateway | null = null
+let orchestrator: PipelineOrchestrator | null = null
+
+function getGateway(): AIGateway {
+  if (!gateway) {
+    gateway = new AIGateway()
+    gateway.register("gemini", new GeminiProvider(), true)
+  }
+  return gateway
+}
+
+function getOrchestrator(): PipelineOrchestrator {
+  if (!orchestrator) {
+    const gw = getGateway()
+    const registry = createAgentRegistry(gw, prisma)
+    orchestrator = new PipelineOrchestrator(prisma)
+    for (const [name, agent] of registry) {
+      orchestrator.register(name, agent)
+    }
+  }
+  return orchestrator
+}
+
+// ─── Response mapping ───
+
+function toRunResponse(run: {
+  id: string
+  projectId: string
+  steps: unknown
+  currentStep: string | null
+  status: string
+  progress: number
+  stepResults: unknown
+  errorMessage: string | null
+  startedAt: Date | null
+  completedAt: Date | null
+  createdAt: Date
+}): PipelineRunResponse {
+  return {
+    id: run.id,
+    project_id: run.projectId,
+    steps: run.steps as string[],
+    current_step: run.currentStep,
+    status: run.status.toLowerCase() as RunStatus,
+    progress: run.progress,
+    step_results: (run.stepResults as StepResult[]) ?? [],
+    error_message: run.errorMessage,
+    started_at: run.startedAt?.toISOString() ?? null,
+    completed_at: run.completedAt?.toISOString() ?? null,
+    created_at: run.createdAt.toISOString(),
+  }
+}
+
+// ─── Service methods ───
+
+export async function createRun(projectId: string, steps: string[], idea?: string): Promise<PipelineRunResponse> {
+  const project = await prisma.project.findUnique({ where: { id: projectId } })
+  if (!project) {
+    throw new NotFoundError("Project", projectId)
+  }
+
+  // Determine phase from first step
+  const preSteps = ["script_writer", "scripter", "concept_artist", "previsualizer", "casting_director", "location_scout"]
+  const mainSteps = ["cinematographer", "generalist", "asset_designer"]
+  const firstStep = steps[0] ?? ""
+  const phase = preSteps.includes(firstStep) ? "PRE" : mainSteps.includes(firstStep) ? "MAIN" : "POST"
+
+  const run = await prisma.pipelineRun.create({
+    data: {
+      projectId,
+      phase,
+      steps,
+      status: "QUEUED",
+      stepResults: {},
+    },
+  })
+
+  return toRunResponse(run)
+}
+
+export async function listRuns(projectId: string): Promise<PipelineRunResponse[]> {
+  const runs = await prisma.pipelineRun.findMany({
+    where: { projectId },
+    orderBy: { createdAt: "desc" },
+  })
+  return runs.map(toRunResponse)
+}
+
+export async function getRun(runId: string): Promise<PipelineRunResponse> {
+  const run = await prisma.pipelineRun.findUnique({ where: { id: runId } })
+  if (!run) {
+    throw new NotFoundError("PipelineRun", runId)
+  }
+  return toRunResponse(run)
+}
+
+export async function executeRun(runId: string, idea?: string): Promise<void> {
+  const run = await prisma.pipelineRun.findUnique({
+    where: { id: runId },
+    include: { project: true },
+  })
+  if (!run) {
+    console.error(`[Pipeline] Run ${runId} not found`)
+    return
+  }
+
+  const steps = run.steps as string[]
+  const orch = getOrchestrator()
+
+  // Build initial context from project data
+  const initialContext: Record<string, unknown> = {
+    idea: idea ?? run.project.idea ?? run.project.title,
+  }
+
+  // If project already has a directionPlan, pass it for downstream agents
+  if (run.project.directionPlan) {
+    initialContext["directionPlan"] = run.project.directionPlan
+  }
+
+  console.log(`[Pipeline] Starting run ${runId} with steps: ${steps.join(", ")}`)
+
+  try {
+    await orch.run(runId, run.projectId, steps, initialContext)
+    console.log(`[Pipeline] Run ${runId} completed`)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[Pipeline] Run ${runId} failed: ${msg}`)
+  }
+}

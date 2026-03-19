@@ -1,0 +1,62 @@
+// ---------------------------------------------------------------------------
+// @marionette/agents — barrel exports + agent registry
+// ---------------------------------------------------------------------------
+
+// Base
+export { BaseAgent } from "./base/agent.js"
+export type { AgentInput, AgentOutput } from "./base/agent.js"
+export { PipelineOrchestrator } from "./base/pipeline.js"
+
+// Pre-Production
+export { ScriptWriterAgent } from "./pre-production/script-writer.js"
+export type { ScriptWriterInput } from "./pre-production/script-writer.js"
+export { ScripterAgent } from "./pre-production/scripter.js"
+export type { ScripterInput } from "./pre-production/scripter.js"
+export { ConceptArtistAgent } from "./pre-production/concept-artist.js"
+export type { ConceptArtistInput } from "./pre-production/concept-artist.js"
+
+// Main-Production
+export { CinematographerAgent } from "./main-production/cinematographer.js"
+export type { CinematographerInput } from "./main-production/cinematographer.js"
+export { GeneralistAgent } from "./main-production/generalist.js"
+
+// Post-Production
+export { SoundDesignerAgent } from "./post-production/sound-designer.js"
+export type { SoundDesignerInput } from "./post-production/sound-designer.js"
+export { MasterEditorAgent } from "./post-production/master-editor.js"
+
+// ─── Agent Registry ───
+
+import type { PrismaClient } from "@prisma/client"
+import type { AIGateway } from "@marionette/ai-gateway"
+import type { BaseAgent } from "./base/agent.js"
+import { ScriptWriterAgent } from "./pre-production/script-writer.js"
+import { ScripterAgent } from "./pre-production/scripter.js"
+import { ConceptArtistAgent } from "./pre-production/concept-artist.js"
+import { CinematographerAgent } from "./main-production/cinematographer.js"
+import { GeneralistAgent } from "./main-production/generalist.js"
+import { SoundDesignerAgent } from "./post-production/sound-designer.js"
+import { MasterEditorAgent } from "./post-production/master-editor.js"
+
+/**
+ * Create all available agents with shared dependencies.
+ * Returns a map of agent name → agent instance.
+ */
+export function createAgentRegistry(gateway: AIGateway, db: PrismaClient): Map<string, BaseAgent> {
+  const registry = new Map<string, BaseAgent>()
+
+  // Pre-Production
+  registry.set("script_writer", new ScriptWriterAgent(gateway, db))
+  registry.set("scripter", new ScripterAgent(gateway, db))
+  registry.set("concept_artist", new ConceptArtistAgent(gateway, db))
+
+  // Main-Production
+  registry.set("cinematographer", new CinematographerAgent(gateway, db))
+  registry.set("generalist", new GeneralistAgent(gateway, db))
+
+  // Post-Production
+  registry.set("sound_designer", new SoundDesignerAgent(gateway, db))
+  registry.set("master_editor", new MasterEditorAgent(gateway, db))
+
+  return registry
+}

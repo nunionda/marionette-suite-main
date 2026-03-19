@@ -1,0 +1,29 @@
+{
+  "name": "marionette-studio",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^10.0.3",
+    "typescript": "^5.9.3"
+  },
+  "private": true,
+  "scripts": {
+    "typecheck": "bun run --filter '*' typecheck",
+    "test": "bun run --filter '*' test",
+    "test:file": "bun test",
+    "lint": "eslint .",
+    "lint:file": "eslint",
+    "lint:claude": "bun run lint",
+    "dev:api": "bun run --filter @marionette/api dev",
+    "dev:web": "bun run --filter @marionette/web dev",
+    "db:generate": "bun run --filter @marionette/db generate",
+    "db:push": "bun run --filter @marionette/db push",
+    "db:seed": "bun run --filter @marionette/db seed"
+  },
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "dependencies": {
+    "@prisma/client": "6.19.2"
+  }
+}
