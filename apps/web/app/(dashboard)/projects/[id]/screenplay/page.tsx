@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
-import { fetchAPI } from "../../../../../lib/api"
+import { fetchAPI, API_BASE } from "../../../../../lib/api"
 
 // ─── Types ───
 
@@ -692,6 +692,7 @@ export default function ScreenplayPage() {
 
           {activeStep === 6 && (
             <Step6DirectionPlan
+              projectId={projectId}
               dpScenes={dpScenes}
               outline={screenplay?.outline ?? ""}
               activeStage={activeStage}
@@ -1647,9 +1648,10 @@ function Step5Review({
 // ─── Step 6: Direction Plan ───
 
 function Step6DirectionPlan({
-  dpScenes, outline, activeStage, setActiveStage, generatingStage,
+  projectId, dpScenes, outline, activeStage, setActiveStage, generatingStage,
   onGenerateSequence, onGenerateCuts, onGeneratePrompts, onGenerateAll, onFinish,
 }: {
+  projectId: string
   dpScenes: DPScene[]
   outline: string
   activeStage: number
@@ -1664,6 +1666,68 @@ function Step6DirectionPlan({
   const [expandedScene, setExpandedScene] = useState<number | null>(null)
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null)
   const [promptEdit, setPromptEdit] = useState({ image: "", video: "" })
+
+  // Storyboard generation state
+  const [generatingImage, setGeneratingImage] = useState<string | null>(null)
+  const [generatedAssets, setGeneratedAssets] = useState<Record<string, { id: string; fileName: string }>>({})
+
+  // Load existing storyboard assets on mount
+  useEffect(() => {
+    const loadAssets = async () => {
+      try {
+        const data = await fetchAPI<{ assets: Array<{ id: string; type: string; agent_name: string; scene_number: number | null; file_name: string; metadata: Record<string, unknown> | null }> }>(
+          `/api/assets/${projectId}`
+        )
+        const assetMap: Record<string, { id: string; fileName: string }> = {}
+        for (const asset of data.assets) {
+          if (asset.type === "IMAGE" && asset.scene_number != null) {
+            const meta = asset.metadata
+            const cutNum = meta?.cutNumber as number | undefined
+            const key = cutNum
+              ? `cut-${asset.scene_number}-${cutNum}`
+              : `scene-${asset.scene_number}`
+            // Keep the most recent (first in desc order)
+            if (!assetMap[key]) {
+              assetMap[key] = { id: asset.id, fileName: asset.file_name }
+            }
+          }
+        }
+        setGeneratedAssets(assetMap)
+      } catch {
+        // Silently fail — not critical
+      }
+    }
+    if (activeStage === 3) loadAssets()
+  }, [projectId, activeStage])
+
+  const onGenerateStoryboard = async (
+    scope: "sequence" | "scene" | "cut",
+    opts: { sequence?: number; sceneNumber?: number; cutNumber?: number }
+  ) => {
+    const key = scope === "sequence"
+      ? `seq-${opts.sequence}`
+      : scope === "scene"
+        ? `scene-${opts.sceneNumber}`
+        : `cut-${opts.sceneNumber}-${opts.cutNumber}`
+
+    setGeneratingImage(key)
+    try {
+      const result = await fetchAPI<{ assets: Array<{ id: string; sceneNumber: number; cutNumber?: number; fileName: string }> }>(
+        `/api/screenplay/${projectId}/direction-plan/storyboard/generate`,
+        { method: "POST", body: JSON.stringify({ scope, ...opts }) }
+      )
+      for (const asset of result.assets) {
+        const assetKey = asset.cutNumber
+          ? `cut-${asset.sceneNumber}-${asset.cutNumber}`
+          : `scene-${asset.sceneNumber}`
+        setGeneratedAssets((prev) => ({ ...prev, [assetKey]: { id: asset.id, fileName: asset.fileName } }))
+      }
+    } catch (err) {
+      console.error("Storyboard generation failed:", err)
+    } finally {
+      setGeneratingImage(null)
+    }
+  }
 
   // Parse sequence titles from outline
   const sequenceTitles: Record<number, string> = {}
@@ -1895,128 +1959,231 @@ function Step6DirectionPlan({
           {dpScenes.length === 0 ? (
             <p className="text-sm text-gray-500">먼저 시퀀스 분석과 컷 설계를 완료하세요.</p>
           ) : (
-            <div className="space-y-4">
-              {dpScenes.map((scene) => {
-                const hasCuts = scene.cuts && scene.cuts.length > 0
-
-                return (
-                  <div key={scene.scene_number} className={`rounded-lg border ${SEQUENCE_COLORS[((scene.sequence ?? 1) - 1) % 8]}`}>
-                    <div className="px-4 py-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">
-                          S#{scene.scene_number}
-                        </span>
-                        <span className="text-sm text-gray-300">{scene.setting}</span>
-                        <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">
-                          {scene.time_of_day}
-                        </span>
+            <div className="space-y-6">
+              {Object.entries(
+                dpScenes.reduce<Record<number, DPScene[]>>((acc, scene) => {
+                  const seq = scene.sequence ?? 1
+                  if (!acc[seq]) acc[seq] = []
+                  acc[seq].push(scene)
+                  return acc
+                }, {})
+              )
+                .sort(([a], [b]) => Number(a) - Number(b))
+                .map(([seqNumStr, scenes]) => {
+                  const seqNum = Number(seqNumStr)
+                  return (
+                    <div key={seqNum}>
+                      {/* Sequence header with generation button */}
+                      <div className="flex items-center justify-between mb-3 px-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`rounded px-2 py-0.5 text-xs font-bold ${SEQUENCE_COLORS[((seqNum) - 1) % 8]}`}>
+                            SEQ {seqNum}
+                          </span>
+                          <span className="text-sm font-medium text-gray-300">
+                            {sequenceTitles[seqNum] ?? `시퀀스 ${seqNum}`}
+                          </span>
+                          <span className="text-xs text-gray-500">({scenes.length} scenes)</span>
+                        </div>
+                        <button
+                          onClick={() => onGenerateStoryboard("sequence", { sequence: seqNum })}
+                          disabled={generatingImage !== null}
+                          className="rounded border border-green-700 px-2.5 py-1 text-xs font-medium text-green-400 hover:text-white hover:bg-green-700/50 transition disabled:opacity-50"
+                        >
+                          {generatingImage === `seq-${seqNum}` ? (
+                            <span className="flex items-center gap-1.5">
+                              <span className="h-2.5 w-2.5 animate-spin rounded-full border border-green-300/30 border-t-green-300" />
+                              Generating...
+                            </span>
+                          ) : "Generate All Images"}
+                        </button>
                       </div>
 
-                      {/* Scene-level prompts */}
-                      {scene.image_prompt && (
-                        <div className="mb-2 rounded bg-gray-950 p-2">
-                          <span className="text-xs font-medium text-cyan-400">Scene Image Prompt:</span>
-                          <p className="text-xs text-gray-400 mt-0.5">{scene.image_prompt}</p>
-                        </div>
-                      )}
+                      <div className="space-y-4">
+                        {scenes.map((scene) => {
+                          const hasCuts = scene.cuts && scene.cuts.length > 0
 
-                      {hasCuts && (
-                        <div className="space-y-2 mt-2">
-                          {scene.cuts.map((cut) => {
-                            const editKey = `${scene.scene_number}-${cut.cut_number}`
-                            const isEditing = editingPrompt === editKey
-                            const isRegenerating = generatingStage === `prompts-${scene.scene_number}-${cut.cut_number}`
-
-                            return (
-                              <div key={cut.cut_number} className="rounded-lg bg-gray-950 p-3">
+                          return (
+                            <div key={scene.scene_number} className={`rounded-lg border ${SEQUENCE_COLORS[((scene.sequence ?? 1) - 1) % 8]}`}>
+                              <div className="px-4 py-3">
                                 <div className="flex items-center justify-between mb-2">
                                   <div className="flex items-center gap-2">
-                                    <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-xs font-bold text-purple-400">
-                                      CUT {cut.cut_number}
+                                    <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">
+                                      S#{scene.scene_number}
                                     </span>
-                                    <span className="text-xs text-gray-500">{cut.shot_type} / {cut.camera_angle}</span>
+                                    <span className="text-sm text-gray-300">{scene.setting}</span>
+                                    <span className="rounded bg-gray-800 px-1.5 py-0.5 text-xs text-gray-400">
+                                      {scene.time_of_day}
+                                    </span>
                                   </div>
-                                  <div className="flex items-center gap-1.5">
-                                    <button
-                                      onClick={() => {
-                                        if (isEditing) {
-                                          setEditingPrompt(null)
-                                        } else {
-                                          setEditingPrompt(editKey)
-                                          setPromptEdit({ image: cut.image_prompt, video: cut.video_prompt })
-                                        }
-                                      }}
-                                      className="rounded border border-gray-700 px-2 py-0.5 text-xs text-gray-400 hover:text-white transition"
-                                    >
-                                      {isEditing ? "Done" : "Edit"}
-                                    </button>
-                                    <button
-                                      onClick={() => onGeneratePrompts(scene.scene_number, cut.cut_number)}
-                                      disabled={generatingStage !== null}
-                                      className="rounded border border-gray-700 px-2 py-0.5 text-xs text-gray-400 hover:text-white transition disabled:opacity-50"
-                                    >
-                                      {isRegenerating ? (
-                                        <span className="flex items-center gap-1">
-                                          <span className="h-2.5 w-2.5 animate-spin rounded-full border border-white/30 border-t-white" />
-                                        </span>
-                                      ) : "Regen"}
-                                    </button>
-                                  </div>
+                                  {/* Scene-level generation button */}
+                                  <button
+                                    onClick={() => onGenerateStoryboard("scene", { sceneNumber: scene.scene_number })}
+                                    disabled={generatingImage !== null || !scene.image_prompt}
+                                    className="rounded border border-cyan-700 px-2 py-0.5 text-xs text-cyan-400 hover:text-white hover:bg-cyan-700/50 transition disabled:opacity-50"
+                                    title="Generate storyboard for this scene"
+                                  >
+                                    {generatingImage === `scene-${scene.scene_number}` ? (
+                                      <span className="flex items-center gap-1">
+                                        <span className="h-2.5 w-2.5 animate-spin rounded-full border border-cyan-300/30 border-t-cyan-300" />
+                                      </span>
+                                    ) : "Scene Image"}
+                                  </button>
                                 </div>
 
-                                {isEditing ? (
-                                  <div className="space-y-2">
-                                    <div>
-                                      <label className="mb-1 block text-xs text-cyan-400">Image Prompt</label>
-                                      <textarea
-                                        value={promptEdit.image}
-                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPromptEdit({ ...promptEdit, image: e.target.value })}
-                                        rows={3}
-                                        className="w-full rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-xs text-gray-200 focus:border-blue-500 focus:outline-none"
-                                      />
+                                {/* Scene-level prompts */}
+                                {scene.image_prompt && (
+                                  <div className="mb-2 rounded bg-gray-950 p-2">
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-xs font-medium text-cyan-400">Scene Image Prompt:</span>
                                     </div>
-                                    <div>
-                                      <label className="mb-1 block text-xs text-orange-400">Video Prompt</label>
-                                      <textarea
-                                        value={promptEdit.video}
-                                        onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPromptEdit({ ...promptEdit, video: e.target.value })}
-                                        rows={3}
-                                        className="w-full rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-xs text-gray-200 focus:border-blue-500 focus:outline-none"
-                                      />
-                                    </div>
-                                  </div>
-                                ) : (
-                                  <div className="space-y-1.5">
-                                    {cut.image_prompt && (
-                                      <div>
-                                        <span className="text-xs font-medium text-cyan-400">Image:</span>
-                                        <p className="text-xs text-gray-400 mt-0.5">{cut.image_prompt}</p>
-                                      </div>
-                                    )}
-                                    {cut.video_prompt && (
-                                      <div>
-                                        <span className="text-xs font-medium text-orange-400">Video:</span>
-                                        <p className="text-xs text-gray-400 mt-0.5">{cut.video_prompt}</p>
-                                      </div>
-                                    )}
-                                    {!cut.image_prompt && !cut.video_prompt && (
-                                      <p className="text-xs text-gray-600 italic">No prompts generated yet</p>
-                                    )}
+                                    <p className="text-xs text-gray-400 mt-0.5">{scene.image_prompt}</p>
+                                    {/* Scene-level generated thumbnail */}
+                                    {(() => {
+                                      const sceneAsset = generatedAssets[`scene-${scene.scene_number}`]
+                                      return sceneAsset ? (
+                                        <div className="mt-2">
+                                          <img
+                                            src={`${API_BASE}/api/assets/download/${sceneAsset.id}`}
+                                            alt={`Scene ${scene.scene_number} storyboard`}
+                                            className="rounded border border-gray-700 max-h-40"
+                                          />
+                                        </div>
+                                      ) : null
+                                    })()}
                                   </div>
                                 )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                      )}
 
-                      {!hasCuts && (
-                        <p className="text-xs text-gray-600 italic">No cuts designed yet. Go to Stage 2 first.</p>
-                      )}
+                                {hasCuts && (
+                                  <div className="space-y-2 mt-2">
+                                    {scene.cuts.map((cut) => {
+                                      const editKey = `${scene.scene_number}-${cut.cut_number}`
+                                      const isEditing = editingPrompt === editKey
+                                      const isRegenerating = generatingStage === `prompts-${scene.scene_number}-${cut.cut_number}`
+                                      const cutAssetKey = `cut-${scene.scene_number}-${cut.cut_number}`
+
+                                      return (
+                                        <div key={cut.cut_number} className="rounded-lg bg-gray-950 p-3">
+                                          <div className="flex items-center justify-between mb-2">
+                                            <div className="flex items-center gap-2">
+                                              <span className="rounded bg-purple-500/20 px-1.5 py-0.5 text-xs font-bold text-purple-400">
+                                                CUT {cut.cut_number}
+                                              </span>
+                                              <span className="text-xs text-gray-500">{cut.shot_type} / {cut.camera_angle}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                              <button
+                                                onClick={() => {
+                                                  if (isEditing) {
+                                                    setEditingPrompt(null)
+                                                  } else {
+                                                    setEditingPrompt(editKey)
+                                                    setPromptEdit({ image: cut.image_prompt, video: cut.video_prompt })
+                                                  }
+                                                }}
+                                                className="rounded border border-gray-700 px-2 py-0.5 text-xs text-gray-400 hover:text-white transition"
+                                              >
+                                                {isEditing ? "Done" : "Edit"}
+                                              </button>
+                                              <button
+                                                onClick={() => onGeneratePrompts(scene.scene_number, cut.cut_number)}
+                                                disabled={generatingStage !== null}
+                                                className="rounded border border-gray-700 px-2 py-0.5 text-xs text-gray-400 hover:text-white transition disabled:opacity-50"
+                                              >
+                                                {isRegenerating ? (
+                                                  <span className="flex items-center gap-1">
+                                                    <span className="h-2.5 w-2.5 animate-spin rounded-full border border-white/30 border-t-white" />
+                                                  </span>
+                                                ) : "Regen"}
+                                              </button>
+                                              {/* Cut-level image generation button */}
+                                              <button
+                                                onClick={() => onGenerateStoryboard("cut", {
+                                                  sceneNumber: scene.scene_number,
+                                                  cutNumber: cut.cut_number,
+                                                })}
+                                                disabled={generatingImage !== null || !cut.image_prompt}
+                                                className="rounded border border-purple-700 px-2 py-0.5 text-xs text-purple-400 hover:text-white hover:bg-purple-700/50 transition disabled:opacity-50"
+                                                title="Generate storyboard image for this cut"
+                                              >
+                                                {generatingImage === cutAssetKey ? (
+                                                  <span className="flex items-center gap-1">
+                                                    <span className="h-2.5 w-2.5 animate-spin rounded-full border border-purple-300/30 border-t-purple-300" />
+                                                  </span>
+                                                ) : "Image"}
+                                              </button>
+                                            </div>
+                                          </div>
+
+                                          {isEditing ? (
+                                            <div className="space-y-2">
+                                              <div>
+                                                <label className="mb-1 block text-xs text-cyan-400">Image Prompt</label>
+                                                <textarea
+                                                  value={promptEdit.image}
+                                                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPromptEdit({ ...promptEdit, image: e.target.value })}
+                                                  rows={3}
+                                                  className="w-full rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-xs text-gray-200 focus:border-blue-500 focus:outline-none"
+                                                />
+                                              </div>
+                                              <div>
+                                                <label className="mb-1 block text-xs text-orange-400">Video Prompt</label>
+                                                <textarea
+                                                  value={promptEdit.video}
+                                                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPromptEdit({ ...promptEdit, video: e.target.value })}
+                                                  rows={3}
+                                                  className="w-full rounded border border-gray-700 bg-gray-800 px-2 py-1.5 text-xs text-gray-200 focus:border-blue-500 focus:outline-none"
+                                                />
+                                              </div>
+                                            </div>
+                                          ) : (
+                                            <div className="space-y-1.5">
+                                              {cut.image_prompt && (
+                                                <div>
+                                                  <span className="text-xs font-medium text-cyan-400">Image:</span>
+                                                  <p className="text-xs text-gray-400 mt-0.5">{cut.image_prompt}</p>
+                                                </div>
+                                              )}
+                                              {cut.video_prompt && (
+                                                <div>
+                                                  <span className="text-xs font-medium text-orange-400">Video:</span>
+                                                  <p className="text-xs text-gray-400 mt-0.5">{cut.video_prompt}</p>
+                                                </div>
+                                              )}
+                                              {!cut.image_prompt && !cut.video_prompt && (
+                                                <p className="text-xs text-gray-600 italic">No prompts generated yet</p>
+                                              )}
+                                              {/* Cut-level generated thumbnail */}
+                                              {(() => {
+                                                const cutAsset = generatedAssets[cutAssetKey]
+                                                return cutAsset ? (
+                                                  <div className="mt-2">
+                                                    <img
+                                                      src={`${API_BASE}/api/assets/download/${cutAsset.id}`}
+                                                      alt={`Cut ${cut.cut_number} storyboard`}
+                                                      className="rounded border border-gray-700 max-h-32"
+                                                    />
+                                                  </div>
+                                                ) : null
+                                              })()}
+                                            </div>
+                                          )}
+                                        </div>
+                                      )
+                                    })}
+                                  </div>
+                                )}
+
+                                {!hasCuts && (
+                                  <p className="text-xs text-gray-600 italic">No cuts designed yet. Go to Stage 2 first.</p>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
             </div>
           )}
         </div>

@@ -32,7 +32,7 @@ export function createLogger(
       const ts = new Date().toISOString();
       const prefix = `[${ts}] [${level.toUpperCase()}] [${name}]`;
       const suffix = meta ? ` ${JSON.stringify(meta)}` : "";
-      // eslint-disable-next-line no-console
+       
       console[level === "debug" ? "log" : level](`${prefix} ${message}${suffix}`);
     };
 

@@ -2,7 +2,16 @@ import { Hono } from "hono"
 import { prisma } from "@marionette/db"
 import { AIGateway } from "@marionette/ai-gateway"
 import { GeminiProvider } from "@marionette/ai-gateway/providers/gemini.js"
-import { NotFoundError, ValidationError } from "../middleware/error-handler.ts"
+import { NotFoundError, ValidationError, AppError } from "../middleware/error-handler.ts"
+import { mkdir, writeFile, stat } from "node:fs/promises"
+import { join } from "node:path"
+import {
+  STYLE_PRESETS,
+  ASPECT_RATIOS,
+  makeStoryboardFileName,
+  buildEnhancedPrompt,
+  cropToAspect,
+} from "@marionette/agents/pre-production/style-presets.js"
 
 export const screenplayRoutes = new Hono()
 
@@ -86,9 +95,9 @@ screenplayRoutes.get("/:projectId", async (c) => {
     const screenplay = await getOrCreateScreenplay(projectId)
     return c.json(screenplay)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Failed to fetch screenplay"
-    console.error(`[screenplay GET] ${message}`)
-    return c.json({ error: message }, 500)
+    throw new AppError(message, 500, "INTERNAL_SERVER_ERROR")
   }
 })
 
@@ -99,12 +108,12 @@ screenplayRoutes.post("/:projectId/outline", async (c) => {
   try {
     const project = await prisma.project.findUnique({ where: { id: projectId } })
     if (!project) {
-      return c.json({ error: `Project '${projectId}' not found` }, 404)
+      throw new AppError(`Project '${projectId}' not found`, 404, "NOT_FOUND")
     }
 
     const idea = project.idea || project.title
     if (!idea) {
-      return c.json({ error: "Project must have an idea or title to generate an outline" }, 400)
+      throw new ValidationError("Project must have an idea or title to generate an outline")
     }
 
     const gw = getGateway()
@@ -118,7 +127,7 @@ screenplayRoutes.post("/:projectId/outline", async (c) => {
     )
 
     if (!outline || outline.trim().length === 0) {
-      return c.json({ error: "AI returned empty outline. Please try again." }, 502)
+      throw new AppError("AI returned empty outline. Please try again.", 502, "BAD_GATEWAY")
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
@@ -129,9 +138,9 @@ screenplayRoutes.post("/:projectId/outline", async (c) => {
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay outline] ${message}`)
-    return c.json({ error: `Outline generation failed: ${message}` }, 500)
+    throw new AppError(`Outline generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -142,7 +151,7 @@ screenplayRoutes.put("/:projectId/outline", async (c) => {
     const body = await c.req.json<{ outline: string }>()
 
     if (!body.outline || typeof body.outline !== "string") {
-      return c.json({ error: "outline is required and must be a string" }, 400)
+      throw new ValidationError("outline is required and must be a string")
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
@@ -153,9 +162,9 @@ screenplayRoutes.put("/:projectId/outline", async (c) => {
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay outline PUT] ${message}`)
-    return c.json({ error: `Save failed: ${message}` }, 500)
+    throw new AppError(`Save failed: ${message}`, 500, "INTERNAL_SERVER_ERROR")
   }
 })
 
@@ -166,7 +175,7 @@ screenplayRoutes.post("/:projectId/characters", async (c) => {
   try {
     const screenplay = await getOrCreateScreenplay(projectId)
     if (!screenplay.outline) {
-      return c.json({ error: "Outline must exist before generating characters" }, 400)
+      throw new ValidationError("Outline must exist before generating characters")
     }
 
     const gw = getGateway()
@@ -180,7 +189,7 @@ screenplayRoutes.post("/:projectId/characters", async (c) => {
     )
 
     if (!charactersRaw || charactersRaw.trim().length === 0) {
-      return c.json({ error: "AI returned empty character data. Please try again." }, 502)
+      throw new AppError("AI returned empty character data. Please try again.", 502, "BAD_GATEWAY")
     }
 
     // Attempt to parse as JSON; store raw string if parsing fails
@@ -202,9 +211,9 @@ screenplayRoutes.post("/:projectId/characters", async (c) => {
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay characters] ${message}`)
-    return c.json({ error: `Character generation failed: ${message}` }, 500)
+    throw new AppError(`Character generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -215,7 +224,7 @@ screenplayRoutes.put("/:projectId/characters", async (c) => {
     const body = await c.req.json<{ characters: unknown }>()
 
     if (!body.characters) {
-      return c.json({ error: "characters is required" }, 400)
+      throw new ValidationError("characters is required")
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
@@ -226,9 +235,9 @@ screenplayRoutes.put("/:projectId/characters", async (c) => {
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay characters PUT] ${message}`)
-    return c.json({ error: `Save failed: ${message}` }, 500)
+    throw new AppError(`Save failed: ${message}`, 500, "INTERNAL_SERVER_ERROR")
   }
 })
 
@@ -238,16 +247,16 @@ screenplayRoutes.post("/:projectId/treatment/:sequence", async (c) => {
   const sequence = parseInt(c.req.param("sequence"))
 
   if (isNaN(sequence) || sequence < 1 || sequence > 8) {
-    return c.json({ error: "sequence must be a number between 1 and 8" }, 400)
+    throw new ValidationError("sequence must be a number between 1 and 8")
   }
 
   try {
     const screenplay = await getOrCreateScreenplay(projectId)
     if (!screenplay.outline) {
-      return c.json({ error: "Outline must exist before generating treatment" }, 400)
+      throw new ValidationError("Outline must exist before generating treatment")
     }
     if (!screenplay.characters) {
-      return c.json({ error: "Characters must exist before generating treatment" }, 400)
+      throw new ValidationError("Characters must exist before generating treatment")
     }
 
     const charactersText = typeof screenplay.characters === "string"
@@ -284,7 +293,7 @@ Return ONLY the JSON array. No markdown wrapping.`,
     )
 
     if (!response || response.trim().length === 0) {
-      return c.json({ error: "AI returned empty scene logs. Please try again." }, 502)
+      throw new AppError("AI returned empty scene logs. Please try again.", 502, "BAD_GATEWAY")
     }
 
     // Parse JSON array from response
@@ -292,11 +301,12 @@ Return ONLY the JSON array. No markdown wrapping.`,
     try {
       const jsonMatch = response.match(/\[[\s\S]*\]/)
       if (!jsonMatch) {
-        return c.json({ error: "AI response was not a valid JSON array" }, 502)
+        throw new AppError("AI response was not a valid JSON array", 502, "BAD_GATEWAY")
       }
       newScenes = JSON.parse(jsonMatch[0]) as Record<string, unknown>[]
-    } catch {
-      return c.json({ error: "Failed to parse AI response as JSON" }, 502)
+    } catch (e) {
+      if (e instanceof AppError) throw e
+      throw new AppError("Failed to parse AI response as JSON", 502, "BAD_GATEWAY")
     }
 
     // Merge with existing scene logs: replace scenes from this sequence, keep others
@@ -326,9 +336,9 @@ Return ONLY the JSON array. No markdown wrapping.`,
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay treatment seq${sequence}] ${message}`)
-    return c.json({ error: `Treatment generation failed: ${message}` }, 500)
+    throw new AppError(`Treatment generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -338,7 +348,7 @@ screenplayRoutes.put("/:projectId/treatment-text", async (c) => {
   try {
     const body = await c.req.json<{ sceneLogs: string }>()
     if (!body.sceneLogs || typeof body.sceneLogs !== "string") {
-      return c.json({ error: "sceneLogs is required and must be a string" }, 400)
+      throw new ValidationError("sceneLogs is required and must be a string")
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
@@ -349,9 +359,9 @@ screenplayRoutes.put("/:projectId/treatment-text", async (c) => {
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay treatment-text PUT] ${message}`)
-    return c.json({ error: `Save failed: ${message}` }, 500)
+    throw new AppError(`Save failed: ${message}`, 500, "INTERNAL_SERVER_ERROR")
   }
 })
 
@@ -362,13 +372,13 @@ screenplayRoutes.post("/:projectId/draft", async (c) => {
   try {
     const screenplay = await getOrCreateScreenplay(projectId)
     if (!screenplay.outline) {
-      return c.json({ error: "Outline must exist before generating draft" }, 400)
+      throw new ValidationError("Outline must exist before generating draft")
     }
     if (!screenplay.characters) {
-      return c.json({ error: "Characters must exist before generating draft" }, 400)
+      throw new ValidationError("Characters must exist before generating draft")
     }
     if (!screenplay.sceneLogs) {
-      return c.json({ error: "Scene logs must exist before generating draft" }, 400)
+      throw new ValidationError("Scene logs must exist before generating draft")
     }
 
     const charactersText = typeof screenplay.characters === "string"
@@ -403,7 +413,7 @@ ${existingDraft || "(No scenes written yet — start from S#1)"}`,
     )
 
     if (!newScenes || newScenes.trim().length === 0) {
-      return c.json({ error: "AI returned empty draft scenes. Please try again." }, 502)
+      throw new AppError("AI returned empty draft scenes. Please try again.", 502, "BAD_GATEWAY")
     }
 
     const combinedDraft = existingDraft
@@ -421,9 +431,9 @@ ${existingDraft || "(No scenes written yet — start from S#1)"}`,
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay draft] ${message}`)
-    return c.json({ error: `Draft generation failed: ${message}` }, 500)
+    throw new AppError(`Draft generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -434,12 +444,12 @@ screenplayRoutes.post("/:projectId/apply-feedback", async (c) => {
   try {
     const body = await c.req.json<{ feedback: string }>()
     if (!body.feedback?.trim()) {
-      return c.json({ error: "feedback is required" }, 400)
+      throw new ValidationError("feedback is required")
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
     if (!screenplay.draft) {
-      return c.json({ error: "Draft must exist before applying feedback" }, 400)
+      throw new ValidationError("Draft must exist before applying feedback")
     }
 
     const charactersText = typeof screenplay.characters === "string"
@@ -493,9 +503,9 @@ Return ONLY JSON.`,
 
     return c.json({ ...updated, revision: parsedNotes })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay apply-feedback] ${message}`)
-    return c.json({ error: `Feedback application failed: ${message}` }, 500)
+    throw new AppError(`Feedback application failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -506,7 +516,7 @@ screenplayRoutes.put("/:projectId/draft", async (c) => {
     const body = await c.req.json<{ draft: string }>()
 
     if (!body.draft || typeof body.draft !== "string") {
-      return c.json({ error: "draft is required and must be a string" }, 400)
+      throw new ValidationError("draft is required and must be a string")
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
@@ -517,9 +527,9 @@ screenplayRoutes.put("/:projectId/draft", async (c) => {
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay draft PUT] ${message}`)
-    return c.json({ error: `Save failed: ${message}` }, 500)
+    throw new AppError(`Save failed: ${message}`, 500, "INTERNAL_SERVER_ERROR")
   }
 })
 
@@ -534,9 +544,9 @@ screenplayRoutes.delete("/:projectId/draft", async (c) => {
     })
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay draft DELETE] ${message}`)
-    return c.json({ error: `Reset failed: ${message}` }, 500)
+    throw new AppError(`Reset failed: ${message}`, 500, "INTERNAL_SERVER_ERROR")
   }
 })
 
@@ -547,7 +557,7 @@ screenplayRoutes.patch("/:projectId/step", async (c) => {
     const body = await c.req.json<{ step: number }>()
 
     if (typeof body.step !== "number" || body.step < 1 || body.step > 6) {
-      return c.json({ error: "step must be a number between 1 and 6" }, 400)
+      throw new ValidationError("step must be a number between 1 and 6")
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
@@ -558,9 +568,9 @@ screenplayRoutes.patch("/:projectId/step", async (c) => {
 
     return c.json(updated)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[screenplay step] ${message}`)
-    return c.json({ error: `Step update failed: ${message}` }, 500)
+    throw new AppError(`Step update failed: ${message}`, 500, "INTERNAL_SERVER_ERROR")
   }
 })
 
@@ -610,16 +620,16 @@ screenplayRoutes.post("/:projectId/direction-plan/sequence/:seq", async (c) => {
   const seq = parseInt(c.req.param("seq"))
 
   if (isNaN(seq) || seq < 1 || seq > 8) {
-    return c.json({ error: "seq must be a number between 1 and 8" }, 400)
+    throw new ValidationError("seq must be a number between 1 and 8")
   }
 
   try {
     const screenplay = await getOrCreateScreenplay(projectId)
     if (!screenplay.outline) {
-      return c.json({ error: "Outline must exist before analyzing sequences" }, 400)
+      throw new ValidationError("Outline must exist before analyzing sequences")
     }
     if (!screenplay.draft) {
-      return c.json({ error: "Draft must exist before analyzing sequences" }, 400)
+      throw new ValidationError("Draft must exist before analyzing sequences")
     }
 
     const gw = getGateway()
@@ -641,7 +651,7 @@ Extract all scenes belonging to Sequence ${seq}.`,
     )
 
     if (!response || response.trim().length === 0) {
-      return c.json({ error: "AI returned empty analysis. Please try again." }, 502)
+      throw new AppError("AI returned empty analysis. Please try again.", 502, "BAD_GATEWAY")
     }
 
     // Parse JSON array from response
@@ -649,17 +659,18 @@ Extract all scenes belonging to Sequence ${seq}.`,
     try {
       const jsonMatch = response.match(/\[[\s\S]*\]/)
       if (!jsonMatch) {
-        return c.json({ error: "AI response was not a valid JSON array" }, 502)
+        throw new AppError("AI response was not a valid JSON array", 502, "BAD_GATEWAY")
       }
       newScenes = JSON.parse(jsonMatch[0]) as Record<string, unknown>[]
-    } catch {
-      return c.json({ error: "Failed to parse AI response as JSON" }, 502)
+    } catch (e) {
+      if (e instanceof AppError) throw e
+      throw new AppError("Failed to parse AI response as JSON", 502, "BAD_GATEWAY")
     }
 
     // Merge into project.directionPlan
     const project = await prisma.project.findUnique({ where: { id: projectId } })
     if (!project) {
-      return c.json({ error: `Project '${projectId}' not found` }, 404)
+      throw new AppError(`Project '${projectId}' not found`, 404, "NOT_FOUND")
     }
 
     const directionPlan = (project.directionPlan as Record<string, unknown> | null) ?? {
@@ -692,9 +703,9 @@ Extract all scenes belonging to Sequence ${seq}.`,
 
     return c.json({ directionPlan: updatedProject.directionPlan })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[direction-plan sequence ${seq}] ${message}`)
-    return c.json({ error: `Sequence analysis failed: ${message}` }, 500)
+    throw new AppError(`Sequence analysis failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -704,18 +715,18 @@ screenplayRoutes.post("/:projectId/direction-plan/scene/:sceneNumber/cuts", asyn
   const sceneNumber = parseInt(c.req.param("sceneNumber"))
 
   if (isNaN(sceneNumber) || sceneNumber < 1) {
-    return c.json({ error: "sceneNumber must be a positive integer" }, 400)
+    throw new ValidationError("sceneNumber must be a positive integer")
   }
 
   try {
     const project = await prisma.project.findUnique({ where: { id: projectId } })
     if (!project) {
-      return c.json({ error: `Project '${projectId}' not found` }, 404)
+      throw new AppError(`Project '${projectId}' not found`, 404, "NOT_FOUND")
     }
 
     const directionPlan = project.directionPlan as Record<string, unknown> | null
     if (!directionPlan || !directionPlan.scenes) {
-      return c.json({ error: "Direction plan with scenes must exist before generating cuts" }, 400)
+      throw new ValidationError("Direction plan with scenes must exist before generating cuts")
     }
 
     const scenes = directionPlan.scenes as Record<string, unknown>[]
@@ -723,7 +734,7 @@ screenplayRoutes.post("/:projectId/direction-plan/scene/:sceneNumber/cuts", asyn
       (s) => (s as { scene_number?: number }).scene_number === sceneNumber
     )
     if (!scene) {
-      return c.json({ error: `Scene ${sceneNumber} not found in direction plan` }, 404)
+      throw new AppError(`Scene ${sceneNumber} not found in direction plan`, 404, "NOT_FOUND")
     }
 
     const gw = getGateway()
@@ -744,18 +755,19 @@ Dialogue: ${(scene as { dialogue?: string | null }).dialogue ?? "None"}`,
     )
 
     if (!response || response.trim().length === 0) {
-      return c.json({ error: "AI returned empty cut design. Please try again." }, 502)
+      throw new AppError("AI returned empty cut design. Please try again.", 502, "BAD_GATEWAY")
     }
 
     let cuts: Record<string, unknown>[]
     try {
       const jsonMatch = response.match(/\[[\s\S]*\]/)
       if (!jsonMatch) {
-        return c.json({ error: "AI response was not a valid JSON array" }, 502)
+        throw new AppError("AI response was not a valid JSON array", 502, "BAD_GATEWAY")
       }
       cuts = JSON.parse(jsonMatch[0]) as Record<string, unknown>[]
-    } catch {
-      return c.json({ error: "Failed to parse AI response as JSON" }, 502)
+    } catch (e) {
+      if (e instanceof AppError) throw e
+      throw new AppError("Failed to parse AI response as JSON", 502, "BAD_GATEWAY")
     }
 
     // Update scene with cuts
@@ -768,9 +780,9 @@ Dialogue: ${(scene as { dialogue?: string | null }).dialogue ?? "None"}`,
 
     return c.json({ directionPlan: updatedProject.directionPlan })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[direction-plan cuts scene ${sceneNumber}] ${message}`)
-    return c.json({ error: `Cut generation failed: ${message}` }, 500)
+    throw new AppError(`Cut generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -781,21 +793,21 @@ screenplayRoutes.post("/:projectId/direction-plan/scene/:sceneNumber/cut/:cutNum
   const cutNumber = parseInt(c.req.param("cutNumber"))
 
   if (isNaN(sceneNumber) || sceneNumber < 1) {
-    return c.json({ error: "sceneNumber must be a positive integer" }, 400)
+    throw new ValidationError("sceneNumber must be a positive integer")
   }
   if (isNaN(cutNumber) || cutNumber < 1) {
-    return c.json({ error: "cutNumber must be a positive integer" }, 400)
+    throw new ValidationError("cutNumber must be a positive integer")
   }
 
   try {
     const project = await prisma.project.findUnique({ where: { id: projectId } })
     if (!project) {
-      return c.json({ error: `Project '${projectId}' not found` }, 404)
+      throw new AppError(`Project '${projectId}' not found`, 404, "NOT_FOUND")
     }
 
     const directionPlan = project.directionPlan as Record<string, unknown> | null
     if (!directionPlan || !directionPlan.scenes) {
-      return c.json({ error: "Direction plan with scenes must exist" }, 400)
+      throw new ValidationError("Direction plan with scenes must exist")
     }
 
     const scenes = directionPlan.scenes as Record<string, unknown>[]
@@ -803,19 +815,19 @@ screenplayRoutes.post("/:projectId/direction-plan/scene/:sceneNumber/cut/:cutNum
       (s) => (s as { scene_number?: number }).scene_number === sceneNumber
     )
     if (!scene) {
-      return c.json({ error: `Scene ${sceneNumber} not found in direction plan` }, 404)
+      throw new AppError(`Scene ${sceneNumber} not found in direction plan`, 404, "NOT_FOUND")
     }
 
     const cuts = (scene as { cuts?: Record<string, unknown>[] }).cuts
     if (!cuts || cuts.length === 0) {
-      return c.json({ error: `Scene ${sceneNumber} has no cuts. Generate cuts first (Stage 2).` }, 400)
+      throw new ValidationError(`Scene ${sceneNumber} has no cuts. Generate cuts first (Stage 2).`)
     }
 
     const cut = cuts.find(
       (ct) => (ct as { cut_number?: number }).cut_number === cutNumber
     )
     if (!cut) {
-      return c.json({ error: `Cut ${cutNumber} not found in scene ${sceneNumber}` }, 404)
+      throw new AppError(`Cut ${cutNumber} not found in scene ${sceneNumber}`, 404, "NOT_FOUND")
     }
 
     const gw = getGateway()
@@ -838,18 +850,19 @@ Action: ${(cut as { action?: string }).action ?? ""}`,
     )
 
     if (!response || response.trim().length === 0) {
-      return c.json({ error: "AI returned empty prompts. Please try again." }, 502)
+      throw new AppError("AI returned empty prompts. Please try again.", 502, "BAD_GATEWAY")
     }
 
     let prompts: { image_prompt: string; video_prompt: string }
     try {
       const jsonMatch = response.match(/\{[\s\S]*\}/)
       if (!jsonMatch) {
-        return c.json({ error: "AI response was not a valid JSON object" }, 502)
+        throw new AppError("AI response was not a valid JSON object", 502, "BAD_GATEWAY")
       }
       prompts = JSON.parse(jsonMatch[0]) as { image_prompt: string; video_prompt: string }
-    } catch {
-      return c.json({ error: "Failed to parse AI response as JSON" }, 502)
+    } catch (e) {
+      if (e instanceof AppError) throw e
+      throw new AppError("Failed to parse AI response as JSON", 502, "BAD_GATEWAY")
     }
 
     // Update cut with prompts
@@ -863,9 +876,9 @@ Action: ${(cut as { action?: string }).action ?? ""}`,
 
     return c.json({ directionPlan: updatedProject.directionPlan })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[direction-plan prompts scene ${sceneNumber} cut ${cutNumber}] ${message}`)
-    return c.json({ error: `Prompt generation failed: ${message}` }, 500)
+    throw new AppError(`Prompt generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -875,18 +888,18 @@ screenplayRoutes.post("/:projectId/direction-plan/scene/:sceneNumber/generate-al
   const sceneNumber = parseInt(c.req.param("sceneNumber"))
 
   if (isNaN(sceneNumber) || sceneNumber < 1) {
-    return c.json({ error: "sceneNumber must be a positive integer" }, 400)
+    throw new ValidationError("sceneNumber must be a positive integer")
   }
 
   try {
     const project = await prisma.project.findUnique({ where: { id: projectId } })
     if (!project) {
-      return c.json({ error: `Project '${projectId}' not found` }, 404)
+      throw new AppError(`Project '${projectId}' not found`, 404, "NOT_FOUND")
     }
 
     const directionPlan = project.directionPlan as Record<string, unknown> | null
     if (!directionPlan || !directionPlan.scenes) {
-      return c.json({ error: "Direction plan with scenes must exist before generating cuts" }, 400)
+      throw new ValidationError("Direction plan with scenes must exist before generating cuts")
     }
 
     const scenes = directionPlan.scenes as Record<string, unknown>[]
@@ -894,7 +907,7 @@ screenplayRoutes.post("/:projectId/direction-plan/scene/:sceneNumber/generate-al
       (s) => (s as { scene_number?: number }).scene_number === sceneNumber
     )
     if (!scene) {
-      return c.json({ error: `Scene ${sceneNumber} not found in direction plan` }, 404)
+      throw new AppError(`Scene ${sceneNumber} not found in direction plan`, 404, "NOT_FOUND")
     }
 
     const gw = getGateway()
@@ -917,18 +930,19 @@ Dialogue: ${(scene as { dialogue?: string | null }).dialogue ?? "None"}`,
     )
 
     if (!cutsResponse || cutsResponse.trim().length === 0) {
-      return c.json({ error: "AI returned empty cut design. Please try again." }, 502)
+      throw new AppError("AI returned empty cut design. Please try again.", 502, "BAD_GATEWAY")
     }
 
     let cuts: Record<string, unknown>[]
     try {
       const jsonMatch = cutsResponse.match(/\[[\s\S]*\]/)
       if (!jsonMatch) {
-        return c.json({ error: "AI cut response was not a valid JSON array" }, 502)
+        throw new AppError("AI cut response was not a valid JSON array", 502, "BAD_GATEWAY")
       }
       cuts = JSON.parse(jsonMatch[0]) as Record<string, unknown>[]
-    } catch {
-      return c.json({ error: "Failed to parse AI cut response as JSON" }, 502)
+    } catch (e) {
+      if (e instanceof AppError) throw e
+      throw new AppError("Failed to parse AI cut response as JSON", 502, "BAD_GATEWAY")
     }
 
     // Stage 3: Generate prompts for each cut
@@ -976,8 +990,202 @@ Action: ${(cut as { action?: string }).action ?? ""}`,
 
     return c.json({ directionPlan: updatedProject.directionPlan })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : "Unknown error"
-    console.error(`[direction-plan generate-all scene ${sceneNumber}] ${message}`)
-    return c.json({ error: `Generate-all failed: ${message}` }, 500)
+    throw new AppError(`Generate-all failed: ${message}`, 500, "AI_ERROR")
+  }
+})
+
+// ─── Storyboard Image Generation ───
+
+interface StoryboardGenerateBody {
+  scope: "sequence" | "scene" | "cut"
+  sequence?: number
+  sceneNumber?: number
+  cutNumber?: number
+  style?: string
+}
+
+interface DPSceneShape {
+  scene_number: number
+  sequence?: number
+  setting?: string
+  time_of_day?: string
+  image_prompt?: string
+  cuts?: DPCutShape[]
+}
+
+interface DPCutShape {
+  cut_number: number
+  image_prompt?: string
+  video_prompt?: string
+}
+
+// POST /:projectId/direction-plan/storyboard/generate — Generate storyboard images per scope
+screenplayRoutes.post("/:projectId/direction-plan/storyboard/generate", async (c) => {
+  const projectId = c.req.param("projectId")
+  const body = await c.req.json<StoryboardGenerateBody>()
+
+  const { scope, style: styleKey = "webtoon" } = body
+
+  // Validate scope-specific params
+  if (scope === "sequence" && (body.sequence == null || body.sequence < 1)) {
+    throw new ValidationError("sequence is required for scope='sequence'")
+  }
+  if ((scope === "scene" || scope === "cut") && (body.sceneNumber == null || body.sceneNumber < 1)) {
+    throw new ValidationError("sceneNumber is required for scope='scene' or 'cut'")
+  }
+  if (scope === "cut" && (body.cutNumber == null || body.cutNumber < 1)) {
+    throw new ValidationError("cutNumber is required for scope='cut'")
+  }
+
+  try {
+    const project = await prisma.project.findUnique({ where: { id: projectId } })
+    if (!project) {
+      throw new AppError(`Project '${projectId}' not found`, 404, "NOT_FOUND")
+    }
+
+    const directionPlan = project.directionPlan as { scenes?: DPSceneShape[] } | null
+    if (!directionPlan?.scenes?.length) {
+      throw new ValidationError("Direction plan has no scenes")
+    }
+
+    const style = STYLE_PRESETS[styleKey] ?? STYLE_PRESETS.webtoon!
+    const aspectKey = style.aspect
+    const aspectRatio = ASPECT_RATIOS[aspectKey] ?? 2.35
+
+    // Collect targets: { prompt, sequence, sceneNumber, cutNumber? }
+    const targets: Array<{
+      prompt: string
+      sequence: number
+      sceneNumber: number
+      cutNumber?: number
+    }> = []
+
+    if (scope === "cut") {
+      const scene = directionPlan.scenes.find((s) => s.scene_number === body.sceneNumber)
+      if (!scene) throw new AppError(`Scene ${body.sceneNumber} not found`, 404, "NOT_FOUND")
+      const cut = scene.cuts?.find((ct) => ct.cut_number === body.cutNumber)
+      if (!cut) throw new AppError(`Cut ${body.cutNumber} not found in scene ${body.sceneNumber}`, 404, "NOT_FOUND")
+      if (!cut.image_prompt) throw new ValidationError("Cut has no image_prompt")
+      targets.push({
+        prompt: cut.image_prompt,
+        sequence: scene.sequence ?? 1,
+        sceneNumber: scene.scene_number,
+        cutNumber: cut.cut_number,
+      })
+    } else if (scope === "scene") {
+      const scene = directionPlan.scenes.find((s) => s.scene_number === body.sceneNumber)
+      if (!scene) throw new AppError(`Scene ${body.sceneNumber} not found`, 404, "NOT_FOUND")
+      if (!scene.image_prompt) throw new ValidationError("Scene has no image_prompt")
+      targets.push({
+        prompt: scene.image_prompt,
+        sequence: scene.sequence ?? 1,
+        sceneNumber: scene.scene_number,
+      })
+    } else {
+      // sequence scope
+      const seqScenes = directionPlan.scenes.filter((s) => (s.sequence ?? 1) === body.sequence)
+      if (seqScenes.length === 0) throw new AppError(`No scenes in sequence ${body.sequence}`, 404, "NOT_FOUND")
+      for (const scene of seqScenes) {
+        if (scene.image_prompt) {
+          targets.push({
+            prompt: scene.image_prompt,
+            sequence: scene.sequence ?? 1,
+            sceneNumber: scene.scene_number,
+          })
+        }
+      }
+      if (targets.length === 0) throw new ValidationError("No scenes with image_prompt in this sequence")
+    }
+
+    const gw = getGateway()
+    const outputDir = join("output", "storyboards", projectId)
+    await mkdir(outputDir, { recursive: true })
+
+    const assets: Array<{
+      id: string
+      sceneNumber: number
+      cutNumber?: number
+      fileName: string
+    }> = []
+
+    for (const target of targets) {
+      const enhancedPrompt = buildEnhancedPrompt(target.prompt, style, aspectKey)
+
+      try {
+        const imageBuffer = await gw.image(enhancedPrompt, {
+          provider: "gemini",
+          style: styleKey,
+          aspectRatio: aspectKey,
+        })
+
+        const croppedBuffer = await cropToAspect(imageBuffer, aspectRatio)
+
+        // Check for existing file and add timestamp if needed
+        const baseFileName = makeStoryboardFileName({
+          sequence: target.sequence,
+          sceneNumber: target.sceneNumber,
+          cutNumber: target.cutNumber,
+        })
+        let fileName = baseFileName
+        try {
+          await stat(join(outputDir, baseFileName))
+          // File exists — append timestamp
+          fileName = makeStoryboardFileName({
+            sequence: target.sequence,
+            sceneNumber: target.sceneNumber,
+            cutNumber: target.cutNumber,
+            timestamp: Math.floor(Date.now() / 1000),
+          })
+        } catch {
+          // File doesn't exist — use base name
+        }
+
+        const filePath = join(outputDir, fileName)
+        await writeFile(filePath, croppedBuffer)
+
+        const fileInfo = await stat(filePath)
+        console.log(`[storyboard] ${fileName} (${(fileInfo.size / 1024).toFixed(1)}KB)`)
+
+        const asset = await prisma.asset.create({
+          data: {
+            projectId,
+            type: "IMAGE",
+            phase: "PRE",
+            agentName: "StoryboardGenerator",
+            filePath,
+            fileName,
+            mimeType: "image/png",
+            sceneNumber: target.sceneNumber,
+            fileSize: fileInfo.size,
+            metadata: {
+              style: styleKey,
+              aspect: aspectKey,
+              sequence: target.sequence,
+              cutNumber: target.cutNumber ?? null,
+              scope,
+            },
+          },
+        })
+
+        assets.push({
+          id: asset.id,
+          sceneNumber: target.sceneNumber,
+          cutNumber: target.cutNumber,
+          fileName,
+        })
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error(`[storyboard] Failed to generate for scene ${target.sceneNumber}: ${msg}`)
+        // Continue with remaining targets
+      }
+    }
+
+    return c.json({ assets })
+  } catch (err) {
+    if (err instanceof AppError) throw err
+    const message = err instanceof Error ? err.message : "Unknown error"
+    throw new AppError(`Storyboard generation failed: ${message}`, 500, "AI_ERROR")
   }
 })

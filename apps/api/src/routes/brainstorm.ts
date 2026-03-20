@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { AIGateway } from "@marionette/ai-gateway"
 import { GeminiProvider } from "@marionette/ai-gateway/providers/gemini.js"
+import { ValidationError, AppError } from "../middleware/error-handler.ts"
 
 export const brainstormRoutes = new Hono()
 
@@ -75,7 +76,7 @@ brainstormRoutes.post("/generate-ideas", async (c) => {
   }>()
 
   if (!body.seed?.trim()) {
-    return c.json({ error: "seed idea is required" }, 400)
+    throw new ValidationError("seed idea is required")
   }
 
   const userPrompt = `Format: ${body.format || "영화"}
@@ -97,7 +98,7 @@ Generate 3-5 unique concept variations based on this seed idea.`
     // Parse JSON array from response
     const arrayMatch = response.match(/\[[\s\S]*\]/)
     if (!arrayMatch) {
-      return c.json({ error: "Failed to parse AI response as JSON array" }, 500)
+      throw new AppError("Failed to parse AI response as JSON array", 500, "AI_ERROR")
     }
 
     const concepts = JSON.parse(arrayMatch[0]) as Record<string, unknown>[]
@@ -110,8 +111,9 @@ Generate 3-5 unique concept variations based on this seed idea.`
 
     return c.json({ concepts: conceptsWithIds })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : String(err)
-    return c.json({ error: `Idea generation failed: ${message}` }, 500)
+    throw new AppError(`Idea generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -127,7 +129,7 @@ brainstormRoutes.post("/refine-concept", async (c) => {
   }>()
 
   if (!body.title?.trim()) {
-    return c.json({ error: "title is required" }, 400)
+    throw new ValidationError("title is required")
   }
 
   const userPrompt = `Concept to expand:
@@ -150,14 +152,15 @@ Expand this concept into a full project pitch.`
 
     const objMatch = response.match(/\{[\s\S]*\}/)
     if (!objMatch) {
-      return c.json({ error: "Failed to parse AI response as JSON object" }, 500)
+      throw new AppError("Failed to parse AI response as JSON object", 500, "AI_ERROR")
     }
 
     const expanded = JSON.parse(objMatch[0])
     return c.json({ expanded })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : String(err)
-    return c.json({ error: `Concept refinement failed: ${message}` }, 500)
+    throw new AppError(`Concept refinement failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -170,12 +173,12 @@ brainstormRoutes.post("/generate-logline", async (c) => {
   }>()
 
   if (!body.context?.trim()) {
-    return c.json({ error: "context is required" }, 400)
+    throw new ValidationError("context is required")
   }
 
   const validSections = ["logline", "synopsis", "characters", "themes", "comparables"]
   if (!validSections.includes(body.section)) {
-    return c.json({ error: `section must be one of: ${validSections.join(", ")}` }, 400)
+    throw new ValidationError(`section must be one of: ${validSections.join(", ")}`)
   }
 
   const userPrompt = `Context:
@@ -203,7 +206,8 @@ Section to regenerate: ${body.section}`
     const cleaned = response.replace(/```[a-z]*\n?|\n?```/g, "").trim()
     return c.json({ result: cleaned })
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : String(err)
-    return c.json({ error: `Section regeneration failed: ${message}` }, 500)
+    throw new AppError(`Section regeneration failed: ${message}`, 500, "AI_ERROR")
   }
 })

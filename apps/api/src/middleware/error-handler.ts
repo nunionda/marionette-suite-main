@@ -20,7 +20,7 @@ export const errorHandler = (err: Error, c: Context): Response => {
       error: {
         code,
         message: err.message,
-        ...(process.env.NODE_ENV !== "production" && { stack: err.stack }),
+        ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
       },
     },
     status as ContentfulStatusCode,

@@ -1,6 +1,8 @@
 import { prisma } from "@marionette/db"
 import type { ProjectCreate, ProjectUpdate, ProjectResponse } from "@marionette/shared/types/project.ts"
-import { NotFoundError } from "../middleware/error-handler.ts"
+import { NotFoundError, ValidationError } from "../middleware/error-handler.ts"
+
+const VALID_STATUSES = new Set(["DRAFT", "PRE_PRODUCTION", "MAIN_PRODUCTION", "POST_PRODUCTION", "COMPLETED", "ARCHIVED"])
 
 function toProjectResponse(project: {
   id: string
@@ -81,6 +83,13 @@ export async function updateProject(id: string, data: ProjectUpdate): Promise<Pr
   const existing = await prisma.project.findUnique({ where: { id } })
   if (!existing) {
     throw new NotFoundError("Project", id)
+  }
+
+  if (data.status !== undefined) {
+    const upper = data.status.toUpperCase()
+    if (!VALID_STATUSES.has(upper)) {
+      throw new ValidationError(`Invalid status '${data.status}'. Must be one of: ${[...VALID_STATUSES].join(", ")}`)
+    }
   }
 
   const project = await prisma.project.update({

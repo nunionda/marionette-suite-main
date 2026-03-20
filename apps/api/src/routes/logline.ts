@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { AIGateway } from "@marionette/ai-gateway"
 import { GeminiProvider } from "@marionette/ai-gateway/providers/gemini.js"
+import { ValidationError, AppError } from "../middleware/error-handler.ts"
 
 export const loglineRoutes = new Hono()
 
@@ -93,7 +94,7 @@ loglineRoutes.post("/generate", async (c) => {
   }>()
 
   if (!body.idea?.trim()) {
-    return c.json({ error: "idea is required" }, 400)
+    throw new ValidationError("idea is required")
   }
 
   const userPrompt = `Format: ${body.format || "영화"}
@@ -113,7 +114,7 @@ Generate a Cold Catch (Category A) and Extended Pitch (Category B) logline for t
 
     const objMatch = response.match(/\{[\s\S]*\}/)
     if (!objMatch) {
-      return c.json({ error: "Failed to parse AI response as JSON object" }, 500)
+      throw new AppError("Failed to parse AI response as JSON object", 500, "INTERNAL_SERVER_ERROR")
     }
 
     const result = JSON.parse(objMatch[0]) as {
@@ -125,8 +126,9 @@ Generate a Cold Catch (Category A) and Extended Pitch (Category B) logline for t
     }
     return c.json(result)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : String(err)
-    return c.json({ error: `Logline generation failed: ${message}` }, 500)
+    throw new AppError(`Logline generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -138,7 +140,7 @@ loglineRoutes.post("/analyze", async (c) => {
   }>()
 
   if (!body.logline?.trim()) {
-    return c.json({ error: "logline is required" }, 400)
+    throw new ValidationError("logline is required")
   }
 
   const userPrompt = `Analyze this logline:
@@ -157,7 +159,7 @@ Score it on the 4 criteria and provide feedback with an improved version.`
 
     const objMatch = response.match(/\{[\s\S]*\}/)
     if (!objMatch) {
-      return c.json({ error: "Failed to parse AI response as JSON object" }, 500)
+      throw new AppError("Failed to parse AI response as JSON object", 500, "INTERNAL_SERVER_ERROR")
     }
 
     const result = JSON.parse(objMatch[0]) as {
@@ -167,8 +169,9 @@ Score it on the 4 criteria and provide feedback with an improved version.`
     }
     return c.json(result)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : String(err)
-    return c.json({ error: `Logline analysis failed: ${message}` }, 500)
+    throw new AppError(`Logline analysis failed: ${message}`, 500, "AI_ERROR")
   }
 })
 
@@ -181,12 +184,12 @@ loglineRoutes.post("/variations", async (c) => {
   }>()
 
   if (!body.logline?.trim()) {
-    return c.json({ error: "logline is required" }, 400)
+    throw new ValidationError("logline is required")
   }
 
   const validStyles = ["darker", "lighter", "more_ironic", "more_emotional"]
   if (!validStyles.includes(body.style)) {
-    return c.json({ error: `style must be one of: ${validStyles.join(", ")}` }, 400)
+    throw new ValidationError(`style must be one of: ${validStyles.join(", ")}`)
   }
 
   const userPrompt = `Original logline: "${body.logline}"
@@ -205,13 +208,14 @@ Generate 3 variations of this logline in the specified style direction.`
 
     const objMatch = response.match(/\{[\s\S]*\}/)
     if (!objMatch) {
-      return c.json({ error: "Failed to parse AI response as JSON object" }, 500)
+      throw new AppError("Failed to parse AI response as JSON object", 500, "INTERNAL_SERVER_ERROR")
     }
 
     const result = JSON.parse(objMatch[0]) as { variations: string[] }
     return c.json(result)
   } catch (err) {
+    if (err instanceof AppError) throw err
     const message = err instanceof Error ? err.message : String(err)
-    return c.json({ error: `Variation generation failed: ${message}` }, 500)
+    throw new AppError(`Variation generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
