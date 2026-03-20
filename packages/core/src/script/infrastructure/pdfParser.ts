@@ -1,6 +1,6 @@
 import fs from 'fs';
-import pdf from 'pdf-parse';
-import { parseFountain, ScriptElement } from './parser';
+const pdf = require('pdf-parse');
+import { parseFountain, type ScriptElement } from './parser';
 
 /**
  * Extracts text from a PDF screenplay and attempts to parse it using the Fountain parser.

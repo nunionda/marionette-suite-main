@@ -36,3 +36,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # User-specific or auto-research directories
 borischerny-cluade-setup/
 autoresearch/
+
+# Data Storage Pipelines
+.data/

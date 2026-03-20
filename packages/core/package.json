@@ -1,0 +1,13 @@
+{
+  "name": "@scenario-analysis/core",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "type": "module",
+  "dependencies": {
+    "@types/pdf-parse": "^1.1.5",
+    "pdf-parse": "^2.4.5",
+    "winston": "^3.19.0",
+    "zod": "^4.3.6"
+  }
+}
