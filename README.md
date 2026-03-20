@@ -10,6 +10,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [Result: Session 2 (Infrastructure Scalability)](./docs/results/session-2-monorepo-infra.md) - Zod Env, Winston Logger, CI/CD, Next.js, Elysia Backend, PostgreSQL Docker.
 - [Result: Session 3 (Automation Fixes)](./docs/results/session-3-ide-setup.md) - Universal IDE Setup Script, README guides, and Embedded Git repo fix.
 - [Result: Session 4 (Market Data Integration)](./docs/results/session-4-market-data.md) - TMDB API Client, ROI math, BoxOfficeData Domain.
+- [**Result: Phase 2 (Beat Sheet & Multi-LLM)**](./docs/results/01-phase2-creative-nlp.md) - Multi-LLM Factory (OpenAI, Anthropic, Gemini) & Beat Sheet narrative generator.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
