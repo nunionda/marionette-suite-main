@@ -11,6 +11,7 @@ import {
   BoxOfficePredictor,
   ContentRatingClassifier,
   Benchmarker,
+  ScriptCoverageEvaluator,
   env,
   resolveStrategy,
   type AnalysisStrategyName,
@@ -118,7 +119,20 @@ const app = new Elysia()
     const roiPrediction = roiResult.data;
     const similarity = benchmarker.findComps(features);
 
-    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback;
+    // 5. Script Coverage Evaluation (comprehensive scoring)
+    const coverageResult = await withFallback('coverage', 'Coverage', (p) =>
+      new ScriptCoverageEvaluator(p).evaluate(scriptId, elements, {
+        beats: beats.beats,
+        emotions: emotion.scenes,
+        characters: network.characters,
+        roi: roiPrediction,
+        rating: mpaaRating,
+        comps: similarity.topComps,
+      })
+    );
+    const coverage = coverageResult.data;
+
+    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback || coverageResult.fallback;
 
     const result = {
       scriptId,
@@ -137,12 +151,14 @@ const app = new Elysia()
         rating: mpaaRating,
         comps: similarity.topComps
       },
+      coverage,
       strategy: resolved.name,
       providers: {
         beatSheet: beatsResult.provider,
         emotion: emotionResult.provider,
         rating: ratingResult.provider,
         roi: roiResult.provider,
+        coverage: coverageResult.provider,
       },
       ...(usedFallback && { warning: 'Some results used mock fallback due to LLM rate limits' }),
     };
@@ -163,6 +179,7 @@ const app = new Elysia()
         emotion: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
         rating: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
         roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+        coverage: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
       })),
     })
   })

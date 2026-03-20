@@ -32,6 +32,7 @@ model AnalysisReport {
   beatSheet        Json
   emotionGraph     Json
   predictions      Json
+  coverage         Json?
 
   @@index([predictedRoi])
   @@index([predictedRating])

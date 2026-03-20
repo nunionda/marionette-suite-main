@@ -492,6 +492,166 @@
   color: #7f8c8d;
 }
 
+/* Export PDF Button */
+.btn-export {
+  background: linear-gradient(135deg, var(--accent-gold), #b8941f);
+  color: #000;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.btn-export:hover {
+  opacity: 0.85;
+}
+
+/* Script Coverage Report */
+.coverage-section {
+  margin-top: 2rem;
+}
+
+.coverage-header {
+  margin-bottom: 1rem;
+}
+
+.coverage-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.score-circle {
+  display: flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+
+.score-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.score-label {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.verdict-badge {
+  padding: 0.4rem 1.2rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.verdict-recommend {
+  background: linear-gradient(45deg, #27ae60, #2ecc71);
+  color: white;
+}
+
+.verdict-consider {
+  background: linear-gradient(45deg, #f39c12, #e67e22);
+  color: white;
+}
+
+.verdict-pass {
+  background: linear-gradient(45deg, #7f8c8d, #95a5a6);
+  color: white;
+}
+
+/* Category Score Bars */
+.coverage-categories {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.coverage-category-card {
+  padding: 1rem !important;
+}
+
+.category-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.category-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.subcategories {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.subcategory-item {
+  padding: 0.4rem 0;
+}
+
+/* Synopsis */
+.coverage-synopsis {
+  margin-bottom: 1rem;
+}
+
+/* Strengths & Weaknesses */
+.strengths-weaknesses {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sw-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sw-list li {
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+
+.sw-list li::before {
+  content: '+';
+  color: #2ecc71;
+  font-weight: 700;
+  margin-right: 0.5rem;
+}
+
+.sw-list-weak li::before {
+  content: '−';
+  color: #e74c3c;
+}
+
+/* Recommendation Box */
+.recommendation-box {
+  border-left: 3px solid var(--accent-gold);
+  margin-bottom: 1rem;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .upload-row {
@@ -510,4 +670,132 @@
   .custom-grid {
     grid-template-columns: 1fr;
   }
+  .coverage-categories {
+    grid-template-columns: 1fr;
+  }
+  .strengths-weaknesses {
+    grid-template-columns: 1fr;
+  }
+  .coverage-title-row {
+    flex-direction: column;
+  }
+}
+
+/* ===== Print Styles (PDF Export) ===== */
+@media print {
+  /* Hide interactive UI */
+  .no-print,
+  .upload-row,
+  .strategy-row,
+  .custom-grid,
+  .provider-bar,
+  .warning-banner,
+  .btn-reset,
+  .btn-export,
+  .btn-analyze {
+    display: none !important;
+  }
+
+  /* Reset dark theme → print-friendly */
+  :root {
+    --bg-dark: #ffffff;
+    --panel-bg: #ffffff;
+    --text-dim: #555555;
+    --border-glass: #dddddd;
+  }
+
+  body,
+  .dashboard-container {
+    background: white !important;
+    color: #1a1a1a !important;
+    padding: 0 !important;
+    min-height: auto !important;
+  }
+
+  .glass-panel {
+    background: white !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    border: 1px solid #ddd !important;
+    break-inside: avoid;
+  }
+
+  /* Single column layout for print */
+  .grid-layout {
+    display: block !important;
+  }
+
+  .grid-layout > * {
+    margin-bottom: 1rem;
+    break-inside: avoid;
+  }
+
+  .stat-card {
+    display: inline-block;
+    width: 23%;
+    vertical-align: top;
+  }
+
+  .main-chart {
+    width: 100%;
+    height: 300px !important;
+  }
+
+  .sidebar-panel,
+  .detail-panel-wide,
+  .detail-panel-narrow,
+  .comps-panel,
+  .timeline-container {
+    width: 100%;
+  }
+
+  /* Coverage report adjustments */
+  .coverage-categories {
+    grid-template-columns: 1fr;
+  }
+
+  .coverage-category-card .subcategories {
+    display: flex !important;
+  }
+
+  .strengths-weaknesses {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .category-bar {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .category-bar-fill {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .verdict-badge,
+  .badge {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Score circle */
+  .score-value {
+    color: #1a1a1a;
+  }
+
+  /* Chart color preservation */
+  .recharts-surface {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.2rem; }
+  h3 { font-size: 1rem; }
 }

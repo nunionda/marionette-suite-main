@@ -50,6 +50,7 @@ export interface AnalysisResultInput {
       marketPerformance: { budget: number; revenue: number; roi: number };
     }>;
   };
+  coverage?: any;
 }
 
 export interface PaginatedResult<T> {

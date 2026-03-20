@@ -1,6 +1,6 @@
 export type AnalysisStrategyName = 'auto' | 'fast' | 'deep' | 'custom';
 
-export type EngineName = 'beatSheet' | 'emotion' | 'rating' | 'roi';
+export type EngineName = 'beatSheet' | 'emotion' | 'rating' | 'roi' | 'coverage';
 
 export type ProviderChoice = 'gemini' | 'anthropic' | 'openai' | 'mock';
 
@@ -14,4 +14,5 @@ export interface CustomStrategyInput {
   emotion?: ProviderChoice;
   rating?: ProviderChoice;
   roi?: ProviderChoice;
+  coverage?: ProviderChoice;
 }

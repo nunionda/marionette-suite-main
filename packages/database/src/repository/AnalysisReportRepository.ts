@@ -25,6 +25,7 @@ export class AnalysisReportRepository {
         beatSheet: input.beatSheet as any,
         emotionGraph: input.emotionGraph as any,
         predictions: input.predictions as any,
+        ...(input.coverage && { coverage: input.coverage as any }),
       },
       update: {
         totalElements: input.summary.totalElements,
@@ -41,6 +42,7 @@ export class AnalysisReportRepository {
         beatSheet: input.beatSheet as any,
         emotionGraph: input.emotionGraph as any,
         predictions: input.predictions as any,
+        ...(input.coverage && { coverage: input.coverage as any }),
       },
     });
 
@@ -103,6 +105,7 @@ export class AnalysisReportRepository {
         averageWordsPerDialogue: report.averageWordsPerDialogue,
       },
       predictions: report.predictions as any,
+      ...(report.coverage && { coverage: report.coverage as any }),
     };
   }
 }

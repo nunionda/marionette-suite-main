@@ -23,6 +23,7 @@ export function resolveStrategy(
           emotion: 'gemini',
           rating: 'gemini',
           roi: 'gemini',
+          coverage: 'gemini',
         },
       };
 
@@ -37,6 +38,7 @@ export function resolveStrategy(
           emotion: deepReasoner,
           rating: fastClassifier,
           roi: fastClassifier,
+          coverage: deepReasoner,
         },
       };
 
@@ -48,6 +50,7 @@ export function resolveStrategy(
           emotion: custom?.emotion || defaultProvider,
           rating: custom?.rating || defaultProvider,
           roi: custom?.roi || defaultProvider,
+          coverage: custom?.coverage || defaultProvider,
         },
       };
 
@@ -60,6 +63,7 @@ export function resolveStrategy(
           emotion: defaultProvider,
           rating: defaultProvider,
           roi: defaultProvider,
+          coverage: defaultProvider,
         },
       };
   }

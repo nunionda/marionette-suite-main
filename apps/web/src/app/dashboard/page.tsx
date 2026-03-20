@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star } from 'lucide-react';
+import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star, Download, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
 import './dashboard.css';
 
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
@@ -48,6 +48,7 @@ export default function Dashboard() {
     roi: 'gemini',
   });
   const [availableProviders, setAvailableProviders] = useState<Record<string, boolean>>({});
+  const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
 
   useEffect(() => {
     fetchReportHistory();
@@ -174,11 +175,14 @@ export default function Dashboard() {
           </p>
         </div>
         {data && (
-          <div style={{ display: 'flex', gap: '1rem' }}>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <div className="badge badge-r">Rating: {data.summary.predictedRating}</div>
             <div className={`badge ${data.summary.predictedRoi === 'Blockbuster' ? 'badge-blockbuster' : 'badge-hit'}`}>
               ROI: {data.summary.predictedRoi}
             </div>
+            <button className="btn-export no-print" onClick={() => window.print()}>
+              <Download size={16} /> Export PDF
+            </button>
           </div>
         )}
       </header>
@@ -342,6 +346,134 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Script Coverage Report */}
+      {data?.coverage && (
+        <div className="coverage-section">
+          <div className="glass-panel coverage-header">
+            <div className="coverage-title-row">
+              <div>
+                <h2 style={{ margin: 0, fontSize: '1.4rem' }}>Script Coverage Report</h2>
+                <p style={{ color: 'var(--text-dim)', margin: '0.25rem 0 0', fontSize: '0.9rem' }}>
+                  {data.coverage.title} — {data.coverage.genre}
+                </p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div className="score-circle">
+                  <span className="score-value">{data.coverage.overallScore}</span>
+                  <span className="score-label">/ 100</span>
+                </div>
+                <span className={`verdict-badge verdict-${data.coverage.verdict.toLowerCase()}`}>
+                  {data.coverage.verdict}
+                </span>
+              </div>
+            </div>
+            {data.coverage.logline && (
+              <p style={{ color: 'var(--text-dim)', fontStyle: 'italic', margin: '0.75rem 0 0', fontSize: '0.9rem' }}>
+                &ldquo;{data.coverage.logline}&rdquo;
+              </p>
+            )}
+          </div>
+
+          {/* Category Score Bars */}
+          <div className="coverage-categories">
+            {data.coverage.categories?.map((cat: any, idx: number) => (
+              <div key={idx} className="glass-panel coverage-category-card">
+                <div
+                  className="category-header"
+                  onClick={() => setExpandedCategory(expandedCategory === idx ? null : idx)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                      <span style={{ fontWeight: 600 }}>{cat.name}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{cat.score}</span>
+                        {expandedCategory === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </div>
+                    </div>
+                    <div className="category-bar">
+                      <div
+                        className="category-bar-fill"
+                        style={{
+                          width: `${cat.score}%`,
+                          background: cat.score >= 80 ? '#2ecc71' : cat.score >= 60 ? '#f39c12' : '#e74c3c',
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+                {expandedCategory === idx && cat.subcategories && (
+                  <div className="subcategories">
+                    {cat.subcategories.map((sub: any, si: number) => (
+                      <div key={si} className="subcategory-item">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                          <span style={{ fontSize: '0.85rem' }}>{sub.name}</span>
+                          <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{sub.score}</span>
+                        </div>
+                        <div className="category-bar" style={{ height: '4px' }}>
+                          <div
+                            className="category-bar-fill"
+                            style={{
+                              width: `${sub.score}%`,
+                              background: sub.score >= 80 ? '#2ecc71' : sub.score >= 60 ? '#f39c12' : '#e74c3c',
+                            }}
+                          />
+                        </div>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: '0.25rem 0 0' }}>{sub.assessment}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Synopsis */}
+          {data.coverage.synopsis && (
+            <div className="glass-panel coverage-synopsis">
+              <h3 style={{ margin: '0 0 0.5rem' }}>Synopsis</h3>
+              <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{data.coverage.synopsis}</p>
+            </div>
+          )}
+
+          {/* Strengths & Weaknesses */}
+          {(data.coverage.strengths?.length > 0 || data.coverage.weaknesses?.length > 0) && (
+            <div className="strengths-weaknesses">
+              <div className="glass-panel sw-col">
+                <h3 style={{ margin: '0 0 0.75rem', color: '#2ecc71' }}>
+                  <CheckCircle size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
+                  Strengths
+                </h3>
+                <ul className="sw-list">
+                  {data.coverage.strengths?.map((s: string, i: number) => (
+                    <li key={i}>{s}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="glass-panel sw-col">
+                <h3 style={{ margin: '0 0 0.75rem', color: '#e74c3c' }}>
+                  <XCircle size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
+                  Weaknesses
+                </h3>
+                <ul className="sw-list sw-list-weak">
+                  {data.coverage.weaknesses?.map((w: string, i: number) => (
+                    <li key={i}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Recommendation */}
+          {data.coverage.recommendation && (
+            <div className="glass-panel recommendation-box">
+              <h3 style={{ margin: '0 0 0.5rem' }}>Analyst Recommendation</h3>
+              <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{data.coverage.recommendation}</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Results Dashboard */}
       {data && (
