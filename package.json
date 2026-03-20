@@ -1,0 +1,24 @@
+{
+  "name": "scenario-analysys-system",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:file": "bun test",
+    "lint": "eslint .",
+    "lint:file": "eslint",
+    "lint:claude": "bun run lint",
+    "index:test": "bun run index.test.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^10.0.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.3"
+  }
+}
