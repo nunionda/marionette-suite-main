@@ -4,7 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Features
 
-*(Features will be automatically updated here by the session wrap-up workflow)*
+- [Session 1: Project Foundation & Domain-Driven Design](./docs/features/session-1-foundation.md) - Fountain parser, PDF integration, DDD refactoring.
 
 ## Getting Started
 
