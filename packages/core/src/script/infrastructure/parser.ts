@@ -69,7 +69,7 @@ export function parseFountain(script: string): ScriptElement[] {
       
       // Korean character detection: shorter length, no punctuation, NOT empty next line
       const nameWithoutParens = line.replace(/\s*\(.*?\)\s*/g, '').trim();
-      const isKoreanNamePattern = /^[가-힣A-Za-z0-9\s]+$/.test(nameWithoutParens);
+      const isKoreanNamePattern = /^[가-힣A-Za-z0-9\s]+$/.test(nameWithoutParens) && /[가-힣A-Za-z]/.test(nameWithoutParens);
       const wordCount = nameWithoutParens.split(/\s+/).length;
       const isKoreanCharacter = isKoreanNamePattern && nameWithoutParens.length <= 8 && wordCount <= 2 && !line.match(/[.?!,:;]$/);
       

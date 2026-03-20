@@ -1,14 +1,15 @@
 import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
-import { 
-  parseFountain, 
-  LLMFactory, 
-  CharacterAnalyzer, 
-  BeatSheetGenerator, 
-  EmotionAnalyzer, 
-  FeatureExtractor, 
-  BoxOfficePredictor, 
-  ContentRatingClassifier, 
+import {
+  parseFountain,
+  parsePdfBuffer,
+  LLMFactory,
+  CharacterAnalyzer,
+  BeatSheetGenerator,
+  EmotionAnalyzer,
+  FeatureExtractor,
+  BoxOfficePredictor,
+  ContentRatingClassifier,
   Benchmarker,
   env
 } from "@scenario-analysis/core";
@@ -21,13 +22,17 @@ const app = new Elysia()
   .get("/", () => ({ status: "online", version: "1.0.0" }))
   
   .post("/analyze", async ({ body }) => {
-    const { scriptText, movieId } = body as { scriptText: string, movieId?: string };
+    const { scriptText, scriptBase64, isPdf, movieId } = body as {
+      scriptText?: string; scriptBase64?: string; isPdf?: boolean; movieId?: string;
+    };
     const scriptId = movieId || `script-${Date.now()}`;
-    
+
     console.log(`🎬 Starting API Orchestration for: ${scriptId}`);
 
-    // 1. Parse
-    const elements = parseFountain(scriptText);
+    // 1. Parse (PDF or plain text)
+    const elements = isPdf && scriptBase64
+      ? await parsePdfBuffer(Buffer.from(scriptBase64, 'base64'))
+      : parseFountain(scriptText || '');
     
     // 2. Initialize Core Services
     const factory = new LLMFactory();
@@ -91,7 +96,9 @@ const app = new Elysia()
     return result;
   }, {
     body: t.Object({
-      scriptText: t.String(),
+      scriptText: t.Optional(t.String()),
+      scriptBase64: t.Optional(t.String()),
+      isPdf: t.Optional(t.Boolean()),
       movieId: t.Optional(t.String())
     })
   })
@@ -113,7 +120,7 @@ const app = new Elysia()
     })
   })
 
-  .listen(3005);
+  .listen(4005);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`

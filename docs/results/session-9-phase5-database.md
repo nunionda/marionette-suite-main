@@ -34,9 +34,9 @@ Phase 5 transforms the system from an ephemeral proof-of-concept into a producti
 ## How to Run the System
 1. **Start Database**: `docker-compose up -d db` (or use local PostgreSQL)
 2. **Run Migration**: `cd packages/database && bunx prisma migrate dev`
-3. **Start Backend**: `cd apps/api && bun run dev` (Port 3005)
+3. **Start Backend**: `cd apps/api && bun run dev` (Port 4005)
 4. **Start Frontend**: `cd apps/web && bun run dev` (Port 3000)
-5. **View Dashboard**: Navigate to `http://localhost:3000/dashboard`
+5. **View Dashboard**: Navigate to `http://localhost:4000/dashboard`
 
 ## Verification
 - **POST /analyze**: Successfully stores analysis results in PostgreSQL.

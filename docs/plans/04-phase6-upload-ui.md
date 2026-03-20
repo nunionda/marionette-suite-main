@@ -6,7 +6,7 @@ Replace the hardcoded Fight Club data display with an interactive upload-driven 
 ## 2. Core Features (Scope)
 
 ### A. API CORS Configuration
-- **Goal:** Enable cross-origin requests from the frontend (port 3000) to the API (port 3005).
+- **Goal:** Enable cross-origin requests from the frontend (port 3000) to the API (port 4005).
 - **Implementation:** Install `@elysiajs/cors` and add `.use(cors())` middleware chain to the Elysia app.
 
 ### B. Dashboard State Model Refactoring

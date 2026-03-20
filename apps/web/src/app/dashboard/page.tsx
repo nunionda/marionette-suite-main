@@ -24,7 +24,7 @@ export default function Dashboard() {
 
   async function fetchReportHistory() {
     try {
-      const res = await fetch('http://localhost:3005/reports?pageSize=10');
+      const res = await fetch('http://localhost:4005/reports?pageSize=10');
       if (res.ok) {
         const result = await res.json();
         setReports(result.data || []);
@@ -40,14 +40,24 @@ export default function Dashboard() {
     setUploadError(null);
 
     try {
-      const scriptText = await selectedFile.text();
-      const res = await fetch('http://localhost:3005/analyze', {
+      const isPdf = selectedFile.name.endsWith('.pdf');
+      let bodyPayload: Record<string, unknown>;
+
+      if (isPdf) {
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const base64 = btoa(
+          new Uint8Array(arrayBuffer).reduce((s, b) => s + String.fromCharCode(b), '')
+        );
+        bodyPayload = { scriptBase64: base64, isPdf: true, movieId: movieId.trim() || undefined };
+      } else {
+        const scriptText = await selectedFile.text();
+        bodyPayload = { scriptText, movieId: movieId.trim() || undefined };
+      }
+
+      const res = await fetch('http://localhost:4005/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          scriptText,
-          movieId: movieId.trim() || undefined,
-        }),
+        body: JSON.stringify(bodyPayload),
       });
 
       if (!res.ok) {
@@ -69,7 +79,7 @@ export default function Dashboard() {
     setMode('analyzing');
     setUploadError(null);
     try {
-      const res = await fetch(`http://localhost:3005/report/${scriptId}`);
+      const res = await fetch(`http://localhost:4005/report/${scriptId}`);
       if (!res.ok) throw new Error('Failed to load report');
       const result = await res.json();
       setData(result);
@@ -84,18 +94,18 @@ export default function Dashboard() {
     e.preventDefault();
     setDragOver(false);
     const file = e.dataTransfer.files[0];
-    if (file && (file.name.endsWith('.fountain') || file.name.endsWith('.txt'))) {
+    if (file && (file.name.endsWith('.fountain') || file.name.endsWith('.txt') || file.name.endsWith('.pdf'))) {
       setSelectedFile(file);
       setUploadError(null);
     } else {
-      setUploadError('Please drop a .fountain or .txt file');
+      setUploadError('Please drop a .fountain, .txt, or .pdf file');
     }
   }
 
   function handleFileSelect() {
     const input = document.createElement('input');
     input.type = 'file';
-    input.accept = '.fountain,.txt';
+    input.accept = '.fountain,.txt,.pdf';
     input.onchange = (e: any) => {
       const file = e.target.files?.[0];
       if (file) {
@@ -168,7 +178,7 @@ export default function Dashboard() {
                 ) : (
                   <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
                     <Upload size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-                    <div>Drag & drop a <strong>.fountain</strong> or <strong>.txt</strong> file</div>
+                    <div>Drag & drop a <strong>.fountain</strong>, <strong>.txt</strong>, or <strong>.pdf</strong> file</div>
                     <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>or click to browse</div>
                   </div>
                 )}

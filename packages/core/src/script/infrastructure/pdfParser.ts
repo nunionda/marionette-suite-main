@@ -1,24 +1,35 @@
 import fs from 'fs';
-const pdf = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 import { parseFountain, type ScriptElement } from './parser';
+
+async function extractText(data: Buffer | Uint8Array): Promise<string> {
+  const parser = new PDFParse({ data });
+  const result = await parser.getText();
+  // Clean up PDF artifacts: collapse tabs to single space, strip standalone page numbers
+  return result.text
+    .replace(/\t+/g, ' ')
+    .replace(/^\d+\s*$/gm, '');
+}
 
 /**
  * Extracts text from a PDF screenplay and attempts to parse it using the Fountain parser.
- * Note: PDF parsing may lose some indentation information, which could affect the Fountain parser's accuracy.
- * Advanced layout analysis based on coordinate positioning would be needed for production-grade accuracy.
- * 
+ *
  * @param filePath Path to the PDF file
  * @returns Array of parsed script elements
  */
 export async function parsePdfToFountainElements(filePath: string): Promise<ScriptElement[]> {
-  try {
-    const dataBuffer = fs.readFileSync(filePath);
-    const data = await pdf(dataBuffer);
-    
-    // Feed the extracted text into the Fountain parser
-    return parseFountain(data.text);
-  } catch (error) {
-    console.error(`Failed to parse PDF at ${filePath}:`, error);
-    throw error;
-  }
+  const dataBuffer = fs.readFileSync(filePath);
+  const text = await extractText(dataBuffer);
+  return parseFountain(text);
+}
+
+/**
+ * Parses a PDF buffer directly without file I/O.
+ *
+ * @param buffer PDF file contents as Buffer
+ * @returns Array of parsed script elements
+ */
+export async function parsePdfBuffer(buffer: Buffer): Promise<ScriptElement[]> {
+  const text = await extractText(buffer);
+  return parseFountain(text);
 }

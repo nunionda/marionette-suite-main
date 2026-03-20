@@ -1,4 +1,5 @@
 export * from './script/infrastructure/parser';
+export * from './script/infrastructure/pdfParser';
 export * from './creative/infrastructure/llm/LLMFactory';
 export * from './creative/infrastructure/llm/ILLMProvider';
 export * from './creative/infrastructure/llm/MockProvider';

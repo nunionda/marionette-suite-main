@@ -24,7 +24,7 @@ Phase 4 completes the "Hollywood Script Intelligence System" by providing a high
 ## How to Run the System
 1. **Start Backend**: `cd apps/api && bun run dev` (Port 3001)
 2. **Start Frontend**: `cd apps/web && bun run dev` (Port 3000)
-3. **View Dashboard**: Navigate to `http://localhost:3000/dashboard`
+3. **View Dashboard**: Navigate to `http://localhost:4000/dashboard`
 
 ## Status
 - **Verification**: Verified the UI rendering with Fight Club sample data. API endpoints successfully tested.

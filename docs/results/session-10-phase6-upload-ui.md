@@ -51,9 +51,9 @@ Phase 6 transforms the dashboard from a static, hardcoded display into an intera
 
 ## How to Run
 1. **Start Database**: `docker-compose up -d db` (or local PostgreSQL)
-2. **Start Backend**: `cd apps/api && bun run dev` (Port 3005)
-3. **Start Frontend**: `cd apps/web && bun run dev` (Port 3000)
-4. **Open Dashboard**: `http://localhost:3000/dashboard`
+2. **Start Backend**: `cd apps/api && bun run dev` (Port 4005)
+3. **Start Frontend**: `cd apps/web && bun run dev` (Port 4000)
+4. **Open Dashboard**: `http://localhost:4000/dashboard`
 5. **Upload**: Drag a `.fountain` file → click Analyze → view results
 6. **History**: Click any past report in the sidebar to reload it
 
