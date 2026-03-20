@@ -25,6 +25,8 @@ export type { PrevisualizerInput } from "./pre-production/previsualizer.js"
 export { CinematographerAgent } from "./main-production/cinematographer.js"
 export type { CinematographerInput } from "./main-production/cinematographer.js"
 export { GeneralistAgent } from "./main-production/generalist.js"
+export { AssetDesignerAgent } from "./main-production/asset-designer.js"
+export type { AssetDesignerInput } from "./main-production/asset-designer.js"
 
 // Post-Production
 export { SoundDesignerAgent } from "./post-production/sound-designer.js"
@@ -36,6 +38,8 @@ export { ColoristAgent } from "./post-production/colorist.js"
 export type { ColoristInput } from "./post-production/colorist.js"
 export { MixingEngineerAgent } from "./post-production/mixing-engineer.js"
 export type { MixingEngineerInput } from "./post-production/mixing-engineer.js"
+export { VFXCompositorAgent } from "./post-production/vfx-compositor.js"
+export type { VFXCompositorInput } from "./post-production/vfx-compositor.js"
 
 // ─── Agent Registry ───
 
@@ -50,8 +54,10 @@ import { LocationScoutAgent } from "./pre-production/location-scout.js"
 import { PrevisualizerAgent } from "./pre-production/previsualizer.js"
 import { CinematographerAgent } from "./main-production/cinematographer.js"
 import { GeneralistAgent } from "./main-production/generalist.js"
+import { AssetDesignerAgent } from "./main-production/asset-designer.js"
 import { SoundDesignerAgent } from "./post-production/sound-designer.js"
 import { MasterEditorAgent } from "./post-production/master-editor.js"
+import { VFXCompositorAgent } from "./post-production/vfx-compositor.js"
 import { ComposerAgent } from "./post-production/composer.js"
 import { ColoristAgent } from "./post-production/colorist.js"
 import { MixingEngineerAgent } from "./post-production/mixing-engineer.js"
@@ -74,8 +80,10 @@ export function createAgentRegistry(gateway: AIGateway, db: PrismaClient): Map<s
   // Main-Production
   registry.set("cinematographer", new CinematographerAgent(gateway, db))
   registry.set("generalist", new GeneralistAgent(gateway, db))
+  registry.set("asset_designer", new AssetDesignerAgent(gateway, db))
 
   // Post-Production
+  registry.set("vfx_compositor", new VFXCompositorAgent(gateway, db))
   registry.set("sound_designer", new SoundDesignerAgent(gateway, db))
   registry.set("composer", new ComposerAgent(gateway, db))
   registry.set("master_editor", new MasterEditorAgent(gateway, db))

@@ -76,7 +76,7 @@ export class SoundDesignerAgent extends BaseAgent {
   readonly name = "SoundDesigner"
   readonly phase = ProductionPhase.POST
   readonly description =
-    "Generates TTS dialogue audio for each scene using Gemini TTS and saves WAV files"
+    "Generates TTS dialogue audio and SFX/ambient sound descriptions for each scene"
 
   async execute(input: SoundDesignerInput): Promise<AgentOutput> {
     const { directionPlan, projectId, runId } = input
@@ -90,67 +90,105 @@ export class SoundDesignerAgent extends BaseAgent {
     // Ensure output directory exists
     mkdirSync(outputDir, { recursive: true })
 
-    const generatedFiles: string[] = []
+    const dialogueFiles: string[] = []
+    const sfxFiles: string[] = []
     const totalScenes = directionPlan.scenes.length
 
     for (const scene of directionPlan.scenes) {
+      // --- Dialogue TTS ---
       const dialogue = scene.dialogue
-      if (!dialogue || dialogue.toLowerCase() === "null") {
-        this.log(`Scene #${scene.scene_number} — no dialogue, skipping`)
-        continue
+      if (dialogue && dialogue.toLowerCase() !== "null") {
+        this.log(
+          `Scene #${scene.scene_number} — generating TTS for: "${dialogue.slice(0, 50)}..."`,
+        )
+
+        const filePath = await this.generateSceneAudio(
+          scene,
+          dialogue,
+          outputDir,
+        )
+
+        if (filePath) {
+          dialogueFiles.push(filePath)
+
+          await this.saveAsset({
+            projectId,
+            type: "AUDIO",
+            agentName: this.name,
+            filePath,
+            fileName: `scene_${String(scene.scene_number).padStart(3, "0")}_dialogue.wav`,
+            mimeType: "audio/wav",
+            sceneNumber: scene.scene_number,
+            metadata: {
+              audioType: "dialogue",
+              dialogueText: dialogue,
+              sampleRate: DEFAULT_SAMPLE_RATE,
+              channels: CHANNELS,
+              bitsPerSample: BITS_PER_SAMPLE,
+            },
+          })
+        }
       }
 
-      this.log(
-        `Scene #${scene.scene_number} — generating TTS for: "${dialogue.slice(0, 50)}..."`,
-      )
+      // --- SFX / Ambient sound ---
+      const sfxDescription = this.buildSFXDescription(scene, directionPlan)
+      if (sfxDescription) {
+        this.log(
+          `Scene #${scene.scene_number} — generating SFX narration`,
+        )
 
-      const filePath = await this.generateSceneAudio(
-        scene,
-        dialogue,
-        outputDir,
-      )
+        const sfxPath = await this.generateSFXAudio(
+          scene,
+          sfxDescription,
+          outputDir,
+        )
 
-      if (filePath) {
-        generatedFiles.push(filePath)
+        if (sfxPath) {
+          sfxFiles.push(sfxPath)
 
-        // Save asset to DB
-        await this.saveAsset({
-          projectId,
-          type: "AUDIO",
-          agentName: this.name,
-          filePath,
-          fileName: `scene_${String(scene.scene_number).padStart(3, "0")}_dialogue.wav`,
-          mimeType: "audio/wav",
-          sceneNumber: scene.scene_number,
-          metadata: {
-            dialogueText: dialogue,
-            sampleRate: DEFAULT_SAMPLE_RATE,
-            channels: CHANNELS,
-            bitsPerSample: BITS_PER_SAMPLE,
-          },
-        })
+          await this.saveAsset({
+            projectId,
+            type: "AUDIO",
+            agentName: this.name,
+            filePath: sfxPath,
+            fileName: `scene_${String(scene.scene_number).padStart(3, "0")}_sfx.wav`,
+            mimeType: "audio/wav",
+            sceneNumber: scene.scene_number,
+            metadata: {
+              audioType: "sfx",
+              sfxDescription,
+              sampleRate: DEFAULT_SAMPLE_RATE,
+              channels: CHANNELS,
+              bitsPerSample: BITS_PER_SAMPLE,
+            },
+          })
+        }
       }
 
       // Update progress proportionally
+      const totalGenerated = dialogueFiles.length + sfxFiles.length
       const progress = Math.round(
-        5 + (90 * (generatedFiles.length / totalScenes)),
+        5 + (90 * (totalGenerated / (totalScenes * 2))),
       )
       await this.updateProgress(runId, Math.min(progress, 95))
     }
 
     await this.updateProgress(runId, 100)
 
+    const allFiles = [...dialogueFiles, ...sfxFiles]
     this.log(
-      `Audio generation complete (${generatedFiles.length} clips from ${totalScenes} scenes)`,
+      `Audio generation complete (${dialogueFiles.length} dialogue + ${sfxFiles.length} SFX from ${totalScenes} scenes)`,
     )
 
     return {
       success: true,
-      message: `SoundDesigner generated ${generatedFiles.length} audio clips for "${directionPlan.title}"`,
+      message: `SoundDesigner generated ${dialogueFiles.length} dialogue + ${sfxFiles.length} SFX clips for "${directionPlan.title}"`,
       outputPath: outputDir,
       data: {
-        generatedFiles,
-        clipCount: generatedFiles.length,
+        generatedFiles: allFiles,
+        dialogueCount: dialogueFiles.length,
+        sfxCount: sfxFiles.length,
+        clipCount: allFiles.length,
         totalScenes,
         globalAudioConcept: directionPlan.global_audio_concept,
       },
@@ -184,6 +222,66 @@ export class SoundDesignerAgent extends BaseAgent {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err)
       this.log(`Scene #${scene.scene_number} TTS error: ${errorMessage}`)
+      return null
+    }
+  }
+
+  /**
+   * Build a SFX/ambient sound description from scene metadata.
+   * This is narrated via TTS to create a placeholder ambient audio track.
+   * In future, this can be replaced with actual SFX generation API.
+   */
+  private buildSFXDescription(scene: Scene, _plan: DirectionPlan): string | null {
+    // Extract audio cues from video_prompt [Audio] tags
+    const audioMatch = scene.video_prompt?.match(/\[Audio[:\s]*([^\]]+)\]/i)
+    const audioCue = audioMatch?.[1]?.trim()
+
+    if (!audioCue && !scene.setting) return null
+
+    // Build ambient sound narration for TTS synthesis
+    const parts: string[] = []
+
+    if (audioCue) {
+      parts.push(audioCue)
+    } else {
+      // Generate ambient from setting
+      parts.push(`Ambient sounds of ${scene.setting}`)
+      if (scene.time_of_day) {
+        parts.push(`during ${scene.time_of_day}`)
+      }
+    }
+
+    return parts.join(", ")
+  }
+
+  /** Generate SFX/ambient audio via TTS narration. */
+  private async generateSFXAudio(
+    scene: Scene,
+    sfxDescription: string,
+    outputDir: string,
+  ): Promise<string | null> {
+    try {
+      // Use a different voice for SFX narration to distinguish from dialogue
+      const rawAudio = await this.gateway.tts(sfxDescription, {
+        provider: "gemini",
+        voice: "Puck",
+      })
+
+      const wavData = pcmToWav(rawAudio)
+
+      const filename = `scene_${String(scene.scene_number).padStart(3, "0")}_sfx.wav`
+      const filePath = join(outputDir, filename)
+
+      writeFileSync(filePath, wavData)
+
+      this.log(
+        `Scene #${scene.scene_number} SFX saved: ${filePath} (${Math.round(wavData.length / 1024)}KB)`,
+      )
+
+      return filePath
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err)
+      this.log(`Scene #${scene.scene_number} SFX error: ${errorMessage}`)
       return null
     }
   }
