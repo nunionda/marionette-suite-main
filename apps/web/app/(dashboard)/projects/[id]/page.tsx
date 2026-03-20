@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { fetchAPI, API_BASE } from "../../../../lib/api"
 import { AssetGallery } from "../../../../components/asset-gallery"
+import { VersionHistory } from "../../../../components/version-history"
 
 // ─── Types ───
 
@@ -433,6 +434,9 @@ function DevelopmentTab({
           </div>
         )}
       </div>
+
+      {/* ─── Version History ─── */}
+      <VersionHistory projectId={project.id} />
     </div>
   )
 }

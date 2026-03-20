@@ -25,6 +25,7 @@ model Project {
   pipelineRuns      PipelineRun[]
   assets            Asset[]
   screenplay        Screenplay?
+  snapshots         ProjectSnapshot[]
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @updatedAt
 }
@@ -73,6 +74,20 @@ model Asset {
   fileSize    Int?
   metadata    Json?
   createdAt   DateTime        @default(now())
+}
+
+model ProjectSnapshot {
+  id        String   @id @default(cuid())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type      String   // DIRECTION_PLAN, SCREENPLAY_OUTLINE, SCREENPLAY_DRAFT, SCREENPLAY_CHARACTERS
+  version   Int
+  label     String?
+  data      Json
+  createdAt DateTime @default(now())
+
+  @@index([projectId, type])
+  @@unique([projectId, type, version])
 }
 
 model AgentConfig {

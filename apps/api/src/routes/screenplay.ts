@@ -3,6 +3,7 @@ import { prisma } from "@marionette/db"
 import { AIGateway } from "@marionette/ai-gateway"
 import { GeminiProvider } from "@marionette/ai-gateway/providers/gemini.js"
 import { NotFoundError, ValidationError, AppError } from "../middleware/error-handler.ts"
+import { createSnapshot } from "./snapshots.ts"
 import { mkdir, writeFile, stat } from "node:fs/promises"
 import { join } from "node:path"
 import {
@@ -131,6 +132,9 @@ screenplayRoutes.post("/:projectId/outline", async (c) => {
     }
 
     const screenplay = await getOrCreateScreenplay(projectId)
+    if (screenplay.outline) {
+      await createSnapshot(projectId, "SCREENPLAY_OUTLINE", screenplay.outline)
+    }
     const updated = await prisma.screenplay.update({
       where: { id: screenplay.id },
       data: { outline, currentStep: Math.max(screenplay.currentStep, 1) },
@@ -696,6 +700,7 @@ Extract all scenes belonging to Sequence ${seq}.`,
     )
     directionPlan.scenes = mergedScenes
 
+    await createSnapshot(projectId, "DIRECTION_PLAN", project.directionPlan)
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
       data: { directionPlan: directionPlan as Record<string, unknown> },
@@ -773,6 +778,7 @@ Dialogue: ${(scene as { dialogue?: string | null }).dialogue ?? "None"}`,
     // Update scene with cuts
     scene.cuts = cuts
 
+    await createSnapshot(projectId, "DIRECTION_PLAN", project.directionPlan)
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
       data: { directionPlan: directionPlan as Record<string, unknown> },
@@ -869,6 +875,7 @@ Action: ${(cut as { action?: string }).action ?? ""}`,
     cut.image_prompt = prompts.image_prompt
     cut.video_prompt = prompts.video_prompt
 
+    await createSnapshot(projectId, "DIRECTION_PLAN", project.directionPlan)
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
       data: { directionPlan: directionPlan as Record<string, unknown> },
