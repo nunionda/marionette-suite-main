@@ -2,19 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { fetchAPI, API_BASE } from "../lib/api"
-
-interface Asset {
-  id: string
-  type: string
-  phase: string
-  agent_name: string
-  scene_number: number | null
-  file_path: string
-  file_name: string
-  mime_type: string
-  file_size: number | null
-  created_at: string
-}
+import { AssetLightbox, formatFileSize } from "./asset-lightbox"
+import type { Asset } from "./asset-lightbox"
 
 type FilterType = "IMAGE" | "VIDEO" | "AUDIO" | "all"
 
@@ -38,13 +27,6 @@ const TYPE_BADGE_COLORS: Record<string, string> = {
   DOCUMENT: "bg-gray-500/20 text-gray-400",
 }
 
-function formatFileSize(bytes: number | null): string {
-  if (bytes === null) return ""
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
 function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -64,13 +46,28 @@ function LoadingSkeleton() {
   )
 }
 
-function AssetCard({ asset }: { asset: Asset }) {
+function AssetCard({ asset, onClick }: { asset: Asset; onClick?: () => void }) {
   const badgeColor = TYPE_BADGE_COLORS[asset.type] ?? TYPE_BADGE_COLORS.DOCUMENT
 
   return (
-    <div className="overflow-hidden rounded-xl border border-gray-800 bg-gray-900 transition-colors hover:border-gray-700">
+    <div
+      className="group/card cursor-pointer overflow-hidden rounded-xl border border-gray-800 bg-gray-900 transition-colors hover:border-gray-700"
+      onClick={onClick}
+    >
       {/* Media preview */}
       <div className="relative flex h-40 items-center justify-center bg-gray-950">
+        {/* Download button overlay */}
+        <a
+          href={`${API_BASE}/api/assets/download/${asset.id}`}
+          download={asset.file_name}
+          onClick={(e) => e.stopPropagation()}
+          className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-gray-300 opacity-0 transition-all hover:bg-black/80 hover:text-white group-hover/card:opacity-100"
+          title="Download"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+        </a>
         {asset.type === "IMAGE" && (
           <img
             src={`${API_BASE}/api/assets/download/${asset.id}`}
@@ -158,11 +155,54 @@ function AssetCard({ asset }: { asset: Asset }) {
   )
 }
 
+function groupByScene(assets: Asset[]): [string, Asset[]][] {
+  const groups = new Map<number | null, Asset[]>()
+  for (const asset of assets) {
+    const key = asset.scene_number
+    const list = groups.get(key) ?? []
+    list.push(asset)
+    groups.set(key, list)
+  }
+  // Sort: numbered scenes ascending, null last
+  const entries = [...groups.entries()].sort((a, b) => {
+    if (a[0] === null) return 1
+    if (b[0] === null) return -1
+    return a[0] - b[0]
+  })
+  return entries.map(([key, list]) => [
+    key === null ? "Other" : `Scene ${key}`,
+    list,
+  ])
+}
+
+function AssetGrid({
+  assets,
+  allFiltered,
+  onCardClick,
+}: {
+  assets: Asset[]
+  allFiltered: Asset[]
+  onCardClick: (index: number) => void
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {assets.map((asset) => (
+        <AssetCard
+          key={asset.id}
+          asset={asset}
+          onClick={() => onCardClick(allFiltered.indexOf(asset))}
+        />
+      ))}
+    </div>
+  )
+}
+
 export function AssetGallery({ projectId, filter: initialFilter = "all" }: AssetGalleryProps) {
   const [assets, setAssets] = useState<Asset[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [activeFilter, setActiveFilter] = useState<FilterType>(initialFilter)
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   const fetchAssets = useCallback(() => {
     setLoading(true)
@@ -183,6 +223,8 @@ export function AssetGallery({ projectId, filter: initialFilter = "all" }: Asset
     activeFilter === "all"
       ? assets
       : assets.filter((a) => a.type === activeFilter)
+
+  const sceneGroups = activeFilter === "all" ? groupByScene(filteredAssets) : null
 
   return (
     <div>
@@ -234,13 +276,39 @@ export function AssetGallery({ projectId, filter: initialFilter = "all" }: Asset
         </div>
       )}
 
-      {/* Asset grid */}
-      {!loading && filteredAssets.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-          {filteredAssets.map((asset) => (
-            <AssetCard key={asset.id} asset={asset} />
+      {/* Scene-grouped grid (all filter) */}
+      {!loading && filteredAssets.length > 0 && sceneGroups && (
+        <div className="space-y-6">
+          {sceneGroups.map(([label, groupAssets]) => (
+            <div key={label}>
+              <h3 className="mb-3 text-sm font-medium text-gray-400">{label}</h3>
+              <AssetGrid
+                assets={groupAssets}
+                allFiltered={filteredAssets}
+                onCardClick={setLightboxIndex}
+              />
+            </div>
           ))}
         </div>
+      )}
+
+      {/* Flat grid (type filter) */}
+      {!loading && filteredAssets.length > 0 && !sceneGroups && (
+        <AssetGrid
+          assets={filteredAssets}
+          allFiltered={filteredAssets}
+          onCardClick={setLightboxIndex}
+        />
+      )}
+
+      {/* Lightbox */}
+      {lightboxIndex !== null && (
+        <AssetLightbox
+          assets={filteredAssets}
+          currentIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onNavigate={setLightboxIndex}
+        />
       )}
     </div>
   )
