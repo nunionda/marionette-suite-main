@@ -2,7 +2,7 @@ import { prisma } from "@marionette/db"
 import { AIGateway } from "@marionette/ai-gateway"
 import { GeminiProvider } from "@marionette/ai-gateway/providers/gemini.js"
 import { SunoProvider } from "@marionette/ai-gateway/providers/suno.js"
-import { createAgentRegistry, PipelineOrchestrator } from "@marionette/agents"
+import { createAgentRegistry, PipelineOrchestrator, PipelineEventBus } from "@marionette/agents"
 import type { PipelineRunResponse, StepResult, RunStatus } from "@marionette/shared/types/pipeline.ts"
 import { NotFoundError } from "../middleware/error-handler.ts"
 
@@ -10,6 +10,9 @@ import { NotFoundError } from "../middleware/error-handler.ts"
 
 let gateway: AIGateway | null = null
 let orchestrator: PipelineOrchestrator | null = null
+
+// ─── Shared event bus (created once, injected into orchestrator + WS handler) ───
+export const pipelineBus = new PipelineEventBus()
 
 function getGateway(): AIGateway {
   if (!gateway) {
@@ -24,7 +27,7 @@ function getOrchestrator(): PipelineOrchestrator {
   if (!orchestrator) {
     const gw = getGateway()
     const registry = createAgentRegistry(gw, prisma)
-    orchestrator = new PipelineOrchestrator(prisma)
+    orchestrator = new PipelineOrchestrator(prisma, pipelineBus)
     for (const [name, agent] of registry) {
       orchestrator.register(name, agent)
     }

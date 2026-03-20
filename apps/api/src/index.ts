@@ -1,6 +1,7 @@
 import { Hono } from "hono"
 import { cors } from "hono/cors"
 import { logger } from "hono/logger"
+import type { Server } from "bun"
 import { projectRoutes } from "./routes/projects.ts"
 import { pipelineRoutes } from "./routes/pipeline.ts"
 import { agentRoutes } from "./routes/agents.ts"
@@ -10,6 +11,9 @@ import { brainstormRoutes } from "./routes/brainstorm.ts"
 import { loglineRoutes } from "./routes/logline.ts"
 import { promptGuideRoutes } from "./routes/prompt-guide.ts"
 import { errorHandler } from "./middleware/error-handler.ts"
+import { wsHandler, initWSHandler } from "./ws/handler.ts"
+import { pipelineBus } from "./services/pipeline.service.ts"
+import { prisma } from "@marionette/db"
 
 const app = new Hono()
 
@@ -28,4 +32,20 @@ app.route("/api/brainstorm", brainstormRoutes)
 app.route("/api/logline", loglineRoutes)
 app.route("/api/prompt-guide", promptGuideRoutes)
 
-export default { port: 3001, fetch: app.fetch, idleTimeout: 255 }
+// Initialize WebSocket handler with shared dependencies
+initWSHandler(pipelineBus, prisma)
+
+export default {
+  port: 3001,
+  fetch(req: Request, server: Server<undefined>) {
+    // Intercept WebSocket upgrade before Hono
+    if (new URL(req.url).pathname === "/api/pipeline/ws") {
+      const upgraded = server.upgrade(req)
+      if (upgraded) return undefined
+      return new Response("WebSocket upgrade failed", { status: 400 })
+    }
+    return app.fetch(req)
+  },
+  websocket: wsHandler,
+  idleTimeout: 255,
+}
