@@ -10,6 +10,7 @@ import { screenplayRoutes } from "./routes/screenplay.ts"
 import { brainstormRoutes } from "./routes/brainstorm.ts"
 import { loglineRoutes } from "./routes/logline.ts"
 import { promptGuideRoutes } from "./routes/prompt-guide.ts"
+import { exportRoutes } from "./routes/export.ts"
 import { errorHandler } from "./middleware/error-handler.ts"
 import { wsHandler, initWSHandler } from "./ws/handler.ts"
 import { pipelineBus } from "./services/pipeline.service.ts"
@@ -31,6 +32,7 @@ app.route("/api/screenplay", screenplayRoutes)
 app.route("/api/brainstorm", brainstormRoutes)
 app.route("/api/logline", loglineRoutes)
 app.route("/api/prompt-guide", promptGuideRoutes)
+app.route("/api/export", exportRoutes)
 
 // Initialize WebSocket handler with shared dependencies
 initWSHandler(pipelineBus, prisma)
