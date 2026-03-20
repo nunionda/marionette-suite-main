@@ -2,6 +2,7 @@ import { ILLMProvider, LLMResponse } from './ILLMProvider';
 import { OpenAIProvider } from './OpenAIProvider';
 import { AnthropicProvider } from './AnthropicProvider';
 import { GeminiProvider } from './GeminiProvider';
+import { MockProvider } from './MockProvider';
 
 export class LLMFactory {
   private providers: Map<string, ILLMProvider> = new Map();
@@ -11,12 +12,13 @@ export class LLMFactory {
     this.providers.set('openai', new OpenAIProvider());
     this.providers.set('anthropic', new AnthropicProvider());
     this.providers.set('gemini', new GeminiProvider());
+    this.providers.set('mock', new MockProvider());
   }
 
   /**
    * Get a specific provider by name.
    */
-  getProvider(name: 'openai' | 'anthropic' | 'gemini'): ILLMProvider {
+  getProvider(name: 'openai' | 'anthropic' | 'gemini' | 'mock'): ILLMProvider {
     const provider = this.providers.get(name);
     if (!provider) {
       throw new Error(`Provider ${name} is not registered.`);

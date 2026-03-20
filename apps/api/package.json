@@ -7,7 +7,8 @@
   },
   "dependencies": {
     "elysia": "latest",
-    "@scenario-analysis/core": "workspace:*"
+    "@scenario-analysis/core": "workspace:*",
+    "@scenario-analysis/database": "workspace:*"
   },
   "devDependencies": {
     "bun-types": "latest"

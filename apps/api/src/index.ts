@@ -11,9 +11,9 @@ import {
   Benchmarker,
   env
 } from "@scenario-analysis/core";
+import { AnalysisReportRepository } from "@scenario-analysis/database";
 
-// In-memory store for analysis results (Phase 4 MVP)
-const analysisStore = new Map<string, any>();
+const reportRepo = new AnalysisReportRepository();
 
 const app = new Elysia()
   .get("/", () => ({ status: "online", version: "1.0.0" }))
@@ -34,7 +34,12 @@ const app = new Elysia()
     const benchmarker = new Benchmarker();
 
     // Provider selection (using Gemini as default for this run if available)
-    const provider = env.GEMINI_API_KEY ? factory.getProvider('gemini') : factory.getProvider('anthropic');
+    let providerName: 'openai' | 'anthropic' | 'gemini' | 'mock' = 'mock';
+    if (env.GEMINI_API_KEY) providerName = 'gemini';
+    else if (env.ANTHROPIC_API_KEY) providerName = 'anthropic';
+    else if (env.OPENAI_API_KEY) providerName = 'openai';
+
+    const provider = factory.getProvider(providerName);
     
     const beatGenerator = new BeatSheetGenerator(provider);
     const emotionAnalyzer = new EmotionAnalyzer(provider);
@@ -80,7 +85,7 @@ const app = new Elysia()
       }
     };
 
-    analysisStore.set(scriptId, result);
+    await reportRepo.save(result);
     return result;
   }, {
     body: t.Object({
@@ -89,13 +94,24 @@ const app = new Elysia()
     })
   })
   
-  .get("/report/:id", ({ params: { id } }) => {
-    const report = analysisStore.get(id);
+  .get("/report/:id", async ({ params: { id } }) => {
+    const report = await reportRepo.findByScriptId(id);
     if (!report) return { error: "Report not found" };
     return report;
   })
 
-  .listen(3001);
+  .get("/reports", async ({ query }) => {
+    const page = Number(query.page) || 1;
+    const pageSize = Math.min(Number(query.pageSize) || 20, 100);
+    return reportRepo.findAll(page, pageSize);
+  }, {
+    query: t.Object({
+      page: t.Optional(t.String()),
+      pageSize: t.Optional(t.String())
+    })
+  })
+
+  .listen(3005);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`

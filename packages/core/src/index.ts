@@ -1,6 +1,7 @@
 export * from './script/infrastructure/parser';
 export * from './creative/infrastructure/llm/LLMFactory';
 export * from './creative/infrastructure/llm/ILLMProvider';
+export * from './creative/infrastructure/llm/MockProvider';
 export * from './creative/application/CharacterAnalyzer';
 export * from './creative/application/BeatSheetGenerator';
 export * from './creative/application/EmotionAnalyzer';

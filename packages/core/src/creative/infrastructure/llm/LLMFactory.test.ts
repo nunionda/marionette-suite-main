@@ -30,9 +30,9 @@ describe('LLMFactory Orchestrator', () => {
     const responses = await factory.runEnsemble("System prompt", "User prompt");
     
     expect(responses).toBeInstanceOf(Array);
-    expect(responses).toHaveLength(3); // OpenAI, Anthropic, Gemini
-    
+    expect(responses).toHaveLength(4); // OpenAI, Anthropic, Gemini, Mock
+
     const providers = responses.map(r => r.provider).sort();
-    expect(providers).toEqual(['anthropic', 'gemini', 'openai']);
+    expect(providers).toEqual(['anthropic', 'gemini', 'mock', 'openai']);
   });
 });

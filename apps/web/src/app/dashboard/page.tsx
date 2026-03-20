@@ -13,7 +13,7 @@ export default function Dashboard() {
     // Phase 4: Fetch from local API
     async function fetchReport() {
       try {
-        const res = await fetch('http://localhost:3001/report/fight_club');
+        const res = await fetch('http://localhost:3005/report/fight_club');
         if (res.ok) {
           setData(await res.json());
         }
