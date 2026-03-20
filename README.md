@@ -2,12 +2,14 @@
 
 A comprehensive script intelligence system designed to ingest, analyze, and forecast the success of Hollywood screenplays using AI-native development and autoresearch paradigms.
 
-## Features
+## Development Track (Plans & Results)
 
-- [Session 1: Project Foundation & Domain-Driven Design](./docs/features/session-1-foundation.md) - Fountain parser, PDF integration, DDD refactoring.
-- [Session 2: Infrastructure & Monorepo Scale-Up](./docs/features/session-2-monorepo-infra.md) - Zod Env, Winston Logger, CI/CD, Next.js Frontend, Elysia Backend, and PostgreSQL Docker setup.
-- [Session 3: Development Automation & Pipeline Fixes](./docs/features/session-3-ide-setup.md) - Universal IDE Setup Script, README guides, and Embedded Git repo fix.
-- [Session 4: Market Data Integration & ROI Evaluation](./docs/features/session-4-market-data.md) - TMDB API Client, ROI math, BoxOfficeData Domain, and Test coverage.
+- [**Plan: Phase 2 (Creative NLP Engine)**](./docs/plans/01-phase2-creative-nlp.md)
+
+- [Result: Session 1 (Project Foundation) ](./docs/results/session-1-foundation.md) - Fountain parser, PDF integration, DDD.
+- [Result: Session 2 (Infrastructure Scalability)](./docs/results/session-2-monorepo-infra.md) - Zod Env, Winston Logger, CI/CD, Next.js, Elysia Backend, PostgreSQL Docker.
+- [Result: Session 3 (Automation Fixes)](./docs/results/session-3-ide-setup.md) - Universal IDE Setup Script, README guides, and Embedded Git repo fix.
+- [Result: Session 4 (Market Data Integration)](./docs/results/session-4-market-data.md) - TMDB API Client, ROI math, BoxOfficeData Domain.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
