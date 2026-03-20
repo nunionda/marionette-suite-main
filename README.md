@@ -10,8 +10,8 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [Result: Session 2 (Infrastructure Scalability)](./docs/results/session-2-monorepo-infra.md) - Zod Env, Winston Logger, CI/CD, Next.js, Elysia Backend, PostgreSQL Docker.
 - [Result: Session 3 (Automation Fixes)](./docs/results/session-3-ide-setup.md) - Universal IDE Setup Script, README guides, and Embedded Git repo fix.
 - [Result: Session 4 (Market Data Integration)](./docs/results/session-4-market-data.md) - TMDB API Client, ROI math, BoxOfficeData Domain.
-- [**Result: Phase 2 (Beat Sheet & Multi-LLM)**](./docs/results/01-phase2-creative-nlp.md) - Multi-LLM Factory (OpenAI, Anthropic, Gemini) & Beat Sheet narrative generator.
-- [**Result: Phase 2 (Emotion Graph, Character Network, RAG)**](./docs/results/02-phase2-emotion-character-rag.md) - Pinecone RAG setup, Determistic Character Line Parsing, Scene-by-scene emotional valence scoring.
+- [**Result: Session 5 (Beat Sheet & Multi-LLM)**](./docs/results/session-5-phase2-beat-sheet.md) - Multi-LLM Factory (OpenAI, Anthropic, Gemini) & Beat Sheet narrative generator.
+- [**Result: Session 6 (Emotion Graph, Character Network, RAG)**](./docs/results/session-6-phase2-emotion-network.md) - Pinecone RAG setup, Determistic Character Line Parsing, Scene-by-scene emotional valence scoring.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
