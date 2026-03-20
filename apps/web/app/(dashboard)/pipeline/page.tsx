@@ -1,18 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { fetchAPI } from "../../../lib/api";
-
-interface PipelineRun {
-  id: string;
-  projectId: string;
-  projectTitle: string;
-  status: string;
-  currentStep: string;
-  progress: number;
-  startedAt: string;
-  completedAt?: string;
-}
+import { usePipelineWS } from "../../../hooks/use-pipeline-ws";
 
 const statusColors: Record<string, string> = {
   completed: "bg-green-500/20 text-green-400",
@@ -23,35 +11,27 @@ const statusColors: Record<string, string> = {
 };
 
 export default function PipelinePage() {
-  const [runs, setRuns] = useState<PipelineRun[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const fetchRuns = () => {
-    fetchAPI<{ runs: PipelineRun[] }>("/api/pipeline/runs")
-      .then((data) => setRuns(data.runs ?? []))
-      .catch(() => {
-        setRuns([])
-      })
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchRuns();
-    intervalRef.current = setInterval(fetchRuns, 3000);
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
+  const { runs, connected, loading } = usePipelineWS();
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold">Pipeline</h1>
-        <p className="mt-1 text-sm text-gray-400">
-          Monitor active and recent pipeline runs
-        </p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Pipeline</h1>
+          <p className="mt-1 text-sm text-gray-400">
+            Monitor active and recent pipeline runs
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className={`h-2 w-2 rounded-full ${
+              connected ? "bg-green-400" : "bg-yellow-400"
+            }`}
+          />
+          <span className="text-xs text-gray-500">
+            {connected ? "Live" : "Polling"}
+          </span>
+        </div>
       </div>
 
       {loading && (
@@ -60,13 +40,7 @@ export default function PipelinePage() {
         </div>
       )}
 
-      {error && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
-          Failed to load pipeline runs: {error}
-        </div>
-      )}
-
-      {!loading && !error && runs.length === 0 && (
+      {!loading && runs.length === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400">
           <p className="text-lg">No pipeline runs</p>
           <p className="mt-1 text-sm">
@@ -97,7 +71,7 @@ export default function PipelinePage() {
 
             <div className="mb-2 flex items-center justify-between text-sm">
               <span className="text-gray-400">{run.currentStep}</span>
-              <span className="text-gray-500">{run.progress}%</span>
+              <span className="text-gray-500">{Math.round(run.progress)}%</span>
             </div>
 
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
