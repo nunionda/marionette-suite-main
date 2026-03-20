@@ -18,7 +18,7 @@ export function parseFountain(script: string): ScriptElement[] {
   const elements: ScriptElement[] = [];
 
   let currentCharacter = "";
-  const sceneRegex = /^((INT\.|EXT\.|INT|EXT|EST|I\/E)[. ]|(S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경)/i;
+  const sceneRegex = /^((INT\.|EXT\.|INT|EXT|EST|I\/E)[. ]|(S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경|\d+\.\s+)/i;
 
   for (let i = 0; i < lines.length; i++) {
     const originalLine = lines[i] || "";
@@ -38,7 +38,7 @@ export function parseFountain(script: string): ScriptElement[] {
       let time = "";
       
       const enMatch = text.match(/^(INT\.|EXT\.|INT|EXT|EST|I\/E)\s+(.*?)(?:\s*-\s*(.*))?$/i);
-      const koMatch = text.match(/^((?:S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경)[.,\s]*(.*?)(?:\s*-\s*(.*))?$/i);
+      const koMatch = text.match(/^((?:S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경|\d+\.)[.,\s]*(.*?)(?:\s*[-–]\s*(.*))?$/i);
       
       if (enMatch) {
         setting = enMatch[1] ? enMatch[1].trim() : "";
@@ -58,13 +58,13 @@ export function parseFountain(script: string): ScriptElement[] {
       elements.push({ type: "parenthetical", text: line });
     }
     // Transitions
-    else if ((line === line.toUpperCase() && line.endsWith("TO:")) || line.match(/^(FADE IN:|FADE OUT\.|CUT TO:|디졸브|암전)/)) {
+    else if ((line === line.toUpperCase() && line.endsWith("TO:")) || line.match(/^(FADE IN:|FADE OUT\.|CUT\s+TO\b|디졸브|암전)/)) {
       elements.push({ type: "transition", text: line });
       currentCharacter = "";
     }
     // Characters
     else {
-      const isUppercaseEnglish = line === line.toUpperCase() && /[A-Z]/.test(line) && !line.match(/[.:?!]$/);
+      const isUppercaseEnglish = line === line.toUpperCase() && /[A-Z]/.test(line) && !line.match(/[.:?!]$/) && !/[가-힣]/.test(line);
       const nextLine = i + 1 < lines.length ? (lines[i + 1]?.trim() ?? "") : "";
       
       // Korean character detection: shorter length, no punctuation, NOT empty next line
