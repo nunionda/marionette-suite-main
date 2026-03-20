@@ -23,4 +23,5 @@ export {
 } from "./agent.js";
 
 export { AssetType, type Asset } from "./asset.js";
-export { type PipelineWSEvent, type PipelineRunSnapshot } from "./ws-events.js"
+export { type PipelineWSEvent, type PipelineRunSnapshot, type BatchRunSnapshot } from "./ws-events.js"
+export { type StepResults, type BatchAgentInput } from "./batch.js"
