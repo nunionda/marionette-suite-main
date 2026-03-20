@@ -7,6 +7,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [Session 1: Project Foundation & Domain-Driven Design](./docs/features/session-1-foundation.md) - Fountain parser, PDF integration, DDD refactoring.
 - [Session 2: Infrastructure & Monorepo Scale-Up](./docs/features/session-2-monorepo-infra.md) - Zod Env, Winston Logger, CI/CD, Next.js Frontend, Elysia Backend, and PostgreSQL Docker setup.
 - [Session 3: Development Automation & Pipeline Fixes](./docs/features/session-3-ide-setup.md) - Universal IDE Setup Script, README guides, and Embedded Git repo fix.
+- [Session 4: Market Data Integration & ROI Evaluation](./docs/features/session-4-market-data.md) - TMDB API Client, ROI math, BoxOfficeData Domain, and Test coverage.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
