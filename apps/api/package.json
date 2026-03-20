@@ -6,9 +6,10 @@
     "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
-    "elysia": "latest",
+    "@elysiajs/cors": "^1.4.1",
     "@scenario-analysis/core": "workspace:*",
-    "@scenario-analysis/database": "workspace:*"
+    "@scenario-analysis/database": "workspace:*",
+    "elysia": "latest"
   },
   "devDependencies": {
     "bun-types": "latest"

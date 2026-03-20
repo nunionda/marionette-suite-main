@@ -1,4 +1,5 @@
 import { Elysia, t } from "elysia";
+import { cors } from "@elysiajs/cors";
 import { 
   parseFountain, 
   LLMFactory, 
@@ -16,6 +17,7 @@ import { AnalysisReportRepository } from "@scenario-analysis/database";
 const reportRepo = new AnalysisReportRepository();
 
 const app = new Elysia()
+  .use(cors())
   .get("/", () => ({ status: "online", version: "1.0.0" }))
   
   .post("/analyze", async ({ body }) => {
