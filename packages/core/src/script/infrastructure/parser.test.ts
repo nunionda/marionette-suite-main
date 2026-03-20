@@ -63,3 +63,37 @@ S# 12. 경찰서 조사실 - 밤
     { type: "transition", text: "암전" }
   ]);
 });
+
+test("parse Japanese screenplay conventions", () => {
+  const script = `
+○ 映画館・上映室 - 夜
+
+暗い映画館の中、スクリーンが光る。
+
+太郎
+(振り返り)
+今日は何の映画を見ようか？
+
+花子
+あの新作がいいんじゃない？
+
+暗転
+  `.trim();
+
+  const elements = parseFountain(script);
+
+  expect(elements).toEqual([
+    {
+      type: "scene_heading",
+      text: "○ 映画館・上映室 - 夜",
+      metadata: { setting: "○", location: "映画館・上映室", time: "夜" }
+    },
+    { type: "action", text: "暗い映画館の中、スクリーンが光る。" },
+    { type: "character", text: "太郎" },
+    { type: "parenthetical", text: "(振り返り)" },
+    { type: "dialogue", text: "今日は何の映画を見ようか？" },
+    { type: "character", text: "花子" },
+    { type: "dialogue", text: "あの新作がいいんじゃない？" },
+    { type: "transition", text: "暗転" }
+  ]);
+});

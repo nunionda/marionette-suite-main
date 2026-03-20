@@ -18,7 +18,7 @@ export function parseFountain(script: string): ScriptElement[] {
   const elements: ScriptElement[] = [];
 
   let currentCharacter = "";
-  const sceneRegex = /^((INT\.|EXT\.|INT|EXT|EST|I\/E)[. ]|(S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경|\d+\.\s+)/i;
+  const sceneRegex = /^((INT\.|EXT\.|INT|EXT|EST|I\/E)[. ]|(S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경|\d+\.\s+|○\s*)/i;
 
   for (let i = 0; i < lines.length; i++) {
     const originalLine = lines[i] || "";
@@ -39,7 +39,8 @@ export function parseFountain(script: string): ScriptElement[] {
       
       const enMatch = text.match(/^(INT\.|EXT\.|INT|EXT|EST|I\/E)\s+(.*?)(?:\s*-\s*(.*))?$/i);
       const koMatch = text.match(/^((?:S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경|\d+\.)[.,\s]*(.*?)(?:\s*[-–]\s*(.*))?$/i);
-      
+      const jpMatch = text.match(/^○?\s*(.*?)(?:\s*[-–]\s*(.*))?$/);
+
       if (enMatch) {
         setting = enMatch[1] ? enMatch[1].trim() : "";
         location = enMatch[2] ? enMatch[2].trim() : "";
@@ -48,6 +49,10 @@ export function parseFountain(script: string): ScriptElement[] {
         setting = koMatch[1] ? koMatch[1].trim() : "";
         location = koMatch[2] ? koMatch[2].trim() : "";
         time = koMatch[3] ? koMatch[3].trim() : "";
+      } else if (jpMatch) {
+        setting = "○";
+        location = jpMatch[1] ? jpMatch[1].trim() : "";
+        time = jpMatch[2] ? jpMatch[2].trim() : "";
       }
 
       elements.push({ type: "scene_heading", text, metadata: { setting, location, time } });
@@ -58,22 +63,22 @@ export function parseFountain(script: string): ScriptElement[] {
       elements.push({ type: "parenthetical", text: line });
     }
     // Transitions
-    else if ((line === line.toUpperCase() && line.endsWith("TO:")) || line.match(/^(FADE IN:|FADE OUT\.|CUT\s+TO\b|디졸브|암전)/)) {
+    else if ((line === line.toUpperCase() && line.endsWith("TO:")) || line.match(/^(FADE IN:|FADE OUT\.|CUT\s+TO\b|디졸브|암전|暗転|フェードイン|フェードアウト|ディゾルブ)/)) {
       elements.push({ type: "transition", text: line });
       currentCharacter = "";
     }
     // Characters
     else {
-      const isUppercaseEnglish = line === line.toUpperCase() && /[A-Z]/.test(line) && !line.match(/[.:?!]$/) && !/[가-힣]/.test(line);
+      const isUppercaseEnglish = line === line.toUpperCase() && /[A-Z]/.test(line) && !line.match(/[.:?!]$/) && !/[가-힣ぁ-んァ-ヴー一-龯]/.test(line);
       const nextLine = i + 1 < lines.length ? (lines[i + 1]?.trim() ?? "") : "";
       
-      // Korean character detection: shorter length, no punctuation, NOT empty next line
+      // CJK character detection: shorter length, no punctuation, NOT empty next line
       const nameWithoutParens = line.replace(/\s*\(.*?\)\s*/g, '').trim();
-      const isKoreanNamePattern = /^[가-힣A-Za-z0-9\s]+$/.test(nameWithoutParens) && /[가-힣A-Za-z]/.test(nameWithoutParens);
+      const isCjkNamePattern = /^[가-힣ぁ-んァ-ヴー一-龯A-Za-z0-9\s]+$/.test(nameWithoutParens) && /[가-힣ぁ-んァ-ヴー一-龯A-Za-z]/.test(nameWithoutParens);
       const wordCount = nameWithoutParens.split(/\s+/).length;
-      const isKoreanCharacter = isKoreanNamePattern && nameWithoutParens.length <= 8 && wordCount <= 2 && !line.match(/[.?!,:;]$/);
-      
-      if (isUppercaseEnglish || (isKoreanCharacter && nextLine !== "")) {
+      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 8 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；]$/);
+
+      if (isUppercaseEnglish || (isCjkCharacter && nextLine !== "")) {
         elements.push({ type: "character", text: line });
         currentCharacter = line;
       }
