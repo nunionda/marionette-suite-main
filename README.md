@@ -14,6 +14,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 5 (Beat Sheet & Multi-LLM)**](./docs/results/session-5-phase2-beat-sheet.md) - Multi-LLM Factory (OpenAI, Anthropic, Gemini) & Beat Sheet narrative generator.
 - [**Result: Session 6 (Emotion Graph, Character Network, RAG)**](./docs/results/session-6-phase2-emotion-network.md) - Pinecone RAG setup, Determistic Character Line Parsing, Scene-by-scene emotional valence scoring.
 - [**Result: Session 7 (Market Intelligence Predictor)**](./docs/results/session-7-phase3-predictor.md) - ROI Tier Forecasting, MPAA Rating Classification, and Comp Film Benchmarking.
+- [**Result: Session 8 (Visualization Dashboard)**](./docs/results/session-8-phase4-dashboard.md) - Next.js Dashboard UI, Recharts Emotion Graph, and Elysia.js API Bridge.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
