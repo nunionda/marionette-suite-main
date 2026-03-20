@@ -10,8 +10,15 @@ export const assetRoutes = new Hono()
 assetRoutes.get("/:projectId", async (c) => {
   const projectId = c.req.param("projectId")
 
+  const sceneNumber = c.req.query("sceneNumber")
+  const type = c.req.query("type")
+
+  const where: Record<string, unknown> = { projectId }
+  if (sceneNumber) where.sceneNumber = Number(sceneNumber)
+  if (type) where.type = type
+
   const assets = await prisma.asset.findMany({
-    where: { projectId },
+    where,
     orderBy: { createdAt: "desc" },
   })
 

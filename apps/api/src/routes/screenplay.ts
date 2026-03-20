@@ -1196,3 +1196,140 @@ screenplayRoutes.post("/:projectId/direction-plan/storyboard/generate", async (c
     throw new AppError(`Storyboard generation failed: ${message}`, 500, "AI_ERROR")
   }
 })
+
+// ─── 씬 단위 비디오 생성 ───
+
+screenplayRoutes.post("/:projectId/scene/:sceneNumber/generate-video", async (c) => {
+  const projectId = c.req.param("projectId")
+  const sceneNumber = Number(c.req.param("sceneNumber"))
+
+  const project = await prisma.project.findUnique({ where: { id: projectId } })
+  if (!project) throw new NotFoundError("Project", projectId)
+
+  const directionPlan = project.directionPlan as { scenes?: DPSceneShape[] } | null
+  if (!directionPlan?.scenes?.length) {
+    throw new ValidationError("Direction plan has no scenes")
+  }
+
+  const targetScene = directionPlan.scenes.find((s) => s.scene_number === sceneNumber)
+  if (!targetScene) throw new ValidationError(`Scene ${sceneNumber} not found in direction plan`)
+  if (!targetScene.cuts?.length) throw new ValidationError(`Scene ${sceneNumber} has no cuts`)
+
+  const gw = getGateway()
+  const outputDir = join("output", "videos", projectId)
+  await mkdir(outputDir, { recursive: true })
+
+  const assets: Array<Record<string, unknown>> = []
+
+  for (const cut of targetScene.cuts) {
+    if (!cut.video_prompt) continue
+
+    try {
+      const result = await gw.video(cut.video_prompt, {
+        provider: "gemini",
+        aspectRatio: "16:9",
+      })
+
+      const fileName = `scene_${sceneNumber}_cut_${cut.cut_number}.mp4`
+      const filePath = join(outputDir, fileName)
+      await writeFile(filePath, result.videoBuffer)
+
+      const asset = await prisma.asset.create({
+        data: {
+          projectId,
+          type: "VIDEO",
+          phase: "MAIN",
+          agentName: "Generalist",
+          sceneNumber,
+          filePath,
+          fileName,
+          mimeType: "video/mp4",
+          fileSize: result.videoBuffer.length,
+          metadata: {
+            cutNumber: cut.cut_number,
+            duration: result.duration,
+            prompt: cut.video_prompt,
+          } as Record<string, unknown>,
+        },
+      })
+
+      assets.push({
+        id: asset.id, fileName, filePath, sceneNumber,
+        cutNumber: cut.cut_number, type: "VIDEO",
+      })
+    } catch (err) {
+      console.error(`[generate-video] Scene ${sceneNumber} Cut ${cut.cut_number} failed:`, err)
+    }
+  }
+
+  return c.json({ assets, sceneNumber, totalCuts: targetScene.cuts.length })
+})
+
+// ─── 씬 단위 오디오 생성 ───
+
+screenplayRoutes.post("/:projectId/scene/:sceneNumber/generate-audio", async (c) => {
+  const projectId = c.req.param("projectId")
+  const sceneNumber = Number(c.req.param("sceneNumber"))
+
+  const project = await prisma.project.findUnique({ where: { id: projectId } })
+  if (!project) throw new NotFoundError("Project", projectId)
+
+  const directionPlan = project.directionPlan as { scenes?: DPSceneShape[] } | null
+  if (!directionPlan?.scenes?.length) {
+    throw new ValidationError("Direction plan has no scenes")
+  }
+
+  const targetScene = directionPlan.scenes.find((s) => s.scene_number === sceneNumber)
+  if (!targetScene) throw new ValidationError(`Scene ${sceneNumber} not found in direction plan`)
+
+  const gw = getGateway()
+  const outputDir = join("output", "audio", projectId)
+  await mkdir(outputDir, { recursive: true })
+
+  const assets: Array<Record<string, unknown>> = []
+
+  for (const cut of (targetScene.cuts ?? [])) {
+    // video_prompt에서 대화/오디오 내용 추출
+    const prompt = cut.video_prompt ?? ""
+    if (!prompt) continue
+
+    try {
+      const dialogueBuffer = await gw.tts(prompt, {
+        provider: "gemini",
+        voice: "Kore",
+        language: "ko",
+      })
+
+      const fileName = `scene_${sceneNumber}_cut_${cut.cut_number}_dialogue.wav`
+      const filePath = join(outputDir, fileName)
+      await writeFile(filePath, dialogueBuffer)
+
+      const asset = await prisma.asset.create({
+        data: {
+          projectId,
+          type: "AUDIO",
+          phase: "POST",
+          agentName: "SoundDesigner",
+          sceneNumber,
+          filePath,
+          fileName,
+          mimeType: "audio/wav",
+          fileSize: dialogueBuffer.length,
+          metadata: {
+            cutNumber: cut.cut_number,
+            audioType: "dialogue",
+          } as Record<string, unknown>,
+        },
+      })
+
+      assets.push({
+        id: asset.id, fileName, filePath, sceneNumber,
+        cutNumber: cut.cut_number, type: "AUDIO",
+      })
+    } catch (err) {
+      console.error(`[generate-audio] Scene ${sceneNumber} Cut ${cut.cut_number} failed:`, err)
+    }
+  }
+
+  return c.json({ assets, sceneNumber })
+})

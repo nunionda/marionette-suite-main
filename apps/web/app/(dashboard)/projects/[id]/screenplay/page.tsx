@@ -1754,7 +1754,81 @@ function Step6DirectionPlan({
     { key: 1, label: "시퀀스 분석" },
     { key: 2, label: "컷 설계" },
     { key: 3, label: "프롬프트" },
+    { key: 4, label: "에셋 생성" },
   ]
+
+  // ─── 에셋 생성 탭 상태 ───
+  interface SceneAssetStatus {
+    sceneNumber: number
+    sequenceNumber: number
+    cutCount: number
+    hasImagePrompt: boolean
+    hasVideoPrompt: boolean
+    imageCount: number
+    videoCount: number
+    audioCount: number
+    generating: "idle" | "image" | "video" | "audio"
+  }
+
+  const [sceneAssetStatuses, setSceneAssetStatuses] = useState<SceneAssetStatus[]>([])
+
+  const loadAllAssetStatuses = useCallback(async () => {
+    // 전체 에셋 1회 조회 후 클라이언트 필터링 (N+1 방지)
+    const allAssets = await fetchAPI<{ assets: Array<{ scene_number: number | null; type: string }> }>(
+      `/api/assets/${projectId}`
+    ).catch(() => ({ assets: [] }))
+
+    const statuses: SceneAssetStatus[] = dpScenes.map((scene) => {
+      const sceneAssets = allAssets.assets.filter((a) => a.scene_number === scene.scene_number)
+      const cuts = scene.cuts ?? []
+      return {
+        sceneNumber: scene.scene_number,
+        sequenceNumber: scene.sequence ?? 0,
+        cutCount: cuts.length,
+        hasImagePrompt: cuts.length > 0 && cuts.every((c) => !!c.image_prompt),
+        hasVideoPrompt: cuts.length > 0 && cuts.every((c) => !!c.video_prompt),
+        imageCount: sceneAssets.filter((a) => a.type === "IMAGE").length,
+        videoCount: sceneAssets.filter((a) => a.type === "VIDEO").length,
+        audioCount: sceneAssets.filter((a) => a.type === "AUDIO").length,
+        generating: "idle" as const,
+      }
+    })
+    setSceneAssetStatuses(statuses)
+  }, [projectId, dpScenes])
+
+  useEffect(() => {
+    if (activeStage === 4) loadAllAssetStatuses()
+  }, [activeStage, loadAllAssetStatuses])
+
+  const handleGenerateAsset = useCallback(async (sceneNumber: number, type: "image" | "video" | "audio") => {
+    setSceneAssetStatuses((prev) => prev.map((s) =>
+      s.sceneNumber === sceneNumber ? { ...s, generating: type } : s
+    ))
+
+    try {
+      if (type === "image") {
+        await fetchAPI(`/api/screenplay/${projectId}/direction-plan/storyboard/generate`, {
+          method: "POST",
+          body: JSON.stringify({ scope: "scene", sceneNumber, style: "webtoon" }),
+        })
+      } else if (type === "video") {
+        await fetchAPI(`/api/screenplay/${projectId}/scene/${sceneNumber}/generate-video`, {
+          method: "POST",
+        })
+      } else {
+        await fetchAPI(`/api/screenplay/${projectId}/scene/${sceneNumber}/generate-audio`, {
+          method: "POST",
+        })
+      }
+      await loadAllAssetStatuses()
+    } catch (err) {
+      console.error(`[asset-gen] ${type} for scene ${sceneNumber} failed:`, err)
+    } finally {
+      setSceneAssetStatuses((prev) => prev.map((s) =>
+        s.sceneNumber === sceneNumber ? { ...s, generating: "idle" } : s
+      ))
+    }
+  }, [projectId, loadAllAssetStatuses])
 
   return (
     <div className="space-y-6">
@@ -2184,6 +2258,113 @@ function Step6DirectionPlan({
                     </div>
                   )
                 })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Stage 4: Asset Generation */}
+      {activeStage === 4 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold">씬별 에셋 생성</h2>
+            <p className="mt-1 text-sm text-gray-400">
+              프롬프트 완성 씬부터 이미지→비디오→오디오 순서로 생성
+            </p>
+          </div>
+
+          {sceneAssetStatuses.length === 0 ? (
+            <p className="text-sm text-gray-500">씬 분석을 먼저 완료하세요.</p>
+          ) : (
+            <div className="space-y-3">
+              {Object.entries(
+                sceneAssetStatuses.reduce<Record<number, SceneAssetStatus[]>>((acc, s) => {
+                  const seq = s.sequenceNumber || 1
+                  if (!acc[seq]) acc[seq] = []
+                  acc[seq].push(s)
+                  return acc
+                }, {})
+              ).map(([seq, scenes]) => (
+                <div key={seq}>
+                  <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">
+                    시퀀스 {seq}
+                  </h3>
+                  <div className="space-y-2">
+                    {scenes.map((scene) => (
+                      <div
+                        key={scene.sceneNumber}
+                        className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-950 px-4 py-3"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-sm font-bold text-blue-400">
+                            S#{scene.sceneNumber}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {scene.cutCount}컷
+                          </span>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {/* 이미지 */}
+                          <button
+                            disabled={!scene.hasImagePrompt || scene.generating !== "idle"}
+                            onClick={() => handleGenerateAsset(scene.sceneNumber, "image")}
+                            className={`rounded px-3 py-1 text-xs font-medium transition ${
+                              scene.imageCount > 0
+                                ? "bg-green-900/50 text-green-400 hover:bg-green-900"
+                                : scene.hasImagePrompt
+                                  ? "bg-blue-900/50 text-blue-400 hover:bg-blue-900"
+                                  : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                            }`}
+                          >
+                            {scene.generating === "image" ? "⏳ 생성 중..." :
+                             scene.imageCount > 0 ? `🖼 재생성 (${scene.imageCount})` : "🖼 이미지"}
+                          </button>
+
+                          {/* 비디오 */}
+                          <button
+                            disabled={scene.imageCount === 0 || !scene.hasVideoPrompt || scene.generating !== "idle"}
+                            onClick={() => handleGenerateAsset(scene.sceneNumber, "video")}
+                            className={`rounded px-3 py-1 text-xs font-medium transition ${
+                              scene.videoCount > 0
+                                ? "bg-green-900/50 text-green-400 hover:bg-green-900"
+                                : scene.imageCount > 0 && scene.hasVideoPrompt
+                                  ? "bg-blue-900/50 text-blue-400 hover:bg-blue-900"
+                                  : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                            }`}
+                          >
+                            {scene.generating === "video" ? "⏳ 생성 중..." :
+                             scene.videoCount > 0 ? `🎬 재생성 (${scene.videoCount})` : "🎬 비디오"}
+                          </button>
+
+                          {/* 오디오 */}
+                          <button
+                            disabled={scene.videoCount === 0 || scene.generating !== "idle"}
+                            onClick={() => handleGenerateAsset(scene.sceneNumber, "audio")}
+                            className={`rounded px-3 py-1 text-xs font-medium transition ${
+                              scene.audioCount > 0
+                                ? "bg-green-900/50 text-green-400 hover:bg-green-900"
+                                : scene.videoCount > 0
+                                  ? "bg-blue-900/50 text-blue-400 hover:bg-blue-900"
+                                  : "bg-gray-800 text-gray-600 cursor-not-allowed"
+                            }`}
+                          >
+                            {scene.generating === "audio" ? "⏳ 생성 중..." :
+                             scene.audioCount > 0 ? `🔊 재생성 (${scene.audioCount})` : "🔊 오디오"}
+                          </button>
+                        </div>
+
+                        {/* 진행 바 */}
+                        <div className="flex gap-1 w-20">
+                          <div className={`h-1 flex-1 rounded ${scene.imageCount > 0 ? "bg-green-500" : scene.hasImagePrompt ? "bg-blue-800" : "bg-gray-800"}`} />
+                          <div className={`h-1 flex-1 rounded ${scene.videoCount > 0 ? "bg-green-500" : scene.imageCount > 0 ? "bg-blue-800" : "bg-gray-800"}`} />
+                          <div className={`h-1 flex-1 rounded ${scene.audioCount > 0 ? "bg-green-500" : scene.videoCount > 0 ? "bg-blue-800" : "bg-gray-800"}`} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>
