@@ -38,16 +38,18 @@ function toProjectResponse(project: {
   }
 }
 
-export async function listProjects(page: number, limit: number) {
+export async function listProjects(page: number, limit: number, userId?: string) {
   const skip = (page - 1) * limit
+  const where = userId ? { userId } : {}
 
   const [projects, total] = await Promise.all([
     prisma.project.findMany({
+      where,
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
     }),
-    prisma.project.count(),
+    prisma.project.count({ where }),
   ])
 
   return {
@@ -59,28 +61,33 @@ export async function listProjects(page: number, limit: number) {
   }
 }
 
-export async function getProject(id: string): Promise<ProjectResponse> {
-  const project = await prisma.project.findUnique({ where: { id } })
+export async function getProject(id: string, userId?: string): Promise<ProjectResponse> {
+  const project = await prisma.project.findFirst({
+    where: { id, ...(userId ? { userId } : {}) },
+  })
   if (!project) {
     throw new NotFoundError("Project", id)
   }
   return toProjectResponse(project)
 }
 
-export async function createProject(data: ProjectCreate): Promise<ProjectResponse> {
+export async function createProject(data: ProjectCreate, userId?: string): Promise<ProjectResponse> {
   const project = await prisma.project.create({
     data: {
       title: data.title,
       genre: data.genre,
       logline: data.logline,
       idea: data.idea,
+      ...(userId ? { userId } : {}),
     },
   })
   return toProjectResponse(project)
 }
 
-export async function updateProject(id: string, data: ProjectUpdate): Promise<ProjectResponse> {
-  const existing = await prisma.project.findUnique({ where: { id } })
+export async function updateProject(id: string, data: ProjectUpdate, userId?: string): Promise<ProjectResponse> {
+  const existing = await prisma.project.findFirst({
+    where: { id, ...(userId ? { userId } : {}) },
+  })
   if (!existing) {
     throw new NotFoundError("Project", id)
   }
@@ -109,8 +116,10 @@ export async function updateProject(id: string, data: ProjectUpdate): Promise<Pr
   return toProjectResponse(project)
 }
 
-export async function deleteProject(id: string): Promise<void> {
-  const existing = await prisma.project.findUnique({ where: { id } })
+export async function deleteProject(id: string, userId?: string): Promise<void> {
+  const existing = await prisma.project.findFirst({
+    where: { id, ...(userId ? { userId } : {}) },
+  })
   if (!existing) {
     throw new NotFoundError("Project", id)
   }

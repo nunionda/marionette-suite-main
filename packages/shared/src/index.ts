@@ -17,6 +17,10 @@ export {
   type AgentOutput,
   AssetType,
   type Asset,
+  type AuthUser,
+  type LoginRequest,
+  type SignupRequest,
+  type AuthResponse,
 } from "./types/index.js";
 
 export { createLogger, type Logger, type LogLevel } from "./utils/logger.js";

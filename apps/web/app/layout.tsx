@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { AuthProvider } from "../lib/auth-context";
 
 export const metadata: Metadata = {
   title: "Marionette Studio",
@@ -13,7 +14,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-gray-950 text-white antialiased">{children}</body>
+      <body className="bg-gray-950 text-white antialiased">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   );
 }
