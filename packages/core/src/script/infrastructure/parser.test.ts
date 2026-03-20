@@ -97,3 +97,66 @@ test("parse Japanese screenplay conventions", () => {
     { type: "transition", text: "暗転" }
   ]);
 });
+
+test("Korean transition markers and angle brackets are not characters", () => {
+  const script = `
+68. 전율미궁 – CCTV 상황실 / 늦은 오후
+
+해영
+지금 바로 확인해.
+
+다시 현재
+마유가 모니터를 본다.
+
+<인서트 – 씬 19 / CCTV 화면>
+모니터에 영상이 재생된다.
+
+그때 화면이
+갑자기 멈춘다.
+
+CUT TO – 대기실
+유진이 대기하고 있다.
+  `.trim();
+
+  const elements = parseFountain(script);
+  const types = elements.map(e => ({ type: e.type, text: e.text }));
+
+  // "다시 현재" should be transition, not character
+  expect(types).toContainEqual({ type: "transition", text: "다시 현재" });
+  // "<인서트...>" should be action, not character
+  expect(types).toContainEqual({ type: "action", text: "<인서트 – 씬 19 / CCTV 화면>" });
+  // "그때 화면이" ends with particle 이 → action, not character
+  expect(types).not.toContainEqual({ type: "character", text: "그때 화면이" });
+  // "CUT TO – 대기실" should be transition
+  expect(types).toContainEqual({ type: "transition", text: "CUT TO – 대기실" });
+  // Real character names should still work
+  expect(types).toContainEqual({ type: "character", text: "해영" });
+});
+
+test("CJK character name followed by blank line then dialogue (PDF format)", () => {
+  const script = `
+68. 전율미궁 – CCTV 상황실 / 늦은 오후
+
+마유
+
+왜 이런 일이 생긴 거야?
+
+완수
+여기서 기다려.
+
+해영
+
+다시 확인해 봐야 해.
+  `.trim();
+
+  const elements = parseFountain(script);
+  const types = elements.map(e => ({ type: e.type, text: e.text }));
+
+  // Short CJK names (≤3 chars) should be detected even with blank line after
+  expect(types).toContainEqual({ type: "character", text: "마유" });
+  expect(types).toContainEqual({ type: "dialogue", text: "왜 이런 일이 생긴 거야?" });
+  expect(types).toContainEqual({ type: "character", text: "완수" });
+  expect(types).toContainEqual({ type: "dialogue", text: "여기서 기다려." });
+  expect(types).toContainEqual({ type: "character", text: "해영" });
+  expect(types).toContainEqual({ type: "dialogue", text: "다시 확인해 봐야 해." });
+});

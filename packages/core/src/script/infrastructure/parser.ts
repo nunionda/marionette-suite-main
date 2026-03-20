@@ -18,6 +18,7 @@ export function parseFountain(script: string): ScriptElement[] {
   const elements: ScriptElement[] = [];
 
   let currentCharacter = "";
+  let allowBlankAfterCharacter = false;
   const sceneRegex = /^((INT\.|EXT\.|INT|EXT|EST|I\/E)[. ]|(S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경|\d+\.\s+|○\s*)/i;
 
   for (let i = 0; i < lines.length; i++) {
@@ -25,9 +26,14 @@ export function parseFountain(script: string): ScriptElement[] {
     const line = originalLine.trim();
 
     if (line === "") {
-      currentCharacter = "";
+      if (allowBlankAfterCharacter) {
+        allowBlankAfterCharacter = false;
+      } else {
+        currentCharacter = "";
+      }
       continue;
     }
+    allowBlankAfterCharacter = false;
 
     // Scene Headings
     if (line.match(sceneRegex) || line.startsWith(".")) {
@@ -63,7 +69,12 @@ export function parseFountain(script: string): ScriptElement[] {
       elements.push({ type: "parenthetical", text: line });
     }
     // Transitions
-    else if ((line === line.toUpperCase() && line.endsWith("TO:")) || line.match(/^(FADE IN:|FADE OUT\.|CUT\s+TO\b|디졸브|암전|暗転|フェードイン|フェードアウト|ディゾルブ)/)) {
+    else if (line.startsWith("<") && line.endsWith(">")) {
+      elements.push({ type: "action", text: line });
+      currentCharacter = "";
+    }
+    // Transitions
+    else if ((line === line.toUpperCase() && line.endsWith("TO:")) || line.match(/^(FADE IN:|FADE OUT\.|CUT\s+TO\b|디졸브|암전|暗転|フェードイン|フェードアウト|ディゾルブ)/) || /^다시\s+\S+$/.test(line)) {
       elements.push({ type: "transition", text: line });
       currentCharacter = "";
     }
@@ -76,11 +87,18 @@ export function parseFountain(script: string): ScriptElement[] {
       const nameWithoutParens = line.replace(/\s*\(.*?\)\s*/g, '').trim();
       const isCjkNamePattern = /^[가-힣ぁ-んァ-ヴー一-龯A-Za-z0-9\s]+$/.test(nameWithoutParens) && /[가-힣ぁ-んァ-ヴー一-龯A-Za-z]/.test(nameWithoutParens);
       const wordCount = nameWithoutParens.split(/\s+/).length;
-      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 8 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；]$/);
+      const hasKoreanParticle = /[이가을를은는도의에서와로]$/.test(nameWithoutParens);
+      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 6 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；]$/) && !hasKoreanParticle;
 
-      if (isUppercaseEnglish || (isCjkCharacter && nextLine !== "")) {
+      // Short CJK names (≤3 chars) allow a blank line before dialogue (common in Korean PDF screenplays)
+      const nextNextLine = i + 2 < lines.length ? (lines[i + 2]?.trim() ?? "") : "";
+      const isShortName = nameWithoutParens.length <= 3;
+      const hasFollowingContent = nextLine !== "" || (isShortName && nextNextLine !== "");
+
+      if (isUppercaseEnglish || (isCjkCharacter && hasFollowingContent)) {
         elements.push({ type: "character", text: line });
         currentCharacter = line;
+        allowBlankAfterCharacter = true;
       }
       // Dialogue
       else if (currentCharacter !== "") {

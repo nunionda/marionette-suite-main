@@ -2,10 +2,33 @@
 
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle } from 'lucide-react';
+import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star } from 'lucide-react';
 import './dashboard.css';
 
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
+type Strategy = 'auto' | 'fast' | 'deep' | 'custom';
+type ProviderChoice = 'gemini' | 'anthropic' | 'openai' | 'mock';
+
+const STRATEGIES = [
+  { name: 'auto' as Strategy, label: 'Auto', desc: 'Best available + fallback' },
+  { name: 'fast' as Strategy, label: 'Fast', desc: 'Gemini Flash (low cost)' },
+  { name: 'deep' as Strategy, label: 'Deep Analysis', desc: 'Claude + Gemini hybrid' },
+  { name: 'custom' as Strategy, label: 'Custom', desc: 'Pick per engine' },
+];
+
+const ENGINE_LABELS: Record<string, string> = {
+  beatSheet: 'Beat Sheet',
+  emotion: 'Emotion',
+  rating: 'Rating',
+  roi: 'ROI Prediction',
+};
+
+const PROVIDER_LABELS: Record<string, string> = {
+  gemini: 'Gemini',
+  anthropic: 'Claude',
+  openai: 'GPT-4o',
+  mock: 'Mock',
+};
 
 export default function Dashboard() {
   const [mode, setMode] = useState<ViewMode>('idle');
@@ -17,9 +40,21 @@ export default function Dashboard() {
   const [dragOver, setDragOver] = useState(false);
 
   const [reports, setReports] = useState<any[]>([]);
+  const [strategy, setStrategy] = useState<Strategy>('auto');
+  const [customProviders, setCustomProviders] = useState<Record<string, ProviderChoice>>({
+    beatSheet: 'gemini',
+    emotion: 'gemini',
+    rating: 'gemini',
+    roi: 'gemini',
+  });
+  const [availableProviders, setAvailableProviders] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetchReportHistory();
+    fetch('http://localhost:4005/providers')
+      .then(r => r.json())
+      .then(d => setAvailableProviders(d.available || {}))
+      .catch(() => {});
   }, []);
 
   async function fetchReportHistory() {
@@ -52,6 +87,11 @@ export default function Dashboard() {
       } else {
         const scriptText = await selectedFile.text();
         bodyPayload = { scriptText, movieId: movieId.trim() || undefined };
+      }
+
+      bodyPayload.strategy = strategy;
+      if (strategy === 'custom') {
+        bodyPayload.customProviders = customProviders;
       }
 
       const res = await fetch('http://localhost:4005/analyze', {
@@ -143,6 +183,25 @@ export default function Dashboard() {
         )}
       </header>
 
+      {data?.warning && (
+        <div className="warning-banner">
+          <AlertCircle size={16} /> {data.warning}
+        </div>
+      )}
+
+      {/* Provider attribution bar */}
+      {data?.providers && (
+        <div className="provider-bar">
+          {data.strategy && <span className="provider-strategy">{data.strategy.toUpperCase()}</span>}
+          {Object.entries(data.providers).map(([engine, prov]: [string, any]) => (
+            <span key={engine} className="provider-badge-item">
+              <span className="provider-engine">{ENGINE_LABELS[engine] || engine}</span>
+              <span className={`provider-name provider-${prov}`}>{PROVIDER_LABELS[prov] || prov}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* Upload + History Row */}
       <div className="upload-row">
         <div className="glass-panel upload-panel">
@@ -183,6 +242,42 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
+
+              {/* Strategy Selector */}
+              <div className="strategy-row">
+                {STRATEGIES.map(s => (
+                  <button
+                    key={s.name}
+                    className={`strategy-pill ${strategy === s.name ? 'active' : ''}`}
+                    onClick={() => setStrategy(s.name)}
+                  >
+                    <span className="pill-label">{s.label}</span>
+                    <span className="pill-desc">{s.desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Custom Provider Grid */}
+              {strategy === 'custom' && (
+                <div className="custom-grid">
+                  {(['beatSheet', 'emotion', 'rating', 'roi'] as const).map(engine => (
+                    <div key={engine} className="custom-grid-item">
+                      <label>{ENGINE_LABELS[engine]}</label>
+                      <select
+                        className="select-glass"
+                        value={customProviders[engine]}
+                        onChange={(e) => setCustomProviders(prev => ({ ...prev, [engine]: e.target.value as ProviderChoice }))}
+                      >
+                        {(['gemini', 'anthropic', 'openai', 'mock'] as const).map(p => (
+                          <option key={p} value={p} disabled={p !== 'mock' && !availableProviders[p]}>
+                            {PROVIDER_LABELS[p]}{p !== 'mock' && !availableProviders[p] ? ' (no key)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', alignItems: 'center' }}>
                 <input
@@ -290,8 +385,22 @@ export default function Dashboard() {
                 <XAxis dataKey="sceneNumber" hide />
                 <YAxis domain={[-10, 10]} stroke="var(--text-dim)" />
                 <Tooltip
-                  contentStyle={{ background: '#1a1a1a', border: '1px solid #333' }}
+                  contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
                   itemStyle={{ color: '#fff' }}
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.[0]) return null;
+                    const d = payload[0].payload;
+                    return (
+                      <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', padding: '0.75rem', maxWidth: '280px' }}>
+                        <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Scene {d.sceneNumber}</div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.25rem' }}>
+                          <span style={{ color: 'var(--accent-gold)' }}>{d.dominantEmotion || '—'}</span>
+                          <span style={{ fontWeight: 600, color: d.score >= 0 ? '#2ecc71' : '#e74c3c' }}>{d.score > 0 ? '+' : ''}{d.score}</span>
+                        </div>
+                        {d.explanation && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', whiteSpace: 'normal' }}>{d.explanation}</div>}
+                      </div>
+                    );
+                  }}
                 />
                 <Area type="monotone" dataKey="score" stroke="#0070f3" fillOpacity={1} fill="url(#colorScore)" strokeWidth={3} />
               </AreaChart>
@@ -313,9 +422,111 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {/* ROI Analysis */}
+          {data.predictions?.roi && (
+            <div className="glass-panel detail-panel-wide">
+              <h3>
+                <TrendingUp size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#27ae60' }} />
+                ROI Analysis
+              </h3>
+              <div className="detail-metrics">
+                <div className="detail-metric">
+                  <span className="detail-label">Tier</span>
+                  <span className={`badge ${data.predictions.roi.tier === 'Blockbuster' ? 'badge-blockbuster' : data.predictions.roi.tier === 'Hit' ? 'badge-hit' : 'badge-flop'}`}>
+                    {data.predictions.roi.tier}
+                  </span>
+                </div>
+                <div className="detail-metric">
+                  <span className="detail-label">Multiplier</span>
+                  <span style={{ fontWeight: 700, fontSize: '1.2rem' }}>{data.predictions.roi.predictedMultiplier}x</span>
+                </div>
+                <div className="detail-metric">
+                  <span className="detail-label">Confidence</span>
+                  <span style={{ fontWeight: 600 }}>{Math.round((data.predictions.roi.confidence || 0) * 100)}%</span>
+                </div>
+              </div>
+              {data.predictions.roi.reasoning && (
+                <p className="detail-reasoning">{data.predictions.roi.reasoning}</p>
+              )}
+            </div>
+          )}
+
+          {/* Content Rating */}
+          {data.predictions?.rating && (
+            <div className="glass-panel detail-panel-narrow">
+              <h3>
+                <Shield size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#c0392b' }} />
+                Content Rating
+              </h3>
+              <div style={{ textAlign: 'center', margin: '1rem 0' }}>
+                <span className="rating-badge">{data.predictions.rating.rating}</span>
+                {data.predictions.rating.confidence != null && (
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginTop: '0.5rem' }}>
+                    Confidence: {Math.round(data.predictions.rating.confidence * 100)}%
+                  </div>
+                )}
+              </div>
+              {data.predictions.rating.reasons?.length > 0 && (
+                <ul className="rating-reasons">
+                  {data.predictions.rating.reasons.map((r: string, i: number) => (
+                    <li key={i}>{r}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
+          {/* Comparable Films */}
+          {data.predictions?.comps?.length > 0 && (
+            <div className="glass-panel comps-panel">
+              <h3>
+                <Star size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--accent-gold)' }} />
+                Comparable Films
+              </h3>
+              <div className="comps-grid">
+                {data.predictions.comps.map((comp: any, idx: number) => (
+                  <div key={idx} className="comp-card">
+                    <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>{comp.title}</div>
+                    <div className="comp-stat">
+                      <span className="detail-label">Similarity</span>
+                      <span>{Math.round(comp.similarityScore * 100)}%</span>
+                    </div>
+                    {comp.marketPerformance && (
+                      <>
+                        <div className="comp-stat">
+                          <span className="detail-label">Budget</span>
+                          <span>${(comp.marketPerformance.budget / 1e6).toFixed(0)}M</span>
+                        </div>
+                        <div className="comp-stat">
+                          <span className="detail-label">Revenue</span>
+                          <span>${(comp.marketPerformance.revenue / 1e6).toFixed(0)}M</span>
+                        </div>
+                        <div className="comp-stat">
+                          <span className="detail-label">ROI</span>
+                          <span style={{ color: '#2ecc71', fontWeight: 600 }}>{comp.marketPerformance.roi}x</span>
+                        </div>
+                      </>
+                    )}
+                    {comp.sharedTraits?.length > 0 && (
+                      <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                        {comp.sharedTraits.map((t: string, i: number) => (
+                          <span key={i} className="trait-tag">{t}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Beat Sheet */}
           <div className="timeline-container">
             <div className="glass-panel">
-              <h3 style={{ marginBottom: '1.5rem' }}>Narrative Beat Sheet</h3>
+              <h3 style={{ marginBottom: '1.5rem' }}>
+                <BarChart3 size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--accent-blue)' }} />
+                Narrative Beat Sheet
+              </h3>
               <div style={{ display: 'flex' }}>
                 {data.beatSheet.map((beat: any, idx: number) => (
                   <div key={idx} className="beat-node">

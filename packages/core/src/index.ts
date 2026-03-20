@@ -3,6 +3,8 @@ export * from './script/infrastructure/pdfParser';
 export * from './creative/infrastructure/llm/LLMFactory';
 export * from './creative/infrastructure/llm/ILLMProvider';
 export * from './creative/infrastructure/llm/MockProvider';
+export * from './creative/infrastructure/llm/AnalysisStrategy';
+export * from './creative/infrastructure/llm/StrategyResolver';
 export * from './creative/application/CharacterAnalyzer';
 export * from './creative/application/BeatSheetGenerator';
 export * from './creative/application/EmotionAnalyzer';

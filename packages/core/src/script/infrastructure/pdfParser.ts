@@ -8,6 +8,7 @@ async function extractText(data: Buffer | Uint8Array): Promise<string> {
   // Clean up PDF artifacts: collapse tabs to single space, strip standalone page numbers
   return result.text
     .replace(/\t+/g, ' ')
+    .replace(/ {2,}/g, ' ')
     .replace(/^\d+\s*$/gm, '');
 }
 

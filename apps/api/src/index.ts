@@ -11,7 +11,12 @@ import {
   BoxOfficePredictor,
   ContentRatingClassifier,
   Benchmarker,
-  env
+  env,
+  resolveStrategy,
+  type AnalysisStrategyName,
+  type CustomStrategyInput,
+  type EngineName,
+  type ILLMProvider,
 } from "@scenario-analysis/core";
 import { AnalysisReportRepository } from "@scenario-analysis/database";
 
@@ -20,58 +25,100 @@ const reportRepo = new AnalysisReportRepository();
 const app = new Elysia()
   .use(cors())
   .get("/", () => ({ status: "online", version: "1.0.0" }))
-  
+
+  // Available providers and strategies for dashboard UI
+  .get("/providers", () => ({
+    available: {
+      gemini: !!env.GEMINI_API_KEY,
+      anthropic: !!env.ANTHROPIC_API_KEY,
+      openai: !!env.OPENAI_API_KEY,
+      mock: true,
+    },
+    strategies: [
+      { name: 'auto', label: 'Auto', description: 'Best available provider with fallback' },
+      { name: 'fast', label: 'Fast', description: 'Gemini Flash only (low cost)', requires: ['gemini'] },
+      { name: 'deep', label: 'Deep Analysis', description: 'Claude for narrative, Gemini for metrics', requires: ['anthropic'] },
+      { name: 'custom', label: 'Custom', description: 'Pick provider per engine' },
+    ],
+  }))
+
   .post("/analyze", async ({ body }) => {
-    const { scriptText, scriptBase64, isPdf, movieId } = body as {
+    const { scriptText, scriptBase64, isPdf, movieId, strategy, customProviders } = body as {
       scriptText?: string; scriptBase64?: string; isPdf?: boolean; movieId?: string;
+      strategy?: AnalysisStrategyName; customProviders?: CustomStrategyInput;
     };
     const scriptId = movieId || `script-${Date.now()}`;
 
-    console.log(`🎬 Starting API Orchestration for: ${scriptId}`);
+    console.log(`🎬 Starting analysis for: ${scriptId} (strategy: ${strategy || 'auto'})`);
 
     // 1. Parse (PDF or plain text)
     const elements = isPdf && scriptBase64
       ? await parsePdfBuffer(Buffer.from(scriptBase64, 'base64'))
       : parseFountain(scriptText || '');
-    
+
     // 2. Initialize Core Services
     const factory = new LLMFactory();
     const characterAnalyzer = new CharacterAnalyzer();
     const featureExtractor = new FeatureExtractor();
     const benchmarker = new Benchmarker();
 
-    // Provider selection (using Gemini as default for this run if available)
-    let providerName: 'openai' | 'anthropic' | 'gemini' | 'mock' = 'mock';
-    if (env.GEMINI_API_KEY) providerName = 'gemini';
-    else if (env.ANTHROPIC_API_KEY) providerName = 'anthropic';
-    else if (env.OPENAI_API_KEY) providerName = 'openai';
+    // 3. Resolve strategy → per-engine provider mapping
+    const resolved = resolveStrategy(strategy || 'auto', customProviders);
+    const mockProvider = factory.getProvider('mock');
 
-    const provider = factory.getProvider(providerName);
-    
-    const beatGenerator = new BeatSheetGenerator(provider);
-    const emotionAnalyzer = new EmotionAnalyzer(provider);
-    const boxOfficePredictor = new BoxOfficePredictor(provider);
-    const ratingClassifier = new ContentRatingClassifier(provider);
+    function getEngineProvider(engine: EngineName): ILLMProvider {
+      try {
+        return factory.getProvider(resolved.engineProviders[engine]);
+      } catch {
+        return mockProvider;
+      }
+    }
 
-    // 3. Run Pipeline
+    // Helper: run engine with its assigned provider, fallback to mock on failure
+    async function withFallback<T>(
+      engine: EngineName,
+      label: string,
+      fn: (p: ILLMProvider) => Promise<T>,
+    ): Promise<{ data: T; fallback: boolean; provider: string }> {
+      const provider = getEngineProvider(engine);
+      try {
+        return { data: await fn(provider), fallback: false, provider: provider.name };
+      } catch (err: any) {
+        if (provider.name !== 'mock') {
+          console.warn(`⚠️ ${label} failed with ${provider.name} (${err.message?.slice(0, 80)}), using mock fallback`);
+          return { data: await fn(mockProvider), fallback: true, provider: 'mock' };
+        }
+        throw err;
+      }
+    }
+
+    // 4. Run Pipeline
     const network = characterAnalyzer.analyze(scriptId, elements);
-    const [beats, emotion, mpaaRating] = await Promise.all([
-      beatGenerator.generate(scriptId, elements),
-      emotionAnalyzer.analyze(scriptId, elements),
-      ratingClassifier.classify(scriptId, elements)
+
+    const [beatsResult, emotionResult, ratingResult] = await Promise.all([
+      withFallback('beatSheet', 'BeatSheet', (p) => new BeatSheetGenerator(p).generate(scriptId, elements)),
+      withFallback('emotion', 'Emotion', (p) => new EmotionAnalyzer(p).analyze(scriptId, elements)),
+      withFallback('rating', 'Rating', (p) => new ContentRatingClassifier(p).classify(scriptId, elements)),
     ]);
 
-    // Mock Market data for now (In Phase 4 we'd fetch this from DB/TMDB)
+    const beats = beatsResult.data;
+    const emotion = emotionResult.data;
+    const mpaaRating = ratingResult.data;
+
+    // Mock Market data for now
     const mockMarket = { budget: 50000000, revenue: 0, genres: ["Action", "Sci-Fi"], topCast: [] };
 
-    const features = featureExtractor.extract(scriptId, elements, { 
-      characterNetwork: network, 
-      beatSheet: beats, 
-      emotionGraph: emotion 
+    const features = featureExtractor.extract(scriptId, elements, {
+      characterNetwork: network,
+      beatSheet: beats,
+      emotionGraph: emotion
     }, mockMarket as any);
 
-    const roiPrediction = await boxOfficePredictor.predictROI(features);
+    const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features));
+    const roiPrediction = roiResult.data;
     const similarity = benchmarker.findComps(features);
+
+    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback;
 
     const result = {
       scriptId,
@@ -89,7 +136,15 @@ const app = new Elysia()
         roi: roiPrediction,
         rating: mpaaRating,
         comps: similarity.topComps
-      }
+      },
+      strategy: resolved.name,
+      providers: {
+        beatSheet: beatsResult.provider,
+        emotion: emotionResult.provider,
+        rating: ratingResult.provider,
+        roi: roiResult.provider,
+      },
+      ...(usedFallback && { warning: 'Some results used mock fallback due to LLM rate limits' }),
     };
 
     await reportRepo.save(result);
@@ -99,10 +154,19 @@ const app = new Elysia()
       scriptText: t.Optional(t.String()),
       scriptBase64: t.Optional(t.String()),
       isPdf: t.Optional(t.Boolean()),
-      movieId: t.Optional(t.String())
+      movieId: t.Optional(t.String()),
+      strategy: t.Optional(t.Union([
+        t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom')
+      ])),
+      customProviders: t.Optional(t.Object({
+        beatSheet: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+        emotion: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+        rating: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+        roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+      })),
     })
   })
-  
+
   .get("/report/:id", async ({ params: { id } }) => {
     const report = await reportRepo.findByScriptId(id);
     if (!report) return { error: "Report not found" };
