@@ -18,9 +18,11 @@ export function parseFountain(script: string): ScriptElement[] {
   const elements: ScriptElement[] = [];
 
   let currentCharacter = "";
+  const sceneRegex = /^((INT\.|EXT\.|INT|EXT|EST|I\/E)[. ]|(S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경)/i;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i]?.trim() ?? "";
+    const originalLine = lines[i] || "";
+    const line = originalLine.trim();
 
     if (line === "") {
       currentCharacter = "";
@@ -28,49 +30,61 @@ export function parseFountain(script: string): ScriptElement[] {
     }
 
     // Scene Headings
-    if (line.match(/^(INT|EXT|EST|I\/E)[. ]/i) || line.startsWith(".")) {
+    if (line.match(sceneRegex) || line.startsWith(".")) {
       const text = line.startsWith(".") ? line.substring(1).trim() : line;
       
       let setting = "";
       let location = "";
       let time = "";
       
-      // Parse e.g. "INT. BRICK'S PATIO - DAY"
-      const match = text.match(/^(INT\.|EXT\.|INT|EXT|EST|I\/E)\s+(.*?)(?:\s*-\s*(.*))?$/i);
-      if (match) {
-        setting = match[1] ? match[1].trim() : "";
-        location = match[2] ? match[2].trim() : "";
-        time = match[3] ? match[3].trim() : "";
+      const enMatch = text.match(/^(INT\.|EXT\.|INT|EXT|EST|I\/E)\s+(.*?)(?:\s*-\s*(.*))?$/i);
+      const koMatch = text.match(/^((?:S#|S\/|씬|씬\/)\s*\d+|제\s*\d+\s*경)[.,\s]*(.*?)(?:\s*-\s*(.*))?$/i);
+      
+      if (enMatch) {
+        setting = enMatch[1] ? enMatch[1].trim() : "";
+        location = enMatch[2] ? enMatch[2].trim() : "";
+        time = enMatch[3] ? enMatch[3].trim() : "";
+      } else if (koMatch) {
+        setting = koMatch[1] ? koMatch[1].trim() : "";
+        location = koMatch[2] ? koMatch[2].trim() : "";
+        time = koMatch[3] ? koMatch[3].trim() : "";
       }
 
-      elements.push({ 
-        type: "scene_heading", 
-        text,
-        metadata: { setting, location, time }
-      });
+      elements.push({ type: "scene_heading", text, metadata: { setting, location, time } });
       currentCharacter = "";
-    }
-    // Character Names (Simple heuristic: uppercase and no punctuation)
-    else if (line === line.toUpperCase() && !line.match(/[.:?!]$/) && !line.match(/^(INT|EXT|EST|I\/E)[. ]/i)) {
-      elements.push({ type: "character", text: line });
-      currentCharacter = line;
     }
     // Parentheticals
     else if (line.startsWith("(") && line.endsWith(")")) {
       elements.push({ type: "parenthetical", text: line });
     }
-    // Transitions (Simple heuristic: uppercase and ends with TO:)
-    else if (line === line.toUpperCase() && line.endsWith("TO:")) {
+    // Transitions
+    else if ((line === line.toUpperCase() && line.endsWith("TO:")) || line.match(/^(FADE IN:|FADE OUT\.|CUT TO:|디졸브|암전)/)) {
       elements.push({ type: "transition", text: line });
       currentCharacter = "";
     }
-    // Dialogue (if we have a current character)
-    else if (currentCharacter !== "") {
-      elements.push({ type: "dialogue", text: line });
-    }
-    // Action
+    // Characters
     else {
-      elements.push({ type: "action", text: line });
+      const isUppercaseEnglish = line === line.toUpperCase() && /[A-Z]/.test(line) && !line.match(/[.:?!]$/);
+      const nextLine = i + 1 < lines.length ? (lines[i + 1]?.trim() ?? "") : "";
+      
+      // Korean character detection: shorter length, no punctuation, NOT empty next line
+      const nameWithoutParens = line.replace(/\s*\(.*?\)\s*/g, '').trim();
+      const isKoreanNamePattern = /^[가-힣A-Za-z0-9\s]+$/.test(nameWithoutParens);
+      const wordCount = nameWithoutParens.split(/\s+/).length;
+      const isKoreanCharacter = isKoreanNamePattern && nameWithoutParens.length <= 8 && wordCount <= 2 && !line.match(/[.?!,:;]$/);
+      
+      if (isUppercaseEnglish || (isKoreanCharacter && nextLine !== "")) {
+        elements.push({ type: "character", text: line });
+        currentCharacter = line;
+      }
+      // Dialogue
+      else if (currentCharacter !== "") {
+        elements.push({ type: "dialogue", text: line });
+      }
+      // Action
+      else {
+        elements.push({ type: "action", text: line });
+      }
     }
   }
 
