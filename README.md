@@ -6,12 +6,35 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 - [Session 1: Project Foundation & Domain-Driven Design](./docs/features/session-1-foundation.md) - Fountain parser, PDF integration, DDD refactoring.
 - [Session 2: Infrastructure & Monorepo Scale-Up](./docs/features/session-2-monorepo-infra.md) - Zod Env, Winston Logger, CI/CD, Next.js Frontend, Elysia Backend, and PostgreSQL Docker setup.
+- [Session 3: Development Automation & Pipeline Fixes](./docs/features/session-3-ide-setup.md) - Universal IDE Setup Script, README guides, and Embedded Git repo fix.
 
-## Getting Started
+## 🚀 Quick Setup (One-Click Initialization)
 
-1. Set up dependencies: `bun install`
-2. Run tests: `bun test`
-3. Run linting: `bun run lint`
+To perfectly setup this monorepo in any development environment (after cloning), run our automated initialization script on your terminal:
+
+```bash
+chmod +x scripts/setup-ide.sh
+./scripts/setup-ide.sh
+```
+
+This script will automatically:
+1. Verify and install all Bun Workspace dependencies.
+2. Clone `.env.example` into a local `.env`.
+3. Scaffold and start the local PostgreSQL database via Docker.
+4. Auto-generate `.vscode/settings.json` for proper ESLint & TS integration.
+
+## 🛠 IDE Specific Configurations
+
+This project is optimized for AI-native and modern editors.
+
+### 1. Cursor & VS Code
+- **Setup:** The `setup-ide.sh` script automatically creates robust `.vscode/settings.json` files for format-on-save and ESLint auto-fixing.
+- **Rules:** For Cursor, keep AI prompt context aware by mentioning `packages/core` for business logic, and `apps/web` for UI components.
+
+### 2. Antigravity & Claude Code (AI Agents)
+- **Shared Workflows:** Both agent platforms can securely read and execute the workflows stored in `.agents/workflows/`.
+- **Command Setup:** At the end of your development session, type `/session-wrapup` in the Antigravity prompt or run `bun run session-wrapup` (if configured in package.json) to automatically summarize features, update documentation, and push code to the `develop` branch.
+- **Tip:** When delegating tasks to agents, explicitly mention the target Monorepo workspace (e.g., "Implement a new route inside `apps/api` using Elysia").
 
 ## Architecture
 See `Gemini.md` and `할리우드 시나리오 평가 시스템 구축.md` for full orchestration and system architecture details.
