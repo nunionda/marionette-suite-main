@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Phase 5 (Database Persistence)**](./docs/plans/03-phase5-database-persistence.md)
 - [**Plan: Phase 3 (Market Intelligence Predictor)**](./docs/plans/02-phase3-market-predictor.md)
 - [**Plan: Phase 2 (Creative NLP Engine)**](./docs/plans/01-phase2-creative-nlp.md)
 
@@ -15,6 +16,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 6 (Emotion Graph, Character Network, RAG)**](./docs/results/session-6-phase2-emotion-network.md) - Pinecone RAG setup, Determistic Character Line Parsing, Scene-by-scene emotional valence scoring.
 - [**Result: Session 7 (Market Intelligence Predictor)**](./docs/results/session-7-phase3-predictor.md) - ROI Tier Forecasting, MPAA Rating Classification, and Comp Film Benchmarking.
 - [**Result: Session 8 (Visualization Dashboard)**](./docs/results/session-8-phase4-dashboard.md) - Next.js Dashboard UI, Recharts Emotion Graph, and Elysia.js API Bridge.
+- [**Result: Session 9 (Database Persistence)**](./docs/results/session-9-phase5-database.md) - PostgreSQL + Prisma ORM, Repository pattern, paginated /reports endpoint, MockProvider.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
