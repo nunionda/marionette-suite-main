@@ -17,7 +17,11 @@ CUT TO:
   const elements = parseFountain(script);
 
   expect(elements).toEqual([
-    { type: "scene_heading", text: "EXT. BRICK'S PATIO - DAY" },
+    { 
+      type: "scene_heading", 
+      text: "EXT. BRICK'S PATIO - DAY",
+      metadata: { setting: "EXT.", location: "BRICK'S PATIO", time: "DAY" }
+    },
     { type: "action", text: "A SUN-DRENCHED patio. BRICK (30s) sits alone." },
     { type: "character", text: "BRICK" },
     { type: "parenthetical", text: "(to himself)" },

@@ -6,6 +6,11 @@
 export interface ScriptElement {
   type: "scene_heading" | "character" | "dialogue" | "action" | "transition" | "parenthetical";
   text: string;
+  metadata?: {
+    setting?: string;
+    location?: string;
+    time?: string;
+  };
 }
 
 export function parseFountain(script: string): ScriptElement[] {
@@ -24,7 +29,25 @@ export function parseFountain(script: string): ScriptElement[] {
 
     // Scene Headings
     if (line.match(/^(INT|EXT|EST|I\/E)[. ]/i) || line.startsWith(".")) {
-      elements.push({ type: "scene_heading", text: line.startsWith(".") ? line.substring(1).trim() : line });
+      const text = line.startsWith(".") ? line.substring(1).trim() : line;
+      
+      let setting = "";
+      let location = "";
+      let time = "";
+      
+      // Parse e.g. "INT. BRICK'S PATIO - DAY"
+      const match = text.match(/^(INT\.|EXT\.|INT|EXT|EST|I\/E)\s+(.*?)(?:\s*-\s*(.*))?$/i);
+      if (match) {
+        setting = match[1] ? match[1].trim() : "";
+        location = match[2] ? match[2].trim() : "";
+        time = match[3] ? match[3].trim() : "";
+      }
+
+      elements.push({ 
+        type: "scene_heading", 
+        text,
+        metadata: { setting, location, time }
+      });
       currentCharacter = "";
     }
     // Character Names (Simple heuristic: uppercase and no punctuation)
