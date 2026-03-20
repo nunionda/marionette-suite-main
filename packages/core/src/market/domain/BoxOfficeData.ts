@@ -9,4 +9,5 @@ export interface BoxOfficeData {
    * Useful for downstream Actor Profitability and Star Power ML features.
    */
   topCast: string[];
+  genres: string[];
 }

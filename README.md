@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Phase 3 (Market Intelligence Predictor)**](./docs/plans/02-phase3-market-predictor.md)
 - [**Plan: Phase 2 (Creative NLP Engine)**](./docs/plans/01-phase2-creative-nlp.md)
 
 - [Result: Session 1 (Project Foundation) ](./docs/results/session-1-foundation.md) - Fountain parser, PDF integration, DDD.
@@ -12,6 +13,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [Result: Session 4 (Market Data Integration)](./docs/results/session-4-market-data.md) - TMDB API Client, ROI math, BoxOfficeData Domain.
 - [**Result: Session 5 (Beat Sheet & Multi-LLM)**](./docs/results/session-5-phase2-beat-sheet.md) - Multi-LLM Factory (OpenAI, Anthropic, Gemini) & Beat Sheet narrative generator.
 - [**Result: Session 6 (Emotion Graph, Character Network, RAG)**](./docs/results/session-6-phase2-emotion-network.md) - Pinecone RAG setup, Determistic Character Line Parsing, Scene-by-scene emotional valence scoring.
+- [**Result: Session 7 (Market Intelligence Predictor)**](./docs/results/session-7-phase3-predictor.md) - ROI Tier Forecasting, MPAA Rating Classification, and Comp Film Benchmarking.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
