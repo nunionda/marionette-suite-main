@@ -1294,11 +1294,11 @@ input:focus-visible {
   .print-section-header {
     display: flex !important;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.4rem;
     border-top: 2px solid #1a1a1a;
-    padding-top: 0.75rem;
-    margin: 1.5rem 0 0.75rem;
-    font-size: 14pt;
+    padding-top: 0.5rem;
+    margin: 0.75rem 0 0.4rem;
+    font-size: 11pt;
     font-weight: 700;
     color: #1a1a1a;
   }
@@ -1306,13 +1306,13 @@ input:focus-visible {
   .print-section-number {
     background: #1a1a1a;
     color: white;
-    width: 1.6rem;
-    height: 1.6rem;
+    width: 1.3rem;
+    height: 1.3rem;
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 10pt;
+    font-size: 8pt;
     font-weight: 700;
     flex-shrink: 0;
     -webkit-print-color-adjust: exact;
@@ -1333,14 +1333,16 @@ input:focus-visible {
   .skip-link,
   .analysis-progress,
   .dashboard-header,
-  .btn-locale {
+  .btn-locale,
+  .btn-toggle-all,
+  .coverage-categories-header {
     display: none !important;
   }
 
   /* ─── Page setup ─── */
   @page {
     size: A4;
-    margin: 15mm 20mm;
+    margin: 12mm 15mm;
   }
 
   /* ─── Reset dark theme → print ─── */
@@ -1366,27 +1368,29 @@ input:focus-visible {
     color: #1a1a1a !important;
     padding: 0 !important;
     min-height: auto !important;
-    font-size: 10pt;
-    line-height: 1.5;
+    font-size: 9pt;
+    line-height: 1.4;
   }
 
   /* ─── Typography ─── */
-  h1 { font-size: 18pt; color: #1a1a1a; }
-  h2 { font-size: 14pt; color: #1a1a1a; }
-  h3 { font-size: 12pt; color: #1a1a1a; }
+  h1 { font-size: 16pt; color: #1a1a1a; margin: 0; }
+  h2 { font-size: 12pt; color: #1a1a1a; margin: 0; }
+  h3 { font-size: 10pt; color: #1a1a1a; margin: 0; }
+  p { margin: 0.2rem 0; }
 
   .score-value { color: #1a1a1a; }
-  .stat-value { color: #1a1a1a; font-size: 14pt; }
+  .stat-value { color: #1a1a1a; font-size: 12pt; }
 
-  /* ─── Glass panel → clean card ─── */
+  /* ─── Glass panel → compact card ─── */
   .glass-panel {
     background: white !important;
     backdrop-filter: none !important;
     box-shadow: none !important;
     border: 1px solid #ddd !important;
+    border-radius: 4px !important;
     break-inside: avoid;
-    padding: 1rem !important;
-    margin-bottom: 0.75rem;
+    padding: 0.6rem 0.75rem !important;
+    margin-bottom: 0.4rem;
   }
 
   /* ─── Report Cover ─── */
@@ -1402,23 +1406,23 @@ input:focus-visible {
     display: flex;
     flex-direction: column;
     border: 3px solid #1a1a1a;
-    padding: 3rem;
+    padding: 2.5rem;
   }
 
   .report-cover-top {
     text-align: right;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .report-cover-label {
-    font-size: 9pt;
+    font-size: 8pt;
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
     color: #999;
     border: 1px solid #999;
     display: inline-block;
-    padding: 0.2rem 0.8rem;
+    padding: 0.15rem 0.6rem;
   }
 
   .report-cover-main {
@@ -1429,18 +1433,18 @@ input:focus-visible {
   }
 
   .report-cover-title {
-    font-size: 36pt !important;
+    font-size: 30pt !important;
     font-weight: 800;
     line-height: 1.1;
-    margin: 0 0 2rem;
+    margin: 0 0 1.5rem;
     color: #1a1a1a;
   }
 
   .report-cover-divider {
-    width: 80px;
-    height: 4px;
+    width: 60px;
+    height: 3px;
     background: #1a1a1a;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -1448,7 +1452,7 @@ input:focus-visible {
   .report-cover-meta {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    gap: 0.75rem;
   }
 
   .report-cover-meta-item {
@@ -1457,15 +1461,15 @@ input:focus-visible {
   }
 
   .report-cover-meta-label {
-    font-size: 8pt;
+    font-size: 7pt;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #888;
-    margin-bottom: 0.2rem;
+    margin-bottom: 0.15rem;
   }
 
   .report-cover-meta-value {
-    font-size: 12pt;
+    font-size: 11pt;
     font-weight: 600;
     color: #1a1a1a;
   }
@@ -1473,9 +1477,9 @@ input:focus-visible {
   .report-cover-stats {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-top: 3rem;
-    padding-top: 2rem;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
     border-top: 1px solid #ddd;
   }
 
@@ -1483,17 +1487,17 @@ input:focus-visible {
     text-align: center;
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.2rem;
   }
 
   .report-cover-stat-value {
-    font-size: 18pt;
+    font-size: 16pt;
     font-weight: 800;
     color: #1a1a1a;
   }
 
   .report-cover-stat-label {
-    font-size: 8pt;
+    font-size: 7pt;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #888;
@@ -1501,49 +1505,45 @@ input:focus-visible {
 
   .report-cover-score {
     text-align: center;
-    margin-top: 1.5rem;
-    padding: 1rem;
+    margin-top: 1rem;
+    padding: 0.75rem;
     border: 2px solid #1a1a1a;
     display: inline-block;
     align-self: center;
   }
 
   .report-cover-score-number {
-    font-size: 32pt;
+    font-size: 28pt;
     font-weight: 800;
     color: #1a1a1a;
   }
 
   .report-cover-score-suffix {
-    font-size: 14pt;
+    font-size: 12pt;
     color: #888;
   }
 
   .report-cover-score-label {
     display: block;
-    font-size: 8pt;
+    font-size: 7pt;
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #888;
-    margin-top: 0.3rem;
+    margin-top: 0.2rem;
   }
 
   .report-cover-footer {
-    margin-top: 2rem;
-    padding-top: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 0.75rem;
     border-top: 1px solid #ddd;
     display: flex;
     justify-content: space-between;
-    font-size: 8pt;
+    font-size: 7pt;
     color: #888;
   }
 
-  /* ─── Page breaks ─── */
+  /* ─── Page breaks (minimal) ─── */
   #coverage {
-    page-break-before: always;
-  }
-
-  #production {
     page-break-before: always;
   }
 
@@ -1551,60 +1551,138 @@ input:focus-visible {
     page-break-before: always;
   }
 
-  /* ─── Grid layout → print flow ─── */
+  /* ─── Grid layout → compact print flow ─── */
   .grid-layout {
     display: block !important;
   }
 
   .grid-layout > * {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.4rem;
     break-inside: avoid;
   }
 
-  /* Stat cards: 4-across row */
+  /* Stat cards: 4-across compact row */
   .stat-card {
     display: inline-block !important;
-    width: 23% !important;
+    width: 23.5% !important;
     vertical-align: top;
     text-align: center;
     border: 1px solid #ddd !important;
-    margin-right: 1%;
+    margin-right: 0.8%;
+    padding: 0.4rem 0.5rem !important;
   }
 
-  /* Chart */
+  .stat-card h3 {
+    font-size: 8pt;
+    color: #666;
+    margin-bottom: 0.1rem;
+  }
+
+  .stat-card .icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  /* Chart — compact */
   .main-chart {
     width: 100%;
-    height: 280px !important;
-    margin-bottom: 0.75rem;
+    height: 220px !important;
+    margin-bottom: 0.4rem;
+    padding: 0.5rem !important;
   }
 
-  /* ─── Coverage ─── */
+  .main-chart h3 {
+    margin-bottom: 0.5rem !important;
+  }
+
+  /* ─── Coverage — dense 2-column ─── */
   .coverage-section {
     margin-top: 0;
   }
 
+  .coverage-header {
+    padding: 0.6rem 0.75rem !important;
+  }
+
+  .score-circle {
+    width: 50px;
+    height: 50px;
+  }
+
   .coverage-categories {
-    grid-template-columns: 1fr 1fr;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.35rem !important;
+  }
+
+  .coverage-category-card {
+    padding: 0.5rem 0.6rem !important;
   }
 
   .coverage-category-card .subcategories {
     display: flex !important;
     flex-direction: column;
+    gap: 0.2rem !important;
+  }
+
+  .subcategory-item {
+    padding: 0.25rem 0.4rem !important;
+  }
+
+  .subcategory-assessment {
+    font-size: 7.5pt !important;
+    margin-top: 0.1rem !important;
   }
 
   .strengths-weaknesses {
+    display: grid !important;
     grid-template-columns: 1fr 1fr;
+    gap: 0.35rem;
   }
 
-  /* ─── Production ─── */
+  .sw-list li {
+    font-size: 8pt;
+    padding: 0.15rem 0;
+  }
+
+  .coverage-synopsis {
+    padding: 0.5rem 0.6rem !important;
+  }
+
+  .coverage-synopsis p {
+    font-size: 8.5pt;
+  }
+
+  .recommendation-box {
+    padding: 0.5rem 0.6rem !important;
+  }
+
+  .recommendation-box p {
+    font-size: 8.5pt;
+  }
+
+  /* ─── Production — compact 2-column ─── */
   .production-section {
     margin-top: 0;
+    page-break-before: always;
+  }
+
+  .production-header {
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  .prod-stat-inline {
+    gap: 0.1rem;
+  }
+
+  .prod-stat-inline span:last-child {
+    font-size: 1rem !important;
   }
 
   .production-grid {
     display: grid !important;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    gap: 0.4rem;
   }
 
   .production-grid > * {
@@ -1617,13 +1695,50 @@ input:focus-visible {
 
   .budget-breakdown {
     grid-template-columns: repeat(5, 1fr);
+    gap: 0.3rem;
   }
 
-  /* ─── Character panels ─── */
-  .sidebar-panel,
-  .char-relationships-panel,
+  .budget-item {
+    font-size: 8pt;
+  }
+
+  .location-item {
+    padding: 0.2rem 0 !important;
+    font-size: 8.5pt;
+  }
+
+  .vfx-item {
+    padding: 0.2rem 0 !important;
+  }
+
+  .cast-heat-row {
+    margin-bottom: 0.2rem;
+  }
+
+  /* ─── Character panels — side-by-side where possible ─── */
+  .sidebar-panel {
+    display: inline-block !important;
+    width: 48% !important;
+    vertical-align: top;
+    margin-right: 1%;
+  }
+
+  .char-relationships-panel {
+    display: inline-block !important;
+    width: 48% !important;
+    vertical-align: top;
+  }
+
   .voice-panel {
     width: 100%;
+  }
+
+  .character-item {
+    padding: 0.4rem 0 !important;
+  }
+
+  .relationship-row {
+    padding: 0.2rem 0 !important;
   }
 
   .diversity-panel,
@@ -1634,22 +1749,57 @@ input:focus-visible {
     margin-right: 1%;
   }
 
-  /* ─── Narrative Arc ─── */
+  /* ─── Narrative Arc — compact ─── */
   .arc-panel {
     width: 100%;
   }
 
   .arc-footer {
+    display: grid !important;
     grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
   }
 
-  /* ─── Market panels ─── */
+  .turning-points {
+    gap: 0.2rem !important;
+  }
+
+  .tp-chip {
+    font-size: 7.5pt !important;
+    padding: 0.15rem 0.3rem !important;
+  }
+
+  .pacing-issue {
+    padding: 0.2rem 0.3rem !important;
+    font-size: 8pt;
+  }
+
+  /* ─── Market panels — 2-column ROI+Rating ─── */
   .detail-panel-wide {
-    width: 100%;
+    display: inline-block !important;
+    width: 58% !important;
+    vertical-align: top;
+    margin-right: 1%;
   }
 
   .detail-panel-narrow {
-    width: 100%;
+    display: inline-block !important;
+    width: 39% !important;
+    vertical-align: top;
+  }
+
+  .detail-reasoning {
+    font-size: 8pt !important;
+    line-height: 1.3;
+  }
+
+  .detail-metrics {
+    gap: 0.5rem !important;
+  }
+
+  .rating-reasons li {
+    font-size: 8pt;
+    padding: 0.1rem 0;
   }
 
   .comps-panel {
@@ -1658,24 +1808,38 @@ input:focus-visible {
 
   .comps-grid {
     grid-template-columns: repeat(3, 1fr) !important;
-    gap: 0.5rem !important;
+    gap: 0.35rem !important;
   }
 
-  /* ─── Beat Sheet ─── */
+  .comp-card {
+    padding: 0.4rem 0.5rem !important;
+    font-size: 8.5pt;
+  }
+
+  .comp-stats-row {
+    gap: 0.3rem !important;
+  }
+
+  .trait-tag {
+    font-size: 7pt !important;
+    padding: 0.1rem 0.25rem !important;
+  }
+
+  /* ─── Beat Sheet — dense 3-column ─── */
   .beat-sheet-container {
     width: 100%;
     page-break-before: always;
   }
 
   .beat-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.3rem;
   }
 
   .beat-card {
     border-left: 3px solid #555 !important;
     background: #f9f9f9 !important;
-    padding: 0.5rem 0.75rem;
+    padding: 0.35rem 0.5rem;
     break-inside: avoid;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
@@ -1686,9 +1850,41 @@ input:focus-visible {
     box-shadow: none;
   }
 
+  .beat-card-name {
+    font-size: 8.5pt !important;
+  }
+
+  .beat-card-scenes {
+    font-size: 7pt !important;
+  }
+
+  .beat-card-desc {
+    font-size: 7.5pt !important;
+    line-height: 1.3 !important;
+    margin: 0.15rem 0 0 !important;
+  }
+
+  .beat-act-header {
+    margin-bottom: 0.3rem !important;
+  }
+
+  .beat-act-label {
+    font-size: 9pt !important;
+  }
+
+  .beat-act-count {
+    font-size: 7.5pt !important;
+  }
+
   .beat-act-line {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
+  }
+
+  .beat-act-section + .beat-act-section {
+    border-top: none !important;
+    padding-top: 0 !important;
+    margin-top: 0.3rem !important;
   }
 
   /* ─── Color preservation (comprehensive) ─── */
@@ -1719,7 +1915,9 @@ input:focus-visible {
   .budget-range-bar::after,
   .progress-bar-fill,
   .beat-card,
-  .beat-act-line {
+  .beat-act-line,
+  .score-circle,
+  .category-score-badge {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -1814,13 +2012,13 @@ input:focus-visible {
 .btn-locale {
   display: flex;
   align-items: center;
-  gap: 0.3rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid var(--border-glass);
+  gap: 0.35rem;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid var(--accent-gold);
   border-radius: 8px;
-  padding: 0.4rem 0.7rem;
-  color: var(--text-dim);
-  font-size: 0.75rem;
+  padding: 0.45rem 0.8rem;
+  color: var(--accent-gold);
+  font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
@@ -1828,9 +2026,13 @@ input:focus-visible {
 }
 
 .btn-locale:hover {
-  border-color: var(--accent-gold);
+  background: rgba(212, 175, 55, 0.2);
   color: white;
-  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
+}
+
+.btn-locale:active {
+  transform: scale(0.95);
 }
 
 .mock-engines {

@@ -33,6 +33,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 16 (Benchmarker Expansion)**](./docs/results/session-16-phase12-benchmarker-expansion.md) - 50-film catalog, cosine similarity matching, LLM trope analysis, enhanced comp cards UI.
 - [**Result: Session 17 (UI/UX PDCA Improvement)**](./docs/results/session-17-uiux-pdca-improvement.md) - Component decomposition (1041→200 lines), CSS variables, responsive breakpoints, loading progress, section nav, accessibility.
 - [**Result: Session 18 (Design Refinements)**](./docs/results/session-18-design-refinements.md) - KO/EN toggle, mock warning accuracy, filename$ convention, coverage expand-all, dynamic emotion scenes, beat sheet responsive grid.
+- [**Result: Session 19 (i18n & Print Density)**](./docs/results/session-19-i18n-print-density.md) - Full KO/EN i18n across 8 components, Character Prominence legacy robustness, dense professional PDF export layout.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 

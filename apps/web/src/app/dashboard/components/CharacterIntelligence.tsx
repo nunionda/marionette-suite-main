@@ -5,31 +5,47 @@ import { GitBranch, AudioWaveform, PieChart } from 'lucide-react';
 
 interface CharacterIntelligenceProps {
   characterNetwork: any;
+  locale?: 'en' | 'ko';
 }
 
-export default function CharacterIntelligence({ characterNetwork }: CharacterIntelligenceProps) {
-  const characters = characterNetwork?.characters ?? characterNetwork ?? [];
+export default function CharacterIntelligence({ characterNetwork, locale = 'en' }: CharacterIntelligenceProps) {
+  const ko = locale === 'ko';
+  const characters: any[] = characterNetwork?.characters ?? (Array.isArray(characterNetwork) ? characterNetwork : []);
   const edges = characterNetwork?.edges;
   const diversityMetrics = characterNetwork?.diversityMetrics;
+
+  if (characters.length === 0) {
+    return (
+      <div className="glass-panel sidebar-panel">
+        <h3>{ko ? '캐릭터 비중' : 'Character Prominence'}</h3>
+        <p style={{ color: 'var(--text-dim)', textAlign: 'center', padding: '1rem 0' }}>
+          {ko ? '캐릭터 데이터가 없습니다' : 'No character data available'}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
       {/* Character Prominence */}
       <div className="glass-panel sidebar-panel">
-        <h3>Character Prominence</h3>
+        <h3>{ko ? '캐릭터 비중' : 'Character Prominence'}</h3>
         <div style={{ marginTop: '1rem' }}>
-          {characters.map((char: any) => (
-            <div key={char.name} className="character-item">
+          {characters.map((char: any, idx: number) => (
+            <div key={`${char.name}-${idx}`} className="character-item">
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontWeight: 600 }}>{char.name}</span>
-                  <span style={{ fontWeight: 600 }}>{char.totalLines || '—'}</span>
+                  <span style={{ fontWeight: 600 }}>{char.totalLines ?? '—'}</span>
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between' }}>
                   <span>{char.role}</span>
+                  {char.totalWords != null && (
+                    <span>{char.totalWords} {ko ? '단어' : 'words'}</span>
+                  )}
                   {char.voiceScore != null && (
                     <span style={{ color: char.voiceScore >= 60 ? '#2ecc71' : char.voiceScore >= 30 ? '#f39c12' : 'var(--text-dim)' }}>
-                      Voice: {char.voiceScore}
+                      {ko ? '보이스' : 'Voice'}: {char.voiceScore}
                     </span>
                   )}
                 </div>
@@ -44,7 +60,7 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
         <div className="glass-panel char-relationships-panel">
           <h3 style={{ marginBottom: '1rem' }}>
             <GitBranch size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--accent-blue)' }} />
-            Character Relationships
+            {ko ? '캐릭터 관계' : 'Character Relationships'}
           </h3>
           <div className="relationship-list">
             {edges.slice(0, 12).map((edge: any, i: number) => {
@@ -58,9 +74,9 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
                     <span>{edge.target}</span>
                   </div>
                   <div className="relationship-stats">
-                    <span className="detail-label">{edge.weight} scenes</span>
+                    <span className="detail-label">{edge.weight} {ko ? '장면' : 'scenes'}</span>
                     {edge.dialogueExchanges > 0 && (
-                      <span className="detail-label">{edge.dialogueExchanges} exchanges</span>
+                      <span className="detail-label">{edge.dialogueExchanges} {ko ? '교환' : 'exchanges'}</span>
                     )}
                   </div>
                   <div className="category-bar" style={{ height: '4px' }}>
@@ -81,7 +97,7 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
         <div className="glass-panel voice-panel">
           <h3 style={{ marginBottom: '1rem' }}>
             <AudioWaveform size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#9b59b6' }} />
-            Voice Uniqueness
+            {ko ? '보이스 고유성' : 'Voice Uniqueness'}
           </h3>
           <div className="voice-list">
             {(characters as any[])
@@ -114,7 +130,7 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
         <div className="glass-panel diversity-panel">
           <h3 style={{ marginBottom: '1rem' }}>
             <PieChart size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#2ecc71' }} />
-            Dialogue Distribution
+            {ko ? '대사 분포' : 'Dialogue Distribution'}
           </h3>
           <div className="diversity-stats">
             <div className="diversity-stat-item">
@@ -123,7 +139,7 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
               }}>
                 <span className="diversity-donut-label">{diversityMetrics.speakingRoleDistribution.top1Pct}%</span>
               </div>
-              <span className="detail-label">Lead Share</span>
+              <span className="detail-label">{ko ? '주연 비율' : 'Lead Share'}</span>
             </div>
             <div className="diversity-stat-item">
               <div className="diversity-donut" style={{
@@ -131,12 +147,12 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
               }}>
                 <span className="diversity-donut-label">{diversityMetrics.speakingRoleDistribution.top3Pct}%</span>
               </div>
-              <span className="detail-label">Top 3 Share</span>
+              <span className="detail-label">{ko ? '상위 3인 비율' : 'Top 3 Share'}</span>
             </div>
             <div className="diversity-stat-item">
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{diversityMetrics.centralityGap}</div>
-                <span className="detail-label">Centrality Gap</span>
+                <span className="detail-label">{ko ? '중심성 격차' : 'Centrality Gap'}</span>
               </div>
             </div>
           </div>

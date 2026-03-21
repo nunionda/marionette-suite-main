@@ -5,16 +5,18 @@ import { Waypoints, AlertTriangle } from 'lucide-react';
 
 interface NarrativeArcPanelProps {
   narrativeArc: any;
+  locale?: 'en' | 'ko';
 }
 
-export default function NarrativeArcPanel({ narrativeArc }: NarrativeArcPanelProps) {
+export default function NarrativeArcPanel({ narrativeArc, locale = 'en' }: NarrativeArcPanelProps) {
+  const ko = locale === 'ko';
   return (
     <div className="glass-panel arc-panel">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
         <div>
           <h3 style={{ margin: 0 }}>
             <Waypoints size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#9b59b6' }} />
-            Narrative Arc
+            {ko ? '서사 아크' : 'Narrative Arc'}
           </h3>
           <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
             {narrativeArc.arcDescription}
@@ -33,7 +35,7 @@ export default function NarrativeArcPanel({ narrativeArc }: NarrativeArcPanelPro
       {/* Turning Points */}
       {narrativeArc.turningPoints?.length > 0 && (
         <div style={{ marginBottom: '1rem' }}>
-          <div className="detail-label" style={{ marginBottom: '0.5rem' }}>Turning Points</div>
+          <div className="detail-label" style={{ marginBottom: '0.5rem' }}>{ko ? '전환점' : 'Turning Points'}</div>
           <div className="turning-points">
             {narrativeArc.turningPoints.filter((tp: any) => tp.type !== 'plateau').slice(0, 8).map((tp: any, i: number) => (
               <span key={i} className={`tp-chip tp-${tp.type}`}>
@@ -47,7 +49,7 @@ export default function NarrativeArcPanel({ narrativeArc }: NarrativeArcPanelPro
       <div className="arc-footer">
         {/* Genre Fit */}
         <div className="genre-fit">
-          <div className="detail-label">Genre Fit</div>
+          <div className="detail-label">{ko ? '장르 적합성' : 'Genre Fit'}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
             <div className="category-bar" style={{ flex: 1 }}>
               <div className="category-bar-fill" style={{
@@ -67,7 +69,7 @@ export default function NarrativeArcPanel({ narrativeArc }: NarrativeArcPanelPro
           <div className="pacing-issues">
             <div className="detail-label" style={{ marginBottom: '0.4rem' }}>
               <AlertTriangle size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle', color: '#f39c12' }} />
-              Pacing Issues ({narrativeArc.pacingIssues.length})
+              {ko ? `페이싱 이슈 (${narrativeArc.pacingIssues.length})` : `Pacing Issues (${narrativeArc.pacingIssues.length})`}
             </div>
             {narrativeArc.pacingIssues.map((issue: any, i: number) => (
               <div key={i} className={`pacing-issue pacing-${issue.severity}`}>

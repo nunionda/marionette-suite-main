@@ -5,32 +5,34 @@ import { Clapperboard, DollarSign, MapPin, Sparkles, Users } from 'lucide-react'
 
 interface ProductionBreakdownProps {
   production: any;
+  locale?: 'en' | 'ko';
 }
 
-export default function ProductionBreakdown({ production }: ProductionBreakdownProps) {
+export default function ProductionBreakdown({ production, locale = 'en' }: ProductionBreakdownProps) {
+  const ko = locale === 'ko';
   return (
     <div className="production-section">
       <div className="glass-panel production-header">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, fontSize: '1.4rem' }}>
             <Clapperboard size={22} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--accent-gold)' }} />
-            Production Feasibility
+            {ko ? '제작 타당성' : 'Production Feasibility'}
           </h2>
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
             <div className="prod-stat-inline">
-              <span className="detail-label">Shooting Days</span>
+              <span className="detail-label">{ko ? '촬영 일수' : 'Shooting Days'}</span>
               <span style={{ fontWeight: 700, fontSize: '1.3rem' }}>{production.estimatedShootingDays}</span>
             </div>
             <div className="prod-stat-inline">
-              <span className="detail-label">Locations</span>
+              <span className="detail-label">{ko ? '촬영지' : 'Locations'}</span>
               <span style={{ fontWeight: 700, fontSize: '1.3rem' }}>{production.uniqueLocationCount}</span>
             </div>
             <div className="prod-stat-inline">
-              <span className="detail-label">Speaking Roles</span>
+              <span className="detail-label">{ko ? '대사 배역' : 'Speaking Roles'}</span>
               <span style={{ fontWeight: 700, fontSize: '1.3rem' }}>{production.totalSpeakingRoles}</span>
             </div>
             <div className="prod-stat-inline">
-              <span className="detail-label">VFX Score</span>
+              <span className="detail-label">{ko ? 'VFX 점수' : 'VFX Score'}</span>
               <span style={{
                 fontWeight: 700, fontSize: '1.3rem',
                 color: production.vfxComplexityScore > 60 ? '#e74c3c' : production.vfxComplexityScore > 30 ? '#f39c12' : '#2ecc71'
@@ -48,7 +50,7 @@ export default function ProductionBreakdown({ production }: ProductionBreakdownP
           <div className="glass-panel production-budget">
             <h3 style={{ margin: '0 0 1rem' }}>
               <DollarSign size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: '#2ecc71' }} />
-              Budget Estimate
+              {ko ? '예산 추정' : 'Budget Estimate'}
             </h3>
             <div className="budget-range">
               <div className="budget-range-bar">
@@ -81,7 +83,7 @@ export default function ProductionBreakdown({ production }: ProductionBreakdownP
         <div className="glass-panel production-locations">
           <h3 style={{ margin: '0 0 0.75rem' }}>
             <MapPin size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: 'var(--accent-blue)' }} />
-            Locations
+            {ko ? '촬영지' : 'Locations'}
             <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginLeft: '0.5rem' }}>
               INT {production.intExtRatio?.int}% / EXT {production.intExtRatio?.ext}%
             </span>
@@ -107,7 +109,7 @@ export default function ProductionBreakdown({ production }: ProductionBreakdownP
           <div className="glass-panel production-vfx">
             <h3 style={{ margin: '0 0 0.75rem' }}>
               <Sparkles size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: '#9b59b6' }} />
-              VFX Requirements ({production.vfxRequirements.length} shots)
+              {ko ? `VFX 요구사항 (${production.vfxRequirements.length}개)` : `VFX Requirements (${production.vfxRequirements.length} shots)`}
             </h3>
             <div className="vfx-list">
               {production.vfxRequirements.map((vfx: any, i: number) => (
@@ -132,7 +134,7 @@ export default function ProductionBreakdown({ production }: ProductionBreakdownP
         <div className="glass-panel production-cast">
           <h3 style={{ margin: '0 0 0.75rem' }}>
             <Users size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: 'var(--accent-gold)' }} />
-            Cast Breakdown
+            {ko ? '캐스트 구성' : 'Cast Breakdown'}
           </h3>
           <div className="cast-heatmap">
             {production.cast?.slice(0, 12).map((c: any, i: number) => {

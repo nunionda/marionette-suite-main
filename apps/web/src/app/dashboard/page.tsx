@@ -156,34 +156,36 @@ export default function Dashboard() {
     setMovieId('');
   }
 
+  const ko = locale === 'ko';
+
   return (
     <main className="dashboard-container" aria-label="Script Intelligence Dashboard">
       <a href="#stats" className="skip-link">Skip to results</a>
       <header className="dashboard-header">
         <div>
-          <h1 className="dashboard-title">Script Intelligence</h1>
+          <h1 className="dashboard-title">{ko ? '시나리오 분석' : 'Script Intelligence'}</h1>
           <p className="dashboard-subtitle">
-            {data ? `Project ID: ${data.scriptId}` : (locale === 'ko' ? '시나리오를 업로드하여 분석을 시작하세요' : 'Upload a screenplay to begin analysis')}
+            {data ? `${ko ? '프로젝트' : 'Project'} ID: ${data.scriptId}` : (ko ? '시나리오를 업로드하여 분석을 시작하세요' : 'Upload a screenplay to begin analysis')}
           </p>
         </div>
         <div className="header-actions">
           <button
             className="btn-locale no-print"
             onClick={() => setLocale(prev => prev === 'en' ? 'ko' : 'en')}
-            aria-label={locale === 'en' ? 'Switch to Korean' : '영어로 전환'}
-            title={locale === 'en' ? '한국어로 전환' : 'Switch to English'}
+            aria-label={ko ? '영어로 전환' : 'Switch to Korean'}
+            title={ko ? 'Switch to English' : '한국어로 전환'}
           >
             <Globe size={16} />
-            <span>{locale === 'en' ? 'KO' : 'EN'}</span>
+            <span>{ko ? 'EN' : 'KO'}</span>
           </button>
           {data && (
             <div className="header-badges">
-              <div className="badge badge-r">Rating: {data.summary.predictedRating}</div>
+              <div className="badge badge-r">{ko ? '등급' : 'Rating'}: {data.summary.predictedRating}</div>
               <div className={`badge ${data.summary.predictedRoi === 'Blockbuster' ? 'badge-blockbuster' : 'badge-hit'}`}>
                 ROI: {data.summary.predictedRoi}
               </div>
               <button className="btn-export no-print" onClick={() => window.print()}>
-                <Download size={16} /> Export PDF
+                <Download size={16} /> {ko ? 'PDF 내보내기' : 'Export PDF'}
               </button>
             </div>
           )}
@@ -194,8 +196,8 @@ export default function Dashboard() {
         <div className="warning-banner">
           <AlertCircle size={16} />
           <div>
-            <strong>{locale === 'ko' ? '주의' : 'Warning'}:</strong>{' '}
-            {locale === 'ko'
+            <strong>{ko ? '주의' : 'Warning'}:</strong>{' '}
+            {ko
               ? 'Mock 데이터가 사용된 항목이 있습니다. 해당 결과는 실제 AI 분석이 아닌 샘플 데이터입니다.'
               : data.warning}
             {data.mockEngines?.length > 0 && (
@@ -260,7 +262,7 @@ export default function Dashboard() {
           <div className="print-section-header print-only">
             <span className="print-section-number">1</span> Script Coverage Report
           </div>
-          <CoverageReport coverage={data.coverage} />
+          <CoverageReport coverage={data.coverage} locale={locale} />
         </section>
       )}
 
@@ -270,7 +272,7 @@ export default function Dashboard() {
           <div className="print-section-header print-only">
             <span className="print-section-number">2</span> Production Feasibility
           </div>
-          <ProductionBreakdown production={data.production} />
+          <ProductionBreakdown production={data.production} locale={locale} />
         </section>
       )}
 
@@ -283,12 +285,12 @@ export default function Dashboard() {
 
           <div id="stats" className="glass-panel stat-card">
             <Film className="icon" style={{ color: 'var(--accent-gold)' }} />
-            <h3>Protagonist</h3>
+            <h3>{ko ? '주인공' : 'Protagonist'}</h3>
             <p className="stat-value">{data.summary.protagonist}</p>
           </div>
           <div className="glass-panel stat-card">
             <TrendingUp className="icon" style={{ color: 'var(--color-success-dark)' }} />
-            <h3>ROI Multiplier</h3>
+            <h3>{ko ? 'ROI 배수' : 'ROI Multiplier'}</h3>
             <p className="stat-value">
               {data.predictions?.roi?.predictedMultiplier
                 ? `${data.predictions.roi.predictedMultiplier}x`
@@ -297,24 +299,24 @@ export default function Dashboard() {
           </div>
           <div className="glass-panel stat-card">
             <Users className="icon" style={{ color: 'var(--accent-blue)' }} />
-            <h3>Cast Members</h3>
+            <h3>{ko ? '등장인물' : 'Cast Members'}</h3>
             <p className="stat-value">
               {(data.characterNetwork?.characters ?? data.characterNetwork)?.length ?? 0}
             </p>
           </div>
           <div className="glass-panel stat-card">
             <Activity className="icon" style={{ color: 'var(--color-danger)' }} />
-            <h3>Scenes</h3>
+            <h3>{ko ? '장면 수' : 'Scenes'}</h3>
             <p className="stat-value">{data.features?.sceneCount ?? '—'}</p>
           </div>
 
-          <EmotionChart emotionGraph={data.emotionGraph} />
+          <EmotionChart emotionGraph={data.emotionGraph} locale={locale} />
 
           <div id="characters" style={{ display: 'contents' }}>
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">4</span> Character Intelligence
             </div>
-            <CharacterIntelligence characterNetwork={data.characterNetwork} />
+            <CharacterIntelligence characterNetwork={data.characterNetwork} locale={locale} />
           </div>
 
           {data.narrativeArc && (
@@ -322,7 +324,7 @@ export default function Dashboard() {
               <div className="print-section-header print-only" style={{ width: '100%' }}>
                 <span className="print-section-number">5</span> Narrative Arc
               </div>
-              <NarrativeArcPanel narrativeArc={data.narrativeArc} />
+              <NarrativeArcPanel narrativeArc={data.narrativeArc} locale={locale} />
             </div>
           )}
 
@@ -330,14 +332,14 @@ export default function Dashboard() {
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">6</span> Market Predictions
             </div>
-            <MarketPredictions predictions={data.predictions} tropes={data.tropes} />
+            <MarketPredictions predictions={data.predictions} tropes={data.tropes} locale={locale} />
           </div>
 
           <div id="beats" style={{ display: 'contents' }}>
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">7</span> Narrative Beat Sheet
             </div>
-            <BeatSheetTimeline beatSheet={data.beatSheet} />
+            <BeatSheetTimeline beatSheet={data.beatSheet} locale={locale} />
           </div>
         </div>
       )}

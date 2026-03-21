@@ -5,6 +5,7 @@ import { CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CoverageReportProps {
   coverage: any;
+  locale?: 'en' | 'ko';
 }
 
 function scoreColor(score: number) {
@@ -13,14 +14,21 @@ function scoreColor(score: number) {
   return 'var(--color-danger)';
 }
 
-function scoreLabel(score: number) {
+function scoreLabel(score: number, ko: boolean) {
+  if (ko) {
+    if (score >= 80) return '우수';
+    if (score >= 60) return '양호';
+    if (score >= 40) return '보통';
+    return '미흡';
+  }
   if (score >= 80) return 'Excellent';
   if (score >= 60) return 'Good';
   if (score >= 40) return 'Fair';
   return 'Weak';
 }
 
-export default function CoverageReport({ coverage }: CoverageReportProps) {
+export default function CoverageReport({ coverage, locale = 'en' }: CoverageReportProps) {
+  const ko = locale === 'ko';
   const totalCategories = coverage.categories?.length ?? 0;
   const allIndices = new Set(Array.from({ length: totalCategories }, (_, i) => i));
   const [collapsedCategories, setCollapsedCategories] = useState<Set<number>>(new Set());
@@ -44,7 +52,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
       <div className="glass-panel coverage-header">
         <div className="coverage-title-row">
           <div>
-            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>Script Coverage Report</h2>
+            <h2 style={{ margin: 0, fontSize: '1.4rem' }}>{ko ? '시나리오 커버리지 리포트' : 'Script Coverage Report'}</h2>
             <p style={{ color: 'var(--text-dim)', margin: '0.25rem 0 0', fontSize: '0.9rem' }}>
               {coverage.title} — {coverage.genre}
             </p>
@@ -71,7 +79,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
         <div className="coverage-categories-header">
           <button className="btn-toggle-all" onClick={toggleAll}>
             {allExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-            {allExpanded ? 'Collapse All' : 'Expand All'}
+            {allExpanded ? (ko ? '모두 접기' : 'Collapse All') : (ko ? '모두 펼치기' : 'Expand All')}
           </button>
         </div>
       )}
@@ -93,7 +101,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
                         {cat.score}
                       </span>
                       <span className="category-score-label" style={{ color: scoreColor(cat.score) }}>
-                        {scoreLabel(cat.score)}
+                        {scoreLabel(cat.score, ko)}
                       </span>
                       {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                     </div>
@@ -142,7 +150,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
       {/* Synopsis */}
       {coverage.synopsis && (
         <div className="glass-panel coverage-synopsis">
-          <h3 style={{ margin: '0 0 0.5rem' }}>Synopsis</h3>
+          <h3 style={{ margin: '0 0 0.5rem' }}>{ko ? '시놉시스' : 'Synopsis'}</h3>
           <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{coverage.synopsis}</p>
         </div>
       )}
@@ -153,7 +161,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
           <div className="glass-panel sw-col">
             <h3 style={{ margin: '0 0 0.75rem', color: 'var(--color-success)' }}>
               <CheckCircle size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
-              Strengths
+              {ko ? '강점' : 'Strengths'}
             </h3>
             <ul className="sw-list">
               {coverage.strengths?.map((s: string, i: number) => (
@@ -164,7 +172,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
           <div className="glass-panel sw-col">
             <h3 style={{ margin: '0 0 0.75rem', color: 'var(--color-danger)' }}>
               <XCircle size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
-              Weaknesses
+              {ko ? '약점' : 'Weaknesses'}
             </h3>
             <ul className="sw-list sw-list-weak">
               {coverage.weaknesses?.map((w: string, i: number) => (
@@ -178,7 +186,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
       {/* Recommendation */}
       {coverage.recommendation && (
         <div className="glass-panel recommendation-box">
-          <h3 style={{ margin: '0 0 0.5rem' }}>Analyst Recommendation</h3>
+          <h3 style={{ margin: '0 0 0.5rem' }}>{ko ? '애널리스트 의견' : 'Analyst Recommendation'}</h3>
           <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{coverage.recommendation}</p>
         </div>
       )}

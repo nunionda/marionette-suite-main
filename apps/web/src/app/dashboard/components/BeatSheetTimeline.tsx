@@ -5,6 +5,7 @@ import { BarChart3 } from 'lucide-react';
 
 interface BeatSheetTimelineProps {
   beatSheet: any[];
+  locale?: 'en' | 'ko';
 }
 
 const ACT_COLORS: Record<number, string> = {
@@ -19,7 +20,8 @@ const ACT_BG: Record<number, string> = {
   3: 'rgba(243, 156, 18, 0.08)',
 };
 
-export default function BeatSheetTimeline({ beatSheet }: BeatSheetTimelineProps) {
+export default function BeatSheetTimeline({ beatSheet, locale = 'en' }: BeatSheetTimelineProps) {
+  const ko = locale === 'ko';
   const acts = beatSheet.reduce<Record<number, any[]>>((acc, beat) => {
     const act = beat.act || 1;
     if (!acc[act]) acc[act] = [];
@@ -34,7 +36,7 @@ export default function BeatSheetTimeline({ beatSheet }: BeatSheetTimelineProps)
       <div className="glass-panel">
         <h3 style={{ marginBottom: '1.5rem' }}>
           <BarChart3 size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--accent-blue)' }} />
-          Narrative Beat Sheet
+          {ko ? '비트 시트' : 'Narrative Beat Sheet'}
         </h3>
 
         <div className="beat-acts">
@@ -42,9 +44,9 @@ export default function BeatSheetTimeline({ beatSheet }: BeatSheetTimelineProps)
             <div key={actNum} className="beat-act-section">
               <div className="beat-act-header">
                 <span className="beat-act-label" style={{ color: ACT_COLORS[actNum] || 'var(--text-dim)' }}>
-                  Act {actNum}
+                  {ko ? `제${actNum}막` : `Act ${actNum}`}
                 </span>
-                <span className="beat-act-count">{acts[actNum].length} beats</span>
+                <span className="beat-act-count">{acts[actNum].length} {ko ? '비트' : 'beats'}</span>
                 <div className="beat-act-line" style={{ background: ACT_COLORS[actNum] || 'var(--text-dim)' }} />
               </div>
               <div className="beat-grid">
@@ -59,7 +61,7 @@ export default function BeatSheetTimeline({ beatSheet }: BeatSheetTimelineProps)
                     </div>
                     {(beat.sceneStart || beat.sceneEnd) && (
                       <div className="beat-card-scenes">
-                        Scenes {beat.sceneStart}–{beat.sceneEnd}
+                        {ko ? '장면' : 'Scenes'} {beat.sceneStart}–{beat.sceneEnd}
                       </div>
                     )}
                     <p className="beat-card-desc">{beat.description}</p>

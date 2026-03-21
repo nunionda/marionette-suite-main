@@ -5,12 +5,14 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 
 interface EmotionChartProps {
   emotionGraph: any[];
+  locale?: 'en' | 'ko';
 }
 
-export default function EmotionChart({ emotionGraph }: EmotionChartProps) {
+export default function EmotionChart({ emotionGraph, locale = 'en' }: EmotionChartProps) {
+  const ko = locale === 'ko';
   return (
     <div className="glass-panel main-chart">
-      <h3 style={{ marginBottom: '1.5rem' }}>Emotional Valence Arc</h3>
+      <h3 style={{ marginBottom: '1.5rem' }}>{ko ? '감정 밸런스 아크' : 'Emotional Valence Arc'}</h3>
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={emotionGraph}>
           <defs>
@@ -30,7 +32,7 @@ export default function EmotionChart({ emotionGraph }: EmotionChartProps) {
               const d = payload[0].payload;
               return (
                 <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', padding: '0.75rem', maxWidth: '280px' }}>
-                  <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Scene {d.sceneNumber}</div>
+                  <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{ko ? '장면' : 'Scene'} {d.sceneNumber}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.25rem' }}>
                     <span style={{ color: 'var(--accent-gold)' }}>{d.dominantEmotion || '—'}</span>
                     <span style={{ fontWeight: 600, color: d.score >= 0 ? '#2ecc71' : '#e74c3c' }}>{d.score > 0 ? '+' : ''}{d.score}</span>
