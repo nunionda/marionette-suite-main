@@ -17,6 +17,9 @@ import SectionNav from './components/SectionNav';
 import AnalysisProgress from './components/AnalysisProgress';
 import ReportCover from './components/ReportCover';
 import ChatPanel from './components/ChatPanel';
+import SceneExplorer from './components/SceneExplorer';
+import DraftComparison from './components/DraftComparison';
+import StatisticalROIPanel from './components/StatisticalROIPanel';
 
 export default function Dashboard() {
   const [mode, setMode] = useState<ViewMode>('idle');
@@ -325,6 +328,13 @@ export default function Dashboard() {
         </section>
       )}
 
+      {/* Draft Comparison */}
+      {data && reports.length > 1 && (
+        <section className="no-print">
+          <DraftComparison currentScriptId={data.scriptId} reports={reports} locale={locale} />
+        </section>
+      )}
+
       {/* Production Breakdown */}
       {data?.production && (
         <section id="production">
@@ -392,6 +402,12 @@ export default function Dashboard() {
               <span className="print-section-number">6</span> {ko ? '마켓 예측' : 'Market Predictions'}
             </div>
             <MarketPredictions predictions={displayData.predictions} tropes={displayData.tropes} locale={locale} market={data?.market || 'hollywood'} />
+            <StatisticalROIPanel
+              statisticalRoi={displayData.predictions?.statisticalRoi}
+              llmRoi={displayData.predictions?.roi}
+              locale={locale}
+              market={data?.market || 'hollywood'}
+            />
           </div>
 
           <div id="beats" className="grid-section">
@@ -400,6 +416,20 @@ export default function Dashboard() {
             </div>
             <BeatSheetTimeline beatSheet={displayData.beatSheet} locale={locale} />
           </div>
+
+          {displayData.emotionGraph && (
+            <div id="scenes" className="grid-section">
+              <div className="print-section-header print-only" style={{ width: '100%' }}>
+                <span className="print-section-number">8</span> {ko ? '장면 탐색기' : 'Scene Explorer'}
+              </div>
+              <SceneExplorer
+                emotionGraph={displayData.emotionGraph}
+                beatSheet={displayData.beatSheet || []}
+                production={displayData.production}
+                locale={locale}
+              />
+            </div>
+          )}
         </div>
       )}
 

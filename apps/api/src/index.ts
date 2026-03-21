@@ -18,6 +18,8 @@ import {
   NarrativeArcClassifier,
   TropeAnalyzer,
   ScriptChatAgent,
+  DraftComparator,
+  StatisticalROIModel,
   env,
   resolveStrategy,
   type AnalysisStrategyName,
@@ -242,9 +244,13 @@ const app = new Elysia()
     // 9. Comps (deterministic — runs before ROI so comp data feeds into prediction)
     const similarity = benchmarker.findComps(features, tropes, market);
 
-    // 10. ROI Prediction — now with benchmark comp data injected
+    // 10. ROI Prediction — LLM + Statistical k-NN ensemble
     const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features, market, similarity.topComps));
     const roiPrediction = roiResult.data;
+
+    // 10b. Statistical ROI Model (deterministic k-NN regression)
+    const statisticalModel = new StatisticalROIModel();
+    const statisticalROI = statisticalModel.predict(features, market, budgetEstimate.likely);
 
     // 11. Narrative Arc Classification (uses emotion + genre from coverage)
     const emotionProvider = getEngineProvider('emotion');
@@ -302,6 +308,7 @@ const app = new Elysia()
       features: features.metrics,
       predictions: {
         roi: roiPrediction,
+        statisticalRoi: statisticalROI,
         rating: mpaaRating,
         comps: similarity.topComps
       },
@@ -606,6 +613,27 @@ Rules:
         t.Literal('budget'), t.Literal('premium'), t.Literal('long-context')
       ])),
       market: t.Optional(t.Union([t.Literal('hollywood'), t.Literal('korean')])),
+    })
+  })
+
+  .post("/compare", async ({ body }) => {
+    const { oldScriptId, newScriptId } = body as { oldScriptId: string; newScriptId: string };
+
+    const oldReport = await reportRepo.findByScriptId(oldScriptId);
+    if (!oldReport) return { error: `Report not found: ${oldScriptId}` };
+
+    const newReport = await reportRepo.findByScriptId(newScriptId);
+    if (!newReport) return { error: `Report not found: ${newScriptId}` };
+
+    const comparator = new DraftComparator();
+    return comparator.compare(
+      oldReport as unknown as Record<string, any>,
+      newReport as unknown as Record<string, any>,
+    );
+  }, {
+    body: t.Object({
+      oldScriptId: t.String(),
+      newScriptId: t.String(),
     })
   })
 

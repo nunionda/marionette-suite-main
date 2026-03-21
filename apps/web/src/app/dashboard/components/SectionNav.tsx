@@ -17,6 +17,7 @@ const SECTIONS: Section[] = [
   { id: 'arc', label: 'Arc', labelKo: '아크', icon: '📈' },
   { id: 'market', label: 'Market', labelKo: '마켓', icon: '💰' },
   { id: 'beats', label: 'Beats', labelKo: '비트', icon: '🎵' },
+  { id: 'scenes', label: 'Scenes', labelKo: '장면', icon: '🎞️' },
 ];
 
 interface SectionNavProps {
