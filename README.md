@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Frontend Design Overhaul**](./docs/plans/15-frontend-design-overhaul.md)
 - [**Plan: Design & PDF Upgrade**](./docs/plans/14-design-pdf-upgrade.md)
 - [**Plan: Korean Market Expansion**](./docs/plans/13-korean-market-expansion.md)
 - [**Plan: LLM Engine Expansion**](./docs/plans/12-llm-engine-expansion.md)
@@ -47,6 +48,9 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 26 (Design & PDF Upgrade)**](./docs/results/session-26-design-pdf-upgrade.md) - Geist font fix, glass panel elevation, fadeInUp animations, badge glow, provider bar colors, EmotionChart glass tooltip, PDF TOC, per-section page breaks, cover verdict badge.
 - [**Result: Session 27 (UX Fixes & Cancel Button)**](./docs/results/session-27-ux-fixes-cancel-button.md) - SectionNav scroll fix (grid-section), PDF page-break optimization, analysis cancel button with AbortController.
 - [**Result: Session 28 (Autoresearch Prompt Upgrade)**](./docs/results/session-28-autoresearch-prompt-upgrade.md) - 8-category OnDesk-style Coverage, Save the Cat! 15-beat, 3D emotions, benchmark-informed ROI, MPAA/KMRB guidelines, 6→27 feature metrics, 80 films enhanced.
+- [**Result: Session 29 (AI Chat Agent)**](./docs/results/session-29-ai-chat-agent.md) - Report-context Q&A with floating chat panel.
+- [**Result: Session 30 (Phase 3-5 Completion)**](./docs/results/session-30-phase345-completion.md) - Draft Comparison, Statistical k-NN ROI, Scene Explorer.
+- [**Result: Session 31 (Frontend Design Overhaul)**](./docs/results/session-31-frontend-design-overhaul.md) - Landing page, dashboard frame, grid whitespace fix, CSS variable unification, PDF print orphan card handling.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
