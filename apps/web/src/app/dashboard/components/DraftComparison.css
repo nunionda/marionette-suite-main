@@ -171,6 +171,14 @@
   font-weight: 700;
 }
 
+.draft-summary-stat-value.positive {
+  color: var(--color-success);
+}
+
+.draft-summary-stat-value.negative {
+  color: var(--color-danger);
+}
+
 .draft-summary-stat-label {
   font-size: var(--font-size-xs);
   color: var(--text-dim);
@@ -279,7 +287,7 @@
 }
 
 .draft-metric-name {
-  color: #d0d0d4;
+  color: var(--text-secondary);
 }
 
 .draft-metric-arrow {
@@ -396,7 +404,7 @@
   align-items: flex-start;
   gap: 0.5rem;
   font-size: var(--font-size-sm);
-  color: #d0d0d4;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -407,6 +415,22 @@
 }
 
 /* --- Responsive --- */
+@media (max-width: 1024px) {
+  .draft-metrics-table th,
+  .draft-metrics-table td {
+    font-size: var(--font-size-xs);
+    padding: 0.35rem 0.4rem;
+  }
+
+  .draft-emotion-stats {
+    flex-direction: column;
+  }
+
+  .draft-emotion-stat {
+    min-width: auto;
+  }
+}
+
 @media (max-width: 640px) {
   .draft-comparison-controls {
     flex-direction: column;

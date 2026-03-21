@@ -216,7 +216,7 @@ export default function DraftComparison({
                   <div className="draft-summary-divider" />
 
                   <div className="draft-summary-stat">
-                    <span className="draft-summary-stat-value" style={{ color: 'var(--color-success)' }}>
+                    <span className="draft-summary-stat-value positive">
                       {comparisonResult.positiveCount}
                     </span>
                     <span className="draft-summary-stat-label">
@@ -225,7 +225,7 @@ export default function DraftComparison({
                   </div>
 
                   <div className="draft-summary-stat">
-                    <span className="draft-summary-stat-value" style={{ color: 'var(--color-danger)' }}>
+                    <span className="draft-summary-stat-value negative">
                       {comparisonResult.negativeCount}
                     </span>
                     <span className="draft-summary-stat-label">

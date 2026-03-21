@@ -17,9 +17,9 @@ export default function EmotionChart({ emotionGraph, locale = 'en' }: EmotionCha
         <AreaChart data={emotionGraph}>
           <defs>
             <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#0070f3" stopOpacity={0.4}/>
-              <stop offset="50%" stopColor="#0070f3" stopOpacity={0.12}/>
-              <stop offset="95%" stopColor="#0070f3" stopOpacity={0}/>
+              <stop offset="5%" stopColor="var(--accent-blue)" stopOpacity={0.4}/>
+              <stop offset="50%" stopColor="var(--accent-blue)" stopOpacity={0.12}/>
+              <stop offset="95%" stopColor="var(--accent-blue)" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
@@ -41,14 +41,14 @@ export default function EmotionChart({ emotionGraph, locale = 'en' }: EmotionCha
                 }}>
                   <div style={{ fontWeight: 700, marginBottom: '0.25rem', fontSize: '0.85rem' }}>{ko ? '장면' : 'Scene'} {d.sceneNumber}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.25rem' }}>
-                    <span style={{ color: '#d4af37', fontSize: '0.82rem' }}>{d.dominantEmotion || '—'}</span>
+                    <span style={{ color: 'var(--accent-gold)', fontSize: '0.82rem' }}>{d.dominantEmotion || '—'}</span>
                     <span style={{
                       fontFamily: 'var(--font-geist-mono), monospace',
                       fontWeight: 700,
-                      color: d.score >= 0 ? '#2ecc71' : '#e74c3c',
+                      color: d.score >= 0 ? 'var(--color-success)' : 'var(--color-danger)',
                     }}>{d.score > 0 ? '+' : ''}{d.score}</span>
                   </div>
-                  {d.explanation && <div style={{ fontSize: '0.78rem', color: '#a0a0a0', whiteSpace: 'normal', lineHeight: 1.4 }}>{d.explanation}</div>}
+                  {d.explanation && <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', whiteSpace: 'normal', lineHeight: 1.4 }}>{d.explanation}</div>}
                 </div>
               );
             }}
@@ -56,12 +56,12 @@ export default function EmotionChart({ emotionGraph, locale = 'en' }: EmotionCha
           <Area
             type="monotone"
             dataKey="score"
-            stroke="#0070f3"
+            stroke="var(--accent-blue)"
             fillOpacity={1}
             fill="url(#colorScore)"
             strokeWidth={2.5}
             dot={false}
-            activeDot={{ r: 5, strokeWidth: 2, fill: '#0a0a0c', stroke: '#0070f3' }}
+            activeDot={{ r: 5, strokeWidth: 2, fill: 'var(--bg-dark)', stroke: 'var(--accent-blue)' }}
           />
         </AreaChart>
       </ResponsiveContainer>

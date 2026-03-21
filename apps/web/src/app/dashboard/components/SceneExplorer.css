@@ -3,6 +3,7 @@
 /* ─── Container ─── */
 .scene-explorer {
   width: 100%;
+  grid-column: 1 / -1;
 }
 
 .scene-explorer-panel {
@@ -439,7 +440,7 @@
 
 .scene-detail-text {
   font-size: var(--font-size-sm);
-  color: #d0d0d4;
+  color: var(--text-secondary);
   line-height: 1.55;
   margin: 0;
 }
@@ -501,6 +502,10 @@
 
 /* ─── Print Styles ─── */
 @media print {
+  .scene-explorer {
+    width: 100% !important;
+  }
+
   .scene-explorer-panel {
     background: white;
     border: 1px solid #ddd;
@@ -508,6 +513,8 @@
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     break-inside: avoid;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .scene-explorer-filters {
@@ -517,6 +524,7 @@
   .scene-cards-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 0.5rem;
+    width: 100%;
   }
 
   .scene-card {
@@ -524,6 +532,10 @@
     border: 1px solid #ddd;
     box-shadow: none;
     page-break-inside: avoid;
+  }
+
+  .scene-card:last-child:nth-child(odd) {
+    grid-column: span 2;
   }
 
   .scene-card:hover {

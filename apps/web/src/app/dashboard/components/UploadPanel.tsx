@@ -77,8 +77,8 @@ export default function UploadPanel({
   return (
     <div className="upload-row">
       <div className="glass-panel upload-panel">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-          <h3 style={{ margin: 0 }}>
+        <div className="upload-panel-header">
+          <h3>
             <Upload size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
             {t ? '새 시나리오 분석' : 'Analyze New Script'}
           </h3>
@@ -104,23 +104,23 @@ export default function UploadPanel({
                 <div className="file-info">
                   <FileText size={24} style={{ color: 'var(--accent-gold)' }} />
                   <div>
-                    <div style={{ fontWeight: 600 }}>{selectedFile.name}</div>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                    <div className="file-info-name">{selectedFile.name}</div>
+                    <div className="file-info-size">
                       {(selectedFile.size / 1024).toFixed(1)} KB
                     </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
+                <div className="drop-zone-placeholder">
                   <Upload size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
                   <div>{t ? <><strong>.fountain</strong>, <strong>.txt</strong>, 또는 <strong>.pdf</strong> 파일을 드래그 앤 드롭</> : <>Drag & drop a <strong>.fountain</strong>, <strong>.txt</strong>, or <strong>.pdf</strong> file</>}</div>
-                  <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>{t ? '또는 클릭하여 찾아보기' : 'or click to browse'}</div>
+                  <div className="drop-zone-subtext">{t ? '또는 클릭하여 찾아보기' : 'or click to browse'}</div>
                 </div>
               )}
             </div>
 
             {/* Market Selector */}
-            <div className="strategy-row" style={{ marginBottom: '0.5rem' }}>
+            <div className="strategy-row strategy-row-market">
               <button
                 className={`strategy-pill ${market === 'hollywood' ? 'active' : ''}`}
                 onClick={() => onMarketChange('hollywood')}
@@ -173,14 +173,13 @@ export default function UploadPanel({
               </div>
             )}
 
-            <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', alignItems: 'center' }}>
+            <div className="upload-panel-action-row">
               <input
                 type="text"
                 placeholder={t ? '영화 ID / 제목 (선택사항)' : 'Movie ID / Title (optional)'}
                 value={movieId}
                 onChange={(e) => onMovieIdChange(e.target.value)}
                 className="input-glass"
-                style={{ flex: 1 }}
               />
               {mode === 'analyzing' ? (
                 <button className="btn-cancel" onClick={onCancel}>
@@ -207,13 +206,13 @@ export default function UploadPanel({
       </div>
 
       <div className="glass-panel history-panel">
-        <h3 style={{ margin: 0 }}>
+        <h3>
           <Clock size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
           {t ? '최근 리포트' : 'Recent Reports'}
         </h3>
-        <div style={{ marginTop: '1rem', maxHeight: '220px', overflowY: 'auto' }}>
+        <div className="history-list">
           {reports.length === 0 ? (
-            <div style={{ color: 'var(--text-dim)', textAlign: 'center', fontSize: '0.9rem', padding: '1rem 0' }}>
+            <div className="history-empty">
               {t ? '리포트 없음' : 'No reports yet'}
             </div>
           ) : (
@@ -224,11 +223,11 @@ export default function UploadPanel({
                 onClick={() => onLoadReport(report.scriptId)}
               >
                 <FileText size={14} style={{ color: 'var(--accent-gold)', flexShrink: 0 }} />
-                <div style={{ overflow: 'hidden' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.9rem', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+                <div className="history-item-content">
+                  <div className="history-item-title">
                     {report.scriptId}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>
+                  <div className="history-item-meta">
                     {report.summary.predictedRating} / {report.summary.predictedRoi}
                   </div>
                 </div>

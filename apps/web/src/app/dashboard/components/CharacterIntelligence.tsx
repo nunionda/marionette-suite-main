@@ -44,7 +44,7 @@ export default function CharacterIntelligence({ characterNetwork, locale = 'en' 
                     <span>{char.totalWords} {ko ? '단어' : 'words'}</span>
                   )}
                   {char.voiceScore != null && (
-                    <span style={{ color: char.voiceScore >= 60 ? '#2ecc71' : char.voiceScore >= 30 ? '#f39c12' : 'var(--text-dim)' }}>
+                    <span style={{ color: char.voiceScore >= 60 ? 'var(--color-success)' : char.voiceScore >= 30 ? 'var(--color-warning)' : 'var(--text-dim)' }}>
                       {ko ? '보이스' : 'Voice'}: {char.voiceScore}
                     </span>
                   )}
@@ -96,7 +96,7 @@ export default function CharacterIntelligence({ characterNetwork, locale = 'en' 
       {characters[0]?.voiceScore != null && (
         <div className="glass-panel voice-panel">
           <h3 style={{ marginBottom: '1rem' }}>
-            <AudioWaveform size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#9b59b6' }} />
+            <AudioWaveform size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--color-purple)' }} />
             {ko ? '보이스 고유성' : 'Voice Uniqueness'}
           </h3>
           <div className="voice-list">
@@ -113,7 +113,7 @@ export default function CharacterIntelligence({ characterNetwork, locale = 'en' 
                 <div className="category-bar">
                   <div className="category-bar-fill" style={{
                     width: `${char.voiceScore}%`,
-                    background: char.voiceScore >= 60 ? '#9b59b6' : char.voiceScore >= 30 ? '#f39c12' : '#7f8c8d',
+                    background: char.voiceScore >= 60 ? 'var(--color-purple)' : char.voiceScore >= 30 ? 'var(--color-warning)' : 'var(--color-muted)',
                   }} />
                 </div>
                 <div style={{ textAlign: 'right', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-dim)', marginTop: '0.1rem' }}>
@@ -129,13 +129,13 @@ export default function CharacterIntelligence({ characterNetwork, locale = 'en' 
       {diversityMetrics && (
         <div className="glass-panel diversity-panel">
           <h3 style={{ marginBottom: '1rem' }}>
-            <PieChart size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#2ecc71' }} />
+            <PieChart size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--color-success)' }} />
             {ko ? '대사 분포' : 'Dialogue Distribution'}
           </h3>
           <div className="diversity-stats">
             <div className="diversity-stat-item">
               <div className="diversity-donut" style={{
-                background: `conic-gradient(#b8941f 0% ${diversityMetrics.speakingRoleDistribution.top1Pct}%, #e0e0e0 ${diversityMetrics.speakingRoleDistribution.top1Pct}% 100%)`
+                background: `conic-gradient(var(--accent-gold) 0% ${diversityMetrics.speakingRoleDistribution.top1Pct}%, #e0e0e0 ${diversityMetrics.speakingRoleDistribution.top1Pct}% 100%)`
               }}>
                 <span className="diversity-donut-label">{diversityMetrics.speakingRoleDistribution.top1Pct}%</span>
               </div>
@@ -143,7 +143,7 @@ export default function CharacterIntelligence({ characterNetwork, locale = 'en' 
             </div>
             <div className="diversity-stat-item">
               <div className="diversity-donut" style={{
-                background: `conic-gradient(#005bc0 0% ${diversityMetrics.speakingRoleDistribution.top3Pct}%, #e0e0e0 ${diversityMetrics.speakingRoleDistribution.top3Pct}% 100%)`
+                background: `conic-gradient(var(--accent-blue) 0% ${diversityMetrics.speakingRoleDistribution.top3Pct}%, #e0e0e0 ${diversityMetrics.speakingRoleDistribution.top3Pct}% 100%)`
               }}>
                 <span className="diversity-donut-label">{diversityMetrics.speakingRoleDistribution.top3Pct}%</span>
               </div>

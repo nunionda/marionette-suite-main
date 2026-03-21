@@ -15,7 +15,7 @@ export default function NarrativeArcPanel({ narrativeArc, locale = 'en' }: Narra
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
         <div>
           <h3 style={{ margin: 0 }}>
-            <Waypoints size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#9b59b6' }} />
+            <Waypoints size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--color-purple)' }} />
             {ko ? '서사 아크' : 'Narrative Arc'}
           </h3>
           <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
@@ -54,7 +54,7 @@ export default function NarrativeArcPanel({ narrativeArc, locale = 'en' }: Narra
             <div className="category-bar" style={{ flex: 1 }}>
               <div className="category-bar-fill" style={{
                 width: `${narrativeArc.genreFit.fitScore}%`,
-                background: narrativeArc.genreFit.fitScore >= 80 ? '#2ecc71' : narrativeArc.genreFit.fitScore >= 50 ? '#f39c12' : '#e74c3c',
+                background: narrativeArc.genreFit.fitScore >= 80 ? 'var(--color-success)' : narrativeArc.genreFit.fitScore >= 50 ? 'var(--color-warning)' : 'var(--color-danger)',
               }} />
             </div>
             <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{narrativeArc.genreFit.fitScore}%</span>
@@ -68,7 +68,7 @@ export default function NarrativeArcPanel({ narrativeArc, locale = 'en' }: Narra
         {narrativeArc.pacingIssues?.length > 0 && (
           <div className="pacing-issues">
             <div className="detail-label" style={{ marginBottom: '0.4rem' }}>
-              <AlertTriangle size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle', color: '#f39c12' }} />
+              <AlertTriangle size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle', color: 'var(--color-warning)' }} />
               {ko ? `페이싱 이슈 (${narrativeArc.pacingIssues.length})` : `Pacing Issues (${narrativeArc.pacingIssues.length})`}
             </div>
             {narrativeArc.pacingIssues.map((issue: any, i: number) => (

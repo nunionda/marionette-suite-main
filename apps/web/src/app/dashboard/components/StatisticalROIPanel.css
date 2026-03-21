@@ -173,7 +173,7 @@
 .stat-roi-confidence-value {
   font-size: var(--font-size-xs);
   font-weight: 700;
-  color: #d0d0d4;
+  color: var(--text-secondary);
 }
 
 .stat-roi-confidence-track {
@@ -316,7 +316,7 @@
 .stat-roi-revenue-label-value {
   font-size: var(--font-size-sm);
   font-weight: 700;
-  color: #d0d0d4;
+  color: var(--text-secondary);
 }
 
 .stat-roi-revenue-label.likely .stat-roi-revenue-label-value {
@@ -353,7 +353,7 @@
   padding: 0.45rem 0.5rem;
   font-size: var(--font-size-sm);
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  color: #d0d0d4;
+  color: var(--text-secondary);
 }
 
 .stat-roi-neighbors-table tr:last-child td {
@@ -415,6 +415,22 @@
 }
 
 /* --- Responsive --- */
+@media (max-width: 1024px) {
+  .stat-roi-comparison {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-roi-neighbors-table th,
+  .stat-roi-neighbors-table td {
+    font-size: var(--font-size-xs);
+    padding: 0.35rem 0.4rem;
+  }
+
+  .stat-roi-neighbor-title {
+    max-width: 120px;
+  }
+}
+
 @media (max-width: 768px) {
   .stat-roi-comparison {
     grid-template-columns: 1fr;

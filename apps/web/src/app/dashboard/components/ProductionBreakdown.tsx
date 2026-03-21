@@ -45,7 +45,7 @@ export default function ProductionBreakdown({ production, locale = 'en', market 
               <span className="detail-label">{ko ? 'VFX 점수' : 'VFX Score'}</span>
               <span style={{
                 fontWeight: 700, fontSize: '1.3rem',
-                color: production.vfxComplexityScore > 60 ? '#e74c3c' : production.vfxComplexityScore > 30 ? '#f39c12' : '#2ecc71'
+                color: production.vfxComplexityScore > 60 ? 'var(--color-danger)' : production.vfxComplexityScore > 30 ? 'var(--color-warning)' : 'var(--color-success)'
               }}>
                 {production.vfxComplexityScore}/100
               </span>
@@ -59,7 +59,7 @@ export default function ProductionBreakdown({ production, locale = 'en', market 
         {production.budgetEstimate && (
           <div className="glass-panel production-budget">
             <h3 style={{ margin: '0 0 1rem' }}>
-              <DollarSign size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: '#2ecc71' }} />
+              <DollarSign size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: 'var(--color-success)' }} />
               {ko ? '예산 추정' : 'Budget Estimate'}
             </h3>
             <div className="budget-range">
@@ -118,7 +118,7 @@ export default function ProductionBreakdown({ production, locale = 'en', market 
         {production.vfxRequirements?.length > 0 && (
           <div className="glass-panel production-vfx">
             <h3 style={{ margin: '0 0 0.75rem' }}>
-              <Sparkles size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: '#9b59b6' }} />
+              <Sparkles size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: 'var(--color-purple)' }} />
               {ko ? `VFX 요구사항 (${production.vfxRequirements.length}개)` : `VFX Requirements (${production.vfxRequirements.length} shots)`}
             </h3>
             <div className="vfx-list">
@@ -159,7 +159,7 @@ export default function ProductionBreakdown({ production, locale = 'en', market 
                   <div className="category-bar">
                     <div className="category-bar-fill" style={{
                       width: `${pct}%`,
-                      background: c.role === 'Protagonist' ? 'var(--accent-gold)' : c.role === 'Antagonist' ? '#e74c3c' : c.role === 'Supporting' ? 'var(--accent-blue)' : '#7f8c8d',
+                      background: c.role === 'Protagonist' ? 'var(--accent-gold)' : c.role === 'Antagonist' ? 'var(--color-danger)' : c.role === 'Supporting' ? 'var(--accent-blue)' : 'var(--color-muted)',
                     }} />
                   </div>
                 </div>

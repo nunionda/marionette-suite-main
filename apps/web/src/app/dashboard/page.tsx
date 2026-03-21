@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Film, Users, TrendingUp, Activity, AlertCircle, Download, Globe, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Film, Users, TrendingUp, Activity, AlertCircle, Download, Globe, Loader2, Sparkles } from 'lucide-react';
 import './dashboard.css';
 
 import UploadPanel, { ENGINE_LABELS, PROVIDER_LABELS } from './components/UploadPanel';
@@ -212,14 +213,20 @@ export default function Dashboard() {
   const displayData = (ko && translatedData) ? translatedData : data;
 
   return (
+    <div className="dashboard-bg">
     <main className="dashboard-container" aria-label="Script Intelligence Dashboard">
       <a href="#stats" className="skip-link">Skip to results</a>
       <header className="dashboard-header">
-        <div>
-          <h1 className="dashboard-title">{ko ? '시나리오 분석' : 'Script Intelligence'}</h1>
-          <p className="dashboard-subtitle">
-            {data ? `${ko ? '프로젝트' : 'Project'} ID: ${data.scriptId}` : (ko ? '시나리오를 업로드하여 분석을 시작하세요' : 'Upload a screenplay to begin analysis')}
-          </p>
+        <div className="dashboard-header-left">
+          <Link href="/" className="dashboard-home-link" title={ko ? '홈으로' : 'Home'}>
+            <Sparkles size={18} />
+          </Link>
+          <div>
+            <h1 className="dashboard-title">{ko ? '시나리오 분석' : 'Script Intelligence'}</h1>
+            <p className="dashboard-subtitle">
+              {data ? `${ko ? '프로젝트' : 'Project'} ID: ${data.scriptId}` : (ko ? '시나리오를 업로드하여 분석을 시작하세요' : 'Upload a screenplay to begin analysis')}
+            </p>
+          </div>
         </div>
         <div className="header-actions">
           <button
@@ -281,6 +288,18 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Welcome Hero (idle state) */}
+      {!data && mode === 'idle' && (
+        <div className="welcome-hero">
+          <h2>{ko ? '시나리오 분석을 시작하세요' : 'Start Your Script Analysis'}</h2>
+          <p>
+            {ko
+              ? '시나리오 파일을 업로드하면 AI가 감정 흐름, 캐릭터, 시장성, 제작 타당성을 즉시 분석합니다.'
+              : 'Upload a screenplay file and AI will instantly analyze emotion flow, characters, marketability, and production feasibility.'}
+          </p>
+        </div>
+      )}
+
       {/* Upload + History */}
       <UploadPanel
         mode={mode}
@@ -321,6 +340,7 @@ export default function Dashboard() {
       {/* Script Coverage Report */}
       {data?.coverage && (
         <section id="coverage">
+          <div className="section-label no-print">{ko ? '커버리지' : 'Coverage'}</div>
           <div className="print-section-header print-only">
             <span className="print-section-number">1</span> {ko ? '시나리오 커버리지 리포트' : 'Script Coverage Report'}
           </div>
@@ -338,6 +358,7 @@ export default function Dashboard() {
       {/* Production Breakdown */}
       {data?.production && (
         <section id="production">
+          <div className="section-label no-print">{ko ? '제작 분석' : 'Production'}</div>
           <div className="print-section-header print-only">
             <span className="print-section-number">2</span> {ko ? '제작 타당성' : 'Production Feasibility'}
           </div>
@@ -348,6 +369,7 @@ export default function Dashboard() {
       {/* Results Dashboard */}
       {data && (
         <div className="grid-layout">
+          <div className="section-label no-print" style={{ gridColumn: '1 / -1', margin: '0 0 -0.5rem' }}>{ko ? '분석 결과' : 'Analysis Results'}</div>
           <div className="print-section-header print-only" style={{ width: '100%' }}>
             <span className="print-section-number">3</span> {ko ? '개요 및 감정 아크' : 'Overview & Emotional Arc'}
           </div>
@@ -436,5 +458,6 @@ export default function Dashboard() {
       {/* AI Chat Panel — only visible when analysis results exist */}
       {data && <ChatPanel scriptId={data.scriptId} locale={locale} strategy={strategy} />}
     </main>
+    </div>
   );
 }

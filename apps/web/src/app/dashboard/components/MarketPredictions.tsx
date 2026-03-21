@@ -27,7 +27,7 @@ export default function MarketPredictions({ predictions, tropes, locale = 'en', 
       {predictions?.roi && (
         <div className="glass-panel detail-panel-wide">
           <h3>
-            <TrendingUp size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#27ae60' }} />
+            <TrendingUp size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--color-success-dark)' }} />
             {ko ? 'ROI 분석' : 'ROI Analysis'}
           </h3>
           <div className="detail-metrics">
@@ -56,7 +56,7 @@ export default function MarketPredictions({ predictions, tropes, locale = 'en', 
       {predictions?.rating && (
         <div className="glass-panel detail-panel-narrow">
           <h3>
-            <Shield size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#c0392b' }} />
+            <Shield size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--color-danger-dark)' }} />
             {ko ? '콘텐츠 등급' : 'Content Rating'}
           </h3>
           <div style={{ textAlign: 'center', margin: '1rem 0' }}>
@@ -81,7 +81,7 @@ export default function MarketPredictions({ predictions, tropes, locale = 'en', 
       {tropes && tropes.length > 0 && (
         <div className="glass-panel trope-panel">
           <h3>
-            <Hash size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#e67e22' }} />
+            <Hash size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--color-warning-dark)' }} />
             {ko ? '서사 트로프' : 'Narrative Tropes'}
           </h3>
           <div className="trope-cloud">
@@ -118,7 +118,7 @@ export default function MarketPredictions({ predictions, tropes, locale = 'en', 
                     </div>
                     <div className="comp-stat">
                       <span className="detail-label">ROI</span>
-                      <span style={{ color: '#2ecc71', fontWeight: 600 }}>{comp.marketPerformance.roi}x</span>
+                      <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>{comp.marketPerformance.roi}x</span>
                     </div>
                   </div>
                 )}
