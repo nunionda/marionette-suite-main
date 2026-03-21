@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Phase 10 (Narrative Arc Intelligence)**](./docs/plans/08-phase10-narrative-arc.md)
 - [**Plan: Phase 9 (Production Feasibility Engine)**](./docs/plans/07-phase9-production-feasibility.md)
 - [**Plan: Phase 8 (Script Coverage & PDF Export)**](./docs/plans/06-phase8-script-coverage-pdf.md)
 - [**Plan: Phase 7 (Multi-Model LLM Strategy)**](./docs/plans/05-phase7-multi-model-strategy.md)
@@ -25,6 +26,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 11 (Multi-Model LLM Strategy)**](./docs/results/session-11-phase7-multi-model-strategy.md) - Gemini model chain retry, per-engine provider routing, dashboard strategy selector UI.
 - [**Result: Session 12 (Script Coverage & PDF Export)**](./docs/results/session-12-phase8-script-coverage-pdf.md) - Script Coverage evaluation (5 categories), Pass/Consider/Recommend verdict, PDF export.
 - [**Result: Session 13 (Production Feasibility)**](./docs/results/session-13-phase9-production-feasibility.md) - Location/cast extraction, VFX tier classification, three-tier budget estimation, production dashboard UI.
+- [**Result: Session 14 (Narrative Arc Intelligence)**](./docs/results/session-14-phase10-narrative-arc.md) - Vonnegut 6 arc classification, pacing issue detection, genre fit scoring, narrative arc dashboard UI.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
