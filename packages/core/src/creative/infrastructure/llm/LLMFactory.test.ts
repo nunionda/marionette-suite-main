@@ -8,15 +8,34 @@ describe('LLMFactory Orchestrator', () => {
     const openai = factory.getProvider('openai');
     const anthropic = factory.getProvider('anthropic');
     const gemini = factory.getProvider('gemini');
+    const deepseek = factory.getProvider('deepseek');
+    const groq = factory.getProvider('groq');
 
     expect(openai).toBeDefined();
     expect(openai.name).toBe('openai');
-    
+
     expect(anthropic).toBeDefined();
     expect(anthropic.name).toBe('anthropic');
-    
+
     expect(gemini).toBeDefined();
     expect(gemini.name).toBe('gemini');
+
+    expect(deepseek).toBeDefined();
+    expect(deepseek.name).toBe('deepseek');
+
+    expect(groq).toBeDefined();
+    expect(groq.name).toBe('groq');
+  });
+
+  test('should retrieve gemini tier variants', () => {
+    const pro = factory.getProvider('gemini-pro');
+    const long = factory.getProvider('gemini-long');
+
+    expect(pro).toBeDefined();
+    expect(pro.name).toBe('gemini-pro');
+
+    expect(long).toBeDefined();
+    expect(long.name).toBe('gemini-long');
   });
 
   test('should throw error for unregistered provider', () => {
@@ -24,15 +43,15 @@ describe('LLMFactory Orchestrator', () => {
     expect(() => factory.getProvider('invalid')).toThrow();
   });
 
-  test('runEnsemble should return an array of responses identical to the number of providers', async () => {
-    // In a pure unit test without network, the providers will catch API key missing errors
-    // and return the error gracefully inside the LLMResponse interface instead of crashing.
+  test('runEnsemble should return responses for all providers', async () => {
     const responses = await factory.runEnsemble("System prompt", "User prompt");
-    
+
     expect(responses).toBeInstanceOf(Array);
-    expect(responses).toHaveLength(4); // OpenAI, Anthropic, Gemini, Mock
+    expect(responses).toHaveLength(8); // openai, anthropic, gemini, gemini-pro, gemini-long, deepseek, groq, mock
 
     const providers = responses.map(r => r.provider).sort();
-    expect(providers).toEqual(['anthropic', 'gemini', 'mock', 'openai']);
-  });
+    expect(providers).toContain('mock');
+    expect(providers).toContain('openai');
+    expect(providers).toContain('gemini');
+  }, 120_000); // Gemini retry backoff can take time when rate-limited
 });

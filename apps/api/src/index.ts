@@ -63,14 +63,21 @@ const app = new Elysia()
   .get("/providers", () => ({
     available: {
       gemini: !!env.GEMINI_API_KEY,
+      'gemini-pro': !!env.GEMINI_API_KEY,
+      'gemini-long': !!env.GEMINI_API_KEY,
       anthropic: !!env.ANTHROPIC_API_KEY,
       openai: !!env.OPENAI_API_KEY,
+      deepseek: !!env.DEEPSEEK_API_KEY,
+      groq: !!env.GROQ_API_KEY,
       mock: true,
     },
     strategies: [
       { name: 'auto', label: 'Auto', description: 'Best available provider with fallback' },
       { name: 'fast', label: 'Fast', description: 'Gemini Flash only (low cost)', requires: ['gemini'] },
+      { name: 'budget', label: 'Budget', description: 'Groq (free) + DeepSeek (cheapest)', requires: [] },
       { name: 'deep', label: 'Deep Analysis', description: 'Claude for narrative, Gemini for metrics', requires: ['anthropic'] },
+      { name: 'premium', label: 'Premium', description: 'Claude Sonnet 4.6 for highest quality', requires: ['anthropic'] },
+      { name: 'long-context', label: 'Long Context', description: 'Gemini 1.5 Pro (2M context) for long scripts', requires: ['gemini'] },
       { name: 'custom', label: 'Custom', description: 'Pick provider per engine' },
     ],
   }))
@@ -139,11 +146,10 @@ const app = new Elysia()
     // 4. Run Pipeline
     const network = characterAnalyzer.analyze(scriptId, elements);
 
-    const [beatsResult, emotionResult, ratingResult] = await Promise.all([
-      withFallback('beatSheet', 'BeatSheet', (p) => new BeatSheetGenerator(p).generate(scriptId, elements)),
-      withFallback('emotion', 'Emotion', (p) => new EmotionAnalyzer(p).analyze(scriptId, elements)),
-      withFallback('rating', 'Rating', (p) => new ContentRatingClassifier(p).classify(scriptId, elements)),
-    ]);
+    // Run LLM engines sequentially to avoid Gemini rate-limit exhaustion
+    const beatsResult = await withFallback('beatSheet', 'BeatSheet', (p) => new BeatSheetGenerator(p).generate(scriptId, elements));
+    const emotionResult = await withFallback('emotion', 'Emotion', (p) => new EmotionAnalyzer(p).analyze(scriptId, elements));
+    const ratingResult = await withFallback('rating', 'Rating', (p) => new ContentRatingClassifier(p).classify(scriptId, elements));
 
     const beats = beatsResult.data;
     const emotion = emotionResult.data;
@@ -286,16 +292,17 @@ const app = new Elysia()
       movieId: t.Optional(t.String()),
       fileName: t.Optional(t.String()),
       strategy: t.Optional(t.Union([
-        t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom')
+        t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom'),
+        t.Literal('budget'), t.Literal('premium'), t.Literal('long-context')
       ])),
       customProviders: t.Optional(t.Object({
-        beatSheet: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
-        emotion: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
-        rating: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
-        roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
-        coverage: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
-        vfx: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
-        trope: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+        beatSheet: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
+        emotion: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
+        rating: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
+        roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
+        coverage: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
+        vfx: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
+        trope: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
       })),
     })
   })

@@ -4,6 +4,9 @@
   "main": "src/index.ts",
   "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "benchmark": "bun run src/creative/infrastructure/benchmark/run.ts"
+  },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
     "@google/genai": "^1.46.0",

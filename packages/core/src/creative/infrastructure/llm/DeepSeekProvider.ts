@@ -2,19 +2,20 @@ import OpenAI from 'openai';
 import { env } from '../../../shared/env';
 import type { ILLMProvider, LLMResponse } from './ILLMProvider';
 
-export type OpenAIModel = 'gpt-4o' | 'gpt-4o-mini';
-
-export class OpenAIProvider implements ILLMProvider {
-  readonly name = 'openai';
+export class DeepSeekProvider implements ILLMProvider {
+  readonly name = 'deepseek';
   private client: OpenAI | null = null;
-  private readonly model: OpenAIModel;
+  private readonly model: string;
 
-  constructor(model: OpenAIModel = 'gpt-4o') {
+  constructor(model: 'deepseek-chat' | 'deepseek-reasoner' = 'deepseek-chat') {
     this.model = model;
-    if (env.OPENAI_API_KEY) {
-      this.client = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+    if (env.DEEPSEEK_API_KEY) {
+      this.client = new OpenAI({
+        apiKey: env.DEEPSEEK_API_KEY,
+        baseURL: 'https://api.deepseek.com',
+      });
     } else {
-      console.warn("⚠️ OPENAI_API_KEY is not set. OpenAIProvider will be disabled.");
+      console.warn("⚠️ DEEPSEEK_API_KEY is not set. DeepSeekProvider will be disabled.");
     }
   }
 
@@ -27,7 +28,7 @@ export class OpenAIProvider implements ILLMProvider {
         model: this.model,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
+          { role: 'user', content: userPrompt },
         ],
         temperature: 0.2,
       });
@@ -35,16 +36,16 @@ export class OpenAIProvider implements ILLMProvider {
       return {
         provider: this.name,
         model: this.model,
-        content: response.choices[0]?.message?.content || "",
-        latencyMs: Date.now() - startTime
+        content: response.choices[0]?.message?.content || '',
+        latencyMs: Date.now() - startTime,
       };
     } catch (error: any) {
       return {
         provider: this.name,
         model: this.model,
-        content: "",
+        content: '',
         latencyMs: Date.now() - startTime,
-        error: error.message
+        error: error.message,
       };
     }
   }

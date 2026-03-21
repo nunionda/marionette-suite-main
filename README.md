@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: LLM Engine Expansion**](./docs/plans/12-llm-engine-expansion.md)
 - [**Plan: LLM Real-time Translation**](./docs/plans/11-llm-realtime-translation.md)
 - [**Plan: Phase 12 (Benchmarker Expansion)**](./docs/plans/10-phase12-benchmarker-expansion.md)
 - [**Plan: Phase 11 (Character Intelligence)**](./docs/plans/09-phase11-character-intelligence.md)
@@ -38,6 +39,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 20 (Korean Romanization)**](./docs/results/session-20-korean-romanization.md) - Revised Romanization engine for Korean filenames, `[Romanized]korean$` scriptId convention, URL-safe report loading.
 - [**Result: Session 21 (i18n Translation Review)**](./docs/results/session-21-i18n-translation-review.md) - ROI 등급/티어 disambiguation, SectionNav/AnalysisProgress/ReportCover full i18n, missing labels across 9 components.
 - [**Result: Session 22 (LLM Real-time Translation)**](./docs/results/session-22-llm-realtime-translation.md) - POST /translate endpoint, bulk LLM translation of report content, displayData pattern, translation cache, loading indicator.
+- [**Result: Session 23 (LLM Engine Expansion)**](./docs/results/session-23-llm-engine-expansion.md) - DeepSeek + Groq providers, Gemini 3-tier chains, Anthropic Sonnet 4.6, budget/premium/long-context strategies, benchmark CLI framework.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 

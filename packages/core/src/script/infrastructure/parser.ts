@@ -80,15 +80,23 @@ export function parseFountain(script: string): ScriptElement[] {
     }
     // Characters
     else {
-      const isUppercaseEnglish = line === line.toUpperCase() && /[A-Z]/.test(line) && !line.match(/[.:?!]$/) && !/[가-힣ぁ-んァ-ヴー一-龯]/.test(line);
+      // Reject bracketed system messages: [STATUS: ...], [TIMER: D-45], etc.
+      const isBracketedMessage = /^\[.*\]$/.test(line) || /^\[.*\]$/.test(line.replace(/\s*\(.*?\)\s*/g, '').trim());
+      // Reject lines containing brackets or unmatched closing parens (system/UI text)
+      const hasBracketsOrUnmatchedParen = /[\[\]]/.test(line) || (line.endsWith(')') && !line.includes('('));
+
+      const isUppercaseEnglish = !isBracketedMessage && !hasBracketsOrUnmatchedParen && line === line.toUpperCase() && /[A-Z]/.test(line) && !line.match(/[.:?!\]]$/) && !/[가-힣ぁ-んァ-ヴー一-龯]/.test(line);
       const nextLine = i + 1 < lines.length ? (lines[i + 1]?.trim() ?? "") : "";
-      
+
       // CJK character detection: shorter length, no punctuation, NOT empty next line
       const nameWithoutParens = line.replace(/\s*\(.*?\)\s*/g, '').trim();
-      const isCjkNamePattern = /^[가-힣ぁ-んァ-ヴー一-龯A-Za-z0-9\s]+$/.test(nameWithoutParens) && /[가-힣ぁ-んァ-ヴー一-龯A-Za-z]/.test(nameWithoutParens);
+      const isCjkNamePattern = !isBracketedMessage && !hasBracketsOrUnmatchedParen && /^[가-힣ぁ-んァ-ヴー一-龯A-Za-z0-9\s]+$/.test(nameWithoutParens) && /[가-힣ぁ-んァ-ヴー一-龯]/.test(nameWithoutParens);
       const wordCount = nameWithoutParens.split(/\s+/).length;
-      const hasKoreanParticle = /[이가을를은는도의에서와로]$/.test(nameWithoutParens);
-      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 6 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；]$/) && !hasKoreanParticle;
+      const hasKoreanParticle = /[이가을를은는도의에서와로들야님오]$/.test(nameWithoutParens);
+      // Korean common nouns that should not be character names (check each word individually)
+      const koreanCommonWordRe = /^(오전|오후|새벽|저녁|아침|밤|낮|단계|행동|순간|현재|계속|시작|완료)$/;
+      const isKoreanCommonWord = nameWithoutParens.split(/\s+/).every(w => koreanCommonWordRe.test(w));
+      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 6 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；\]\)]$/) && !hasKoreanParticle && !isKoreanCommonWord;
 
       // Short CJK names (≤3 chars) allow a blank line before dialogue (common in Korean PDF screenplays)
       const nextNextLine = i + 2 < lines.length ? (lines[i + 2]?.trim() ?? "") : "";

@@ -1,8 +1,10 @@
-import { AnalysisStrategy, AnalysisStrategyName, CustomStrategyInput, ProviderChoice } from './AnalysisStrategy';
+import type { AnalysisStrategy, AnalysisStrategyName, CustomStrategyInput, ProviderChoice } from './AnalysisStrategy';
 import { env } from '../../../shared/env';
 
 function getDefaultProvider(): ProviderChoice {
   if (env.GEMINI_API_KEY) return 'gemini';
+  if (env.GROQ_API_KEY) return 'groq';
+  if (env.DEEPSEEK_API_KEY) return 'deepseek';
   if (env.ANTHROPIC_API_KEY) return 'anthropic';
   if (env.OPENAI_API_KEY) return 'openai';
   return 'mock';
@@ -29,8 +31,7 @@ export function resolveStrategy(
         },
       };
 
-    case 'deep':
-      // High-complexity engines → Claude, medium-complexity → Gemini
+    case 'deep': {
       const deepReasoner: ProviderChoice = env.ANTHROPIC_API_KEY ? 'anthropic' : defaultProvider;
       const fastClassifier: ProviderChoice = env.GEMINI_API_KEY ? 'gemini' : defaultProvider;
       return {
@@ -45,6 +46,62 @@ export function resolveStrategy(
           trope: fastClassifier,
         },
       };
+    }
+
+    case 'budget': {
+      // Zero/near-zero cost: Groq (free) + DeepSeek (cheapest paid)
+      const freeProvider: ProviderChoice = env.GROQ_API_KEY ? 'groq' : defaultProvider;
+      const cheapProvider: ProviderChoice = env.DEEPSEEK_API_KEY ? 'deepseek' : freeProvider;
+      return {
+        name: 'budget',
+        engineProviders: {
+          beatSheet: freeProvider,
+          emotion: freeProvider,
+          rating: cheapProvider,
+          roi: cheapProvider,
+          coverage: freeProvider,
+          vfx: freeProvider,
+          trope: freeProvider,
+        },
+      };
+    }
+
+    case 'premium': {
+      // Highest quality: Claude Sonnet 4.6 for creative, Gemini for classification
+      const premiumCreative: ProviderChoice = env.ANTHROPIC_API_KEY ? 'anthropic' : defaultProvider;
+      const premiumClassifier: ProviderChoice = env.GEMINI_API_KEY ? 'gemini' : defaultProvider;
+      return {
+        name: 'premium',
+        engineProviders: {
+          beatSheet: premiumCreative,
+          emotion: premiumCreative,
+          rating: premiumClassifier,
+          roi: premiumCreative,
+          coverage: premiumCreative,
+          vfx: premiumClassifier,
+          trope: premiumCreative,
+        },
+      };
+    }
+
+    case 'long-context': {
+      // Ultra-long scripts: Gemini 1.5 Pro (2M context) for creative engines
+      const longCtx: ProviderChoice = env.GEMINI_API_KEY ? 'gemini-long' : defaultProvider;
+      const standard: ProviderChoice = env.GEMINI_API_KEY ? 'gemini' : defaultProvider;
+      const reasoning: ProviderChoice = env.DEEPSEEK_API_KEY ? 'deepseek' : standard;
+      return {
+        name: 'long-context',
+        engineProviders: {
+          beatSheet: longCtx,
+          emotion: longCtx,
+          rating: standard,
+          roi: reasoning,
+          coverage: longCtx,
+          vfx: standard,
+          trope: env.ANTHROPIC_API_KEY ? 'anthropic' : standard,
+        },
+      };
+    }
 
     case 'custom':
       return {

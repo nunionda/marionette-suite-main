@@ -3,14 +3,17 @@
 import React from 'react';
 import { Upload, FileText, Loader, Clock, AlertCircle } from 'lucide-react';
 
-type Strategy = 'auto' | 'fast' | 'deep' | 'custom';
-type ProviderChoice = 'gemini' | 'anthropic' | 'openai' | 'mock';
+type Strategy = 'auto' | 'fast' | 'deep' | 'custom' | 'budget' | 'premium' | 'long-context';
+type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'openai' | 'deepseek' | 'groq' | 'mock';
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
 
 const STRATEGIES = [
   { name: 'auto' as Strategy, label: 'Auto', labelKo: '자동', desc: 'Best available + fallback', descKo: '최적 제공자 + 폴백' },
+  { name: 'budget' as Strategy, label: 'Budget', labelKo: '저가', desc: 'Groq (free) + DeepSeek', descKo: 'Groq (무료) + DeepSeek' },
   { name: 'fast' as Strategy, label: 'Fast', labelKo: '빠른 분석', desc: 'Gemini Flash (low cost)', descKo: 'Gemini Flash (저비용)' },
   { name: 'deep' as Strategy, label: 'Deep Analysis', labelKo: '심층 분석', desc: 'Claude + Gemini hybrid', descKo: 'Claude + Gemini 하이브리드' },
+  { name: 'premium' as Strategy, label: 'Premium', labelKo: '프리미엄', desc: 'Claude Sonnet 4.6 (best quality)', descKo: 'Claude Sonnet 4.6 (최고 품질)' },
+  { name: 'long-context' as Strategy, label: 'Long Context', labelKo: '장문 분석', desc: 'Gemini 1.5 Pro (2M context)', descKo: 'Gemini 1.5 Pro (2M 컨텍스트)' },
   { name: 'custom' as Strategy, label: 'Custom', labelKo: '사용자 지정', desc: 'Pick per engine', descKo: '엔진별 선택' },
 ];
 
@@ -25,9 +28,13 @@ const ENGINE_LABELS: Record<string, string> = {
 };
 
 const PROVIDER_LABELS: Record<string, string> = {
-  gemini: 'Gemini',
-  anthropic: 'Claude',
+  gemini: 'Gemini Flash',
+  'gemini-pro': 'Gemini Pro',
+  'gemini-long': 'Gemini 1.5 Pro (2M)',
+  anthropic: 'Claude Sonnet 4.6',
   openai: 'GPT-4o',
+  deepseek: 'DeepSeek V3',
+  groq: 'Groq (Llama 3.3)',
   mock: 'Mock',
 };
 

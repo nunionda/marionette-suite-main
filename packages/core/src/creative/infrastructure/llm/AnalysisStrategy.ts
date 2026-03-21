@@ -1,8 +1,8 @@
-export type AnalysisStrategyName = 'auto' | 'fast' | 'deep' | 'custom';
+export type AnalysisStrategyName = 'auto' | 'fast' | 'deep' | 'custom' | 'budget' | 'premium' | 'long-context';
 
 export type EngineName = 'beatSheet' | 'emotion' | 'rating' | 'roi' | 'coverage' | 'vfx' | 'trope';
 
-export type ProviderChoice = 'gemini' | 'anthropic' | 'openai' | 'mock';
+export type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'openai' | 'deepseek' | 'groq' | 'mock';
 
 export interface AnalysisStrategy {
   name: AnalysisStrategyName;

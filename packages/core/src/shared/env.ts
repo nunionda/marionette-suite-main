@@ -14,6 +14,8 @@ const envSchema = z.object({
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
+  DEEPSEEK_API_KEY: z.string().optional(),
+  GROQ_API_KEY: z.string().optional(),
   PINECONE_API_KEY: z.string().optional(),
 });
 

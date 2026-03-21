@@ -1,4 +1,4 @@
-import { ILLMProvider, LLMResponse } from './ILLMProvider';
+import type { ILLMProvider, LLMResponse } from './ILLMProvider';
 
 export class MockProvider implements ILLMProvider {
   name = 'mock';
@@ -25,29 +25,29 @@ export class MockProvider implements ILLMProvider {
       const sceneCount = sceneMatches ? sceneMatches.length : 10;
 
       const arcTemplate = [
-        { emotion: "Curiosity", explanation: "Opening establishes the premise." },
-        { emotion: "Joy", explanation: "Protagonist discovers an opportunity." },
-        { emotion: "Hope", explanation: "Early success builds momentum." },
-        { emotion: "Doubt", explanation: "First signs of trouble emerge." },
-        { emotion: "Tension", explanation: "Conflict intensifies as stakes rise." },
-        { emotion: "Despair", explanation: "Major setback at the lowest point." },
-        { emotion: "Resolve", explanation: "Protagonist finds inner strength." },
-        { emotion: "Determination", explanation: "A new plan takes shape." },
-        { emotion: "Triumph", explanation: "Climactic confrontation with victory." },
-        { emotion: "Catharsis", explanation: "Resolution brings emotional closure." },
+        { emotion: "Curiosity", explanations: ["Opening establishes an intriguing premise.", "A mysterious world is introduced.", "Questions are raised about the protagonist's situation."] },
+        { emotion: "Joy", explanations: ["Protagonist discovers an unexpected opportunity.", "A moment of connection brings warmth.", "Early victory lifts spirits."] },
+        { emotion: "Hope", explanations: ["Early success builds momentum.", "An ally appears with a new possibility.", "Progress toward the goal renews confidence."] },
+        { emotion: "Doubt", explanations: ["First signs of trouble emerge.", "The protagonist questions their path.", "An unexpected obstacle creates uncertainty."] },
+        { emotion: "Tension", explanations: ["Conflict intensifies as stakes rise.", "Opposing forces close in.", "A confrontation reveals hidden dangers."] },
+        { emotion: "Despair", explanations: ["Major setback pushes protagonist to their lowest.", "A devastating loss changes everything.", "All hope seems lost as allies fall away."] },
+        { emotion: "Resolve", explanations: ["Protagonist begins to find inner strength.", "A choice is made to fight back.", "Past lessons crystallize into determination."] },
+        { emotion: "Determination", explanations: ["A new plan takes shape against the odds.", "Resources are gathered for the final push.", "The protagonist commits fully to the mission."] },
+        { emotion: "Triumph", explanations: ["Climactic confrontation with a decisive victory.", "The protagonist overcomes their greatest challenge.", "A hard-won battle reaches its turning point."] },
+        { emotion: "Catharsis", explanations: ["Resolution brings emotional closure and transformation.", "The journey's meaning becomes clear.", "A new equilibrium emerges from the struggle."] },
       ];
 
       const scenes = Array.from({ length: sceneCount }, (_, i) => {
         const progress = sceneCount > 1 ? i / (sceneCount - 1) : 0.5;
         const templateIdx = Math.min(Math.floor(progress * arcTemplate.length), arcTemplate.length - 1);
-        const t = arcTemplate[templateIdx];
+        const t = arcTemplate[templateIdx]!;
         // Generate a "Man in a Hole" emotional arc curve
         const score = Math.round(8 * Math.sin((progress - 0.15) * Math.PI * 2) * (0.5 + 0.5 * progress));
         return {
           sceneNumber: i + 1,
           score: Math.max(-10, Math.min(10, score)),
           dominantEmotion: t.emotion,
-          explanation: t.explanation,
+          explanation: t.explanations[i % t.explanations.length],
         };
       });
 
