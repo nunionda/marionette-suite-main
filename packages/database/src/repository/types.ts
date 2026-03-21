@@ -51,6 +51,7 @@ export interface AnalysisResultInput {
     }>;
   };
   coverage?: any;
+  narrativeArc?: any;
   production?: any;
 }
 

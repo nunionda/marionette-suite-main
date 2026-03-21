@@ -26,6 +26,7 @@ export class AnalysisReportRepository {
         emotionGraph: input.emotionGraph as any,
         predictions: input.predictions as any,
         ...(input.coverage && { coverage: input.coverage as any }),
+        ...(input.narrativeArc && { narrativeArc: input.narrativeArc as any }),
         ...(input.production && { production: input.production as any }),
       },
       update: {
@@ -44,6 +45,7 @@ export class AnalysisReportRepository {
         emotionGraph: input.emotionGraph as any,
         predictions: input.predictions as any,
         ...(input.coverage && { coverage: input.coverage as any }),
+        ...(input.narrativeArc && { narrativeArc: input.narrativeArc as any }),
         ...(input.production && { production: input.production as any }),
       },
     });
@@ -108,6 +110,7 @@ export class AnalysisReportRepository {
       },
       predictions: report.predictions as any,
       ...(report.coverage && { coverage: report.coverage as any }),
+      ...(report.narrativeArc && { narrativeArc: report.narrativeArc as any }),
       ...(report.production && { production: report.production as any }),
     };
   }

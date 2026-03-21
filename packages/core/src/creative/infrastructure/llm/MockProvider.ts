@@ -82,6 +82,8 @@ export class MockProvider implements ILLMProvider {
         weaknesses: ["Character depth needs work", "Dialogue lacks subtext", "Pacing inconsistencies"],
         recommendation: "The screenplay shows promise with a solid structural foundation but needs further development in character depth and dialogue quality before it can be recommended for production.",
       });
+    } else if (systemPrompt.includes("genre classifier")) {
+      content = "Drama";
     } else if (systemPrompt.includes("VFX Supervisor") || systemPrompt.includes("visual effects")) {
       content = JSON.stringify([
         { index: 1, tier: "simple", hours: 30 },

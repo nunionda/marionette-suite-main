@@ -15,6 +15,7 @@ import {
   ProductionAnalyzer,
   VFXEstimator,
   BudgetEstimator,
+  NarrativeArcClassifier,
   env,
   resolveStrategy,
   type AnalysisStrategyName,
@@ -135,7 +136,21 @@ const app = new Elysia()
     );
     const coverage = coverageResult.data;
 
-    // 6. Production Feasibility Analysis
+    // 6. Narrative Arc Classification (uses emotion data)
+    const emotionProvider = getEngineProvider('emotion');
+    const narrativeArcClassifier = new NarrativeArcClassifier(emotionProvider);
+    let narrativeArc;
+    try {
+      narrativeArc = await narrativeArcClassifier.classify(
+        scriptId, emotion.scenes, coverage?.genre
+      );
+    } catch (err: any) {
+      console.warn(`⚠️ NarrativeArc failed (${err.message?.slice(0, 80)}), using mock fallback`);
+      const mockArcClassifier = new NarrativeArcClassifier(mockProvider);
+      narrativeArc = await mockArcClassifier.classify(scriptId, emotion.scenes, coverage?.genre);
+    }
+
+    // 7. Production Feasibility Analysis
     const productionAnalyzer = new ProductionAnalyzer();
     const locations = productionAnalyzer.analyzeLocations(elements);
     const cast = productionAnalyzer.analyzeCast(elements, network.characters);
@@ -184,6 +199,7 @@ const app = new Elysia()
         comps: similarity.topComps
       },
       coverage,
+      narrativeArc,
       production,
       strategy: resolved.name,
       providers: {

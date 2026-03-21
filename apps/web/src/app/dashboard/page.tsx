@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star, Download, ChevronDown, ChevronUp, CheckCircle, XCircle, Clapperboard, MapPin, DollarSign, Sparkles } from 'lucide-react';
+import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star, Download, ChevronDown, ChevronUp, CheckCircle, XCircle, Clapperboard, MapPin, DollarSign, Sparkles, Waypoints, AlertTriangle } from 'lucide-react';
 import './dashboard.css';
 
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
@@ -709,6 +709,81 @@ export default function Dashboard() {
               ))}
             </div>
           </div>
+
+          {/* Narrative Arc */}
+          {data.narrativeArc && (
+            <div className="glass-panel arc-panel">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <div>
+                  <h3 style={{ margin: 0 }}>
+                    <Waypoints size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#9b59b6' }} />
+                    Narrative Arc
+                  </h3>
+                  <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
+                    {data.narrativeArc.arcDescription}
+                  </p>
+                </div>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <span className={`arc-badge arc-${data.narrativeArc.arcType}`}>
+                    {data.narrativeArc.arcType.replace(/-/g, ' ')}
+                  </span>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                    {Math.round(data.narrativeArc.arcConfidence * 100)}% confidence
+                  </span>
+                </div>
+              </div>
+
+              {/* Turning Points */}
+              {data.narrativeArc.turningPoints?.length > 0 && (
+                <div style={{ marginBottom: '1rem' }}>
+                  <div className="detail-label" style={{ marginBottom: '0.5rem' }}>Turning Points</div>
+                  <div className="turning-points">
+                    {data.narrativeArc.turningPoints.filter((tp: any) => tp.type !== 'plateau').slice(0, 8).map((tp: any, i: number) => (
+                      <span key={i} className={`tp-chip tp-${tp.type}`}>
+                        Sc.{tp.sceneNumber} {tp.type === 'rise' ? '↑' : tp.type === 'fall' ? '↓' : '—'} {tp.magnitude > 0 ? tp.magnitude : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="arc-footer">
+                {/* Genre Fit */}
+                <div className="genre-fit">
+                  <div className="detail-label">Genre Fit</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.25rem' }}>
+                    <div className="category-bar" style={{ flex: 1 }}>
+                      <div className="category-bar-fill" style={{
+                        width: `${data.narrativeArc.genreFit.fitScore}%`,
+                        background: data.narrativeArc.genreFit.fitScore >= 80 ? '#2ecc71' : data.narrativeArc.genreFit.fitScore >= 50 ? '#f39c12' : '#e74c3c',
+                      }} />
+                    </div>
+                    <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{data.narrativeArc.genreFit.fitScore}%</span>
+                  </div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-dim)', margin: '0.25rem 0 0' }}>
+                    {data.narrativeArc.genreFit.deviation}
+                  </p>
+                </div>
+
+                {/* Pacing Issues */}
+                {data.narrativeArc.pacingIssues?.length > 0 && (
+                  <div className="pacing-issues">
+                    <div className="detail-label" style={{ marginBottom: '0.4rem' }}>
+                      <AlertTriangle size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle', color: '#f39c12' }} />
+                      Pacing Issues ({data.narrativeArc.pacingIssues.length})
+                    </div>
+                    {data.narrativeArc.pacingIssues.map((issue: any, i: number) => (
+                      <div key={i} className={`pacing-issue pacing-${issue.severity}`}>
+                        <span className="pacing-type">{issue.type}</span>
+                        <span style={{ fontSize: '0.8rem' }}>Scenes {issue.startScene}–{issue.endScene}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{issue.description}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* ROI Analysis */}
           {data.predictions?.roi && (

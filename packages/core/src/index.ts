@@ -10,6 +10,8 @@ export * from './creative/application/BeatSheetGenerator';
 export * from './creative/application/EmotionAnalyzer';
 export * from './creative/application/ScriptCoverageEvaluator';
 export * from './creative/domain/ScriptCoverage';
+export * from './creative/domain/NarrativeArc';
+export * from './creative/application/NarrativeArcClassifier';
 export * from './predictor/application/FeatureExtractor';
 export * from './predictor/application/BoxOfficePredictor';
 export * from './predictor/application/ContentRatingClassifier';

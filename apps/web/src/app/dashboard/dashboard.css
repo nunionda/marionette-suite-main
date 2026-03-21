@@ -652,6 +652,93 @@
   margin-bottom: 1rem;
 }
 
+/* ===== Narrative Arc ===== */
+.arc-panel {
+  grid-column: span 12;
+}
+
+.arc-badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 16px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.arc-rags-to-riches { background: rgba(46, 204, 113, 0.2); color: #2ecc71; }
+.arc-riches-to-rags { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+.arc-man-in-a-hole { background: rgba(0, 112, 243, 0.2); color: var(--accent-blue); }
+.arc-icarus { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+.arc-cinderella { background: rgba(155, 89, 182, 0.2); color: #9b59b6; }
+.arc-oedipus { background: rgba(127, 140, 141, 0.2); color: #95a5a6; }
+
+.turning-points {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.tp-chip {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.15rem 0.5rem;
+  border-radius: 10px;
+}
+
+.tp-rise {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+}
+
+.tp-fall {
+  background: rgba(231, 76, 60, 0.15);
+  color: #e74c3c;
+}
+
+.tp-plateau {
+  background: rgba(127, 140, 141, 0.15);
+  color: #95a5a6;
+}
+
+.arc-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  border-top: 1px solid var(--border-glass);
+  padding-top: 0.75rem;
+}
+
+.genre-fit {
+  padding-right: 1rem;
+}
+
+.pacing-issues {
+  border-left: 1px solid var(--border-glass);
+  padding-left: 1rem;
+}
+
+.pacing-issue {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.3rem 0;
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.pacing-type {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.pacing-low .pacing-type { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
+.pacing-medium .pacing-type { background: rgba(230, 126, 34, 0.2); color: #e67e22; }
+.pacing-high .pacing-type { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
+
 /* ===== Production Feasibility ===== */
 .production-section {
   margin-top: 2rem;
