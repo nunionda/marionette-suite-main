@@ -16,6 +16,7 @@ import BeatSheetTimeline from './components/BeatSheetTimeline';
 import SectionNav from './components/SectionNav';
 import AnalysisProgress from './components/AnalysisProgress';
 import ReportCover from './components/ReportCover';
+import ChatPanel from './components/ChatPanel';
 
 export default function Dashboard() {
   const [mode, setMode] = useState<ViewMode>('idle');
@@ -401,6 +402,9 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* AI Chat Panel — only visible when analysis results exist */}
+      {data && <ChatPanel scriptId={data.scriptId} locale={locale} strategy={strategy} />}
     </main>
   );
 }

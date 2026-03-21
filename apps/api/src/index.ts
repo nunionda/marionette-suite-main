@@ -17,6 +17,7 @@ import {
   BudgetEstimator,
   NarrativeArcClassifier,
   TropeAnalyzer,
+  ScriptChatAgent,
   env,
   resolveStrategy,
   type AnalysisStrategyName,
@@ -544,6 +545,67 @@ Rules:
       strategy: t.Optional(t.Union([
         t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom')
       ])),
+    })
+  })
+
+  .post("/chat", async ({ body }) => {
+    const { scriptId, message, history, strategy: strat, market: marketInput } = body as {
+      scriptId: string; message: string; history?: any[];
+      strategy?: AnalysisStrategyName; market?: 'hollywood' | 'korean';
+    };
+
+    // Load stored report as context
+    const report = await reportRepo.findByScriptId(scriptId);
+    if (!report) {
+      return { error: "Report not found. Run analysis first." };
+    }
+
+    const factory = new LLMFactory();
+    const resolved = resolveStrategy(strat || 'auto');
+
+    // Use the coverage engine provider for chat (best quality)
+    let provider: ILLMProvider;
+    try {
+      provider = factory.getProvider(resolved.engineProviders.coverage);
+    } catch {
+      try {
+        // Fallback chain
+        for (const name of ['gemini', 'anthropic', 'openai', 'deepseek', 'groq'] as const) {
+          try {
+            provider = factory.getProvider(name);
+            break;
+          } catch { /* continue */ }
+        }
+        provider = provider! || factory.getProvider('mock');
+      } catch {
+        provider = factory.getProvider('mock');
+      }
+    }
+
+    const agent = new ScriptChatAgent(provider);
+    const result = await agent.chat({
+      scriptId,
+      message,
+      history: (history || []).slice(-10),
+      reportContext: report as unknown as Record<string, unknown>,
+      market: marketInput || 'hollywood',
+    });
+
+    return result;
+  }, {
+    body: t.Object({
+      scriptId: t.String(),
+      message: t.String(),
+      history: t.Optional(t.Array(t.Object({
+        role: t.Union([t.Literal('user'), t.Literal('assistant')]),
+        content: t.String(),
+        timestamp: t.Number(),
+      }))),
+      strategy: t.Optional(t.Union([
+        t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom'),
+        t.Literal('budget'), t.Literal('premium'), t.Literal('long-context')
+      ])),
+      market: t.Optional(t.Union([t.Literal('hollywood'), t.Literal('korean')])),
     })
   })
 
