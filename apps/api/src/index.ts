@@ -408,7 +408,12 @@ Rules:
 
     try {
       const response = await provider.generateText(systemPrompt, userPrompt);
-      const translated = JSON.parse(response.content);
+      // Strip markdown code fences if LLM wraps response (common with Gemini)
+      let content = response.content.trim();
+      if (content.startsWith('```')) {
+        content = content.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '');
+      }
+      const translated = JSON.parse(content);
 
       // Merge translated fields back into report
       const result = JSON.parse(JSON.stringify(report)); // deep clone
