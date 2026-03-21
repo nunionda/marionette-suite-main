@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader, CheckCircle } from 'lucide-react';
 
-const STEPS = [
+const STEPS_EN = [
   'Parsing screenplay...',
   'Extracting features...',
   'Analyzing emotions...',
@@ -14,12 +14,29 @@ const STEPS = [
   'Identifying tropes & comp films...',
 ];
 
-export default function AnalysisProgress() {
+const STEPS_KO = [
+  '시나리오 파싱 중...',
+  '피처 추출 중...',
+  '감정 분석 중...',
+  '비트 시트 생성 중...',
+  '등급 및 ROI 예측 중...',
+  '커버리지 분석 중...',
+  '제작 타당성 분석 중...',
+  '트로프 및 비교 작품 분석 중...',
+];
+
+interface AnalysisProgressProps {
+  locale?: 'en' | 'ko';
+}
+
+export default function AnalysisProgress({ locale = 'en' }: AnalysisProgressProps) {
+  const ko = locale === 'ko';
+  const steps = ko ? STEPS_KO : STEPS_EN;
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentStep(prev => (prev < STEPS.length - 1 ? prev + 1 : prev));
+      setCurrentStep(prev => (prev < steps.length - 1 ? prev + 1 : prev));
     }, 2500);
     return () => clearInterval(interval);
   }, []);
@@ -28,10 +45,10 @@ export default function AnalysisProgress() {
     <div className="glass-panel analysis-progress">
       <h3 className="panel-heading">
         <Loader size={20} className="spin section-icon" />
-        Analyzing Script...
+        {ko ? '시나리오 분석 중...' : 'Analyzing Script...'}
       </h3>
       <div className="progress-steps">
-        {STEPS.map((step, i) => (
+        {steps.map((step, i) => (
           <div
             key={i}
             className={`progress-step ${i < currentStep ? 'done' : i === currentStep ? 'active' : ''}`}
@@ -50,7 +67,7 @@ export default function AnalysisProgress() {
       <div className="progress-bar-container">
         <div
           className="progress-bar-fill"
-          style={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+          style={{ width: `${((currentStep + 1) / steps.length) * 100}%` }}
         />
       </div>
     </div>

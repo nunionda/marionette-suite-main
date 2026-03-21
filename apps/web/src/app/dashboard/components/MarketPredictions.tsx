@@ -22,7 +22,7 @@ export default function MarketPredictions({ predictions, tropes, locale = 'en' }
           </h3>
           <div className="detail-metrics">
             <div className="detail-metric">
-              <span className="detail-label">{ko ? '등급' : 'Tier'}</span>
+              <span className="detail-label">{ko ? '티어' : 'Tier'}</span>
               <span className={`badge ${predictions.roi.tier === 'Blockbuster' ? 'badge-blockbuster' : predictions.roi.tier === 'Hit' ? 'badge-hit' : 'badge-flop'}`}>
                 {predictions.roi.tier}
               </span>

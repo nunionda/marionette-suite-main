@@ -4,11 +4,13 @@ import React from 'react';
 
 interface ReportCoverProps {
   data: any;
+  locale?: 'en' | 'ko';
 }
 
-export default function ReportCover({ data }: ReportCoverProps) {
+export default function ReportCover({ data, locale = 'en' }: ReportCoverProps) {
+  const ko = locale === 'ko';
   const castCount = (data.characterNetwork?.characters ?? data.characterNetwork)?.length ?? 0;
-  const analysisDate = new Date().toLocaleDateString('en-US', {
+  const analysisDate = new Date().toLocaleDateString(ko ? 'ko-KR' : 'en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 
@@ -16,30 +18,30 @@ export default function ReportCover({ data }: ReportCoverProps) {
     <div className="report-cover print-only">
       <div className="report-cover-inner">
         <div className="report-cover-top">
-          <div className="report-cover-label">CONFIDENTIAL</div>
+          <div className="report-cover-label">{ko ? '대외비' : 'CONFIDENTIAL'}</div>
         </div>
 
         <div className="report-cover-main">
-          <h1 className="report-cover-title">Script Intelligence<br />Report</h1>
+          <h1 className="report-cover-title">{ko ? '시나리오 인텔리전스\n리포트' : 'Script Intelligence\nReport'}</h1>
           <div className="report-cover-divider" />
           <div className="report-cover-meta">
             <div className="report-cover-meta-item">
-              <span className="report-cover-meta-label">Project ID</span>
+              <span className="report-cover-meta-label">{ko ? '프로젝트 ID' : 'Project ID'}</span>
               <span className="report-cover-meta-value">{data.scriptId}</span>
             </div>
             <div className="report-cover-meta-item">
-              <span className="report-cover-meta-label">Analysis Date</span>
+              <span className="report-cover-meta-label">{ko ? '분석 날짜' : 'Analysis Date'}</span>
               <span className="report-cover-meta-value">{analysisDate}</span>
             </div>
             {data.coverage?.title && (
               <div className="report-cover-meta-item">
-                <span className="report-cover-meta-label">Title</span>
+                <span className="report-cover-meta-label">{ko ? '제목' : 'Title'}</span>
                 <span className="report-cover-meta-value">{data.coverage.title}</span>
               </div>
             )}
             {data.coverage?.genre && (
               <div className="report-cover-meta-item">
-                <span className="report-cover-meta-label">Genre</span>
+                <span className="report-cover-meta-label">{ko ? '장르' : 'Genre'}</span>
                 <span className="report-cover-meta-value">{data.coverage.genre}</span>
               </div>
             )}
@@ -49,19 +51,19 @@ export default function ReportCover({ data }: ReportCoverProps) {
         <div className="report-cover-stats">
           <div className="report-cover-stat">
             <span className="report-cover-stat-value">{data.summary.predictedRating}</span>
-            <span className="report-cover-stat-label">Rating</span>
+            <span className="report-cover-stat-label">{ko ? '등급' : 'Rating'}</span>
           </div>
           <div className="report-cover-stat">
             <span className="report-cover-stat-value">{data.summary.predictedRoi}</span>
-            <span className="report-cover-stat-label">ROI Tier</span>
+            <span className="report-cover-stat-label">{ko ? 'ROI 티어' : 'ROI Tier'}</span>
           </div>
           <div className="report-cover-stat">
             <span className="report-cover-stat-value">{castCount}</span>
-            <span className="report-cover-stat-label">Cast Members</span>
+            <span className="report-cover-stat-label">{ko ? '등장인물' : 'Cast Members'}</span>
           </div>
           <div className="report-cover-stat">
             <span className="report-cover-stat-value">{data.features?.sceneCount ?? '—'}</span>
-            <span className="report-cover-stat-label">Scenes</span>
+            <span className="report-cover-stat-label">{ko ? '장면 수' : 'Scenes'}</span>
           </div>
         </div>
 
@@ -69,13 +71,13 @@ export default function ReportCover({ data }: ReportCoverProps) {
           <div className="report-cover-score">
             <span className="report-cover-score-number">{data.coverage.overallScore}</span>
             <span className="report-cover-score-suffix">/100</span>
-            <span className="report-cover-score-label">Overall Coverage Score</span>
+            <span className="report-cover-score-label">{ko ? '종합 커버리지 점수' : 'Overall Coverage Score'}</span>
           </div>
         )}
 
         <div className="report-cover-footer">
-          <div>Script Intelligence Platform</div>
-          <div>For internal use only</div>
+          <div>{ko ? '시나리오 인텔리전스 플랫폼' : 'Script Intelligence Platform'}</div>
+          <div>{ko ? '내부 전용' : 'For internal use only'}</div>
         </div>
       </div>
     </div>

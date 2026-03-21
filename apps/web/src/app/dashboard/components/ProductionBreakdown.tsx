@@ -56,15 +56,15 @@ export default function ProductionBreakdown({ production, locale = 'en' }: Produ
               <div className="budget-range-bar">
                 <div className="budget-marker budget-low" style={{ left: '0%' }}>
                   <span className="budget-value">${(production.budgetEstimate.low / 1e6).toFixed(1)}M</span>
-                  <span className="budget-label-text">Low</span>
+                  <span className="budget-label-text">{ko ? '최소' : 'Low'}</span>
                 </div>
                 <div className="budget-marker budget-likely" style={{ left: '50%' }}>
                   <span className="budget-value">${(production.budgetEstimate.likely / 1e6).toFixed(1)}M</span>
-                  <span className="budget-label-text">Likely</span>
+                  <span className="budget-label-text">{ko ? '예상' : 'Likely'}</span>
                 </div>
                 <div className="budget-marker budget-high" style={{ left: '100%' }}>
                   <span className="budget-value">${(production.budgetEstimate.high / 1e6).toFixed(1)}M</span>
-                  <span className="budget-label-text">High</span>
+                  <span className="budget-label-text">{ko ? '최대' : 'High'}</span>
                 </div>
               </div>
             </div>
@@ -115,7 +115,7 @@ export default function ProductionBreakdown({ production, locale = 'en' }: Produ
               {production.vfxRequirements.map((vfx: any, i: number) => (
                 <div key={i} className="vfx-item">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Scene {vfx.sceneNumber}</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{ko ? '장면' : 'Scene'} {vfx.sceneNumber}</span>
                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                       <span className={`vfx-tier vfx-${vfx.tier}`}>{vfx.tier}</span>
                       <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{vfx.estimatedHours}h</span>
@@ -144,7 +144,7 @@ export default function ProductionBreakdown({ production, locale = 'en' }: Produ
                 <div key={i} className="cast-heat-row">
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
                     <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.name}</span>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{c.role} / {c.totalScenes} scenes</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{ko ? (({ Protagonist: '주연', Antagonist: '악역', Supporting: '조연', Minor: '단역' } as Record<string, string>)[c.role] ?? c.role) : c.role} / {c.totalScenes} {ko ? '장면' : 'scenes'}</span>
                   </div>
                   <div className="category-bar">
                     <div className="category-bar-fill" style={{

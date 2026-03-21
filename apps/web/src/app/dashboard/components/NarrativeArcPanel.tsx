@@ -27,7 +27,7 @@ export default function NarrativeArcPanel({ narrativeArc, locale = 'en' }: Narra
             {narrativeArc.arcType.replace(/-/g, ' ')}
           </span>
           <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-            {Math.round(narrativeArc.arcConfidence * 100)}% confidence
+            {Math.round(narrativeArc.arcConfidence * 100)}% {ko ? '신뢰도' : 'confidence'}
           </span>
         </div>
       </div>
@@ -39,7 +39,7 @@ export default function NarrativeArcPanel({ narrativeArc, locale = 'en' }: Narra
           <div className="turning-points">
             {narrativeArc.turningPoints.filter((tp: any) => tp.type !== 'plateau').slice(0, 8).map((tp: any, i: number) => (
               <span key={i} className={`tp-chip tp-${tp.type}`}>
-                Sc.{tp.sceneNumber} {tp.type === 'rise' ? '↑' : tp.type === 'fall' ? '↓' : '—'} {tp.magnitude > 0 ? tp.magnitude : ''}
+                {ko ? '장면' : 'Sc.'}{tp.sceneNumber} {tp.type === 'rise' ? '↑' : tp.type === 'fall' ? '↓' : '—'} {tp.magnitude > 0 ? tp.magnitude : ''}
               </span>
             ))}
           </div>
@@ -74,7 +74,7 @@ export default function NarrativeArcPanel({ narrativeArc, locale = 'en' }: Narra
             {narrativeArc.pacingIssues.map((issue: any, i: number) => (
               <div key={i} className={`pacing-issue pacing-${issue.severity}`}>
                 <span className="pacing-type">{issue.type}</span>
-                <span style={{ fontSize: '0.8rem' }}>Scenes {issue.startScene}–{issue.endScene}</span>
+                <span style={{ fontSize: '0.8rem' }}>{ko ? '장면' : 'Scenes'} {issue.startScene}–{issue.endScene}</span>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{issue.description}</span>
               </div>
             ))}

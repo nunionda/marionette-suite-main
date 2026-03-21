@@ -35,6 +35,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 18 (Design Refinements)**](./docs/results/session-18-design-refinements.md) - KO/EN toggle, mock warning accuracy, filename$ convention, coverage expand-all, dynamic emotion scenes, beat sheet responsive grid.
 - [**Result: Session 19 (i18n & Print Density)**](./docs/results/session-19-i18n-print-density.md) - Full KO/EN i18n across 8 components, Character Prominence legacy robustness, dense professional PDF export layout.
 - [**Result: Session 20 (Korean Romanization)**](./docs/results/session-20-korean-romanization.md) - Revised Romanization engine for Korean filenames, `[Romanized]korean$` scriptId convention, URL-safe report loading.
+- [**Result: Session 21 (i18n Translation Review)**](./docs/results/session-21-i18n-translation-review.md) - ROI 등급/티어 disambiguation, SectionNav/AnalysisProgress/ReportCover full i18n, missing labels across 9 components.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 

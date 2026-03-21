@@ -39,7 +39,7 @@ export default function CharacterIntelligence({ characterNetwork, locale = 'en' 
                   <span style={{ fontWeight: 600 }}>{char.totalLines ?? '—'}</span>
                 </div>
                 <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', display: 'flex', justifyContent: 'space-between' }}>
-                  <span>{char.role}</span>
+                  <span>{ko ? (({ Protagonist: '주연', Antagonist: '악역', Supporting: '조연', Minor: '단역' } as Record<string, string>)[char.role] ?? char.role) : char.role}</span>
                   {char.totalWords != null && (
                     <span>{char.totalWords} {ko ? '단어' : 'words'}</span>
                   )}
@@ -107,7 +107,7 @@ export default function CharacterIntelligence({ characterNetwork, locale = 'en' 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
                   <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{char.name}</span>
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
-                    {char.avgWordsPerLine} wpl / {char.vocabularyRichness} richness
+                    {char.avgWordsPerLine} {ko ? '평균단어' : 'wpl'} / {char.vocabularyRichness} {ko ? '어휘다양성' : 'richness'}
                   </span>
                 </div>
                 <div className="category-bar">

@@ -5,20 +5,26 @@ import React, { useState, useEffect } from 'react';
 interface Section {
   id: string;
   label: string;
+  labelKo: string;
   icon: string;
 }
 
 const SECTIONS: Section[] = [
-  { id: 'coverage', label: 'Coverage', icon: '📋' },
-  { id: 'production', label: 'Production', icon: '🎬' },
-  { id: 'stats', label: 'Stats', icon: '📊' },
-  { id: 'characters', label: 'Characters', icon: '👥' },
-  { id: 'arc', label: 'Arc', icon: '📈' },
-  { id: 'market', label: 'Market', icon: '💰' },
-  { id: 'beats', label: 'Beats', icon: '🎵' },
+  { id: 'coverage', label: 'Coverage', labelKo: '커버리지', icon: '📋' },
+  { id: 'production', label: 'Production', labelKo: '제작', icon: '🎬' },
+  { id: 'stats', label: 'Stats', labelKo: '통계', icon: '📊' },
+  { id: 'characters', label: 'Characters', labelKo: '캐릭터', icon: '👥' },
+  { id: 'arc', label: 'Arc', labelKo: '아크', icon: '📈' },
+  { id: 'market', label: 'Market', labelKo: '마켓', icon: '💰' },
+  { id: 'beats', label: 'Beats', labelKo: '비트', icon: '🎵' },
 ];
 
-export default function SectionNav() {
+interface SectionNavProps {
+  locale?: 'en' | 'ko';
+}
+
+export default function SectionNav({ locale = 'en' }: SectionNavProps) {
+  const ko = locale === 'ko';
   const [activeSection, setActiveSection] = useState('');
 
   useEffect(() => {
@@ -46,16 +52,16 @@ export default function SectionNav() {
   }
 
   return (
-    <nav className="section-nav no-print" aria-label="Section navigation">
+    <nav className="section-nav no-print" aria-label={ko ? '섹션 탐색' : 'Section navigation'}>
       {SECTIONS.map(s => (
         <button
           key={s.id}
           className={`section-nav-item ${activeSection === s.id ? 'active' : ''}`}
           onClick={() => scrollTo(s.id)}
-          title={s.label}
+          title={ko ? s.labelKo : s.label}
         >
           <span className="section-nav-icon">{s.icon}</span>
-          <span className="section-nav-label">{s.label}</span>
+          <span className="section-nav-label">{ko ? s.labelKo : s.label}</span>
         </button>
       ))}
     </nav>

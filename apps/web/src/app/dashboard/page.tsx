@@ -248,19 +248,19 @@ export default function Dashboard() {
       />
 
       {/* Loading Progress */}
-      {mode === 'analyzing' && <AnalysisProgress />}
+      {mode === 'analyzing' && <AnalysisProgress locale={locale} />}
 
       {/* Section Navigation */}
-      {data && <SectionNav />}
+      {data && <SectionNav locale={locale} />}
 
       {/* Print-only Report Cover */}
-      {data && <ReportCover data={data} />}
+      {data && <ReportCover data={data} locale={locale} />}
 
       {/* Script Coverage Report */}
       {data?.coverage && (
         <section id="coverage">
           <div className="print-section-header print-only">
-            <span className="print-section-number">1</span> Script Coverage Report
+            <span className="print-section-number">1</span> {ko ? '시나리오 커버리지 리포트' : 'Script Coverage Report'}
           </div>
           <CoverageReport coverage={data.coverage} locale={locale} />
         </section>
@@ -270,7 +270,7 @@ export default function Dashboard() {
       {data?.production && (
         <section id="production">
           <div className="print-section-header print-only">
-            <span className="print-section-number">2</span> Production Feasibility
+            <span className="print-section-number">2</span> {ko ? '제작 타당성' : 'Production Feasibility'}
           </div>
           <ProductionBreakdown production={data.production} locale={locale} />
         </section>
@@ -280,7 +280,7 @@ export default function Dashboard() {
       {data && (
         <div className="grid-layout">
           <div className="print-section-header print-only" style={{ width: '100%' }}>
-            <span className="print-section-number">3</span> Overview &amp; Emotional Arc
+            <span className="print-section-number">3</span> {ko ? '개요 및 감정 아크' : 'Overview & Emotional Arc'}
           </div>
 
           <div id="stats" className="glass-panel stat-card">
@@ -314,7 +314,7 @@ export default function Dashboard() {
 
           <div id="characters" style={{ display: 'contents' }}>
             <div className="print-section-header print-only" style={{ width: '100%' }}>
-              <span className="print-section-number">4</span> Character Intelligence
+              <span className="print-section-number">4</span> {ko ? '캐릭터 인텔리전스' : 'Character Intelligence'}
             </div>
             <CharacterIntelligence characterNetwork={data.characterNetwork} locale={locale} />
           </div>
@@ -322,7 +322,7 @@ export default function Dashboard() {
           {data.narrativeArc && (
             <div id="arc" style={{ display: 'contents' }}>
               <div className="print-section-header print-only" style={{ width: '100%' }}>
-                <span className="print-section-number">5</span> Narrative Arc
+                <span className="print-section-number">5</span> {ko ? '서사 아크' : 'Narrative Arc'}
               </div>
               <NarrativeArcPanel narrativeArc={data.narrativeArc} locale={locale} />
             </div>
@@ -330,14 +330,14 @@ export default function Dashboard() {
 
           <div id="market" style={{ display: 'contents' }}>
             <div className="print-section-header print-only" style={{ width: '100%' }}>
-              <span className="print-section-number">6</span> Market Predictions
+              <span className="print-section-number">6</span> {ko ? '마켓 예측' : 'Market Predictions'}
             </div>
             <MarketPredictions predictions={data.predictions} tropes={data.tropes} locale={locale} />
           </div>
 
           <div id="beats" style={{ display: 'contents' }}>
             <div className="print-section-header print-only" style={{ width: '100%' }}>
-              <span className="print-section-number">7</span> Narrative Beat Sheet
+              <span className="print-section-number">7</span> {ko ? '비트 시트' : 'Narrative Beat Sheet'}
             </div>
             <BeatSheetTimeline beatSheet={data.beatSheet} locale={locale} />
           </div>

@@ -8,10 +8,10 @@ type ProviderChoice = 'gemini' | 'anthropic' | 'openai' | 'mock';
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
 
 const STRATEGIES = [
-  { name: 'auto' as Strategy, label: 'Auto', desc: 'Best available + fallback' },
-  { name: 'fast' as Strategy, label: 'Fast', desc: 'Gemini Flash (low cost)' },
-  { name: 'deep' as Strategy, label: 'Deep Analysis', desc: 'Claude + Gemini hybrid' },
-  { name: 'custom' as Strategy, label: 'Custom', desc: 'Pick per engine' },
+  { name: 'auto' as Strategy, label: 'Auto', labelKo: '자동', desc: 'Best available + fallback', descKo: '최적 제공자 + 폴백' },
+  { name: 'fast' as Strategy, label: 'Fast', labelKo: '빠른 분석', desc: 'Gemini Flash (low cost)', descKo: 'Gemini Flash (저비용)' },
+  { name: 'deep' as Strategy, label: 'Deep Analysis', labelKo: '심층 분석', desc: 'Claude + Gemini hybrid', descKo: 'Claude + Gemini 하이브리드' },
+  { name: 'custom' as Strategy, label: 'Custom', labelKo: '사용자 지정', desc: 'Pick per engine', descKo: '엔진별 선택' },
 ];
 
 const ENGINE_LABELS: Record<string, string> = {
@@ -116,8 +116,8 @@ export default function UploadPanel({
                   className={`strategy-pill ${strategy === s.name ? 'active' : ''}`}
                   onClick={() => onStrategyChange(s.name)}
                 >
-                  <span className="pill-label">{s.label}</span>
-                  <span className="pill-desc">{s.desc}</span>
+                  <span className="pill-label">{t ? s.labelKo : s.label}</span>
+                  <span className="pill-desc">{t ? s.descKo : s.desc}</span>
                 </button>
               ))}
             </div>
