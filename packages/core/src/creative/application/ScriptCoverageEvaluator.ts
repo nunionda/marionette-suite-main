@@ -1,9 +1,11 @@
-import { ILLMProvider } from "../infrastructure/llm/ILLMProvider";
-import { ScriptCoverage } from "../domain/ScriptCoverage";
-import { ScriptElement } from "../../script/infrastructure/parser";
-import { Beat } from "../domain/BeatSheet";
-import { SceneEmotion } from "../domain/EmotionGraph";
-import { CharacterNode } from "../domain/CharacterNetwork";
+import type { ILLMProvider } from "../infrastructure/llm/ILLMProvider";
+import type { ScriptCoverage } from "../domain/ScriptCoverage";
+import type { ScriptElement } from "../../script/infrastructure/parser";
+import type { Beat } from "../domain/BeatSheet";
+import type { SceneEmotion } from "../domain/EmotionGraph";
+import type { CharacterNode } from "../domain/CharacterNetwork";
+import type { MarketLocale } from "../../shared/MarketConfig";
+import { getMarketConfig } from "../../shared/MarketConfig";
 
 export interface CoverageInput {
   beats: Beat[];
@@ -17,7 +19,7 @@ export interface CoverageInput {
 export class ScriptCoverageEvaluator {
   constructor(private readonly llm: ILLMProvider) {}
 
-  async evaluate(scriptId: string, elements: ScriptElement[], input: CoverageInput): Promise<ScriptCoverage> {
+  async evaluate(scriptId: string, elements: ScriptElement[], input: CoverageInput, market: MarketLocale = 'hollywood'): Promise<ScriptCoverage> {
     let currentScene = 0;
     const condensedLines = elements.map(e => {
       if (e.type === "scene_heading") {
@@ -47,7 +49,9 @@ export class ScriptCoverageEvaluator {
       comps: input.comps.map(c => c.title),
     });
 
-    const systemPrompt = `You are a senior Hollywood script coverage analyst (Script Reader) writing an official Studio Script Coverage Report.
+    const config = getMarketConfig(market);
+
+    const systemPrompt = `You are ${config.prompts.analystRole}.
 
 Evaluate the screenplay across these 5 categories, each scored 0-100:
 

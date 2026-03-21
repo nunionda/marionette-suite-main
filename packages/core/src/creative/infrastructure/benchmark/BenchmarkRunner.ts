@@ -2,7 +2,7 @@ import { LLMFactory } from '../llm/LLMFactory';
 import { BeatSheetGenerator } from '../../application/BeatSheetGenerator';
 import { EmotionAnalyzer } from '../../application/EmotionAnalyzer';
 import { ContentRatingClassifier } from '../../../predictor/application/ContentRatingClassifier';
-import { TropeAnalyzer } from '../../application/TropeAnalyzer';
+import { TropeAnalyzer } from '../../../predictor/application/TropeAnalyzer';
 import { ScriptCoverageEvaluator } from '../../application/ScriptCoverageEvaluator';
 import { BoxOfficePredictor } from '../../../predictor/application/BoxOfficePredictor';
 import { FeatureExtractor } from '../../../predictor/application/FeatureExtractor';

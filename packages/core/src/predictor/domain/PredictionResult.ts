@@ -1,7 +1,10 @@
+import type { ContentRating, MarketLocale } from '../../shared/MarketConfig';
+
 export type ROITier = "Flop" | "Break-even" | "Hit" | "Blockbuster";
 
 export interface PredictionResult {
   scriptId: string;
+  market?: MarketLocale;
   roi: {
     tier: ROITier;
     predictedMultiplier: number; // Revenue / Budget
@@ -9,7 +12,7 @@ export interface PredictionResult {
     reasoning: string;
   };
   mpaaRating: {
-    rating: "G" | "PG" | "PG-13" | "R" | "NC-17";
+    rating: ContentRating;
     reasons: string[];
     confidence: number;
   };

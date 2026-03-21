@@ -16,6 +16,7 @@ const envSchema = z.object({
   GEMINI_API_KEY: z.string().optional(),
   DEEPSEEK_API_KEY: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
+  KOFIC_API_KEY: z.string().optional(),
   PINECONE_API_KEY: z.string().optional(),
 });
 

@@ -5,6 +5,7 @@ import { Upload, FileText, Loader, Clock, AlertCircle } from 'lucide-react';
 
 type Strategy = 'auto' | 'fast' | 'deep' | 'custom' | 'budget' | 'premium' | 'long-context';
 type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'openai' | 'deepseek' | 'groq' | 'mock';
+type MarketLocale = 'hollywood' | 'korean';
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
 
 const STRATEGIES = [
@@ -45,6 +46,7 @@ interface UploadPanelProps {
   uploadError: string | null;
   dragOver: boolean;
   strategy: Strategy;
+  market: MarketLocale;
   customProviders: Record<string, ProviderChoice>;
   availableProviders: Record<string, boolean>;
   reports: any[];
@@ -54,6 +56,7 @@ interface UploadPanelProps {
   onFileSelect: () => void;
   onMovieIdChange: (v: string) => void;
   onStrategyChange: (s: Strategy) => void;
+  onMarketChange: (m: MarketLocale) => void;
   onCustomProviderChange: (engine: string, provider: ProviderChoice) => void;
   onAnalyze: () => void;
   onReset: () => void;
@@ -61,13 +64,13 @@ interface UploadPanelProps {
 }
 
 export { ENGINE_LABELS, PROVIDER_LABELS };
-export type { Strategy, ProviderChoice, ViewMode };
+export type { Strategy, ProviderChoice, MarketLocale, ViewMode };
 
 export default function UploadPanel({
-  mode, selectedFile, movieId, uploadError, dragOver, strategy,
+  mode, selectedFile, movieId, uploadError, dragOver, strategy, market,
   customProviders, availableProviders, reports, locale,
   onSetDragOver, onFileDrop, onFileSelect, onMovieIdChange,
-  onStrategyChange, onCustomProviderChange, onAnalyze, onReset, onLoadReport,
+  onStrategyChange, onMarketChange, onCustomProviderChange, onAnalyze, onReset, onLoadReport,
 }: UploadPanelProps) {
   const t = locale === 'ko';
   return (
@@ -113,6 +116,24 @@ export default function UploadPanel({
                   <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>{t ? '또는 클릭하여 찾아보기' : 'or click to browse'}</div>
                 </div>
               )}
+            </div>
+
+            {/* Market Selector */}
+            <div className="strategy-row" style={{ marginBottom: '0.5rem' }}>
+              <button
+                className={`strategy-pill ${market === 'hollywood' ? 'active' : ''}`}
+                onClick={() => onMarketChange('hollywood')}
+              >
+                <span className="pill-label">Hollywood</span>
+                <span className="pill-desc">{t ? 'MPAA / USD' : 'MPAA / USD'}</span>
+              </button>
+              <button
+                className={`strategy-pill ${market === 'korean' ? 'active' : ''}`}
+                onClick={() => onMarketChange('korean')}
+              >
+                <span className="pill-label">{t ? '한국 영화' : 'Korean'}</span>
+                <span className="pill-desc">{t ? 'KMRB / KRW' : 'KMRB / KRW'}</span>
+              </button>
             </div>
 
             {/* Strategy Selector */}

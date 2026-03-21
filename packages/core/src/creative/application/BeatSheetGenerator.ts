@@ -1,15 +1,17 @@
-import { ILLMProvider } from "../infrastructure/llm/ILLMProvider";
-import { BeatSheet } from "../domain/BeatSheet";
-import { ScriptElement } from "../../script/infrastructure/parser";
+import type { ILLMProvider } from "../infrastructure/llm/ILLMProvider";
+import type { BeatSheet } from "../domain/BeatSheet";
+import type { ScriptElement } from "../../script/infrastructure/parser";
+import type { MarketLocale } from "../../shared/MarketConfig";
+import { getMarketConfig } from "../../shared/MarketConfig";
 
 export class BeatSheetGenerator {
   constructor(private readonly llm: ILLMProvider) {}
 
   /**
-   * Translates an array of raw script elements into a structurally dense text blocks 
+   * Translates an array of raw script elements into a structurally dense text blocks
    * and invokes the LLM to output a precise 3-Act Structure Beat Sheet JSON.
    */
-  async generate(scriptId: string, elements: ScriptElement[]): Promise<BeatSheet> {
+  async generate(scriptId: string, elements: ScriptElement[], market: MarketLocale = 'hollywood'): Promise<BeatSheet> {
     let currentScene = 0;
     
     // Condense script to preserve token space while maintaining context
@@ -27,7 +29,9 @@ export class BeatSheetGenerator {
     // Safety truncate to prevent LLM context overflow bounds (basic chunking)
     const condensedScript = condensedLines.join('').slice(0, 100000);
 
-    const systemPrompt = `You are an expert Hollywood script consultant structurally evaluating a screenplay.
+    const config = getMarketConfig(market);
+
+    const systemPrompt = `You are ${config.prompts.consultantRole}.
 Analyze the provided screenplay text and extract its narrative structure as a traditional 3-Act Beat Sheet.
 Identify major turning points (e.g., "Inciting Incident", "Plot Point 1", "Midpoint", "Climax", "Resolution").
 

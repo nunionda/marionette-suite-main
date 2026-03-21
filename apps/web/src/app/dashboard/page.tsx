@@ -5,7 +5,7 @@ import { Film, Users, TrendingUp, Activity, AlertCircle, Download, Globe, Loader
 import './dashboard.css';
 
 import UploadPanel, { ENGINE_LABELS, PROVIDER_LABELS } from './components/UploadPanel';
-import type { Strategy, ProviderChoice, ViewMode } from './components/UploadPanel';
+import type { Strategy, ProviderChoice, MarketLocale, ViewMode } from './components/UploadPanel';
 import CoverageReport from './components/CoverageReport';
 import ProductionBreakdown from './components/ProductionBreakdown';
 import EmotionChart from './components/EmotionChart';
@@ -28,6 +28,7 @@ export default function Dashboard() {
 
   const [reports, setReports] = useState<any[]>([]);
   const [strategy, setStrategy] = useState<Strategy>('auto');
+  const [market, setMarket] = useState<MarketLocale>('hollywood');
   const [customProviders, setCustomProviders] = useState<Record<string, ProviderChoice>>({
     beatSheet: 'gemini',
     emotion: 'gemini',
@@ -115,6 +116,7 @@ export default function Dashboard() {
 
       bodyPayload.fileName = selectedFile.name;
       bodyPayload.strategy = strategy;
+      bodyPayload.market = market;
       if (strategy === 'custom') {
         bodyPayload.customProviders = customProviders;
       }
@@ -273,6 +275,7 @@ export default function Dashboard() {
         uploadError={uploadError}
         dragOver={dragOver}
         strategy={strategy}
+        market={market}
         customProviders={customProviders}
         availableProviders={availableProviders}
         reports={reports}
@@ -282,6 +285,7 @@ export default function Dashboard() {
         onFileSelect={handleFileSelect}
         onMovieIdChange={setMovieId}
         onStrategyChange={setStrategy}
+        onMarketChange={setMarket}
         onCustomProviderChange={(engine, provider) =>
           setCustomProviders(prev => ({ ...prev, [engine]: provider }))
         }
@@ -315,7 +319,7 @@ export default function Dashboard() {
           <div className="print-section-header print-only">
             <span className="print-section-number">2</span> {ko ? '제작 타당성' : 'Production Feasibility'}
           </div>
-          <ProductionBreakdown production={displayData.production} locale={locale} />
+          <ProductionBreakdown production={displayData.production} locale={locale} market={data?.market || 'hollywood'} />
         </section>
       )}
 
@@ -375,7 +379,7 @@ export default function Dashboard() {
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">6</span> {ko ? '마켓 예측' : 'Market Predictions'}
             </div>
-            <MarketPredictions predictions={displayData.predictions} tropes={displayData.tropes} locale={locale} />
+            <MarketPredictions predictions={displayData.predictions} tropes={displayData.tropes} locale={locale} market={data?.market || 'hollywood'} />
           </div>
 
           <div id="beats" style={{ display: 'contents' }}>

@@ -2,9 +2,10 @@ import type { AnalysisReport } from "@prisma/client";
 
 export interface AnalysisResultInput {
   scriptId: string;
+  market?: string;
   summary: {
     totalElements: number;
-    protagonist: string;
+    protagonist?: string;
     predictedRoi: string;
     predictedRating: string;
   };

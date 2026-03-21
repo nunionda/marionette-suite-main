@@ -1,3 +1,5 @@
+import type { MarketLocale } from '../../shared/MarketConfig';
+
 export interface CatalogFilm {
   title: string;
   year: number;
@@ -14,6 +16,7 @@ export interface CatalogFilm {
     pacing: 'slow' | 'moderate' | 'fast';
     arcType?: string;
   };
+  market?: MarketLocale;
 }
 
 export const FILM_CATALOG: CatalogFilm[] = [

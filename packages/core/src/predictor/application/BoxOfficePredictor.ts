@@ -1,19 +1,24 @@
-import { ILLMProvider } from "../../creative/infrastructure/llm/ILLMProvider";
-import { ScreenplayFeatures } from "../domain/ScreenplayFeatures";
-import { ROITier } from "../domain/PredictionResult";
+import type { ILLMProvider } from "../../creative/infrastructure/llm/ILLMProvider";
+import type { MarketLocale } from "../../shared/MarketConfig";
+import { getMarketConfig } from "../../shared/MarketConfig";
+import type { ScreenplayFeatures } from "../domain/ScreenplayFeatures";
+import type { ROITier } from "../domain/PredictionResult";
 
 export class BoxOfficePredictor {
   constructor(private readonly llm: ILLMProvider) {}
 
-  async predictROI(features: ScreenplayFeatures): Promise<{ tier: ROITier; predictedMultiplier: number; confidence: number; reasoning: string }> {
-    const systemPrompt = `You are a Hollywood market intelligence AI. 
+  async predictROI(features: ScreenplayFeatures, market: MarketLocale = 'hollywood'): Promise<{ tier: ROITier; predictedMultiplier: number; confidence: number; reasoning: string }> {
+    const config = getMarketConfig(market);
+    const { tiers } = config.roi;
+
+    const systemPrompt = `You are ${config.prompts.boxOfficeRole}.
 Analyze the provided screenplay features (budget, character density, emotional volatility, etc.) and predict its Return on Investment (ROI).
 
 ROI Tiers:
-- Flop: Multiplier < 1.0
-- Break-even: 1.0 <= Multiplier < 2.5
-- Hit: 2.5 <= Multiplier < 5.0
-- Blockbuster: Multiplier >= 5.0
+- Flop: Multiplier < ${tiers.flop.max}
+- Break-even: ${tiers.breakEven.min} <= Multiplier < ${tiers.breakEven.max}
+- Hit: ${tiers.hit.min} <= Multiplier < ${tiers.hit.max}
+- Blockbuster: Multiplier >= ${tiers.blockbuster.min}${tiers.blockbuster.admissionsThreshold ? ` (or ${(tiers.blockbuster.admissionsThreshold / 1_000_000).toFixed(0)}M+ admissions)` : ''}
 
 CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
 {

@@ -1,25 +1,29 @@
-import { ILLMProvider } from "../../creative/infrastructure/llm/ILLMProvider";
-import { ScriptElement } from "../../script/infrastructure/parser";
+import type { ILLMProvider } from "../../creative/infrastructure/llm/ILLMProvider";
+import type { ScriptElement } from "../../script/infrastructure/parser";
+import type { ContentRating, MarketLocale } from "../../shared/MarketConfig";
+import { getMarketConfig } from "../../shared/MarketConfig";
 
 export class ContentRatingClassifier {
   constructor(private readonly llm: ILLMProvider) {}
 
-  async classify(scriptId: string, elements: ScriptElement[]): Promise<{ rating: "G" | "PG" | "PG-13" | "R" | "NC-17"; reasons: string[]; confidence: number }> {
+  async classify(scriptId: string, elements: ScriptElement[], market: MarketLocale = 'hollywood'): Promise<{ rating: ContentRating; reasons: string[]; confidence: number }> {
+    const config = getMarketConfig(market);
+
     // Collect a sample of dialogue and action for content analysis
     const samplingText = elements
       .filter(e => e.type === "dialogue" || e.type === "action")
-      .slice(0, 500) // Sample first 500 elements to avoid context overflow while getting a good gist
+      .slice(0, 500)
       .map(e => e.text)
       .join("\n");
 
-    const systemPrompt = `You are an MPAA rating specialist.
+    const systemPrompt = `You are a ${config.ratings.system} rating specialist.
 Analyze the script content (violence, profanity, drug use, sexual themes) and predict the appropriate age rating.
 
-Ratings: G, PG, PG-13, R, NC-17.
+Ratings: ${config.prompts.ratingValues}.
 
 CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
 {
-  "rating": "PG-13",
+  "rating": "${config.ratings.values[2]}",
   "reasons": ["Moderate fantasy violence", "Some suggestive themes"],
   "confidence": 0.90
 }`;

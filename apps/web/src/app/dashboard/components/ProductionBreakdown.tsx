@@ -3,12 +3,22 @@
 import React from 'react';
 import { Clapperboard, DollarSign, MapPin, Sparkles, Users } from 'lucide-react';
 
+function formatBudget(amount: number, market: string): string {
+  if (market === 'korean') {
+    if (Math.abs(amount) >= 1e8) return `₩${(amount / 1e8).toFixed(1)}억`;
+    if (Math.abs(amount) >= 1e4) return `₩${Math.round(amount / 1e4).toLocaleString('ko-KR')}만`;
+    return `₩${amount.toLocaleString('ko-KR')}`;
+  }
+  return `$${(amount / 1e6).toFixed(1)}M`;
+}
+
 interface ProductionBreakdownProps {
   production: any;
   locale?: 'en' | 'ko';
+  market?: 'hollywood' | 'korean';
 }
 
-export default function ProductionBreakdown({ production, locale = 'en' }: ProductionBreakdownProps) {
+export default function ProductionBreakdown({ production, locale = 'en', market = 'hollywood' }: ProductionBreakdownProps) {
   const ko = locale === 'ko';
   return (
     <div className="production-section">
@@ -55,15 +65,15 @@ export default function ProductionBreakdown({ production, locale = 'en' }: Produ
             <div className="budget-range">
               <div className="budget-range-bar">
                 <div className="budget-marker budget-low" style={{ left: '0%' }}>
-                  <span className="budget-value">${(production.budgetEstimate.low / 1e6).toFixed(1)}M</span>
+                  <span className="budget-value">{formatBudget(production.budgetEstimate.low, market)}</span>
                   <span className="budget-label-text">{ko ? '최소' : 'Low'}</span>
                 </div>
                 <div className="budget-marker budget-likely" style={{ left: '50%' }}>
-                  <span className="budget-value">${(production.budgetEstimate.likely / 1e6).toFixed(1)}M</span>
+                  <span className="budget-value">{formatBudget(production.budgetEstimate.likely, market)}</span>
                   <span className="budget-label-text">{ko ? '예상' : 'Likely'}</span>
                 </div>
                 <div className="budget-marker budget-high" style={{ left: '100%' }}>
-                  <span className="budget-value">${(production.budgetEstimate.high / 1e6).toFixed(1)}M</span>
+                  <span className="budget-value">{formatBudget(production.budgetEstimate.high, market)}</span>
                   <span className="budget-label-text">{ko ? '최대' : 'High'}</span>
                 </div>
               </div>
@@ -72,7 +82,7 @@ export default function ProductionBreakdown({ production, locale = 'en' }: Produ
               {Object.entries(production.budgetEstimate.breakdown).map(([key, val]: [string, any]) => (
                 <div key={key} className="budget-item">
                   <span className="detail-label">{key}</span>
-                  <span style={{ fontWeight: 600 }}>${(val / 1e6).toFixed(2)}M</span>
+                  <span style={{ fontWeight: 600 }}>{formatBudget(val, market)}</span>
                 </div>
               ))}
             </div>

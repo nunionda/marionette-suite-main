@@ -1,3 +1,5 @@
+import type { MarketLocale } from '../../shared/MarketConfig';
+
 export interface BoxOfficeData {
   movieId: string;
   title: string;
@@ -10,4 +12,10 @@ export interface BoxOfficeData {
    */
   topCast: string[];
   genres: string[];
+  /** Market locale for currency/analysis context */
+  market?: MarketLocale;
+  /** Currency code (USD, KRW) */
+  currencyCode?: string;
+  /** Admission count — critical for Korean market (천만 관객 milestone) */
+  admissions?: number;
 }

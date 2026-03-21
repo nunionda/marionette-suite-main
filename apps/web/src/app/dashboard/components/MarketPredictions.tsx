@@ -7,9 +7,19 @@ interface MarketPredictionsProps {
   predictions: any;
   tropes?: string[];
   locale?: 'en' | 'ko';
+  market?: 'hollywood' | 'korean';
 }
 
-export default function MarketPredictions({ predictions, tropes, locale = 'en' }: MarketPredictionsProps) {
+function formatAmount(amount: number, market: string): string {
+  if (market === 'korean') {
+    if (Math.abs(amount) >= 1e8) return `₩${(amount / 1e8).toFixed(0)}억`;
+    if (Math.abs(amount) >= 1e4) return `₩${Math.round(amount / 1e4).toLocaleString('ko-KR')}만`;
+    return `₩${amount.toLocaleString('ko-KR')}`;
+  }
+  return `$${(amount / 1e6).toFixed(0)}M`;
+}
+
+export default function MarketPredictions({ predictions, tropes, locale = 'en', market = 'hollywood' }: MarketPredictionsProps) {
   const ko = locale === 'ko';
   return (
     <>
@@ -100,11 +110,11 @@ export default function MarketPredictions({ predictions, tropes, locale = 'en' }
                   <div className="comp-stats-row">
                     <div className="comp-stat">
                       <span className="detail-label">{ko ? '예산' : 'Budget'}</span>
-                      <span>${(comp.marketPerformance.budget / 1e6).toFixed(0)}M</span>
+                      <span>{formatAmount(comp.marketPerformance.budget, market)}</span>
                     </div>
                     <div className="comp-stat">
                       <span className="detail-label">{ko ? '수익' : 'Revenue'}</span>
-                      <span>${(comp.marketPerformance.revenue / 1e6).toFixed(0)}M</span>
+                      <span>{formatAmount(comp.marketPerformance.revenue, market)}</span>
                     </div>
                     <div className="comp-stat">
                       <span className="detail-label">ROI</span>

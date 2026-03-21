@@ -1,16 +1,19 @@
 import type { ScreenplayFeatures } from "../domain/ScreenplayFeatures";
 import type { SimilarityReport, CompFilm } from "../domain/SimilarityReport";
+import type { MarketLocale } from "../../shared/MarketConfig";
 import { FILM_CATALOG, type CatalogFilm } from "../data/filmCatalog";
+import { KOREAN_FILM_CATALOG } from "../data/koreanFilmCatalog";
 
 export class Benchmarker {
   /**
    * Finds comparable films using cosine similarity on a feature vector
    * built from screenplay metrics. Returns top 5 matches from a 50+ film catalog.
    */
-  public findComps(features: ScreenplayFeatures, scriptTropes?: string[]): SimilarityReport {
+  public findComps(features: ScreenplayFeatures, scriptTropes?: string[], market: MarketLocale = 'hollywood'): SimilarityReport {
+    const catalog = market === 'korean' ? KOREAN_FILM_CATALOG : FILM_CATALOG;
     const scriptVector = this.buildFeatureVector(features);
 
-    const scored = FILM_CATALOG.map((film) => {
+    const scored = catalog.map((film) => {
       const filmVector = this.catalogToVector(film);
       const cosineSim = this.cosineSimilarity(scriptVector, filmVector);
 

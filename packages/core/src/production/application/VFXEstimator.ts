@@ -1,8 +1,9 @@
-import { ILLMProvider } from '../../creative/infrastructure/llm/ILLMProvider';
-import { ScriptElement } from '../../script/infrastructure/parser';
-import { VFXRequirement, VFXTier } from '../domain/ProductionBreakdown';
+import type { ILLMProvider } from '../../creative/infrastructure/llm/ILLMProvider';
+import type { ScriptElement } from '../../script/infrastructure/parser';
+import type { MarketLocale } from '../../shared/MarketConfig';
+import type { VFXRequirement, VFXTier } from '../domain/ProductionBreakdown';
 
-const VFX_KEYWORDS = [
+const VFX_KEYWORDS_EN = [
   'explosion', 'explode', 'crash', 'fly', 'flying', 'flies',
   'transform', 'alien', 'creature', 'underwater', 'space',
   'destroy', 'destruction', 'hologram', 'fire', 'flood',
@@ -11,6 +12,15 @@ const VFX_KEYWORDS = [
   'superhero', 'morph', 'invisible', 'vanish', 'levitate',
   'tornado', 'hurricane', 'meteor', 'collapse', 'shatter',
   'ghost', 'spirit', 'glow', 'beam', 'shield', 'force field',
+];
+
+const VFX_KEYWORDS_KO = [
+  '폭발', '충돌', '비행', '날아', '변신', '외계인', '괴물',
+  '수중', '우주', '파괴', '홀로그램', '불', '홍수',
+  '지진', '용', '마법', '레이저', '포탈', '순간이동',
+  '우주선', '로봇', '슈퍼', '투명', '사라지', '떠오르',
+  '태풍', '폭풍', '운석', '붕괴', '산산조각',
+  '귀신', '유령', '빛', '방패', '결계',
 ];
 
 const TIER_HOURS: Record<VFXTier, number> = {
@@ -23,11 +33,12 @@ const TIER_HOURS: Record<VFXTier, number> = {
 export class VFXEstimator {
   constructor(private readonly llm: ILLMProvider) {}
 
-  async estimate(scriptId: string, elements: ScriptElement[]): Promise<{
+  async estimate(scriptId: string, elements: ScriptElement[], market: MarketLocale = 'hollywood'): Promise<{
     requirements: VFXRequirement[];
     complexityScore: number;
   }> {
     // 1. Filter action lines with VFX keywords
+    const keywords = [...VFX_KEYWORDS_EN, ...(market === 'korean' ? VFX_KEYWORDS_KO : [])];
     let currentScene = 0;
     const candidates: { sceneNumber: number; text: string }[] = [];
 
@@ -38,7 +49,7 @@ export class VFXEstimator {
       }
       if (el.type === 'action') {
         const lower = el.text.toLowerCase();
-        if (VFX_KEYWORDS.some(kw => lower.includes(kw))) {
+        if (keywords.some(kw => lower.includes(kw))) {
           candidates.push({ sceneNumber: currentScene || 1, text: el.text });
         }
       }
@@ -80,7 +91,7 @@ CRITICAL: Output ONLY raw JSON array matching this format:
       requirements = parsed
         .filter(p => p.tier !== 'none' && candidates[p.index - 1])
         .map(p => {
-          const c = candidates[p.index - 1];
+          const c = candidates[p.index - 1]!;
           const tier = (['simple', 'moderate', 'complex'].includes(p.tier) ? p.tier : 'simple') as VFXTier;
           return {
             sceneNumber: c.sceneNumber,

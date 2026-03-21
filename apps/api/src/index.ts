@@ -80,13 +80,16 @@ const app = new Elysia()
       { name: 'long-context', label: 'Long Context', description: 'Gemini 1.5 Pro (2M context) for long scripts', requires: ['gemini'] },
       { name: 'custom', label: 'Custom', description: 'Pick provider per engine' },
     ],
+    markets: ['hollywood', 'korean'],
   }))
 
   .post("/analyze", async ({ body }) => {
-    const { scriptText, scriptBase64, isPdf, movieId, fileName, strategy, customProviders } = body as {
+    const { scriptText, scriptBase64, isPdf, movieId, fileName, strategy, customProviders, market: marketInput } = body as {
       scriptText?: string; scriptBase64?: string; isPdf?: boolean; movieId?: string;
       fileName?: string; strategy?: AnalysisStrategyName; customProviders?: CustomStrategyInput;
+      market?: 'hollywood' | 'korean';
     };
+    const market = marketInput || 'hollywood';
     const baseName = fileName ? fileName.replace(/\.[^.]+$/, '') : null;
     let scriptId: string;
     if (baseName) {
@@ -100,7 +103,7 @@ const app = new Elysia()
       scriptId = movieId || `script-${Date.now()}`;
     }
 
-    console.log(`🎬 Starting analysis for: ${scriptId} (strategy: ${strategy || 'auto'})`);
+    console.log(`🎬 Starting analysis for: ${scriptId} (strategy: ${strategy || 'auto'}, market: ${market})`);
 
     // 1. Parse (PDF or plain text)
     const elements = isPdf && scriptBase64
@@ -147,9 +150,9 @@ const app = new Elysia()
     const network = characterAnalyzer.analyze(scriptId, elements);
 
     // Run LLM engines sequentially to avoid Gemini rate-limit exhaustion
-    const beatsResult = await withFallback('beatSheet', 'BeatSheet', (p) => new BeatSheetGenerator(p).generate(scriptId, elements));
+    const beatsResult = await withFallback('beatSheet', 'BeatSheet', (p) => new BeatSheetGenerator(p).generate(scriptId, elements, market));
     const emotionResult = await withFallback('emotion', 'Emotion', (p) => new EmotionAnalyzer(p).analyze(scriptId, elements));
-    const ratingResult = await withFallback('rating', 'Rating', (p) => new ContentRatingClassifier(p).classify(scriptId, elements));
+    const ratingResult = await withFallback('rating', 'Rating', (p) => new ContentRatingClassifier(p).classify(scriptId, elements, market));
 
     const beats = beatsResult.data;
     const emotion = emotionResult.data;
@@ -164,16 +167,16 @@ const app = new Elysia()
       emotionGraph: emotion
     }, mockMarket as any);
 
-    const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features));
+    const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features, market));
     const roiPrediction = roiResult.data;
 
     // Trope Analysis (LLM)
     const tropeResult = await withFallback('trope', 'Trope', (p) =>
-      new TropeAnalyzer(p).analyze(scriptId, elements)
+      new TropeAnalyzer(p).analyze(scriptId, elements, market)
     );
     const tropes = tropeResult.data.tropes;
 
-    const similarity = benchmarker.findComps(features, tropes);
+    const similarity = benchmarker.findComps(features, tropes, market);
 
     // 5. Script Coverage Evaluation (comprehensive scoring)
     const coverageResult = await withFallback('coverage', 'Coverage', (p) =>
@@ -184,7 +187,7 @@ const app = new Elysia()
         roi: roiPrediction,
         rating: mpaaRating,
         comps: similarity.topComps,
-      })
+      }, market)
     );
     const coverage = coverageResult.data;
 
@@ -211,12 +214,12 @@ const app = new Elysia()
     const estimatedShootingDays = productionAnalyzer.estimateShootingDays(sceneCount);
 
     const vfxResult = await withFallback('vfx', 'VFX', (p) =>
-      new VFXEstimator(p).estimate(scriptId, elements)
+      new VFXEstimator(p).estimate(scriptId, elements, market)
     );
     const vfx = vfxResult.data;
 
     const budgetEstimator = new BudgetEstimator();
-    const budgetEstimate = budgetEstimator.estimate(locations, cast, vfx.requirements, estimatedShootingDays);
+    const budgetEstimate = budgetEstimator.estimate(locations, cast, vfx.requirements, estimatedShootingDays, market);
 
     const production = {
       scriptId,
@@ -243,6 +246,7 @@ const app = new Elysia()
 
     const result = {
       scriptId,
+      market,
       summary: {
         totalElements: elements.length,
         protagonist: network.characters[0]?.name,
@@ -291,6 +295,7 @@ const app = new Elysia()
       isPdf: t.Optional(t.Boolean()),
       movieId: t.Optional(t.String()),
       fileName: t.Optional(t.String()),
+      market: t.Optional(t.Union([t.Literal('hollywood'), t.Literal('korean')])),
       strategy: t.Optional(t.Union([
         t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom'),
         t.Literal('budget'), t.Literal('premium'), t.Literal('long-context')
