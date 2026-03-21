@@ -2035,6 +2035,21 @@ input:focus-visible {
   transform: scale(0.95);
 }
 
+.translating-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--accent-blue);
+  padding: 0.25rem 0.75rem;
+  background: rgba(0, 91, 192, 0.1);
+  border-radius: 1rem;
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
 .mock-engines {
   font-weight: 600;
   opacity: 0.85;

@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { Film, Users, TrendingUp, Activity, AlertCircle, Download, Globe } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Film, Users, TrendingUp, Activity, AlertCircle, Download, Globe, Loader2 } from 'lucide-react';
 import './dashboard.css';
 
 import UploadPanel, { ENGINE_LABELS, PROVIDER_LABELS } from './components/UploadPanel';
@@ -39,6 +39,9 @@ export default function Dashboard() {
   });
   const [availableProviders, setAvailableProviders] = useState<Record<string, boolean>>({});
   const [locale, setLocale] = useState<'en' | 'ko'>('en');
+  const [translatedData, setTranslatedData] = useState<any>(null);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const translationCache = useRef<Map<string, any>>(new Map());
 
   useEffect(() => {
     fetchReportHistory();
@@ -47,6 +50,36 @@ export default function Dashboard() {
       .then(d => setAvailableProviders(d.available || {}))
       .catch(() => {});
   }, []);
+
+  const translateReport = useCallback(async (report: any) => {
+    const cacheKey = report.scriptId;
+    if (translationCache.current.has(cacheKey)) {
+      setTranslatedData(translationCache.current.get(cacheKey));
+      return;
+    }
+    setIsTranslating(true);
+    try {
+      const res = await fetch('http://localhost:4005/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ report, targetLanguage: 'ko', strategy }),
+      });
+      if (!res.ok) throw new Error('Translation failed');
+      const translated = await res.json();
+      translationCache.current.set(cacheKey, translated);
+      setTranslatedData(translated);
+    } catch {
+      // keep original data on failure
+    } finally {
+      setIsTranslating(false);
+    }
+  }, [strategy]);
+
+  useEffect(() => {
+    if (locale === 'ko' && data && !translatedData) {
+      translateReport(data);
+    }
+  }, [locale, data, translatedData, translateReport]);
 
   async function fetchReportHistory() {
     try {
@@ -99,6 +132,7 @@ export default function Dashboard() {
 
       const result = await res.json();
       setData(result);
+      setTranslatedData(null);
       setMode('viewing');
       fetchReportHistory();
     } catch (err: any) {
@@ -115,6 +149,7 @@ export default function Dashboard() {
       if (!res.ok) throw new Error('Failed to load report');
       const result = await res.json();
       setData(result);
+      setTranslatedData(null);
       setMode('viewing');
     } catch (err: any) {
       setUploadError(err.message);
@@ -151,12 +186,14 @@ export default function Dashboard() {
   function resetToIdle() {
     setMode('idle');
     setData(null);
+    setTranslatedData(null);
     setSelectedFile(null);
     setUploadError(null);
     setMovieId('');
   }
 
   const ko = locale === 'ko';
+  const displayData = (ko && translatedData) ? translatedData : data;
 
   return (
     <main className="dashboard-container" aria-label="Script Intelligence Dashboard">
@@ -187,6 +224,12 @@ export default function Dashboard() {
               <button className="btn-export no-print" onClick={() => window.print()}>
                 <Download size={16} /> {ko ? 'PDF 내보내기' : 'Export PDF'}
               </button>
+            </div>
+          )}
+          {isTranslating && (
+            <div className="translating-indicator no-print">
+              <Loader2 size={14} className="spin-icon" />
+              <span>{ko ? '번역 중...' : 'Translating...'}</span>
             </div>
           )}
         </div>
@@ -254,7 +297,7 @@ export default function Dashboard() {
       {data && <SectionNav locale={locale} />}
 
       {/* Print-only Report Cover */}
-      {data && <ReportCover data={data} locale={locale} />}
+      {data && <ReportCover data={displayData} locale={locale} />}
 
       {/* Script Coverage Report */}
       {data?.coverage && (
@@ -262,7 +305,7 @@ export default function Dashboard() {
           <div className="print-section-header print-only">
             <span className="print-section-number">1</span> {ko ? '시나리오 커버리지 리포트' : 'Script Coverage Report'}
           </div>
-          <CoverageReport coverage={data.coverage} locale={locale} />
+          <CoverageReport coverage={displayData.coverage} locale={locale} />
         </section>
       )}
 
@@ -272,7 +315,7 @@ export default function Dashboard() {
           <div className="print-section-header print-only">
             <span className="print-section-number">2</span> {ko ? '제작 타당성' : 'Production Feasibility'}
           </div>
-          <ProductionBreakdown production={data.production} locale={locale} />
+          <ProductionBreakdown production={displayData.production} locale={locale} />
         </section>
       )}
 
@@ -310,13 +353,13 @@ export default function Dashboard() {
             <p className="stat-value">{data.features?.sceneCount ?? '—'}</p>
           </div>
 
-          <EmotionChart emotionGraph={data.emotionGraph} locale={locale} />
+          <EmotionChart emotionGraph={displayData.emotionGraph} locale={locale} />
 
           <div id="characters" style={{ display: 'contents' }}>
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">4</span> {ko ? '캐릭터 인텔리전스' : 'Character Intelligence'}
             </div>
-            <CharacterIntelligence characterNetwork={data.characterNetwork} locale={locale} />
+            <CharacterIntelligence characterNetwork={displayData.characterNetwork} locale={locale} />
           </div>
 
           {data.narrativeArc && (
@@ -324,7 +367,7 @@ export default function Dashboard() {
               <div className="print-section-header print-only" style={{ width: '100%' }}>
                 <span className="print-section-number">5</span> {ko ? '서사 아크' : 'Narrative Arc'}
               </div>
-              <NarrativeArcPanel narrativeArc={data.narrativeArc} locale={locale} />
+              <NarrativeArcPanel narrativeArc={displayData.narrativeArc} locale={locale} />
             </div>
           )}
 
@@ -332,14 +375,14 @@ export default function Dashboard() {
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">6</span> {ko ? '마켓 예측' : 'Market Predictions'}
             </div>
-            <MarketPredictions predictions={data.predictions} tropes={data.tropes} locale={locale} />
+            <MarketPredictions predictions={displayData.predictions} tropes={displayData.tropes} locale={locale} />
           </div>
 
           <div id="beats" style={{ display: 'contents' }}>
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">7</span> {ko ? '비트 시트' : 'Narrative Beat Sheet'}
             </div>
-            <BeatSheetTimeline beatSheet={data.beatSheet} locale={locale} />
+            <BeatSheetTimeline beatSheet={displayData.beatSheet} locale={locale} />
           </div>
         </div>
       )}

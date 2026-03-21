@@ -317,6 +317,181 @@ const app = new Elysia()
     })
   })
 
+  .post("/translate", async ({ body }) => {
+    const { report, targetLanguage, strategy: strat } = body as {
+      report: any; targetLanguage: string; strategy?: AnalysisStrategyName;
+    };
+
+    if (targetLanguage !== 'ko') {
+      return report; // only Korean translation supported for now
+    }
+
+    console.log(`🌐 Translating report ${report.scriptId} → ${targetLanguage}`);
+
+    // Extract translatable text fields into a structured object
+    const translatable: Record<string, any> = {};
+
+    if (report.coverage) {
+      translatable.coverage = {
+        synopsis: report.coverage.synopsis || '',
+        logline: report.coverage.logline || '',
+        strengths: report.coverage.strengths || [],
+        weaknesses: report.coverage.weaknesses || [],
+        recommendation: report.coverage.recommendation || '',
+        categories: (report.coverage.categories || []).map((cat: any) => ({
+          name: cat.name,
+          subcategories: (cat.subcategories || []).map((sub: any) => ({
+            name: sub.name,
+            assessment: sub.assessment || '',
+          })),
+        })),
+      };
+    }
+
+    if (report.beatSheet) {
+      translatable.beatSheet = (report.beatSheet || []).map((b: any) => ({
+        name: b.name,
+        description: b.description || '',
+      }));
+    }
+
+    if (report.emotionGraph) {
+      translatable.emotionGraph = (report.emotionGraph || []).map((e: any) => ({
+        dominantEmotion: e.dominantEmotion || '',
+        explanation: e.explanation || '',
+      }));
+    }
+
+    if (report.narrativeArc) {
+      translatable.narrativeArc = {
+        arcDescription: report.narrativeArc.arcDescription || '',
+        pacingIssues: (report.narrativeArc.pacingIssues || []).map((p: any) => ({
+          description: p.description || '',
+        })),
+        genreFitDeviation: report.narrativeArc.genreFit?.deviation || '',
+      };
+    }
+
+    if (report.predictions) {
+      translatable.predictions = {
+        roiReasoning: report.predictions.roi?.reasoning || '',
+        ratingReasons: report.predictions.rating?.reasons || [],
+      };
+    }
+
+    if (report.tropes) {
+      translatable.tropes = report.tropes || [];
+    }
+
+    // Single LLM call for all translations
+    const factory = new LLMFactory();
+    const resolved = resolveStrategy(strat || 'auto');
+    let provider: ILLMProvider;
+    try {
+      provider = factory.getProvider(resolved.engineProviders.coverage);
+    } catch {
+      provider = factory.getProvider('mock');
+    }
+
+    const systemPrompt = `You are a professional Korean translator specializing in the film and entertainment industry.
+Translate ALL string values in the provided JSON to Korean.
+Rules:
+- Preserve the JSON structure and keys EXACTLY as-is (do not translate keys).
+- Keep proper nouns (character names, movie titles) in their original form.
+- Keep technical abbreviations (VFX, CGI, SFX) unchanged.
+- Keep numbers unchanged.
+- Translate film industry terms naturally: e.g., "Inciting Incident" → "사건의 발단", "Climax" → "클라이맥스", "Rising Action" → "상승 액션".
+- For emotion names: "Tension" → "긴장", "Fear" → "공포", "Joy" → "기쁨", "Sadness" → "슬픔", "Anger" → "분노", "Hope" → "희망", "Surprise" → "놀라움", etc.
+- Return ONLY the translated JSON object, no markdown or explanation.`;
+
+    const userPrompt = JSON.stringify(translatable, null, 2);
+
+    try {
+      const response = await provider.generateText(systemPrompt, userPrompt);
+      const translated = JSON.parse(response.content);
+
+      // Merge translated fields back into report
+      const result = JSON.parse(JSON.stringify(report)); // deep clone
+
+      if (translated.coverage && result.coverage) {
+        result.coverage.synopsis = translated.coverage.synopsis;
+        result.coverage.logline = translated.coverage.logline;
+        result.coverage.strengths = translated.coverage.strengths;
+        result.coverage.weaknesses = translated.coverage.weaknesses;
+        result.coverage.recommendation = translated.coverage.recommendation;
+        if (translated.coverage.categories) {
+          translated.coverage.categories.forEach((tCat: any, ci: number) => {
+            if (result.coverage.categories?.[ci]?.subcategories) {
+              tCat.subcategories?.forEach((tSub: any, si: number) => {
+                if (result.coverage.categories[ci].subcategories[si]) {
+                  result.coverage.categories[ci].subcategories[si].assessment = tSub.assessment;
+                }
+              });
+            }
+          });
+        }
+      }
+
+      if (translated.beatSheet && result.beatSheet) {
+        translated.beatSheet.forEach((tBeat: any, i: number) => {
+          if (result.beatSheet[i]) {
+            result.beatSheet[i].description = tBeat.description;
+          }
+        });
+      }
+
+      if (translated.emotionGraph && result.emotionGraph) {
+        translated.emotionGraph.forEach((tEmo: any, i: number) => {
+          if (result.emotionGraph[i]) {
+            result.emotionGraph[i].dominantEmotion = tEmo.dominantEmotion;
+            result.emotionGraph[i].explanation = tEmo.explanation;
+          }
+        });
+      }
+
+      if (translated.narrativeArc && result.narrativeArc) {
+        result.narrativeArc.arcDescription = translated.narrativeArc.arcDescription;
+        if (translated.narrativeArc.pacingIssues) {
+          translated.narrativeArc.pacingIssues.forEach((tP: any, i: number) => {
+            if (result.narrativeArc.pacingIssues?.[i]) {
+              result.narrativeArc.pacingIssues[i].description = tP.description;
+            }
+          });
+        }
+        if (result.narrativeArc.genreFit) {
+          result.narrativeArc.genreFit.deviation = translated.narrativeArc.genreFitDeviation;
+        }
+      }
+
+      if (translated.predictions && result.predictions) {
+        if (result.predictions.roi) {
+          result.predictions.roi.reasoning = translated.predictions.roiReasoning;
+        }
+        if (result.predictions.rating) {
+          result.predictions.rating.reasons = translated.predictions.ratingReasons;
+        }
+      }
+
+      if (translated.tropes) {
+        result.tropes = translated.tropes;
+      }
+
+      console.log(`✅ Translation complete (${provider.name})`);
+      return result;
+    } catch (err: any) {
+      console.warn(`⚠️ Translation failed (${err.message?.slice(0, 80)}), returning original`);
+      return report;
+    }
+  }, {
+    body: t.Object({
+      report: t.Any(),
+      targetLanguage: t.String(),
+      strategy: t.Optional(t.Union([
+        t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom')
+      ])),
+    })
+  })
+
   .listen(4005);
 
 console.log(
