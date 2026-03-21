@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Phase 9 (Production Feasibility Engine)**](./docs/plans/07-phase9-production-feasibility.md)
 - [**Plan: Phase 8 (Script Coverage & PDF Export)**](./docs/plans/06-phase8-script-coverage-pdf.md)
 - [**Plan: Phase 7 (Multi-Model LLM Strategy)**](./docs/plans/05-phase7-multi-model-strategy.md)
 - [**Plan: Phase 6 (File Upload UI)**](./docs/plans/04-phase6-upload-ui.md)
@@ -23,6 +24,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 10 (File Upload UI)**](./docs/results/session-10-phase6-upload-ui.md) - Interactive drag & drop upload, report history sidebar, CORS, ViewMode state machine.
 - [**Result: Session 11 (Multi-Model LLM Strategy)**](./docs/results/session-11-phase7-multi-model-strategy.md) - Gemini model chain retry, per-engine provider routing, dashboard strategy selector UI.
 - [**Result: Session 12 (Script Coverage & PDF Export)**](./docs/results/session-12-phase8-script-coverage-pdf.md) - Script Coverage evaluation (5 categories), Pass/Consider/Recommend verdict, PDF export.
+- [**Result: Session 13 (Production Feasibility)**](./docs/results/session-13-phase9-production-feasibility.md) - Location/cast extraction, VFX tier classification, three-tier budget estimation, production dashboard UI.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
