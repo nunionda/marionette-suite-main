@@ -45,6 +45,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 24 (Korean Market Expansion)**](./docs/results/session-24-korean-market-expansion.md) - MarketLocale pattern, KMRB ratings, KRW currency, 30 Korean films, 50 Korean tropes, KOFIC API, 7 market-aware engines, market selector UI.
 - [**Result: Session 25 (Pipeline Reliability)**](./docs/results/session-25-pipeline-reliability.md) - Provider chain fallback, ROI real data pipeline, mock warning fix, Groq 413 handling, composite genre fix, verdict criteria UI, 38 Korean benchmark tests.
 - [**Result: Session 26 (Design & PDF Upgrade)**](./docs/results/session-26-design-pdf-upgrade.md) - Geist font fix, glass panel elevation, fadeInUp animations, badge glow, provider bar colors, EmotionChart glass tooltip, PDF TOC, per-section page breaks, cover verdict badge.
+- [**Result: Session 27 (UX Fixes & Cancel Button)**](./docs/results/session-27-ux-fixes-cancel-button.md) - SectionNav scroll fix (grid-section), PDF page-break optimization, analysis cancel button with AbortController.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 

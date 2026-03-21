@@ -43,6 +43,7 @@ export default function Dashboard() {
   const [translatedData, setTranslatedData] = useState<any>(null);
   const [isTranslating, setIsTranslating] = useState(false);
   const translationCache = useRef<Map<string, any>>(new Map());
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     fetchReportHistory();
@@ -121,10 +122,12 @@ export default function Dashboard() {
         bodyPayload.customProviders = customProviders;
       }
 
+      abortControllerRef.current = new AbortController();
       const res = await fetch('http://localhost:4005/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload),
+        signal: abortControllerRef.current.signal,
       });
 
       if (!res.ok) {
@@ -138,9 +141,16 @@ export default function Dashboard() {
       setMode('viewing');
       fetchReportHistory();
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       setUploadError(err.message || 'Analysis failed. Is the API running?');
       setMode('idle');
     }
+  }
+
+  function handleCancel() {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    setMode('idle');
   }
 
   async function loadReport(scriptId: string) {
@@ -290,6 +300,7 @@ export default function Dashboard() {
           setCustomProviders(prev => ({ ...prev, [engine]: provider }))
         }
         onAnalyze={handleAnalyze}
+        onCancel={handleCancel}
         onReset={resetToIdle}
         onLoadReport={loadReport}
       />
@@ -359,7 +370,7 @@ export default function Dashboard() {
 
           <EmotionChart emotionGraph={displayData.emotionGraph} locale={locale} />
 
-          <div id="characters" style={{ display: 'contents' }}>
+          <div id="characters" className="grid-section">
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">4</span> {ko ? '캐릭터 인텔리전스' : 'Character Intelligence'}
             </div>
@@ -367,7 +378,7 @@ export default function Dashboard() {
           </div>
 
           {data.narrativeArc && (
-            <div id="arc" style={{ display: 'contents' }}>
+            <div id="arc" className="grid-section">
               <div className="print-section-header print-only" style={{ width: '100%' }}>
                 <span className="print-section-number">5</span> {ko ? '서사 아크' : 'Narrative Arc'}
               </div>
@@ -375,14 +386,14 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div id="market" style={{ display: 'contents' }}>
+          <div id="market" className="grid-section">
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">6</span> {ko ? '마켓 예측' : 'Market Predictions'}
             </div>
             <MarketPredictions predictions={displayData.predictions} tropes={displayData.tropes} locale={locale} market={data?.market || 'hollywood'} />
           </div>
 
-          <div id="beats" style={{ display: 'contents' }}>
+          <div id="beats" className="grid-section">
             <div className="print-section-header print-only" style={{ width: '100%' }}>
               <span className="print-section-number">7</span> {ko ? '비트 시트' : 'Narrative Beat Sheet'}
             </div>

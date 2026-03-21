@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Upload, FileText, Loader, Clock, AlertCircle } from 'lucide-react';
+import { Upload, FileText, Loader, Clock, AlertCircle, Square } from 'lucide-react';
 
 type Strategy = 'auto' | 'fast' | 'deep' | 'custom' | 'budget' | 'premium' | 'long-context';
 type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'openai' | 'deepseek' | 'groq' | 'mock';
@@ -59,6 +59,7 @@ interface UploadPanelProps {
   onMarketChange: (m: MarketLocale) => void;
   onCustomProviderChange: (engine: string, provider: ProviderChoice) => void;
   onAnalyze: () => void;
+  onCancel?: () => void;
   onReset: () => void;
   onLoadReport: (scriptId: string) => void;
 }
@@ -70,7 +71,7 @@ export default function UploadPanel({
   mode, selectedFile, movieId, uploadError, dragOver, strategy, market,
   customProviders, availableProviders, reports, locale,
   onSetDragOver, onFileDrop, onFileSelect, onMovieIdChange,
-  onStrategyChange, onMarketChange, onCustomProviderChange, onAnalyze, onReset, onLoadReport,
+  onStrategyChange, onMarketChange, onCustomProviderChange, onAnalyze, onCancel, onReset, onLoadReport,
 }: UploadPanelProps) {
   const t = locale === 'ko';
   return (
@@ -181,17 +182,19 @@ export default function UploadPanel({
                 className="input-glass"
                 style={{ flex: 1 }}
               />
-              <button
-                className="btn-analyze"
-                disabled={!selectedFile || mode === 'analyzing'}
-                onClick={onAnalyze}
-              >
-                {mode === 'analyzing' ? (
-                  <><Loader size={16} className="spin" /> {t ? '분석 중...' : 'Analyzing...'}</>
-                ) : (
-                  t ? '분석' : 'Analyze'
-                )}
-              </button>
+              {mode === 'analyzing' ? (
+                <button className="btn-cancel" onClick={onCancel}>
+                  <Square size={14} /> {t ? '중지' : 'Stop'}
+                </button>
+              ) : (
+                <button
+                  className="btn-analyze"
+                  disabled={!selectedFile}
+                  onClick={onAnalyze}
+                >
+                  {t ? '분석' : 'Analyze'}
+                </button>
+              )}
             </div>
 
             {uploadError && (

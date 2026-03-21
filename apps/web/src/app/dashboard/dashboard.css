@@ -104,6 +104,13 @@ input:focus-visible {
   margin-top: 2rem;
 }
 
+.grid-section {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
+}
+
 .stat-card {
   grid-column: span 3;
   text-align: center;
@@ -325,6 +332,26 @@ input:focus-visible {
 }
 
 .btn-analyze:not(:disabled):hover {
+  opacity: 0.85;
+}
+
+.btn-cancel {
+  background: var(--color-danger);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: opacity 0.2s;
+  white-space: nowrap;
+}
+
+.btn-cancel:hover {
   opacity: 0.85;
 }
 
@@ -1503,7 +1530,7 @@ input:focus-visible {
     border-radius: 4px !important;
     break-inside: avoid;
     padding: 0.6rem 0.75rem !important;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.25rem;
   }
 
   /* ─── Report Cover ─── */
@@ -1733,7 +1760,7 @@ input:focus-visible {
   p, li, td { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
 
-  /* ─── Page breaks (per section) ─── */
+  /* ─── Page breaks (large sections only) ─── */
   #coverage {
     page-break-before: always;
   }
@@ -1746,30 +1773,26 @@ input:focus-visible {
     page-break-before: always;
   }
 
-  #characters {
-    page-break-before: always;
-  }
-
-  #arc {
-    page-break-before: always;
-  }
-
-  #market {
-    page-break-before: always;
-  }
+  /* Characters, Arc, Market flow naturally — no forced page breaks */
 
   #beats {
     page-break-before: always;
   }
 
   /* ─── Grid layout → compact print flow ─── */
-  .grid-layout {
+  .grid-layout,
+  .grid-section {
     display: block !important;
   }
 
-  .grid-layout > * {
-    margin-bottom: 0.4rem;
+  .grid-layout > *,
+  .grid-section > * {
+    margin-bottom: 0.25rem;
     break-inside: avoid;
+  }
+
+  .grid-section {
+    gap: 0 !important;
   }
 
   /* ─── Section headers (print) ─── */
@@ -1895,7 +1918,6 @@ input:focus-visible {
   /* ─── Production — compact 2-column ─── */
   .production-section {
     margin-top: 0;
-    page-break-before: always;
   }
 
   .production-header {
@@ -2059,7 +2081,6 @@ input:focus-visible {
   /* ─── Beat Sheet — dense 3-column ─── */
   .beat-sheet-container {
     width: 100%;
-    page-break-before: always;
   }
 
   .beat-grid {
