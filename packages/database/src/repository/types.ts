@@ -51,6 +51,7 @@ export interface AnalysisResultInput {
     }>;
   };
   coverage?: any;
+  production?: any;
 }
 
 export interface PaginatedResult<T> {

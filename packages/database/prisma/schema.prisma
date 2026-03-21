@@ -33,6 +33,7 @@ model AnalysisReport {
   emotionGraph     Json
   predictions      Json
   coverage         Json?
+  production       Json?
 
   @@index([predictedRoi])
   @@index([predictedRating])

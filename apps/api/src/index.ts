@@ -12,6 +12,9 @@ import {
   ContentRatingClassifier,
   Benchmarker,
   ScriptCoverageEvaluator,
+  ProductionAnalyzer,
+  VFXEstimator,
+  BudgetEstimator,
   env,
   resolveStrategy,
   type AnalysisStrategyName,
@@ -132,7 +135,36 @@ const app = new Elysia()
     );
     const coverage = coverageResult.data;
 
-    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback || coverageResult.fallback;
+    // 6. Production Feasibility Analysis
+    const productionAnalyzer = new ProductionAnalyzer();
+    const locations = productionAnalyzer.analyzeLocations(elements);
+    const cast = productionAnalyzer.analyzeCast(elements, network.characters);
+    const intExtRatio = productionAnalyzer.computeIntExtRatio(locations);
+    const sceneCount = elements.filter(e => e.type === 'scene_heading').length;
+    const estimatedShootingDays = productionAnalyzer.estimateShootingDays(sceneCount);
+
+    const vfxResult = await withFallback('vfx', 'VFX', (p) =>
+      new VFXEstimator(p).estimate(scriptId, elements)
+    );
+    const vfx = vfxResult.data;
+
+    const budgetEstimator = new BudgetEstimator();
+    const budgetEstimate = budgetEstimator.estimate(locations, cast, vfx.requirements, estimatedShootingDays);
+
+    const production = {
+      scriptId,
+      locations,
+      uniqueLocationCount: locations.length,
+      intExtRatio,
+      cast,
+      totalSpeakingRoles: cast.length,
+      estimatedShootingDays,
+      vfxRequirements: vfx.requirements,
+      vfxComplexityScore: vfx.complexityScore,
+      budgetEstimate,
+    };
+
+    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback || coverageResult.fallback || vfxResult.fallback;
 
     const result = {
       scriptId,
@@ -152,6 +184,7 @@ const app = new Elysia()
         comps: similarity.topComps
       },
       coverage,
+      production,
       strategy: resolved.name,
       providers: {
         beatSheet: beatsResult.provider,
@@ -159,6 +192,7 @@ const app = new Elysia()
         rating: ratingResult.provider,
         roi: roiResult.provider,
         coverage: coverageResult.provider,
+        vfx: vfxResult.provider,
       },
       ...(usedFallback && { warning: 'Some results used mock fallback due to LLM rate limits' }),
     };
@@ -180,6 +214,7 @@ const app = new Elysia()
         rating: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
         roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
         coverage: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+        vfx: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
       })),
     })
   })

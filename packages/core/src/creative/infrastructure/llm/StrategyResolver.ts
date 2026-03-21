@@ -24,6 +24,7 @@ export function resolveStrategy(
           rating: 'gemini',
           roi: 'gemini',
           coverage: 'gemini',
+          vfx: 'gemini',
         },
       };
 
@@ -39,6 +40,7 @@ export function resolveStrategy(
           rating: fastClassifier,
           roi: fastClassifier,
           coverage: deepReasoner,
+          vfx: fastClassifier,
         },
       };
 
@@ -51,6 +53,7 @@ export function resolveStrategy(
           rating: custom?.rating || defaultProvider,
           roi: custom?.roi || defaultProvider,
           coverage: custom?.coverage || defaultProvider,
+          vfx: custom?.vfx || defaultProvider,
         },
       };
 
@@ -64,6 +67,7 @@ export function resolveStrategy(
           rating: defaultProvider,
           roi: defaultProvider,
           coverage: defaultProvider,
+          vfx: defaultProvider,
         },
       };
   }

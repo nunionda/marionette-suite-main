@@ -11,13 +11,27 @@ export class MockProvider implements ILLMProvider {
     if (systemPrompt.includes("3-Act")) {
       content = JSON.stringify({
         beats: [
-          { act: 1, name: "Inciting Incident", sceneStart: 1, sceneEnd: 5, description: "Sample Start" }
+          { act: 1, name: "Setup", sceneStart: 1, sceneEnd: 2, description: "The world and protagonist are introduced, establishing the status quo." },
+          { act: 1, name: "Inciting Incident", sceneStart: 3, sceneEnd: 4, description: "An unexpected event disrupts the protagonist's ordinary life." },
+          { act: 2, name: "Rising Action", sceneStart: 5, sceneEnd: 6, description: "Conflict intensifies as the protagonist faces mounting challenges." },
+          { act: 2, name: "Midpoint Crisis", sceneStart: 7, sceneEnd: 7, description: "A major revelation forces the protagonist to reassess everything." },
+          { act: 3, name: "Climax", sceneStart: 8, sceneEnd: 9, description: "The protagonist confronts the central conflict head-on." },
+          { act: 3, name: "Resolution", sceneStart: 10, sceneEnd: 10, description: "Loose ends are tied and the protagonist emerges transformed." },
         ]
       });
     } else if (systemPrompt.includes("Emotional Arc") || systemPrompt.includes("valence")) {
       content = JSON.stringify({
         scenes: [
-          { sceneNumber: 1, score: 5, dominantEmotion: "Joy", explanation: "Mock joy" }
+          { sceneNumber: 1, score: 2, dominantEmotion: "Curiosity", explanation: "Opening establishes an intriguing premise." },
+          { sceneNumber: 2, score: 5, dominantEmotion: "Joy", explanation: "Protagonist discovers an unexpected opportunity." },
+          { sceneNumber: 3, score: 3, dominantEmotion: "Hope", explanation: "Early success builds momentum." },
+          { sceneNumber: 4, score: -1, dominantEmotion: "Doubt", explanation: "First signs of trouble emerge." },
+          { sceneNumber: 5, score: -4, dominantEmotion: "Tension", explanation: "Conflict intensifies as stakes are raised." },
+          { sceneNumber: 6, score: -7, dominantEmotion: "Despair", explanation: "Major setback pushes protagonist to their lowest point." },
+          { sceneNumber: 7, score: -3, dominantEmotion: "Resolve", explanation: "Protagonist begins to find inner strength." },
+          { sceneNumber: 8, score: 1, dominantEmotion: "Determination", explanation: "A new plan takes shape." },
+          { sceneNumber: 9, score: 6, dominantEmotion: "Triumph", explanation: "Climactic confrontation with a decisive victory." },
+          { sceneNumber: 10, score: 8, dominantEmotion: "Catharsis", explanation: "Resolution brings emotional closure and transformation." },
         ]
       });
     } else if (systemPrompt.includes("market intelligence")) {
@@ -68,6 +82,12 @@ export class MockProvider implements ILLMProvider {
         weaknesses: ["Character depth needs work", "Dialogue lacks subtext", "Pacing inconsistencies"],
         recommendation: "The screenplay shows promise with a solid structural foundation but needs further development in character depth and dialogue quality before it can be recommended for production.",
       });
+    } else if (systemPrompt.includes("VFX Supervisor") || systemPrompt.includes("visual effects")) {
+      content = JSON.stringify([
+        { index: 1, tier: "simple", hours: 30 },
+        { index: 2, tier: "moderate", hours: 60 },
+        { index: 3, tier: "complex", hours: 140 },
+      ]);
     }
 
     return {

@@ -26,6 +26,7 @@ export class AnalysisReportRepository {
         emotionGraph: input.emotionGraph as any,
         predictions: input.predictions as any,
         ...(input.coverage && { coverage: input.coverage as any }),
+        ...(input.production && { production: input.production as any }),
       },
       update: {
         totalElements: input.summary.totalElements,
@@ -43,6 +44,7 @@ export class AnalysisReportRepository {
         emotionGraph: input.emotionGraph as any,
         predictions: input.predictions as any,
         ...(input.coverage && { coverage: input.coverage as any }),
+        ...(input.production && { production: input.production as any }),
       },
     });
 
@@ -106,6 +108,7 @@ export class AnalysisReportRepository {
       },
       predictions: report.predictions as any,
       ...(report.coverage && { coverage: report.coverage as any }),
+      ...(report.production && { production: report.production as any }),
     };
   }
 }

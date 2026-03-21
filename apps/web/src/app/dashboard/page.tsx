@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star, Download, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
+import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star, Download, ChevronDown, ChevronUp, CheckCircle, XCircle, Clapperboard, MapPin, DollarSign, Sparkles } from 'lucide-react';
 import './dashboard.css';
 
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
@@ -21,6 +21,8 @@ const ENGINE_LABELS: Record<string, string> = {
   emotion: 'Emotion',
   rating: 'Rating',
   roi: 'ROI Prediction',
+  coverage: 'Coverage',
+  vfx: 'VFX',
 };
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -46,6 +48,8 @@ export default function Dashboard() {
     emotion: 'gemini',
     rating: 'gemini',
     roi: 'gemini',
+    coverage: 'gemini',
+    vfx: 'gemini',
   });
   const [availableProviders, setAvailableProviders] = useState<Record<string, boolean>>({});
   const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
@@ -264,7 +268,7 @@ export default function Dashboard() {
               {/* Custom Provider Grid */}
               {strategy === 'custom' && (
                 <div className="custom-grid">
-                  {(['beatSheet', 'emotion', 'rating', 'roi'] as const).map(engine => (
+                  {(['beatSheet', 'emotion', 'rating', 'roi', 'coverage', 'vfx'] as const).map(engine => (
                     <div key={engine} className="custom-grid-item">
                       <label>{ENGINE_LABELS[engine]}</label>
                       <select
@@ -472,6 +476,158 @@ export default function Dashboard() {
               <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{data.coverage.recommendation}</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Production Breakdown */}
+      {data?.production && (
+        <div className="production-section">
+          <div className="glass-panel production-header">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ margin: 0, fontSize: '1.4rem' }}>
+                <Clapperboard size={22} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--accent-gold)' }} />
+                Production Feasibility
+              </h2>
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                <div className="prod-stat-inline">
+                  <span className="detail-label">Shooting Days</span>
+                  <span style={{ fontWeight: 700, fontSize: '1.3rem' }}>{data.production.estimatedShootingDays}</span>
+                </div>
+                <div className="prod-stat-inline">
+                  <span className="detail-label">Locations</span>
+                  <span style={{ fontWeight: 700, fontSize: '1.3rem' }}>{data.production.uniqueLocationCount}</span>
+                </div>
+                <div className="prod-stat-inline">
+                  <span className="detail-label">Speaking Roles</span>
+                  <span style={{ fontWeight: 700, fontSize: '1.3rem' }}>{data.production.totalSpeakingRoles}</span>
+                </div>
+                <div className="prod-stat-inline">
+                  <span className="detail-label">VFX Score</span>
+                  <span style={{
+                    fontWeight: 700, fontSize: '1.3rem',
+                    color: data.production.vfxComplexityScore > 60 ? '#e74c3c' : data.production.vfxComplexityScore > 30 ? '#f39c12' : '#2ecc71'
+                  }}>
+                    {data.production.vfxComplexityScore}/100
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="production-grid">
+            {/* Budget Estimate */}
+            {data.production.budgetEstimate && (
+              <div className="glass-panel production-budget">
+                <h3 style={{ margin: '0 0 1rem' }}>
+                  <DollarSign size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: '#2ecc71' }} />
+                  Budget Estimate
+                </h3>
+                <div className="budget-range">
+                  <div className="budget-range-bar">
+                    <div className="budget-marker budget-low" style={{ left: '0%' }}>
+                      <span className="budget-value">${(data.production.budgetEstimate.low / 1e6).toFixed(1)}M</span>
+                      <span className="budget-label-text">Low</span>
+                    </div>
+                    <div className="budget-marker budget-likely" style={{ left: '50%' }}>
+                      <span className="budget-value">${(data.production.budgetEstimate.likely / 1e6).toFixed(1)}M</span>
+                      <span className="budget-label-text">Likely</span>
+                    </div>
+                    <div className="budget-marker budget-high" style={{ left: '100%' }}>
+                      <span className="budget-value">${(data.production.budgetEstimate.high / 1e6).toFixed(1)}M</span>
+                      <span className="budget-label-text">High</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="budget-breakdown">
+                  {Object.entries(data.production.budgetEstimate.breakdown).map(([key, val]: [string, any]) => (
+                    <div key={key} className="budget-item">
+                      <span className="detail-label">{key}</span>
+                      <span style={{ fontWeight: 600 }}>${(val / 1e6).toFixed(2)}M</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Locations */}
+            <div className="glass-panel production-locations">
+              <h3 style={{ margin: '0 0 0.75rem' }}>
+                <MapPin size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: 'var(--accent-blue)' }} />
+                Locations
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', marginLeft: '0.5rem' }}>
+                  INT {data.production.intExtRatio?.int}% / EXT {data.production.intExtRatio?.ext}%
+                </span>
+              </h3>
+              <div className="location-list">
+                {data.production.locations?.slice(0, 10).map((loc: any, i: number) => (
+                  <div key={i} className="location-item">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span className={`setting-badge setting-${loc.setting.replace('/', '')}`}>{loc.setting}</span>
+                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{loc.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{loc.time}</span>
+                      <span className="freq-badge">{loc.frequency}x</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* VFX Requirements */}
+            {data.production.vfxRequirements?.length > 0 && (
+              <div className="glass-panel production-vfx">
+                <h3 style={{ margin: '0 0 0.75rem' }}>
+                  <Sparkles size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: '#9b59b6' }} />
+                  VFX Requirements ({data.production.vfxRequirements.length} shots)
+                </h3>
+                <div className="vfx-list">
+                  {data.production.vfxRequirements.map((vfx: any, i: number) => (
+                    <div key={i} className="vfx-item">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Scene {vfx.sceneNumber}</span>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                          <span className={`vfx-tier vfx-${vfx.tier}`}>{vfx.tier}</span>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{vfx.estimatedHours}h</span>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: 0, whiteSpace: 'normal' }}>
+                        {vfx.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Cast Breakdown */}
+            <div className="glass-panel production-cast">
+              <h3 style={{ margin: '0 0 0.75rem' }}>
+                <Users size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle', color: 'var(--accent-gold)' }} />
+                Cast Breakdown
+              </h3>
+              <div className="cast-heatmap">
+                {data.production.cast?.slice(0, 12).map((c: any, i: number) => {
+                  const maxScenes = data.production.cast[0]?.totalScenes || 1;
+                  const pct = Math.round((c.totalScenes / maxScenes) * 100);
+                  return (
+                    <div key={i} className="cast-heat-row">
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
+                        <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{c.name}</span>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{c.role} / {c.totalScenes} scenes</span>
+                      </div>
+                      <div className="category-bar">
+                        <div className="category-bar-fill" style={{
+                          width: `${pct}%`,
+                          background: c.role === 'Protagonist' ? 'var(--accent-gold)' : c.role === 'Antagonist' ? '#e74c3c' : c.role === 'Supporting' ? 'var(--accent-blue)' : '#7f8c8d',
+                        }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
