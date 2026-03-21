@@ -238,12 +238,12 @@ const app = new Elysia()
       emotionGraph: emotion
     }, realMarketData);
 
-    // 9. ROI Prediction — now with real budget + genre
-    const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features, market));
-    const roiPrediction = roiResult.data;
-
-    // 10. Comps (uses features + tropes)
+    // 9. Comps (deterministic — runs before ROI so comp data feeds into prediction)
     const similarity = benchmarker.findComps(features, tropes, market);
+
+    // 10. ROI Prediction — now with benchmark comp data injected
+    const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features, market, similarity.topComps));
+    const roiPrediction = roiResult.data;
 
     // 11. Narrative Arc Classification (uses emotion + genre from coverage)
     const emotionProvider = getEngineProvider('emotion');

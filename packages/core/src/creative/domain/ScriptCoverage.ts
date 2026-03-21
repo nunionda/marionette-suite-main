@@ -24,4 +24,6 @@ export interface ScriptCoverage {
   strengths: string[];
   weaknesses: string[];
   recommendation: string;
+  marketPotential: string;       // Market viability assessment
+  comparableTitles: string[];    // 3 similar successful films
 }

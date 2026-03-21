@@ -1,6 +1,6 @@
-import { ILLMProvider } from "../infrastructure/llm/ILLMProvider";
-import { EmotionGraph } from "../domain/EmotionGraph";
-import { ScriptElement } from "../../script/infrastructure/parser";
+import type { ILLMProvider } from "../infrastructure/llm/ILLMProvider";
+import type { EmotionGraph } from "../domain/EmotionGraph";
+import type { ScriptElement } from "../../script/infrastructure/parser";
 
 export class EmotionAnalyzer {
   constructor(private readonly llm: ILLMProvider) {}
@@ -24,10 +24,17 @@ export class EmotionAnalyzer {
 Read the script and score the emotional valence of EACH SCENE.
 Score ranges from -10 (devastation, extreme negative tension) to +10 (joy, triumph, extreme positive).
 
+For each scene, follow this chain-of-thought process:
+1) Identify the literal action and conflict present in the scene.
+2) Assess the underlying emotional subtext — what characters feel versus what they express.
+3) Rate tension (0-10, based on stakes and conflict intensity). 0 = no tension, 10 = life-or-death stakes.
+4) Rate humor (0-10, situational or dialogue comedy). 0 = no comedic elements, 10 = laugh-out-loud comedy.
+5) Predict audience engagement level: "high" (gripping, cannot look away), "medium" (maintains interest), or "low" (may lose attention).
+
 CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
 {
   "scenes": [
-    { "sceneNumber": 1, "score": -5, "dominantEmotion": "Fear", "explanation": "Brief reason..." }
+    { "sceneNumber": 1, "score": -5, "dominantEmotion": "Fear", "explanation": "Brief reason...", "tension": 7, "humor": 0, "engagement": "high" }
   ]
 }`;
 
@@ -43,7 +50,12 @@ CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
       
       return {
         scriptId,
-        scenes: parsed.scenes || []
+        scenes: (parsed.scenes || []).map((s: Record<string, unknown>) => ({
+          ...s,
+          tension: typeof s.tension === 'number' ? s.tension : 0,
+          humor: typeof s.humor === 'number' ? s.humor : 0,
+          engagement: ['high', 'medium', 'low'].includes(s.engagement as string) ? s.engagement : 'medium',
+        }))
       };
     } catch (e) {
       throw new Error(`Failed to parse Emotion JSON from LLM: \n${response.content}`);

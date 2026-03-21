@@ -195,6 +195,32 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
         </div>
       )}
 
+      {/* Market Potential & Comparable Titles */}
+      {(coverage.marketPotential || coverage.comparableTitles?.length > 0) && (
+        <div className="strengths-weaknesses">
+          {coverage.marketPotential && (
+            <div className="glass-panel sw-col">
+              <h3 style={{ margin: '0 0 0.75rem' }}>
+                {ko ? '시장성 평가' : 'Market Potential'}
+              </h3>
+              <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{coverage.marketPotential}</p>
+            </div>
+          )}
+          {coverage.comparableTitles?.length > 0 && (
+            <div className="glass-panel sw-col">
+              <h3 style={{ margin: '0 0 0.75rem' }}>
+                {ko ? '유사 작품' : 'Comparable Titles'}
+              </h3>
+              <ul className="sw-list">
+                {coverage.comparableTitles.map((t: string, i: number) => (
+                  <li key={i}>{t}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Recommendation */}
       {coverage.recommendation && (
         <div className="glass-panel recommendation-box">

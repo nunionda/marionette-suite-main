@@ -51,57 +51,82 @@ export class ScriptCoverageEvaluator {
 
     const config = getMarketConfig(market);
 
-    const systemPrompt = `You are ${config.prompts.analystRole}.
+    const systemPrompt = `You are ${config.prompts.analystRole}. You produce industry-standard script coverage reports comparable to OnDesk and ScriptBook platforms.
 
-Evaluate the screenplay across these 5 categories, each scored 0-100:
+## EVALUATION PROCESS (Chain of Thought)
+Step 1: Read the full screenplay text to understand the story, characters, and themes.
+Step 2: Review the analysis context (beat sheet, emotion graph, character network, ROI prediction, comparable films).
+Step 3: Evaluate each of the 8 categories below using both your reading and the analytical data.
+Step 4: Identify 3-5 specific strengths with concrete scene/character references.
+Step 5: Identify 3-5 specific weaknesses with actionable improvement suggestions.
+Step 6: Assess market potential based on genre trends, comparable film performance, and target audience.
+Step 7: Calculate overallScore as weighted average and determine verdict.
 
-1. **Plot Structure & Logic** (3 subcategories):
-   - Narrative Structure Completeness: How well does it follow classical storytelling frameworks (Three-Act, Hero's Journey)?
-   - Pacing & Scene Flow: Are transitions smooth? Is the action/dialogue ratio appropriate for audience engagement?
-   - Conflict Intensity: Are internal/external conflicts well-developed and tension-building?
+## SCORING CATEGORIES (8 categories, each 0-100)
 
-2. **Character & Dialogue** (2 subcategories):
-   - Character Arc: Do protagonist and key characters have clear motivations and undergo meaningful growth?
-   - Dialogue Quality & Subtext: Is dialogue authentic, character-specific, and rich with subtext (not expository)?
+1. **Premise & Concept** (2 subcategories):
+   - Hook Strength: Is the logline compelling? Does the concept have inherent dramatic tension and commercial appeal?
+   - Originality: Does it offer a fresh take or unique angle within its genre?
 
-3. **Theme & Tone** (2 subcategories):
-   - Theme Clarity: Is the core message clear and organically revealed?
-   - Tone Consistency: Is the emotional tone (drama, humor, suspense) consistent throughout?
+2. **Plot Structure & Logic** (3 subcategories):
+   - Narrative Structure: How well does it follow classical frameworks (Three-Act, Save the Cat)? Are turning points at proper positions?
+   - Pacing & Scene Flow: Are transitions smooth? Does momentum build appropriately? Any sagging or rushed sections?
+   - Conflict Escalation: Do internal/external conflicts develop progressively with rising stakes?
 
-4. **Market Appeal & Commercial Potential** (3 subcategories):
-   - Genre Fit & Trend Alignment: Does it satisfy genre conventions and current audience preferences?
-   - Industry Benchmarking: How does it compare to successful comparable films?
-   - Rating Appropriateness: Is the content level appropriate for maximizing target audience reach?
+3. **Character & Dialogue** (3 subcategories):
+   - Character Arc & Growth: Do protagonist and key characters undergo meaningful transformation?
+   - Dialogue Authenticity: Is dialogue character-specific with distinct voices? Rich with subtext rather than exposition?
+   - Supporting Cast Function: Do supporting characters serve clear narrative purposes and have their own dimensionality?
 
-5. **Production Feasibility** (1 subcategory):
+4. **Theme & Tone** (2 subcategories):
+   - Thematic Coherence: Is the core message clear, organically revealed, and consistently reinforced?
+   - Tonal Consistency: Is the emotional register (drama, humor, suspense) maintained without jarring shifts?
+
+5. **Emotional Impact** (2 subcategories):
+   - Audience Engagement: Does the screenplay create genuine emotional investment? Are there memorable set pieces?
+   - Catharsis & Satisfaction: Does the resolution deliver emotional payoff proportional to the buildup?
+
+6. **Market Appeal** (3 subcategories):
+   - Genre Fit & Trend Alignment: Does it satisfy genre conventions while meeting current audience preferences?
+   - Comparable Film Benchmarking: How does it measure against successful films with similar DNA?
+   - Target Audience Clarity: Is the intended demographic clear, and is the content calibrated accordingly?
+
+7. **Production Feasibility** (2 subcategories):
    - Budget & Resource Viability: Are VFX demands, locations, and production scale realistic and justified?
+   - Shooting Complexity: Are there practical production challenges (night shoots, water, animals, children)?
 
-Use the provided analysis data as reference context (beat sheet structure, emotion graph summary, character network, ROI prediction, content rating, comparable films).
+8. **Dialogue & Voice** (2 subcategories):
+   - Subtext Richness: Do conversations carry meaning beneath the surface? Is exposition handled naturally?
+   - Voice Distinctiveness: Can you identify the speaker without character labels? Do characters sound different from each other?
 
-Verdict rules: overallScore >= 80 → "Recommend", >= 60 → "Consider", < 60 → "Pass"
+## VERDICT RULES
+overallScore >= 80 → "Recommend" (top 1% — production-ready quality)
+overallScore >= 60 → "Consider" (promising with refinement needs)
+overallScore < 60 → "Pass" (significant structural or commercial issues)
 
 CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
 {
-  "title": "Inferred title from screenplay",
-  "genre": "Primary genre",
-  "logline": "One sentence story summary",
-  "synopsis": "3-5 sentence plot summary",
+  "title": "Inferred title",
+  "genre": "Primary genre / Secondary genre",
+  "logline": "One compelling sentence (under 30 words)",
+  "synopsis": "5-7 sentence beat-by-beat plot summary covering all three acts",
   "categories": [
     {
-      "name": "Plot Structure & Logic",
+      "name": "Premise & Concept",
       "score": 75,
       "subcategories": [
-        { "name": "Narrative Structure Completeness", "score": 80, "assessment": "Brief analysis..." },
-        { "name": "Pacing & Scene Flow", "score": 70, "assessment": "Brief analysis..." },
-        { "name": "Conflict Intensity", "score": 75, "assessment": "Brief analysis..." }
+        { "name": "Hook Strength", "score": 80, "assessment": "2-3 sentence analysis with specific references..." },
+        { "name": "Originality", "score": 70, "assessment": "2-3 sentence analysis..." }
       ]
     }
   ],
   "overallScore": 72,
   "verdict": "Consider",
-  "strengths": ["Strength 1", "Strength 2", "Strength 3"],
-  "weaknesses": ["Weakness 1", "Weakness 2", "Weakness 3"],
-  "recommendation": "Final analyst recommendation paragraph..."
+  "strengths": ["Specific strength with scene/character reference", "...", "..."],
+  "weaknesses": ["Specific weakness with actionable suggestion", "...", "..."],
+  "marketPotential": "2-3 sentence assessment of commercial viability, target audience, and release strategy",
+  "comparableTitles": ["Film 1 (Year)", "Film 2 (Year)", "Film 3 (Year)"],
+  "recommendation": "Final analyst recommendation paragraph (3-4 sentences) summarizing the verdict rationale and key next steps for development"
 }`;
 
     const userPrompt = `<screenplay>
@@ -134,6 +159,8 @@ ${analysisContext}
         strengths: parsed.strengths || [],
         weaknesses: parsed.weaknesses || [],
         recommendation: parsed.recommendation || '',
+        marketPotential: parsed.marketPotential || '',
+        comparableTitles: parsed.comparableTitles || [],
       };
     } catch (e) {
       throw new Error(`Failed to parse Coverage JSON from LLM:\n${response.content}`);
