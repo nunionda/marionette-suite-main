@@ -9,6 +9,7 @@ export class GroqProvider implements ILLMProvider {
   private readonly modelChain = [
     'llama-3.3-70b-versatile',
     'mixtral-8x7b-32768',
+    'llama-3.1-8b-instant',
   ];
 
   private readonly maxRetries = 1;
@@ -62,6 +63,11 @@ export class GroqProvider implements ILLMProvider {
             error.message?.includes('429') ||
             error.message?.includes('rate_limit');
 
+          const isTooLarge =
+            error?.status === 413 ||
+            error.message?.includes('413') ||
+            error.message?.includes('too large');
+
           if (isRateLimit) {
             if (attempt < this.maxRetries) {
               const delay = this.baseDelayMs * Math.pow(2, attempt);
@@ -70,6 +76,12 @@ export class GroqProvider implements ILLMProvider {
               continue;
             }
             console.warn(`⚠️ Groq ${model} rate-limited, trying next model...`);
+            lastError = error.message;
+            break;
+          }
+
+          if (isTooLarge) {
+            console.warn(`⚠️ Groq ${model} input too large, trying next model...`);
             lastError = error.message;
             break;
           }

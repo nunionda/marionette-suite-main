@@ -67,6 +67,18 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
             </span>
           </div>
         </div>
+        <div className="verdict-criteria">
+          {[
+            { verdict: 'Recommend', range: '≥ 80', label: ko ? '제작 추천' : 'Greenlight for production' },
+            { verdict: 'Consider', range: '60–79', label: ko ? '수정 후 재검토' : 'Revise and resubmit' },
+            { verdict: 'Pass', range: '< 60', label: ko ? '제작 부적합' : 'Not recommended' },
+          ].map(({ verdict, range, label }) => (
+            <span key={verdict} className={`verdict-criterion ${coverage.verdict === verdict ? 'verdict-criterion-active' : ''}`}>
+              <span className={`verdict-dot verdict-dot-${verdict.toLowerCase()}`} />
+              <strong>{verdict}</strong> <span className="verdict-range">{range}</span> — {label}
+            </span>
+          ))}
+        </div>
         {coverage.logline && (
           <p style={{ color: 'var(--text-dim)', fontStyle: 'italic', margin: '0.75rem 0 0', fontSize: '0.9rem' }}>
             &ldquo;{coverage.logline}&rdquo;

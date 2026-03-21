@@ -1,6 +1,8 @@
-import { SceneEmotion } from '../domain/EmotionGraph';
-import { NarrativeArc, VonnegutArcType, PacingIssue, TurningPoint } from '../domain/NarrativeArc';
-import { ILLMProvider } from '../infrastructure/llm/ILLMProvider';
+import type { SceneEmotion } from '../domain/EmotionGraph';
+import type { NarrativeArc, VonnegutArcType, PacingIssue, TurningPoint } from '../domain/NarrativeArc';
+import type { ILLMProvider } from '../infrastructure/llm/ILLMProvider';
+import type { MarketLocale } from '../../shared/MarketConfig';
+import { getMarketConfig } from '../../shared/MarketConfig';
 
 const ARC_DESCRIPTIONS: Record<VonnegutArcType, string> = {
   'rags-to-riches': 'Steady rise from low to high fortune',
@@ -33,6 +35,7 @@ export class NarrativeArcClassifier {
     scriptId: string,
     scenes: SceneEmotion[],
     genre?: string,
+    market: MarketLocale = 'hollywood',
   ): Promise<NarrativeArc> {
     if (scenes.length < 3) {
       return this.buildDefaultArc(scriptId, scenes, genre);
@@ -47,7 +50,7 @@ export class NarrativeArcClassifier {
     // 2. Genre fit (LLM for genre detection if not provided)
     let detectedGenre = genre;
     if (!detectedGenre) {
-      detectedGenre = await this.detectGenre(scenes);
+      detectedGenre = await this.detectGenre(scenes, market);
     }
     const genreFit = this.computeGenreFit(arcType, detectedGenre);
 
@@ -244,10 +247,11 @@ export class NarrativeArcClassifier {
     return issues;
   }
 
-  private async detectGenre(scenes: SceneEmotion[]): Promise<string> {
+  private async detectGenre(scenes: SceneEmotion[], market: MarketLocale = 'hollywood'): Promise<string> {
+    const config = getMarketConfig(market);
     const sceneSummary = scenes.map(s => `Scene ${s.sceneNumber}: ${s.dominantEmotion} (${s.score})`).join(', ');
 
-    const systemPrompt = `You are a film genre classifier. Based on the emotional arc data, determine the most likely primary genre.
+    const systemPrompt = `You are a film genre classifier specializing in ${config.prompts.marketContext}. Based on the emotional arc data, determine the most likely primary genre.
 Output ONLY a single word: one of Action, Adventure, Thriller, Drama, Tragedy, Romance, Comedy, Horror, Sci-Fi, Fantasy, Crime, Mystery.`;
 
     const response = await this.llm.generateText(systemPrompt, sceneSummary);
@@ -256,7 +260,15 @@ Output ONLY a single word: one of Action, Adventure, Thriller, Drama, Tragedy, R
   }
 
   private computeGenreFit(arcType: VonnegutArcType, genre: string): NarrativeArc['genreFit'] {
-    const expectedArc = GENRE_EXPECTED_ARC[genre] || 'man-in-a-hole';
+    // Handle composite genres like "Crime, Drama" — try each part
+    const genres = genre.split(/[,\/]/).map(g => g.trim()).filter(Boolean);
+    let expectedArc: VonnegutArcType = 'man-in-a-hole';
+    for (const g of genres) {
+      if (GENRE_EXPECTED_ARC[g]) {
+        expectedArc = GENRE_EXPECTED_ARC[g];
+        break;
+      }
+    }
     const fitScore = arcType === expectedArc ? 100 : this.arcSimilarity(arcType, expectedArc);
 
     let deviation = '';

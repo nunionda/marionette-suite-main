@@ -23,6 +23,7 @@ import {
   type CustomStrategyInput,
   type EngineName,
   type ILLMProvider,
+  type ProviderChoice,
 } from "@scenario-analysis/core";
 import { AnalysisReportRepository } from "@scenario-analysis/database";
 
@@ -120,6 +121,12 @@ const app = new Elysia()
     const resolved = resolveStrategy(strategy || 'auto', customProviders);
     const mockProvider = factory.getProvider('mock');
 
+    // Build fallback chain: Gemini → Groq → DeepSeek → Anthropic → OpenAI → Mock
+    const fallbackOrder: ProviderChoice[] = ['gemini', 'groq', 'deepseek', 'anthropic', 'openai'];
+    const availableFallbacks = fallbackOrder.filter(name => {
+      try { factory.getProvider(name); return true; } catch { return false; }
+    });
+
     function getEngineProvider(engine: EngineName): ILLMProvider {
       try {
         return factory.getProvider(resolved.engineProviders[engine]);
@@ -128,28 +135,44 @@ const app = new Elysia()
       }
     }
 
-    // Helper: run engine with its assigned provider, fallback to mock on failure
+    // Helper: run engine with provider chain (primary → alternatives → mock)
     async function withFallback<T>(
       engine: EngineName,
       label: string,
       fn: (p: ILLMProvider) => Promise<T>,
     ): Promise<{ data: T; fallback: boolean; provider: string }> {
-      const provider = getEngineProvider(engine);
-      try {
-        return { data: await fn(provider), fallback: false, provider: provider.name };
-      } catch (err: any) {
-        if (provider.name !== 'mock') {
-          console.warn(`⚠️ ${label} failed with ${provider.name} (${err.message?.slice(0, 80)}), using mock fallback`);
-          return { data: await fn(mockProvider), fallback: true, provider: 'mock' };
+      const primary = getEngineProvider(engine);
+      const tried = new Set<string>([primary.name]);
+      const chain: ILLMProvider[] = [primary];
+      for (const name of availableFallbacks) {
+        if (!tried.has(name)) {
+          tried.add(name);
+          chain.push(factory.getProvider(name));
         }
-        throw err;
       }
+      chain.push(mockProvider);
+
+      for (let i = 0; i < chain.length; i++) {
+        const provider = chain[i]!;
+        try {
+          const data = await fn(provider);
+          if (i > 0) console.log(`✅ ${label} succeeded with fallback: ${provider.name}`);
+          return { data, fallback: i > 0, provider: provider.name };
+        } catch (err: any) {
+          if (provider.name !== 'mock') {
+            console.warn(`⚠️ ${label} failed with ${provider.name} (${err.message?.slice(0, 80)}), trying next...`);
+          } else {
+            throw err;
+          }
+        }
+      }
+      return { data: await fn(mockProvider), fallback: true, provider: 'mock' };
     }
 
     // 4. Run Pipeline
     const network = characterAnalyzer.analyze(scriptId, elements);
 
-    // Run LLM engines sequentially to avoid Gemini rate-limit exhaustion
+    // Run LLM engines sequentially with rate-limit spacing
     const beatsResult = await withFallback('beatSheet', 'BeatSheet', (p) => new BeatSheetGenerator(p).generate(scriptId, elements, market));
     const emotionResult = await withFallback('emotion', 'Emotion', (p) => new EmotionAnalyzer(p).analyze(scriptId, elements));
     const ratingResult = await withFallback('rating', 'Rating', (p) => new ContentRatingClassifier(p).classify(scriptId, elements, market));
@@ -158,54 +181,7 @@ const app = new Elysia()
     const emotion = emotionResult.data;
     const mpaaRating = ratingResult.data;
 
-    // Mock Market data for now
-    const mockMarket = { budget: 50000000, revenue: 0, genres: ["Action", "Sci-Fi"], topCast: [] };
-
-    const features = featureExtractor.extract(scriptId, elements, {
-      characterNetwork: network,
-      beatSheet: beats,
-      emotionGraph: emotion
-    }, mockMarket as any);
-
-    const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features, market));
-    const roiPrediction = roiResult.data;
-
-    // Trope Analysis (LLM)
-    const tropeResult = await withFallback('trope', 'Trope', (p) =>
-      new TropeAnalyzer(p).analyze(scriptId, elements, market)
-    );
-    const tropes = tropeResult.data.tropes;
-
-    const similarity = benchmarker.findComps(features, tropes, market);
-
-    // 5. Script Coverage Evaluation (comprehensive scoring)
-    const coverageResult = await withFallback('coverage', 'Coverage', (p) =>
-      new ScriptCoverageEvaluator(p).evaluate(scriptId, elements, {
-        beats: beats.beats,
-        emotions: emotion.scenes,
-        characters: network.characters,
-        roi: roiPrediction,
-        rating: mpaaRating,
-        comps: similarity.topComps,
-      }, market)
-    );
-    const coverage = coverageResult.data;
-
-    // 6. Narrative Arc Classification (uses emotion data)
-    const emotionProvider = getEngineProvider('emotion');
-    const narrativeArcClassifier = new NarrativeArcClassifier(emotionProvider);
-    let narrativeArc;
-    try {
-      narrativeArc = await narrativeArcClassifier.classify(
-        scriptId, emotion.scenes, coverage?.genre
-      );
-    } catch (err: any) {
-      console.warn(`⚠️ NarrativeArc failed (${err.message?.slice(0, 80)}), using mock fallback`);
-      const mockArcClassifier = new NarrativeArcClassifier(mockProvider);
-      narrativeArc = await mockArcClassifier.classify(scriptId, emotion.scenes, coverage?.genre);
-    }
-
-    // 7. Production Feasibility Analysis
+    // 5. Production Feasibility (run early — budget feeds into ROI)
     const productionAnalyzer = new ProductionAnalyzer();
     const locations = productionAnalyzer.analyzeLocations(elements);
     const cast = productionAnalyzer.analyzeCast(elements, network.characters);
@@ -221,6 +197,68 @@ const app = new Elysia()
     const budgetEstimator = new BudgetEstimator();
     const budgetEstimate = budgetEstimator.estimate(locations, cast, vfx.requirements, estimatedShootingDays, market);
 
+    // 6. Trope Analysis (LLM) — needed for comps + genre inference
+    const tropeResult = await withFallback('trope', 'Trope', (p) =>
+      new TropeAnalyzer(p).analyze(scriptId, elements, market)
+    );
+    const tropes = tropeResult.data.tropes;
+
+    // 7. Coverage (provides genre) — run before ROI so genre feeds into predictions
+    const coverageResult = await withFallback('coverage', 'Coverage', (p) =>
+      new ScriptCoverageEvaluator(p).evaluate(scriptId, elements, {
+        beats: beats.beats,
+        emotions: emotion.scenes,
+        characters: network.characters,
+        roi: { tier: 'Unknown', predictedMultiplier: 0, confidence: 0, reasoning: 'Pending — ROI runs after coverage' },
+        rating: mpaaRating,
+        comps: [],
+      }, market)
+    );
+    const coverage = coverageResult.data;
+
+    // 8. Feature Extraction — use real budget + genre from coverage
+    const coverageGenres = coverage?.genre
+      ? coverage.genre.split(/[,\/]/).map((g: string) => g.trim()).filter(Boolean)
+      : [];
+    const realMarketData = {
+      movieId: scriptId,
+      title: scriptId,
+      budget: budgetEstimate.likely,
+      revenue: 0,
+      releaseDate: '',
+      genres: coverageGenres,
+      topCast: cast.map((c: any) => c.name),
+      market,
+      currencyCode: market === 'korean' ? 'KRW' : 'USD',
+    };
+
+    const features = featureExtractor.extract(scriptId, elements, {
+      characterNetwork: network,
+      beatSheet: beats,
+      emotionGraph: emotion
+    }, realMarketData);
+
+    // 9. ROI Prediction — now with real budget + genre
+    const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features, market));
+    const roiPrediction = roiResult.data;
+
+    // 10. Comps (uses features + tropes)
+    const similarity = benchmarker.findComps(features, tropes, market);
+
+    // 11. Narrative Arc Classification (uses emotion + genre from coverage)
+    const emotionProvider = getEngineProvider('emotion');
+    const narrativeArcClassifier = new NarrativeArcClassifier(emotionProvider);
+    let narrativeArc;
+    try {
+      narrativeArc = await narrativeArcClassifier.classify(
+        scriptId, emotion.scenes, coverage?.genre, market
+      );
+    } catch (err: any) {
+      console.warn(`⚠️ NarrativeArc failed (${err.message?.slice(0, 80)}), using mock fallback`);
+      const mockArcClassifier = new NarrativeArcClassifier(mockProvider);
+      narrativeArc = await mockArcClassifier.classify(scriptId, emotion.scenes, coverage?.genre, market);
+    }
+
     const production = {
       scriptId,
       locations,
@@ -235,13 +273,13 @@ const app = new Elysia()
     };
 
     const mockEngines = [
-      beatsResult.fallback && 'Beat Sheet',
-      emotionResult.fallback && 'Emotion',
-      ratingResult.fallback && 'Rating',
-      roiResult.fallback && 'ROI',
-      coverageResult.fallback && 'Coverage',
-      vfxResult.fallback && 'VFX',
-      tropeResult.fallback && 'Trope',
+      beatsResult.provider === 'mock' && 'Beat Sheet',
+      emotionResult.provider === 'mock' && 'Emotion',
+      ratingResult.provider === 'mock' && 'Rating',
+      roiResult.provider === 'mock' && 'ROI',
+      coverageResult.provider === 'mock' && 'Coverage',
+      vfxResult.provider === 'mock' && 'VFX',
+      tropeResult.provider === 'mock' && 'Trope',
     ].filter(Boolean) as string[];
 
     const result = {
@@ -249,9 +287,9 @@ const app = new Elysia()
       market,
       summary: {
         totalElements: elements.length,
-        protagonist: network.characters[0]?.name,
-        predictedRoi: roiPrediction.tier,
-        predictedRating: mpaaRating.rating
+        protagonist: network.characters[0]?.name || '',
+        predictedRoi: roiPrediction.tier || 'Hit',
+        predictedRating: mpaaRating.rating || (market === 'korean' ? '15+' : 'PG-13'),
       },
       characterNetwork: {
         characters: network.characters,

@@ -5,19 +5,20 @@ import type { ILLMProvider, LLMResponse } from './ILLMProvider';
 export type GeminiTier = 'standard' | 'pro' | 'long-context';
 
 const MODEL_CHAINS: Record<GeminiTier, string[]> = {
-  standard: ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash-lite'],
-  pro: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'],
-  'long-context': ['gemini-1.5-pro', 'gemini-2.5-pro', 'gemini-2.5-flash'],
+  standard: ['gemini-2.5-flash', 'gemini-2.0-flash'],
+  pro: ['gemini-2.5-pro', 'gemini-2.5-flash'],
+  'long-context': ['gemini-1.5-pro', 'gemini-2.5-pro'],
 };
+
+// Shared rate limiter across all GeminiProvider instances.
+// Gemini free tier: ~10 RPM → 1 request per 6 seconds minimum.
+let lastApiCallMs = 0;
+const MIN_INTERVAL_MS = 6_500;
 
 export class GeminiProvider implements ILLMProvider {
   readonly name: string;
   private client: GoogleGenAI | null = null;
   private readonly modelChain: string[];
-
-  // Retry config
-  private readonly maxRetries = 2;
-  private readonly baseDelayMs = 5000;
 
   constructor(tier: GeminiTier = 'standard') {
     const TIER_NAMES: Record<GeminiTier, string> = {
@@ -39,6 +40,15 @@ export class GeminiProvider implements ILLMProvider {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
+  /** Wait for the shared rate limit window before making an API call. */
+  private async waitForRateLimit(): Promise<void> {
+    const elapsed = Date.now() - lastApiCallMs;
+    if (elapsed < MIN_INTERVAL_MS) {
+      await this.sleep(MIN_INTERVAL_MS - elapsed);
+    }
+    lastApiCallMs = Date.now();
+  }
+
   async generateText(systemPrompt: string, userPrompt: string): Promise<LLMResponse> {
     const startTime = Date.now();
 
@@ -49,58 +59,56 @@ export class GeminiProvider implements ILLMProvider {
     let lastError = '';
 
     for (const model of this.modelChain) {
-      for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
-        try {
-          const response = await this.client.models.generateContent({
-            model,
-            contents: userPrompt,
-            config: {
-              systemInstruction: systemPrompt,
-              temperature: 0.2,
-            },
-          });
+      // Rate-limit: wait for minimum interval since last API call
+      await this.waitForRateLimit();
 
-          // Gemini often wraps JSON in markdown code fences — strip them
-          let content = (response.text || '').trim();
-          if (content.startsWith('```')) {
-            content = content.replace(/^```(?:\w*)\s*\n?/, '').replace(/\n?```\s*$/, '');
-          }
+      try {
+        const response = await this.client.models.generateContent({
+          model,
+          contents: userPrompt,
+          config: {
+            systemInstruction: systemPrompt,
+            temperature: 0.2,
+          },
+        });
 
-          return {
-            provider: this.name,
-            model,
-            content,
-            latencyMs: Date.now() - startTime,
-          };
-        } catch (error: any) {
-          const isRateLimit =
-            error?.status === 429 ||
-            error?.httpStatusCode === 429 ||
-            error?.code === 429 ||
-            error.message?.includes('429') ||
-            error.message?.includes('RESOURCE_EXHAUSTED');
-
-          if (isRateLimit) {
-            if (attempt < this.maxRetries) {
-              const delay = this.baseDelayMs * Math.pow(2, attempt);
-              console.warn(`⚠️ Gemini ${model} rate-limited, retrying in ${delay / 1000}s (attempt ${attempt + 1}/${this.maxRetries})...`);
-              await this.sleep(delay);
-              continue;
-            }
-            console.warn(`⚠️ Gemini ${model} rate-limited after ${this.maxRetries} retries, trying next model...`);
-            lastError = error.message;
-            break; // Move to next model
-          }
-
-          // Non-rate-limit error: fail immediately
-          return {
-            provider: this.name,
-            model,
-            content: '',
-            latencyMs: Date.now() - startTime,
-            error: error.message,
-          };
+        // Gemini often wraps JSON in markdown code fences — strip them
+        let content = (response.text || '').trim();
+        if (content.startsWith('```')) {
+          content = content.replace(/^```(?:\w*)\s*\n?/, '').replace(/\n?```\s*$/, '');
         }
+
+        return {
+          provider: this.name,
+          model,
+          content,
+          latencyMs: Date.now() - startTime,
+        };
+      } catch (error: any) {
+        const isRateLimit =
+          error?.status === 429 ||
+          error?.httpStatusCode === 429 ||
+          error?.code === 429 ||
+          error.message?.includes('429') ||
+          error.message?.includes('RESOURCE_EXHAUSTED');
+
+        if (isRateLimit) {
+          // Wait extra on rate limit before trying next model
+          console.warn(`⚠️ Gemini ${model} rate-limited, trying next model after cooldown...`);
+          lastError = error.message;
+          await this.sleep(MIN_INTERVAL_MS);
+          lastApiCallMs = Date.now();
+          continue; // Move to next model in chain
+        }
+
+        // Non-rate-limit error: fail immediately
+        return {
+          provider: this.name,
+          model,
+          content: '',
+          latencyMs: Date.now() - startTime,
+          error: error.message,
+        };
       }
     }
 

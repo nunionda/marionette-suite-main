@@ -11,6 +11,7 @@ export class AnalysisReportRepository {
       where: { scriptId: input.scriptId },
       create: {
         scriptId: input.scriptId,
+        ...(input.market && { market: input.market }),
         totalElements: input.summary.totalElements,
         protagonist: input.summary.protagonist,
         predictedRoi: input.summary.predictedRoi,
@@ -31,6 +32,7 @@ export class AnalysisReportRepository {
         ...(input.production && { production: input.production as any }),
       },
       update: {
+        ...(input.market && { market: input.market }),
         totalElements: input.summary.totalElements,
         protagonist: input.summary.protagonist,
         predictedRoi: input.summary.predictedRoi,
@@ -93,6 +95,7 @@ export class AnalysisReportRepository {
   private toApiResponse(report: AnalysisReport): AnalysisResultInput {
     return {
       scriptId: report.scriptId,
+      market: report.market,
       summary: {
         totalElements: report.totalElements,
         protagonist: report.protagonist ?? "",

@@ -2,6 +2,7 @@ import type { AnalysisStrategy, AnalysisStrategyName, CustomStrategyInput, Provi
 import { env } from '../../../shared/env';
 
 function getDefaultProvider(): ProviderChoice {
+  // Priority: Gemini (free) → Groq (free) → DeepSeek (cheap) → Anthropic → OpenAI → Mock
   if (env.GEMINI_API_KEY) return 'gemini';
   if (env.GROQ_API_KEY) return 'groq';
   if (env.DEEPSEEK_API_KEY) return 'deepseek';

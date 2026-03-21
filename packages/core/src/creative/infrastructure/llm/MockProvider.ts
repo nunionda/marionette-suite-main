@@ -59,10 +59,11 @@ export class MockProvider implements ILLMProvider {
         confidence: 0.8,
         reasoning: "Mock reasoning"
       });
-    } else if (systemPrompt.includes("MPAA")) {
+    } else if (systemPrompt.includes("MPAA") || systemPrompt.includes("KMRB")) {
+      const isKorean = systemPrompt.includes("KMRB");
       content = JSON.stringify({
-        rating: "PG-13",
-        reasons: ["Mock violence"],
+        rating: isKorean ? "15+" : "PG-13",
+        reasons: isKorean ? ["모의 폭력 장면"] : ["Mock violence"],
         confidence: 0.9
       });
     } else if (systemPrompt.includes("Script Coverage") || systemPrompt.includes("coverage analyst")) {
