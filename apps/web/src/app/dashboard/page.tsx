@@ -111,7 +111,7 @@ export default function Dashboard() {
     setMode('analyzing');
     setUploadError(null);
     try {
-      const res = await fetch(`http://localhost:4005/report/${scriptId}`);
+      const res = await fetch(`http://localhost:4005/report/${encodeURIComponent(scriptId)}`);
       if (!res.ok) throw new Error('Failed to load report');
       const result = await res.json();
       setData(result);
