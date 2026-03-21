@@ -5,14 +5,33 @@ import React from 'react';
 interface ReportCoverProps {
   data: any;
   locale?: 'en' | 'ko';
+  providers?: Record<string, string>;
 }
 
-export default function ReportCover({ data, locale = 'en' }: ReportCoverProps) {
+const TOC_ITEMS = [
+  { en: 'Script Coverage Report', ko: '시나리오 커버리지 리포트' },
+  { en: 'Production Feasibility', ko: '제작 타당성' },
+  { en: 'Overview & Emotional Arc', ko: '개요 및 감정 아크' },
+  { en: 'Character Intelligence', ko: '캐릭터 인텔리전스' },
+  { en: 'Narrative Arc', ko: '서사 아크' },
+  { en: 'Market Predictions', ko: '마켓 예측' },
+  { en: 'Narrative Beat Sheet', ko: '비트 시트' },
+];
+
+function getVerdictLabel(verdict: string, ko: boolean) {
+  if (verdict === 'Recommend') return ko ? '제작 추천' : 'Recommend';
+  if (verdict === 'Consider') return ko ? '수정 후 재검토' : 'Consider';
+  return ko ? '제작 부적합' : 'Pass';
+}
+
+export default function ReportCover({ data, locale = 'en', providers }: ReportCoverProps) {
   const ko = locale === 'ko';
   const castCount = (data.characterNetwork?.characters ?? data.characterNetwork)?.length ?? 0;
   const analysisDate = new Date().toLocaleDateString(ko ? 'ko-KR' : 'en-US', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
+  const verdict = data.coverage?.verdict;
+  const providerList = providers ? Object.values(providers).filter((v, i, a) => a.indexOf(v) === i && v !== 'mock') : [];
 
   return (
     <div className="report-cover print-only">
@@ -75,8 +94,27 @@ export default function ReportCover({ data, locale = 'en' }: ReportCoverProps) {
           </div>
         )}
 
+        {verdict && (
+          <div className={`report-cover-verdict report-cover-verdict-${verdict.toLowerCase()}`}>
+            {getVerdictLabel(verdict, ko)}
+          </div>
+        )}
+
+        <div className="report-cover-toc">
+          <div className="report-cover-toc-title">{ko ? '목차' : 'Table of Contents'}</div>
+          {TOC_ITEMS.map((item, i) => (
+            <div key={i} className="report-cover-toc-item">
+              <span className="report-cover-toc-number">{i + 1}</span>
+              <span className="report-cover-toc-label">{ko ? item.ko : item.en}</span>
+            </div>
+          ))}
+        </div>
+
         <div className="report-cover-footer">
           <div>{ko ? '시나리오 인텔리전스 플랫폼' : 'Script Intelligence Platform'}</div>
+          {providerList.length > 0 && (
+            <div>{ko ? 'AI 분석' : 'AI Analysis'}: {providerList.map(p => (p as string).charAt(0).toUpperCase() + (p as string).slice(1)).join(', ')}</div>
+          )}
           <div>{ko ? '내부 전용' : 'For internal use only'}</div>
         </div>
       </div>

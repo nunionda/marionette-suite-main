@@ -301,7 +301,7 @@ export default function Dashboard() {
       {data && <SectionNav locale={locale} />}
 
       {/* Print-only Report Cover */}
-      {data && <ReportCover data={displayData} locale={locale} />}
+      {data && <ReportCover data={displayData} locale={locale} providers={data?.providers} />}
 
       {/* Script Coverage Report */}
       {data?.coverage && (

@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Design & PDF Upgrade**](./docs/plans/14-design-pdf-upgrade.md)
 - [**Plan: Korean Market Expansion**](./docs/plans/13-korean-market-expansion.md)
 - [**Plan: LLM Engine Expansion**](./docs/plans/12-llm-engine-expansion.md)
 - [**Plan: LLM Real-time Translation**](./docs/plans/11-llm-realtime-translation.md)
@@ -43,6 +44,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 23 (LLM Engine Expansion)**](./docs/results/session-23-llm-engine-expansion.md) - DeepSeek + Groq providers, Gemini 3-tier chains, Anthropic Sonnet 4.6, budget/premium/long-context strategies, benchmark CLI framework.
 - [**Result: Session 24 (Korean Market Expansion)**](./docs/results/session-24-korean-market-expansion.md) - MarketLocale pattern, KMRB ratings, KRW currency, 30 Korean films, 50 Korean tropes, KOFIC API, 7 market-aware engines, market selector UI.
 - [**Result: Session 25 (Pipeline Reliability)**](./docs/results/session-25-pipeline-reliability.md) - Provider chain fallback, ROI real data pipeline, mock warning fix, Groq 413 handling, composite genre fix, verdict criteria UI, 38 Korean benchmark tests.
+- [**Result: Session 26 (Design & PDF Upgrade)**](./docs/results/session-26-design-pdf-upgrade.md) - Geist font fix, glass panel elevation, fadeInUp animations, badge glow, provider bar colors, EmotionChart glass tooltip, PDF TOC, per-section page breaks, cover verdict badge.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 

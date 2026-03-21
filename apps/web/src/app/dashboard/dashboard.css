@@ -2,10 +2,14 @@
   /* Core palette */
   --bg-dark: #0a0a0c;
   --panel-bg: rgba(25, 25, 30, 0.6);
+  --panel-bg-hover: rgba(30, 30, 38, 0.8);
   --accent-gold: #d4af37;
+  --accent-gold-dim: rgba(212, 175, 55, 0.15);
   --accent-blue: #0070f3;
+  --accent-blue-dim: rgba(0, 112, 243, 0.12);
   --text-dim: #a0a0a0;
   --border-glass: rgba(255, 255, 255, 0.1);
+  --border-glass-hover: rgba(255, 255, 255, 0.18);
 
   /* Semantic colors */
   --color-success: #2ecc71;
@@ -84,6 +88,13 @@ input:focus-visible {
   border-radius: 16px;
   padding: 1.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.glass-panel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  border-color: var(--border-glass-hover);
 }
 
 .grid-layout {
@@ -96,6 +107,13 @@ input:focus-visible {
 .stat-card {
   grid-column: span 3;
   text-align: center;
+}
+
+.stat-card .icon {
+  background: var(--accent-gold-dim);
+  padding: 0.5rem;
+  border-radius: 50%;
+  margin-bottom: 0.25rem;
 }
 
 .main-chart {
@@ -120,11 +138,23 @@ input:focus-visible {
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  letter-spacing: 0.5px;
 }
 
-.badge-blockbuster { background: linear-gradient(45deg, var(--color-warning), #d35400); }
-.badge-hit { background: linear-gradient(45deg, var(--color-success-dark), var(--color-success)); }
-.badge-r { background: var(--color-danger-dark); }
+.badge-blockbuster {
+  background: linear-gradient(45deg, var(--color-warning), #d35400);
+  box-shadow: 0 0 12px rgba(243, 156, 18, 0.3);
+}
+.badge-hit {
+  background: linear-gradient(45deg, var(--color-success-dark), var(--color-success));
+  box-shadow: 0 0 12px rgba(46, 204, 113, 0.25);
+}
+.badge-r {
+  background: transparent;
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+}
 
 /* ===== Beat Sheet (Redesigned) ===== */
 .beat-sheet-container {
@@ -567,43 +597,63 @@ input:focus-visible {
 .provider-bar {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-glass);
-  border-radius: 8px;
-  font-size: 0.75rem;
+  border-radius: 10px;
+  font-size: 0.72rem;
   flex-wrap: wrap;
+  backdrop-filter: blur(8px);
 }
 
 .provider-strategy {
   font-weight: 700;
   color: var(--accent-gold);
-  padding-right: 0.75rem;
+  padding-right: 0.6rem;
   border-right: 1px solid var(--border-glass);
+  letter-spacing: 0.5px;
 }
 
 .provider-badge-item {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.3rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.provider-badge-item:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .provider-engine {
   color: var(--text-dim);
+  font-size: 0.68rem;
 }
 
 .provider-name {
   font-weight: 600;
   padding: 0.1rem 0.4rem;
   border-radius: 4px;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
 }
 
 .provider-gemini {
   background: rgba(66, 133, 244, 0.2);
   color: #4285f4;
+}
+
+.provider-groq {
+  background: rgba(255, 140, 50, 0.2);
+  color: #ff8c32;
+}
+
+.provider-deepseek {
+  background: rgba(50, 200, 120, 0.2);
+  color: #32c878;
 }
 
 .provider-anthropic {
@@ -1316,6 +1366,27 @@ input:focus-visible {
   }
 }
 
+/* ===== FadeInUp Animation ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.glass-panel {
+  animation: fadeInUp 0.4s ease both;
+}
+
+.stat-card:nth-child(1) { animation-delay: 0s; }
+.stat-card:nth-child(2) { animation-delay: 0.06s; }
+.stat-card:nth-child(3) { animation-delay: 0.12s; }
+.stat-card:nth-child(4) { animation-delay: 0.18s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel {
+    animation: none;
+  }
+}
+
 /* ===== Print-Only (hidden on screen) ===== */
 .print-only {
   display: none !important;
@@ -1574,6 +1645,80 @@ input:focus-visible {
     margin-top: 0.2rem;
   }
 
+  .report-cover-verdict {
+    text-align: center;
+    margin-top: 0.75rem;
+    font-size: 11pt;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 0.3rem 1.2rem;
+    border-radius: 4px;
+    display: inline-block;
+    align-self: center;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .report-cover-verdict-recommend {
+    background: #1a9a4e;
+    color: white;
+  }
+
+  .report-cover-verdict-consider {
+    background: #c07800;
+    color: white;
+  }
+
+  .report-cover-verdict-pass {
+    background: #6b6b6b;
+    color: white;
+  }
+
+  .report-cover-toc {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+  }
+
+  .report-cover-toc-title {
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #888;
+    margin-bottom: 0.5rem;
+  }
+
+  .report-cover-toc-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.2rem 0;
+    font-size: 9pt;
+    color: #1a1a1a;
+  }
+
+  .report-cover-toc-number {
+    background: #1a1a1a;
+    color: white;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7pt;
+    font-weight: 700;
+    flex-shrink: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .report-cover-toc-label {
+    font-weight: 500;
+  }
+
   .report-cover-footer {
     margin-top: 1.5rem;
     padding-top: 0.75rem;
@@ -1584,12 +1729,36 @@ input:focus-visible {
     color: #888;
   }
 
-  /* ─── Page breaks (minimal) ─── */
+  /* ─── Orphan/Widow control ─── */
+  p, li, td { orphans: 3; widows: 3; }
+  h2, h3 { page-break-after: avoid; }
+
+  /* ─── Page breaks (per section) ─── */
   #coverage {
     page-break-before: always;
   }
 
+  #production {
+    page-break-before: always;
+  }
+
   .grid-layout {
+    page-break-before: always;
+  }
+
+  #characters {
+    page-break-before: always;
+  }
+
+  #arc {
+    page-break-before: always;
+  }
+
+  #market {
+    page-break-before: always;
+  }
+
+  #beats {
     page-break-before: always;
   }
 
@@ -1603,9 +1772,25 @@ input:focus-visible {
     break-inside: avoid;
   }
 
-  /* Stat cards: 4-across compact row */
+  /* ─── Section headers (print) ─── */
+  .print-section-header {
+    border-top: 3px solid #1a1a1a;
+    padding-top: 0.6rem;
+    margin: 1rem 0 0.5rem;
+    font-size: 12pt;
+  }
+
+  .print-section-number {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 9pt;
+  }
+
+  /* ─── Stat cards: flexbox 4-column ─── */
   .stat-card {
-    display: inline-block !important;
+    display: inline-flex !important;
+    flex-direction: column;
+    align-items: center;
     width: 23.5% !important;
     vertical-align: top;
     text-align: center;
@@ -1623,6 +1808,10 @@ input:focus-visible {
   .stat-card .icon {
     width: 14px;
     height: 14px;
+    background: none !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* Chart — compact */
@@ -1929,6 +2118,48 @@ input:focus-visible {
     margin-top: 0.3rem !important;
   }
 
+  /* ─── Verdict criteria (print) ─── */
+  .verdict-criteria {
+    border-top: 1px solid #ddd;
+  }
+
+  .verdict-criterion {
+    color: #555;
+  }
+
+  .verdict-criterion-active {
+    color: #1a1a1a;
+  }
+
+  .verdict-dot-recommend { background: #1a9a4e; }
+  .verdict-dot-consider { background: #c07800; }
+  .verdict-dot-pass { background: #6b6b6b; }
+
+  .verdict-range {
+    font-family: monospace;
+    color: #555;
+  }
+
+  /* ─── Print typography tuning ─── */
+  body, .dashboard-container {
+    line-height: 1.5;
+  }
+
+  h1 { line-height: 1.2; }
+  h2 { line-height: 1.25; }
+  h3 { line-height: 1.3; }
+
+  /* ─── Chart height (print) ─── */
+  .main-chart .recharts-responsive-container {
+    height: 200px !important;
+  }
+
+  /* ─── No hover effects in print ─── */
+  .glass-panel {
+    transform: none !important;
+    animation: none !important;
+  }
+
   /* ─── Color preservation (comprehensive) ─── */
   .category-bar,
   .category-bar-fill,
@@ -1952,6 +2183,8 @@ input:focus-visible {
   .pacing-type,
   .freq-badge,
   .report-cover-divider,
+  .report-cover-verdict,
+  .report-cover-toc-number,
   .print-section-number,
   .budget-range-bar,
   .budget-range-bar::after,
@@ -1959,7 +2192,8 @@ input:focus-visible {
   .beat-card,
   .beat-act-line,
   .score-circle,
-  .category-score-badge {
+  .category-score-badge,
+  .verdict-dot {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
@@ -2098,8 +2332,9 @@ input:focus-visible {
 }
 
 .stat-value {
+  font-family: var(--font-geist-mono), monospace;
   font-size: var(--font-size-3xl);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* ─── Section Navigation (Floating) ─── */
@@ -2142,6 +2377,7 @@ input:focus-visible {
 .section-nav-item.active {
   background: rgba(0, 112, 243, 0.15);
   color: var(--accent-blue);
+  border-left: 2px solid var(--accent-blue);
 }
 
 .section-nav-icon {

@@ -17,32 +17,52 @@ export default function EmotionChart({ emotionGraph, locale = 'en' }: EmotionCha
         <AreaChart data={emotionGraph}>
           <defs>
             <linearGradient id="colorScore" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#0070f3" stopOpacity={0.3}/>
+              <stop offset="5%" stopColor="#0070f3" stopOpacity={0.4}/>
+              <stop offset="50%" stopColor="#0070f3" stopOpacity={0.12}/>
               <stop offset="95%" stopColor="#0070f3" stopOpacity={0}/>
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
           <XAxis dataKey="sceneNumber" hide />
-          <YAxis domain={[-10, 10]} stroke="var(--text-dim)" />
+          <YAxis domain={[-10, 10]} stroke="var(--text-dim)" fontSize={11} />
           <Tooltip
-            contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
-            itemStyle={{ color: '#fff' }}
             content={({ active, payload }) => {
               if (!active || !payload?.[0]) return null;
               const d = payload[0].payload;
               return (
-                <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px', padding: '0.75rem', maxWidth: '280px' }}>
-                  <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{ko ? '장면' : 'Scene'} {d.sceneNumber}</div>
+                <div style={{
+                  background: 'rgba(20, 20, 28, 0.92)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  borderRadius: '10px',
+                  padding: '0.75rem 0.85rem',
+                  maxWidth: '280px',
+                  boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+                }}>
+                  <div style={{ fontWeight: 700, marginBottom: '0.25rem', fontSize: '0.85rem' }}>{ko ? '장면' : 'Scene'} {d.sceneNumber}</div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '0.25rem' }}>
-                    <span style={{ color: 'var(--accent-gold)' }}>{d.dominantEmotion || '—'}</span>
-                    <span style={{ fontWeight: 600, color: d.score >= 0 ? '#2ecc71' : '#e74c3c' }}>{d.score > 0 ? '+' : ''}{d.score}</span>
+                    <span style={{ color: '#d4af37', fontSize: '0.82rem' }}>{d.dominantEmotion || '—'}</span>
+                    <span style={{
+                      fontFamily: 'var(--font-geist-mono), monospace',
+                      fontWeight: 700,
+                      color: d.score >= 0 ? '#2ecc71' : '#e74c3c',
+                    }}>{d.score > 0 ? '+' : ''}{d.score}</span>
                   </div>
-                  {d.explanation && <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', whiteSpace: 'normal' }}>{d.explanation}</div>}
+                  {d.explanation && <div style={{ fontSize: '0.78rem', color: '#a0a0a0', whiteSpace: 'normal', lineHeight: 1.4 }}>{d.explanation}</div>}
                 </div>
               );
             }}
           />
-          <Area type="monotone" dataKey="score" stroke="#0070f3" fillOpacity={1} fill="url(#colorScore)" strokeWidth={3} />
+          <Area
+            type="monotone"
+            dataKey="score"
+            stroke="#0070f3"
+            fillOpacity={1}
+            fill="url(#colorScore)"
+            strokeWidth={2.5}
+            dot={false}
+            activeDot={{ r: 5, strokeWidth: 2, fill: '#0a0a0c', stroke: '#0070f3' }}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>
