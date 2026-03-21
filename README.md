@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Phase 12 (Benchmarker Expansion)**](./docs/plans/10-phase12-benchmarker-expansion.md)
 - [**Plan: Phase 11 (Character Intelligence)**](./docs/plans/09-phase11-character-intelligence.md)
 - [**Plan: Phase 10 (Narrative Arc Intelligence)**](./docs/plans/08-phase10-narrative-arc.md)
 - [**Plan: Phase 9 (Production Feasibility Engine)**](./docs/plans/07-phase9-production-feasibility.md)
@@ -29,6 +30,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 13 (Production Feasibility)**](./docs/results/session-13-phase9-production-feasibility.md) - Location/cast extraction, VFX tier classification, three-tier budget estimation, production dashboard UI.
 - [**Result: Session 14 (Narrative Arc Intelligence)**](./docs/results/session-14-phase10-narrative-arc.md) - Vonnegut 6 arc classification, pacing issue detection, genre fit scoring, narrative arc dashboard UI.
 - [**Result: Session 15 (Character Intelligence)**](./docs/results/session-15-phase11-character-intelligence.md) - SNA edges, voice uniqueness scoring, dialogue diversity metrics, relationship/voice/diversity dashboard UI.
+- [**Result: Session 16 (Benchmarker Expansion)**](./docs/results/session-16-phase12-benchmarker-expansion.md) - 50-film catalog, cosine similarity matching, LLM trope analysis, enhanced comp cards UI.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
