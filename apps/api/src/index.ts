@@ -189,7 +189,11 @@ const app = new Elysia()
         predictedRoi: roiPrediction.tier,
         predictedRating: mpaaRating.rating
       },
-      characterNetwork: network.characters,
+      characterNetwork: {
+        characters: network.characters,
+        edges: network.edges,
+        diversityMetrics: network.diversityMetrics,
+      },
       beatSheet: beats.beats,
       emotionGraph: emotion.scenes,
       features: features.metrics,

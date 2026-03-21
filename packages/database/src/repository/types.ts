@@ -8,12 +8,28 @@ export interface AnalysisResultInput {
     predictedRoi: string;
     predictedRating: string;
   };
-  characterNetwork: Array<{
-    name: string;
-    totalLines: number;
-    totalWords: number;
-    role: string;
-  }>;
+  characterNetwork: {
+    characters: Array<{
+      name: string;
+      totalLines: number;
+      totalWords: number;
+      role: string;
+      voiceScore?: number;
+      avgWordsPerLine?: number;
+      vocabularyRichness?: number;
+      sceneAppearances?: number[];
+    }>;
+    edges?: Array<{
+      source: string;
+      target: string;
+      weight: number;
+      dialogueExchanges: number;
+    }>;
+    diversityMetrics?: {
+      speakingRoleDistribution: { top1Pct: number; top3Pct: number };
+      centralityGap: number;
+    };
+  };
   beatSheet: Array<{
     act: number;
     name: string;

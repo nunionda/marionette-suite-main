@@ -1101,3 +1101,94 @@
   h2 { font-size: 1.2rem; }
   h3 { font-size: 1rem; }
 }
+
+/* ─── Character Relationships ─── */
+.char-relationships-panel {
+  grid-column: span 6;
+}
+.relationship-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.relationship-row {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-glass);
+}
+.relationship-row:last-child {
+  border-bottom: none;
+}
+.relationship-names {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  margin-bottom: 0.2rem;
+}
+.relationship-arrow {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+}
+.relationship-stats {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+/* ─── Voice Uniqueness ─── */
+.voice-panel {
+  grid-column: span 6;
+}
+.voice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.voice-row {
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-glass);
+}
+.voice-row:last-child {
+  border-bottom: none;
+}
+
+/* ─── Diversity Metrics ─── */
+.diversity-panel {
+  grid-column: span 4;
+}
+.diversity-stats {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 1rem;
+}
+.diversity-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+.diversity-donut {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.diversity-donut::after {
+  content: '';
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--panel-bg);
+}
+.diversity-donut-label {
+  position: relative;
+  z-index: 1;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
