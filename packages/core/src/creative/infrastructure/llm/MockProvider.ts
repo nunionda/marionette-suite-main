@@ -84,6 +84,8 @@ export class MockProvider implements ILLMProvider {
       });
     } else if (systemPrompt.includes("genre classifier")) {
       content = "Drama";
+    } else if (systemPrompt.includes("trope analyzer") || systemPrompt.includes("narrative tropes")) {
+      content = JSON.stringify(["Coming of Age", "Redemption", "Anti-Hero", "Mentor", "Family"]);
     } else if (systemPrompt.includes("VFX Supervisor") || systemPrompt.includes("visual effects")) {
       content = JSON.stringify([
         { index: 1, tier: "simple", hours: 30 },

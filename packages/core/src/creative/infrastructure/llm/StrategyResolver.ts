@@ -25,6 +25,7 @@ export function resolveStrategy(
           roi: 'gemini',
           coverage: 'gemini',
           vfx: 'gemini',
+          trope: 'gemini',
         },
       };
 
@@ -41,6 +42,7 @@ export function resolveStrategy(
           roi: fastClassifier,
           coverage: deepReasoner,
           vfx: fastClassifier,
+          trope: fastClassifier,
         },
       };
 
@@ -54,6 +56,7 @@ export function resolveStrategy(
           roi: custom?.roi || defaultProvider,
           coverage: custom?.coverage || defaultProvider,
           vfx: custom?.vfx || defaultProvider,
+          trope: custom?.trope || defaultProvider,
         },
       };
 
@@ -68,6 +71,7 @@ export function resolveStrategy(
           roi: defaultProvider,
           coverage: defaultProvider,
           vfx: defaultProvider,
+          trope: defaultProvider,
         },
       };
   }

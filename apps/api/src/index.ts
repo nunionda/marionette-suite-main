@@ -16,6 +16,7 @@ import {
   VFXEstimator,
   BudgetEstimator,
   NarrativeArcClassifier,
+  TropeAnalyzer,
   env,
   resolveStrategy,
   type AnalysisStrategyName,
@@ -121,7 +122,14 @@ const app = new Elysia()
 
     const roiResult = await withFallback('roi', 'ROI', (p) => new BoxOfficePredictor(p).predictROI(features));
     const roiPrediction = roiResult.data;
-    const similarity = benchmarker.findComps(features);
+
+    // Trope Analysis (LLM)
+    const tropeResult = await withFallback('trope', 'Trope', (p) =>
+      new TropeAnalyzer(p).analyze(scriptId, elements)
+    );
+    const tropes = tropeResult.data.tropes;
+
+    const similarity = benchmarker.findComps(features, tropes);
 
     // 5. Script Coverage Evaluation (comprehensive scoring)
     const coverageResult = await withFallback('coverage', 'Coverage', (p) =>
@@ -179,7 +187,7 @@ const app = new Elysia()
       budgetEstimate,
     };
 
-    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback || coverageResult.fallback || vfxResult.fallback;
+    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback || coverageResult.fallback || vfxResult.fallback || tropeResult.fallback;
 
     const result = {
       scriptId,
@@ -202,6 +210,7 @@ const app = new Elysia()
         rating: mpaaRating,
         comps: similarity.topComps
       },
+      tropes,
       coverage,
       narrativeArc,
       production,
@@ -213,6 +222,7 @@ const app = new Elysia()
         roi: roiResult.provider,
         coverage: coverageResult.provider,
         vfx: vfxResult.provider,
+        trope: tropeResult.provider,
       },
       ...(usedFallback && { warning: 'Some results used mock fallback due to LLM rate limits' }),
     };
@@ -235,6 +245,7 @@ const app = new Elysia()
         roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
         coverage: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
         vfx: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
+        trope: t.Optional(t.Union([t.Literal('gemini'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('mock')])),
       })),
     })
   })

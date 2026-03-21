@@ -66,6 +66,7 @@ export interface AnalysisResultInput {
       marketPerformance: { budget: number; revenue: number; roi: number };
     }>;
   };
+  tropes?: string[];
   coverage?: any;
   narrativeArc?: any;
   production?: any;

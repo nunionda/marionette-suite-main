@@ -16,6 +16,8 @@ export * from './predictor/application/FeatureExtractor';
 export * from './predictor/application/BoxOfficePredictor';
 export * from './predictor/application/ContentRatingClassifier';
 export * from './predictor/application/Benchmarker';
+export * from './predictor/application/TropeAnalyzer';
+export * from './predictor/data/filmCatalog';
 export * from './production/domain/ProductionBreakdown';
 export * from './production/application/ProductionAnalyzer';
 export * from './production/application/VFXEstimator';

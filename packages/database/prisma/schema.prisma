@@ -35,6 +35,7 @@ model AnalysisReport {
   coverage         Json?
   production       Json?
   narrativeArc     Json?
+  tropes           Json?
 
   @@index([predictedRoi])
   @@index([predictedRating])

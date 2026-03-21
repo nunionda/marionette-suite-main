@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star, Download, ChevronDown, ChevronUp, CheckCircle, XCircle, Clapperboard, MapPin, DollarSign, Sparkles, Waypoints, AlertTriangle, GitBranch, AudioWaveform, PieChart } from 'lucide-react';
+import { Film, Users, TrendingUp, Activity, Upload, FileText, Loader, Clock, AlertCircle, BarChart3, Shield, Star, Download, ChevronDown, ChevronUp, CheckCircle, XCircle, Clapperboard, MapPin, DollarSign, Sparkles, Waypoints, AlertTriangle, GitBranch, AudioWaveform, PieChart, Hash } from 'lucide-react';
 import './dashboard.css';
 
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
@@ -23,6 +23,7 @@ const ENGINE_LABELS: Record<string, string> = {
   roi: 'ROI Prediction',
   coverage: 'Coverage',
   vfx: 'VFX',
+  trope: 'Trope',
 };
 
 const PROVIDER_LABELS: Record<string, string> = {
@@ -50,6 +51,7 @@ export default function Dashboard() {
     roi: 'gemini',
     coverage: 'gemini',
     vfx: 'gemini',
+    trope: 'gemini',
   });
   const [availableProviders, setAvailableProviders] = useState<Record<string, boolean>>({});
   const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
@@ -268,7 +270,7 @@ export default function Dashboard() {
               {/* Custom Provider Grid */}
               {strategy === 'custom' && (
                 <div className="custom-grid">
-                  {(['beatSheet', 'emotion', 'rating', 'roi', 'coverage', 'vfx'] as const).map(engine => (
+                  {(['beatSheet', 'emotion', 'rating', 'roi', 'coverage', 'vfx', 'trope'] as const).map(engine => (
                     <div key={engine} className="custom-grid-item">
                       <label>{ENGINE_LABELS[engine]}</label>
                       <select
@@ -954,23 +956,37 @@ export default function Dashboard() {
             </div>
           )}
 
+          {/* Trope Tag Cloud */}
+          {data.tropes?.length > 0 && (
+            <div className="glass-panel trope-panel">
+              <h3>
+                <Hash size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#e67e22' }} />
+                Narrative Tropes
+              </h3>
+              <div className="trope-cloud">
+                {data.tropes.map((trope: string, i: number) => (
+                  <span key={i} className="trope-tag">{trope}</span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Comparable Films */}
           {data.predictions?.comps?.length > 0 && (
             <div className="glass-panel comps-panel">
               <h3>
                 <Star size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: 'var(--accent-gold)' }} />
-                Comparable Films
+                Comparable Films ({data.predictions.comps.length})
               </h3>
               <div className="comps-grid">
                 {data.predictions.comps.map((comp: any, idx: number) => (
                   <div key={idx} className="comp-card">
-                    <div style={{ fontWeight: 700, marginBottom: '0.5rem' }}>{comp.title}</div>
-                    <div className="comp-stat">
-                      <span className="detail-label">Similarity</span>
-                      <span>{Math.round(comp.similarityScore * 100)}%</span>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                      <span style={{ fontWeight: 700 }}>{comp.title}</span>
+                      <span className="similarity-badge">{Math.round(comp.similarityScore * 100)}%</span>
                     </div>
                     {comp.marketPerformance && (
-                      <>
+                      <div className="comp-stats-row">
                         <div className="comp-stat">
                           <span className="detail-label">Budget</span>
                           <span>${(comp.marketPerformance.budget / 1e6).toFixed(0)}M</span>
@@ -983,7 +999,7 @@ export default function Dashboard() {
                           <span className="detail-label">ROI</span>
                           <span style={{ color: '#2ecc71', fontWeight: 600 }}>{comp.marketPerformance.roi}x</span>
                         </div>
-                      </>
+                      </div>
                     )}
                     {comp.sharedTraits?.length > 0 && (
                       <div style={{ marginTop: '0.5rem', display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
