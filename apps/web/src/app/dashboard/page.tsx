@@ -15,6 +15,7 @@ import MarketPredictions from './components/MarketPredictions';
 import BeatSheetTimeline from './components/BeatSheetTimeline';
 import SectionNav from './components/SectionNav';
 import AnalysisProgress from './components/AnalysisProgress';
+import ReportCover from './components/ReportCover';
 
 export default function Dashboard() {
   const [mode, setMode] = useState<ViewMode>('idle');
@@ -225,9 +226,15 @@ export default function Dashboard() {
       {/* Section Navigation */}
       {data && <SectionNav />}
 
+      {/* Print-only Report Cover */}
+      {data && <ReportCover data={data} />}
+
       {/* Script Coverage Report */}
       {data?.coverage && (
         <section id="coverage">
+          <div className="print-section-header print-only">
+            <span className="print-section-number">1</span> Script Coverage Report
+          </div>
           <CoverageReport coverage={data.coverage} />
         </section>
       )}
@@ -235,6 +242,9 @@ export default function Dashboard() {
       {/* Production Breakdown */}
       {data?.production && (
         <section id="production">
+          <div className="print-section-header print-only">
+            <span className="print-section-number">2</span> Production Feasibility
+          </div>
           <ProductionBreakdown production={data.production} />
         </section>
       )}
@@ -242,6 +252,10 @@ export default function Dashboard() {
       {/* Results Dashboard */}
       {data && (
         <div className="grid-layout">
+          <div className="print-section-header print-only" style={{ width: '100%' }}>
+            <span className="print-section-number">3</span> Overview &amp; Emotional Arc
+          </div>
+
           <div id="stats" className="glass-panel stat-card">
             <Film className="icon" style={{ color: 'var(--accent-gold)' }} />
             <h3>Protagonist</h3>
@@ -272,20 +286,32 @@ export default function Dashboard() {
           <EmotionChart emotionGraph={data.emotionGraph} />
 
           <div id="characters" style={{ display: 'contents' }}>
+            <div className="print-section-header print-only" style={{ width: '100%' }}>
+              <span className="print-section-number">4</span> Character Intelligence
+            </div>
             <CharacterIntelligence characterNetwork={data.characterNetwork} />
           </div>
 
           {data.narrativeArc && (
             <div id="arc" style={{ display: 'contents' }}>
+              <div className="print-section-header print-only" style={{ width: '100%' }}>
+                <span className="print-section-number">5</span> Narrative Arc
+              </div>
               <NarrativeArcPanel narrativeArc={data.narrativeArc} />
             </div>
           )}
 
           <div id="market" style={{ display: 'contents' }}>
+            <div className="print-section-header print-only" style={{ width: '100%' }}>
+              <span className="print-section-number">6</span> Market Predictions
+            </div>
             <MarketPredictions predictions={data.predictions} tropes={data.tropes} />
           </div>
 
           <div id="beats" style={{ display: 'contents' }}>
+            <div className="print-section-header print-only" style={{ width: '100%' }}>
+              <span className="print-section-number">7</span> Narrative Beat Sheet
+            </div>
             <BeatSheetTimeline beatSheet={data.beatSheet} />
           </div>
         </div>

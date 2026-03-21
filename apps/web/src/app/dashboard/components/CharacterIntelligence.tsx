@@ -119,7 +119,7 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
           <div className="diversity-stats">
             <div className="diversity-stat-item">
               <div className="diversity-donut" style={{
-                background: `conic-gradient(var(--accent-gold) 0% ${diversityMetrics.speakingRoleDistribution.top1Pct}%, rgba(255,255,255,0.1) ${diversityMetrics.speakingRoleDistribution.top1Pct}% 100%)`
+                background: `conic-gradient(#b8941f 0% ${diversityMetrics.speakingRoleDistribution.top1Pct}%, #e0e0e0 ${diversityMetrics.speakingRoleDistribution.top1Pct}% 100%)`
               }}>
                 <span className="diversity-donut-label">{diversityMetrics.speakingRoleDistribution.top1Pct}%</span>
               </div>
@@ -127,7 +127,7 @@ export default function CharacterIntelligence({ characterNetwork }: CharacterInt
             </div>
             <div className="diversity-stat-item">
               <div className="diversity-donut" style={{
-                background: `conic-gradient(var(--accent-blue) 0% ${diversityMetrics.speakingRoleDistribution.top3Pct}%, rgba(255,255,255,0.1) ${diversityMetrics.speakingRoleDistribution.top3Pct}% 100%)`
+                background: `conic-gradient(#005bc0 0% ${diversityMetrics.speakingRoleDistribution.top3Pct}%, #e0e0e0 ${diversityMetrics.speakingRoleDistribution.top3Pct}% 100%)`
               }}>
                 <span className="diversity-donut-label">{diversityMetrics.speakingRoleDistribution.top3Pct}%</span>
               </div>

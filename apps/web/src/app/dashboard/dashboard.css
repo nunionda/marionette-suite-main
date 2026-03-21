@@ -1114,9 +1114,52 @@ input:focus-visible {
   }
 }
 
+/* ===== Print-Only (hidden on screen) ===== */
+.print-only {
+  display: none !important;
+}
+
+.print-section-header {
+  display: none !important;
+}
+
 /* ===== Print Styles (PDF Export) ===== */
 @media print {
-  /* Hide interactive UI */
+
+  /* ─── Show print-only elements ─── */
+  .print-only {
+    display: block !important;
+  }
+
+  .print-section-header {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    border-top: 2px solid #1a1a1a;
+    padding-top: 0.75rem;
+    margin: 1.5rem 0 0.75rem;
+    font-size: 14pt;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+
+  .print-section-number {
+    background: #1a1a1a;
+    color: white;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10pt;
+    font-weight: 700;
+    flex-shrink: 0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ─── Hide interactive / web-only UI ─── */
   .no-print,
   .upload-row,
   .strategy-row,
@@ -1125,16 +1168,35 @@ input:focus-visible {
   .warning-banner,
   .btn-reset,
   .btn-export,
-  .btn-analyze {
+  .btn-analyze,
+  .section-nav,
+  .skip-link,
+  .analysis-progress,
+  .dashboard-header {
     display: none !important;
   }
 
-  /* Reset dark theme → print-friendly */
+  /* ─── Page setup ─── */
+  @page {
+    size: A4;
+    margin: 15mm 20mm;
+  }
+
+  /* ─── Reset dark theme → print ─── */
   :root {
     --bg-dark: #ffffff;
     --panel-bg: #ffffff;
     --text-dim: #555555;
     --border-glass: #dddddd;
+    --accent-gold: #b8941f;
+    --accent-blue: #005bc0;
+    --color-success: #1a9a4e;
+    --color-success-dark: #1a7a3e;
+    --color-warning: #c07800;
+    --color-warning-dark: #a06000;
+    --color-danger: #c0392b;
+    --color-purple: #7b3fa0;
+    --color-muted: #6b6b6b;
   }
 
   body,
@@ -1143,108 +1205,366 @@ input:focus-visible {
     color: #1a1a1a !important;
     padding: 0 !important;
     min-height: auto !important;
+    font-size: 10pt;
+    line-height: 1.5;
   }
 
+  /* ─── Typography ─── */
+  h1 { font-size: 18pt; color: #1a1a1a; }
+  h2 { font-size: 14pt; color: #1a1a1a; }
+  h3 { font-size: 12pt; color: #1a1a1a; }
+
+  .score-value { color: #1a1a1a; }
+  .stat-value { color: #1a1a1a; font-size: 14pt; }
+
+  /* ─── Glass panel → clean card ─── */
   .glass-panel {
     background: white !important;
     backdrop-filter: none !important;
     box-shadow: none !important;
     border: 1px solid #ddd !important;
     break-inside: avoid;
+    padding: 1rem !important;
+    margin-bottom: 0.75rem;
   }
 
-  /* Single column layout for print */
+  /* ─── Report Cover ─── */
+  .report-cover {
+    page-break-after: always;
+    min-height: 90vh;
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  .report-cover-inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 3px solid #1a1a1a;
+    padding: 3rem;
+  }
+
+  .report-cover-top {
+    text-align: right;
+    margin-bottom: 2rem;
+  }
+
+  .report-cover-label {
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #999;
+    border: 1px solid #999;
+    display: inline-block;
+    padding: 0.2rem 0.8rem;
+  }
+
+  .report-cover-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .report-cover-title {
+    font-size: 36pt !important;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 0 0 2rem;
+    color: #1a1a1a;
+  }
+
+  .report-cover-divider {
+    width: 80px;
+    height: 4px;
+    background: #1a1a1a;
+    margin-bottom: 2rem;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .report-cover-meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .report-cover-meta-item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .report-cover-meta-label {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 0.2rem;
+  }
+
+  .report-cover-meta-value {
+    font-size: 12pt;
+    font-weight: 600;
+    color: #1a1a1a;
+  }
+
+  .report-cover-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #ddd;
+  }
+
+  .report-cover-stat {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .report-cover-stat-value {
+    font-size: 18pt;
+    font-weight: 800;
+    color: #1a1a1a;
+  }
+
+  .report-cover-stat-label {
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+  }
+
+  .report-cover-score {
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: 2px solid #1a1a1a;
+    display: inline-block;
+    align-self: center;
+  }
+
+  .report-cover-score-number {
+    font-size: 32pt;
+    font-weight: 800;
+    color: #1a1a1a;
+  }
+
+  .report-cover-score-suffix {
+    font-size: 14pt;
+    color: #888;
+  }
+
+  .report-cover-score-label {
+    display: block;
+    font-size: 8pt;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #888;
+    margin-top: 0.3rem;
+  }
+
+  .report-cover-footer {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+    font-size: 8pt;
+    color: #888;
+  }
+
+  /* ─── Page breaks ─── */
+  #coverage {
+    page-break-before: always;
+  }
+
+  #production {
+    page-break-before: always;
+  }
+
+  .grid-layout {
+    page-break-before: always;
+  }
+
+  /* ─── Grid layout → print flow ─── */
   .grid-layout {
     display: block !important;
   }
 
   .grid-layout > * {
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     break-inside: avoid;
   }
 
+  /* Stat cards: 4-across row */
   .stat-card {
-    display: inline-block;
-    width: 23%;
+    display: inline-block !important;
+    width: 23% !important;
     vertical-align: top;
+    text-align: center;
+    border: 1px solid #ddd !important;
+    margin-right: 1%;
   }
 
+  /* Chart */
   .main-chart {
     width: 100%;
-    height: 300px !important;
+    height: 280px !important;
+    margin-bottom: 0.75rem;
   }
 
-  .sidebar-panel,
-  .detail-panel-wide,
-  .detail-panel-narrow,
-  .comps-panel,
-  .timeline-container,
-  .production-grid {
-    width: 100%;
+  /* ─── Coverage ─── */
+  .coverage-section {
+    margin-top: 0;
   }
 
-  .production-grid {
-    display: block !important;
-  }
-
-  .production-grid > * {
-    margin-bottom: 1rem;
-    break-inside: avoid;
-  }
-
-  .production-budget {
-    grid-column: span 1;
-  }
-
-  /* Coverage report adjustments */
   .coverage-categories {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .coverage-category-card .subcategories {
     display: flex !important;
+    flex-direction: column;
   }
 
   .strengths-weaknesses {
     grid-template-columns: 1fr 1fr;
   }
 
-  .category-bar {
+  /* ─── Production ─── */
+  .production-section {
+    margin-top: 0;
+  }
+
+  .production-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .production-grid > * {
+    break-inside: avoid;
+  }
+
+  .production-budget {
+    grid-column: span 2;
+  }
+
+  .budget-breakdown {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  /* ─── Character panels ─── */
+  .sidebar-panel,
+  .char-relationships-panel,
+  .voice-panel {
+    width: 100%;
+  }
+
+  .diversity-panel,
+  .trope-panel {
+    display: inline-block;
+    width: 48%;
+    vertical-align: top;
+    margin-right: 1%;
+  }
+
+  /* ─── Narrative Arc ─── */
+  .arc-panel {
+    width: 100%;
+  }
+
+  .arc-footer {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* ─── Market panels ─── */
+  .detail-panel-wide {
+    width: 100%;
+  }
+
+  .detail-panel-narrow {
+    width: 100%;
+  }
+
+  .comps-panel {
+    width: 100%;
+  }
+
+  .comps-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  /* ─── Beat Sheet: horizontal → vertical grid ─── */
+  .timeline-container {
+    width: 100%;
+    overflow: visible !important;
+    white-space: normal !important;
+    page-break-before: always;
+  }
+
+  .timeline-container > .glass-panel > div:last-child {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .beat-node {
+    display: block !important;
+    width: auto !important;
+    margin-right: 0 !important;
+    break-inside: avoid;
+    border: 1px solid #eee;
+    padding: 0.5rem;
+    border-radius: 6px;
+  }
+
+  .beat-node .dot {
+    width: 8px;
+    height: 8px;
+    display: inline-block;
+    margin-right: 0.3rem;
+    margin-bottom: 0;
+    vertical-align: middle;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
 
-  .category-bar-fill {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
+  /* ─── Color preservation (comprehensive) ─── */
+  .category-bar,
+  .category-bar-fill,
   .verdict-badge,
-  .badge {
+  .badge,
+  .badge-blockbuster,
+  .badge-hit,
+  .badge-r,
+  .badge-flop,
+  .rating-badge,
+  .recharts-surface,
+  .arc-badge,
+  .tp-chip,
+  .vfx-tier,
+  .setting-badge,
+  .trait-tag,
+  .trope-tag,
+  .similarity-badge,
+  .diversity-donut,
+  .diversity-donut::after,
+  .pacing-type,
+  .freq-badge,
+  .report-cover-divider,
+  .print-section-number,
+  .budget-range-bar,
+  .budget-range-bar::after,
+  .progress-bar-fill {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-
-  /* Score circle */
-  .score-value {
-    color: #1a1a1a;
-  }
-
-  /* Chart color preservation */
-  .recharts-surface {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-
-  /* Page setup */
-  @page {
-    size: A4;
-    margin: 15mm;
-  }
-
-  h1 { font-size: 1.5rem; }
-  h2 { font-size: 1.2rem; }
-  h3 { font-size: 1rem; }
 }
 
 /* ─── Utility Classes ─── */
