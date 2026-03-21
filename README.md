@@ -31,6 +31,8 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 14 (Narrative Arc Intelligence)**](./docs/results/session-14-phase10-narrative-arc.md) - Vonnegut 6 arc classification, pacing issue detection, genre fit scoring, narrative arc dashboard UI.
 - [**Result: Session 15 (Character Intelligence)**](./docs/results/session-15-phase11-character-intelligence.md) - SNA edges, voice uniqueness scoring, dialogue diversity metrics, relationship/voice/diversity dashboard UI.
 - [**Result: Session 16 (Benchmarker Expansion)**](./docs/results/session-16-phase12-benchmarker-expansion.md) - 50-film catalog, cosine similarity matching, LLM trope analysis, enhanced comp cards UI.
+- [**Result: Session 17 (UI/UX PDCA Improvement)**](./docs/results/session-17-uiux-pdca-improvement.md) - Component decomposition (1041→200 lines), CSS variables, responsive breakpoints, loading progress, section nav, accessibility.
+- [**Result: Session 18 (Design Refinements)**](./docs/results/session-18-design-refinements.md) - KO/EN toggle, mock warning accuracy, filename$ convention, coverage expand-all, dynamic emotion scenes, beat sheet responsive grid.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 

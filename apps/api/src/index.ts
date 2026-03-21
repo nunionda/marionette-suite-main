@@ -49,11 +49,12 @@ const app = new Elysia()
   }))
 
   .post("/analyze", async ({ body }) => {
-    const { scriptText, scriptBase64, isPdf, movieId, strategy, customProviders } = body as {
+    const { scriptText, scriptBase64, isPdf, movieId, fileName, strategy, customProviders } = body as {
       scriptText?: string; scriptBase64?: string; isPdf?: boolean; movieId?: string;
-      strategy?: AnalysisStrategyName; customProviders?: CustomStrategyInput;
+      fileName?: string; strategy?: AnalysisStrategyName; customProviders?: CustomStrategyInput;
     };
-    const scriptId = movieId || `script-${Date.now()}`;
+    const baseName = fileName ? fileName.replace(/\.[^.]+$/, '') : null;
+    const scriptId = baseName ? `${baseName}$` : (movieId || `script-${Date.now()}`);
 
     console.log(`🎬 Starting analysis for: ${scriptId} (strategy: ${strategy || 'auto'})`);
 
@@ -187,7 +188,15 @@ const app = new Elysia()
       budgetEstimate,
     };
 
-    const usedFallback = beatsResult.fallback || emotionResult.fallback || ratingResult.fallback || roiResult.fallback || coverageResult.fallback || vfxResult.fallback || tropeResult.fallback;
+    const mockEngines = [
+      beatsResult.fallback && 'Beat Sheet',
+      emotionResult.fallback && 'Emotion',
+      ratingResult.fallback && 'Rating',
+      roiResult.fallback && 'ROI',
+      coverageResult.fallback && 'Coverage',
+      vfxResult.fallback && 'VFX',
+      tropeResult.fallback && 'Trope',
+    ].filter(Boolean) as string[];
 
     const result = {
       scriptId,
@@ -224,7 +233,10 @@ const app = new Elysia()
         vfx: vfxResult.provider,
         trope: tropeResult.provider,
       },
-      ...(usedFallback && { warning: 'Some results used mock fallback due to LLM rate limits' }),
+      ...(mockEngines.length > 0 && {
+        warning: `Mock placeholder data used for: ${mockEngines.join(', ')}. These results are not actual AI analysis.`,
+        mockEngines,
+      }),
     };
 
     await reportRepo.save(result);
@@ -235,6 +247,7 @@ const app = new Elysia()
       scriptBase64: t.Optional(t.String()),
       isPdf: t.Optional(t.Boolean()),
       movieId: t.Optional(t.String()),
+      fileName: t.Optional(t.String()),
       strategy: t.Optional(t.Union([
         t.Literal('auto'), t.Literal('fast'), t.Literal('deep'), t.Literal('custom')
       ])),

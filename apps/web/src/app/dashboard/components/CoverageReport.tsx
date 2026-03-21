@@ -7,8 +7,37 @@ interface CoverageReportProps {
   coverage: any;
 }
 
+function scoreColor(score: number) {
+  if (score >= 80) return 'var(--color-success)';
+  if (score >= 60) return 'var(--color-warning)';
+  return 'var(--color-danger)';
+}
+
+function scoreLabel(score: number) {
+  if (score >= 80) return 'Excellent';
+  if (score >= 60) return 'Good';
+  if (score >= 40) return 'Fair';
+  return 'Weak';
+}
+
 export default function CoverageReport({ coverage }: CoverageReportProps) {
-  const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
+  const totalCategories = coverage.categories?.length ?? 0;
+  const allIndices = new Set(Array.from({ length: totalCategories }, (_, i) => i));
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<number>>(new Set());
+
+  const toggleCategory = (idx: number) => {
+    setCollapsedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx);
+      else next.add(idx);
+      return next;
+    });
+  };
+
+  const allExpanded = collapsedCategories.size === 0;
+  const toggleAll = () => {
+    setCollapsedCategories(allExpanded ? allIndices : new Set());
+  };
 
   return (
     <div className="coverage-section">
@@ -37,58 +66,77 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
         )}
       </div>
 
-      {/* Category Score Bars */}
-      <div className="coverage-categories">
-        {coverage.categories?.map((cat: any, idx: number) => (
-          <div key={idx} className="glass-panel coverage-category-card">
-            <div
-              className="category-header"
-              onClick={() => setExpandedCategory(expandedCategory === idx ? null : idx)}
-              style={{ cursor: 'pointer' }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
-                  <span style={{ fontWeight: 600 }}>{cat.name}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{cat.score}</span>
-                    {expandedCategory === idx ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      {/* Category Score Bars — all expanded by default */}
+      {totalCategories > 0 && (
+        <div className="coverage-categories-header">
+          <button className="btn-toggle-all" onClick={toggleAll}>
+            {allExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {allExpanded ? 'Collapse All' : 'Expand All'}
+          </button>
+        </div>
+      )}
+      <div className="coverage-categories coverage-categories-full">
+        {coverage.categories?.map((cat: any, idx: number) => {
+          const isExpanded = !collapsedCategories.has(idx);
+          return (
+            <div key={idx} className={`glass-panel coverage-category-card ${isExpanded ? 'category-expanded' : ''}`}>
+              <div
+                className="category-header"
+                onClick={() => toggleCategory(idx)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.4rem' }}>
+                    <span style={{ fontWeight: 600 }}>{cat.name}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span className="category-score-badge" style={{ color: scoreColor(cat.score) }}>
+                        {cat.score}
+                      </span>
+                      <span className="category-score-label" style={{ color: scoreColor(cat.score) }}>
+                        {scoreLabel(cat.score)}
+                      </span>
+                      {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                    </div>
+                  </div>
+                  <div className="category-bar">
+                    <div
+                      className="category-bar-fill"
+                      style={{
+                        width: `${cat.score}%`,
+                        background: scoreColor(cat.score),
+                      }}
+                    />
                   </div>
                 </div>
-                <div className="category-bar">
-                  <div
-                    className="category-bar-fill"
-                    style={{
-                      width: `${cat.score}%`,
-                      background: cat.score >= 80 ? '#2ecc71' : cat.score >= 60 ? '#f39c12' : '#e74c3c',
-                    }}
-                  />
-                </div>
               </div>
+              {isExpanded && cat.subcategories && (
+                <div className="subcategories">
+                  {cat.subcategories.map((sub: any, si: number) => (
+                    <div key={si} className="subcategory-item">
+                      <div className="subcategory-header">
+                        <span className="subcategory-name">{sub.name}</span>
+                        <div className="subcategory-score-group">
+                          <span className="subcategory-score" style={{ color: scoreColor(sub.score) }}>{sub.score}</span>
+                          <span className="subcategory-score-max">/ 100</span>
+                        </div>
+                      </div>
+                      <div className="category-bar" style={{ height: '4px' }}>
+                        <div
+                          className="category-bar-fill"
+                          style={{
+                            width: `${sub.score}%`,
+                            background: scoreColor(sub.score),
+                          }}
+                        />
+                      </div>
+                      <p className="subcategory-assessment">{sub.assessment}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            {expandedCategory === idx && cat.subcategories && (
-              <div className="subcategories">
-                {cat.subcategories.map((sub: any, si: number) => (
-                  <div key={si} className="subcategory-item">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                      <span style={{ fontSize: '0.85rem' }}>{sub.name}</span>
-                      <span style={{ fontWeight: 600, fontSize: '0.85rem' }}>{sub.score}</span>
-                    </div>
-                    <div className="category-bar" style={{ height: '4px' }}>
-                      <div
-                        className="category-bar-fill"
-                        style={{
-                          width: `${sub.score}%`,
-                          background: sub.score >= 80 ? '#2ecc71' : sub.score >= 60 ? '#f39c12' : '#e74c3c',
-                        }}
-                      />
-                    </div>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-dim)', margin: '0.25rem 0 0' }}>{sub.assessment}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Synopsis */}
@@ -103,7 +151,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
       {(coverage.strengths?.length > 0 || coverage.weaknesses?.length > 0) && (
         <div className="strengths-weaknesses">
           <div className="glass-panel sw-col">
-            <h3 style={{ margin: '0 0 0.75rem', color: '#2ecc71' }}>
+            <h3 style={{ margin: '0 0 0.75rem', color: 'var(--color-success)' }}>
               <CheckCircle size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
               Strengths
             </h3>
@@ -114,7 +162,7 @@ export default function CoverageReport({ coverage }: CoverageReportProps) {
             </ul>
           </div>
           <div className="glass-panel sw-col">
-            <h3 style={{ margin: '0 0 0.75rem', color: '#e74c3c' }}>
+            <h3 style={{ margin: '0 0 0.75rem', color: 'var(--color-danger)' }}>
               <XCircle size={18} style={{ marginRight: '0.4rem', verticalAlign: 'middle' }} />
               Weaknesses
             </h3>

@@ -20,20 +20,38 @@ export class MockProvider implements ILLMProvider {
         ]
       });
     } else if (systemPrompt.includes("Emotional Arc") || systemPrompt.includes("valence")) {
-      content = JSON.stringify({
-        scenes: [
-          { sceneNumber: 1, score: 2, dominantEmotion: "Curiosity", explanation: "Opening establishes an intriguing premise." },
-          { sceneNumber: 2, score: 5, dominantEmotion: "Joy", explanation: "Protagonist discovers an unexpected opportunity." },
-          { sceneNumber: 3, score: 3, dominantEmotion: "Hope", explanation: "Early success builds momentum." },
-          { sceneNumber: 4, score: -1, dominantEmotion: "Doubt", explanation: "First signs of trouble emerge." },
-          { sceneNumber: 5, score: -4, dominantEmotion: "Tension", explanation: "Conflict intensifies as stakes are raised." },
-          { sceneNumber: 6, score: -7, dominantEmotion: "Despair", explanation: "Major setback pushes protagonist to their lowest point." },
-          { sceneNumber: 7, score: -3, dominantEmotion: "Resolve", explanation: "Protagonist begins to find inner strength." },
-          { sceneNumber: 8, score: 1, dominantEmotion: "Determination", explanation: "A new plan takes shape." },
-          { sceneNumber: 9, score: 6, dominantEmotion: "Triumph", explanation: "Climactic confrontation with a decisive victory." },
-          { sceneNumber: 10, score: 8, dominantEmotion: "Catharsis", explanation: "Resolution brings emotional closure and transformation." },
-        ]
+      // Dynamically generate scenes matching the actual script scene count
+      const sceneMatches = userPrompt.match(/\[Scene \d+\]/g);
+      const sceneCount = sceneMatches ? sceneMatches.length : 10;
+
+      const arcTemplate = [
+        { emotion: "Curiosity", explanation: "Opening establishes the premise." },
+        { emotion: "Joy", explanation: "Protagonist discovers an opportunity." },
+        { emotion: "Hope", explanation: "Early success builds momentum." },
+        { emotion: "Doubt", explanation: "First signs of trouble emerge." },
+        { emotion: "Tension", explanation: "Conflict intensifies as stakes rise." },
+        { emotion: "Despair", explanation: "Major setback at the lowest point." },
+        { emotion: "Resolve", explanation: "Protagonist finds inner strength." },
+        { emotion: "Determination", explanation: "A new plan takes shape." },
+        { emotion: "Triumph", explanation: "Climactic confrontation with victory." },
+        { emotion: "Catharsis", explanation: "Resolution brings emotional closure." },
+      ];
+
+      const scenes = Array.from({ length: sceneCount }, (_, i) => {
+        const progress = sceneCount > 1 ? i / (sceneCount - 1) : 0.5;
+        const templateIdx = Math.min(Math.floor(progress * arcTemplate.length), arcTemplate.length - 1);
+        const t = arcTemplate[templateIdx];
+        // Generate a "Man in a Hole" emotional arc curve
+        const score = Math.round(8 * Math.sin((progress - 0.15) * Math.PI * 2) * (0.5 + 0.5 * progress));
+        return {
+          sceneNumber: i + 1,
+          score: Math.max(-10, Math.min(10, score)),
+          dominantEmotion: t.emotion,
+          explanation: t.explanation,
+        };
       });
+
+      content = JSON.stringify({ scenes });
     } else if (systemPrompt.includes("market intelligence")) {
       content = JSON.stringify({
         tier: "Hit",

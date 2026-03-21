@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Film, Users, TrendingUp, Activity, AlertCircle, Download } from 'lucide-react';
+import { Film, Users, TrendingUp, Activity, AlertCircle, Download, Globe } from 'lucide-react';
 import './dashboard.css';
 
 import UploadPanel, { ENGINE_LABELS, PROVIDER_LABELS } from './components/UploadPanel';
@@ -38,6 +38,7 @@ export default function Dashboard() {
     trope: 'gemini',
   });
   const [availableProviders, setAvailableProviders] = useState<Record<string, boolean>>({});
+  const [locale, setLocale] = useState<'en' | 'ko'>('en');
 
   useEffect(() => {
     fetchReportHistory();
@@ -79,6 +80,7 @@ export default function Dashboard() {
         bodyPayload = { scriptText, movieId: movieId.trim() || undefined };
       }
 
+      bodyPayload.fileName = selectedFile.name;
       bodyPayload.strategy = strategy;
       if (strategy === 'custom') {
         bodyPayload.customProviders = customProviders;
@@ -161,25 +163,47 @@ export default function Dashboard() {
         <div>
           <h1 className="dashboard-title">Script Intelligence</h1>
           <p className="dashboard-subtitle">
-            {data ? `Project ID: ${data.scriptId}` : 'Upload a screenplay to begin analysis'}
+            {data ? `Project ID: ${data.scriptId}` : (locale === 'ko' ? '시나리오를 업로드하여 분석을 시작하세요' : 'Upload a screenplay to begin analysis')}
           </p>
         </div>
-        {data && (
-          <div className="header-badges">
-            <div className="badge badge-r">Rating: {data.summary.predictedRating}</div>
-            <div className={`badge ${data.summary.predictedRoi === 'Blockbuster' ? 'badge-blockbuster' : 'badge-hit'}`}>
-              ROI: {data.summary.predictedRoi}
+        <div className="header-actions">
+          <button
+            className="btn-locale no-print"
+            onClick={() => setLocale(prev => prev === 'en' ? 'ko' : 'en')}
+            aria-label={locale === 'en' ? 'Switch to Korean' : '영어로 전환'}
+            title={locale === 'en' ? '한국어로 전환' : 'Switch to English'}
+          >
+            <Globe size={16} />
+            <span>{locale === 'en' ? 'KO' : 'EN'}</span>
+          </button>
+          {data && (
+            <div className="header-badges">
+              <div className="badge badge-r">Rating: {data.summary.predictedRating}</div>
+              <div className={`badge ${data.summary.predictedRoi === 'Blockbuster' ? 'badge-blockbuster' : 'badge-hit'}`}>
+                ROI: {data.summary.predictedRoi}
+              </div>
+              <button className="btn-export no-print" onClick={() => window.print()}>
+                <Download size={16} /> Export PDF
+              </button>
             </div>
-            <button className="btn-export no-print" onClick={() => window.print()}>
-              <Download size={16} /> Export PDF
-            </button>
-          </div>
-        )}
+          )}
+        </div>
       </header>
 
       {data?.warning && (
         <div className="warning-banner">
-          <AlertCircle size={16} /> {data.warning}
+          <AlertCircle size={16} />
+          <div>
+            <strong>{locale === 'ko' ? '주의' : 'Warning'}:</strong>{' '}
+            {locale === 'ko'
+              ? 'Mock 데이터가 사용된 항목이 있습니다. 해당 결과는 실제 AI 분석이 아닌 샘플 데이터입니다.'
+              : data.warning}
+            {data.mockEngines?.length > 0 && (
+              <span className="mock-engines">
+                {' '}({data.mockEngines.join(', ')})
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -207,6 +231,7 @@ export default function Dashboard() {
         customProviders={customProviders}
         availableProviders={availableProviders}
         reports={reports}
+        locale={locale}
         onSetDragOver={setDragOver}
         onFileDrop={handleFileDrop}
         onFileSelect={handleFileSelect}

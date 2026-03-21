@@ -41,6 +41,7 @@ interface UploadPanelProps {
   customProviders: Record<string, ProviderChoice>;
   availableProviders: Record<string, boolean>;
   reports: any[];
+  locale: 'en' | 'ko';
   onSetDragOver: (v: boolean) => void;
   onFileDrop: (e: React.DragEvent) => void;
   onFileSelect: () => void;
@@ -57,20 +58,21 @@ export type { Strategy, ProviderChoice, ViewMode };
 
 export default function UploadPanel({
   mode, selectedFile, movieId, uploadError, dragOver, strategy,
-  customProviders, availableProviders, reports,
+  customProviders, availableProviders, reports, locale,
   onSetDragOver, onFileDrop, onFileSelect, onMovieIdChange,
   onStrategyChange, onCustomProviderChange, onAnalyze, onReset, onLoadReport,
 }: UploadPanelProps) {
+  const t = locale === 'ko';
   return (
     <div className="upload-row">
       <div className="glass-panel upload-panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
           <h3 style={{ margin: 0 }}>
             <Upload size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
-            Analyze New Script
+            {t ? '새 시나리오 분석' : 'Analyze New Script'}
           </h3>
           {mode === 'viewing' && (
-            <button className="btn-reset" onClick={onReset}>New Analysis</button>
+            <button className="btn-reset" onClick={onReset}>{t ? '새 분석' : 'New Analysis'}</button>
           )}
         </div>
 
@@ -100,8 +102,8 @@ export default function UploadPanel({
               ) : (
                 <div style={{ textAlign: 'center', color: 'var(--text-dim)' }}>
                   <Upload size={32} style={{ marginBottom: '0.5rem', opacity: 0.5 }} />
-                  <div>Drag & drop a <strong>.fountain</strong>, <strong>.txt</strong>, or <strong>.pdf</strong> file</div>
-                  <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>or click to browse</div>
+                  <div>{t ? <><strong>.fountain</strong>, <strong>.txt</strong>, 또는 <strong>.pdf</strong> 파일을 드래그 앤 드롭</> : <>Drag & drop a <strong>.fountain</strong>, <strong>.txt</strong>, or <strong>.pdf</strong> file</>}</div>
+                  <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>{t ? '또는 클릭하여 찾아보기' : 'or click to browse'}</div>
                 </div>
               )}
             </div>
@@ -145,7 +147,7 @@ export default function UploadPanel({
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', alignItems: 'center' }}>
               <input
                 type="text"
-                placeholder="Movie ID / Title (optional)"
+                placeholder={t ? '영화 ID / 제목 (선택사항)' : 'Movie ID / Title (optional)'}
                 value={movieId}
                 onChange={(e) => onMovieIdChange(e.target.value)}
                 className="input-glass"
@@ -157,9 +159,9 @@ export default function UploadPanel({
                 onClick={onAnalyze}
               >
                 {mode === 'analyzing' ? (
-                  <><Loader size={16} className="spin" /> Analyzing...</>
+                  <><Loader size={16} className="spin" /> {t ? '분석 중...' : 'Analyzing...'}</>
                 ) : (
-                  'Analyze'
+                  t ? '분석' : 'Analyze'
                 )}
               </button>
             </div>
@@ -176,12 +178,12 @@ export default function UploadPanel({
       <div className="glass-panel history-panel">
         <h3 style={{ margin: 0 }}>
           <Clock size={20} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
-          Recent Reports
+          {t ? '최근 리포트' : 'Recent Reports'}
         </h3>
         <div style={{ marginTop: '1rem', maxHeight: '220px', overflowY: 'auto' }}>
           {reports.length === 0 ? (
             <div style={{ color: 'var(--text-dim)', textAlign: 'center', fontSize: '0.9rem', padding: '1rem 0' }}>
-              No reports yet
+              {t ? '리포트 없음' : 'No reports yet'}
             </div>
           ) : (
             reports.map((report: any) => (
