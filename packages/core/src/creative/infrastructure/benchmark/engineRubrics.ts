@@ -81,7 +81,7 @@ export const ENGINE_RUBRICS: EngineRubric[] = [
     scoreContent: (parsed) => {
       if (!parsed) return 0;
       let score = 30;
-      if (['G', 'PG', 'PG-13', 'R', 'NC-17'].includes(parsed.rating)) score += 30;
+      if (['G', 'PG', 'PG-13', 'R', 'NC-17', 'ALL', '12+', '15+', '19+', 'RESTRICTED'].includes(parsed.rating)) score += 30;
       if (parsed.reasons?.length >= 1) score += 20;
       if (parsed.confidence >= 0 && parsed.confidence <= 1) score += 20;
       return Math.min(100, score);

@@ -15,7 +15,8 @@
     "lint:file": "eslint",
     "lint:claude": "bun run lint",
     "index:test": "bun run index.test.ts",
-    "test:e2e:sim": "bun run packages/core/src/e2e/simulationTest.ts"
+    "test:e2e:sim": "bun run packages/core/src/e2e/simulationTest.ts",
+    "benchmark:providers": "bun run packages/core/src/e2e/providerBenchmark.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",
