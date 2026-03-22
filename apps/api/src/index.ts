@@ -29,33 +29,7 @@ import {
   type ProviderChoice,
 } from "@scenario-analysis/core";
 import { AnalysisReportRepository } from "@scenario-analysis/database";
-
-/* ─── Korean → Revised Romanization ─── */
-const CHO  = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
-const JUNG = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
-const JONG = ['','k','k','k','n','n','n','t','l','l','l','l','l','l','l','l','m','p','p','t','t','ng','t','t','k','t','p','t'];
-
-function romanizeKorean(text: string): string {
-  let result = '';
-  for (const ch of text) {
-    const code = ch.charCodeAt(0);
-    if (code >= 0xAC00 && code <= 0xD7A3) {
-      const off = code - 0xAC00;
-      result += CHO[Math.floor(off / 588)] + JUNG[Math.floor((off % 588) / 28)] + JONG[off % 28];
-    } else {
-      result += ch;
-    }
-  }
-  return result;
-}
-
-function hasKorean(text: string): boolean {
-  return /[\uAC00-\uD7A3]/.test(text);
-}
-
-function capitalizeFirst(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
+import { generateScriptId, getVersionSearchPattern } from "./utils/naming";
 
 const reportRepo = new AnalysisReportRepository();
 
@@ -94,18 +68,13 @@ const app = new Elysia()
       market?: 'hollywood' | 'korean';
     };
     const market = marketInput || 'hollywood';
-    const baseName = fileName ? fileName.replace(/\.[^.]+$/, '') : null;
-    let scriptId: string;
-    if (baseName) {
-      if (hasKorean(baseName)) {
-        const romanized = capitalizeFirst(romanizeKorean(baseName).replace(/[^a-zA-Z0-9]/g, ''));
-        scriptId = `[${romanized}]${baseName}$`;
-      } else {
-        scriptId = `${baseName}$`;
-      }
-    } else {
-      scriptId = movieId || `script-${Date.now()}`;
-    }
+
+    // Generate scriptId with naming convention: {name}_analysis_{YYMMDD}_v{NNN}
+    const effectiveFileName = fileName || (movieId ? `${movieId}.txt` : `script-${Date.now()}.txt`);
+    const versionPrefix = getVersionSearchPattern(effectiveFileName);
+    const existingCount = await reportRepo.countByPrefix(versionPrefix);
+    const nextVersion = existingCount + 1;
+    const scriptId = generateScriptId(effectiveFileName, nextVersion);
 
     console.log(`🎬 Starting analysis for: ${scriptId} (strategy: ${strategy || 'auto'}, market: ${market})`);
 

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { generateExportFileName } from '../utils/naming';
 
 interface ReportCoverProps {
   data: any;
@@ -30,6 +31,7 @@ export default function ReportCover({ data, locale = 'en', providers }: ReportCo
   });
   const verdict = data.coverage?.verdict;
   const providerList = providers ? Object.values(providers).filter((v, i, a) => a.indexOf(v) === i && v !== 'mock') : [];
+  const documentId = generateExportFileName(data.scriptId);
 
   return (
     <div className="report-cover print-only">
@@ -43,8 +45,8 @@ export default function ReportCover({ data, locale = 'en', providers }: ReportCo
           <div className="report-cover-divider" />
           <div className="report-cover-meta">
             <div className="report-cover-meta-item">
-              <span className="report-cover-meta-label">{ko ? '프로젝트 ID' : 'Project ID'}</span>
-              <span className="report-cover-meta-value">{data.scriptId}</span>
+              <span className="report-cover-meta-label">{ko ? '문서 ID' : 'Document ID'}</span>
+              <span className="report-cover-meta-value">{documentId}</span>
             </div>
             <div className="report-cover-meta-item">
               <span className="report-cover-meta-label">{ko ? '분석 날짜' : 'Analysis Date'}</span>

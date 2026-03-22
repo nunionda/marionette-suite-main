@@ -23,6 +23,7 @@ import DraftComparison from './components/DraftComparison';
 import StatisticalROIPanel from './components/StatisticalROIPanel';
 import PhaseSection from './components/PhaseSection';
 import InvestmentVerdict from './components/InvestmentVerdict';
+import { generateExportFileName } from './utils/naming';
 
 export default function Dashboard() {
   const [mode, setMode] = useState<ViewMode>('idle');
@@ -269,7 +270,12 @@ export default function Dashboard() {
               <div className={`badge ${data.summary.predictedRoi === 'Blockbuster' ? 'badge-blockbuster' : 'badge-hit'}`}>
                 ROI: {data.summary.predictedRoi}
               </div>
-              <button className="btn-export no-print" onClick={() => window.print()}>
+              <button className="btn-export no-print" onClick={() => {
+                const originalTitle = document.title;
+                document.title = generateExportFileName(data.scriptId);
+                window.print();
+                setTimeout(() => { document.title = originalTitle; }, 1000);
+              }}>
                 <Download size={16} /> {ko ? 'PDF 내보내기' : 'Export PDF'}
               </button>
             </div>

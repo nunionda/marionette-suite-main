@@ -92,6 +92,18 @@ export class AnalysisReportRepository {
     };
   }
 
+  /**
+   * Count reports whose scriptId starts with the given prefix.
+   * Used for version auto-increment in naming convention.
+   */
+  async countByPrefix(prefix: string): Promise<number> {
+    return prisma.analysisReport.count({
+      where: {
+        scriptId: { startsWith: prefix },
+      },
+    });
+  }
+
   private toApiResponse(report: AnalysisReport): AnalysisResultInput {
     return {
       scriptId: report.scriptId,
