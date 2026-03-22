@@ -6,6 +6,7 @@ import { CheckCircle, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
 interface CoverageReportProps {
   coverage: any;
   locale?: 'en' | 'ko';
+  summaryMode?: boolean;
 }
 
 function scoreColor(score: number) {
@@ -27,7 +28,7 @@ function scoreLabel(score: number, ko: boolean) {
   return 'Weak';
 }
 
-export default function CoverageReport({ coverage, locale = 'en' }: CoverageReportProps) {
+export default function CoverageReport({ coverage, locale = 'en', summaryMode = false }: CoverageReportProps) {
   const ko = locale === 'ko';
   const totalCategories = coverage.categories?.length ?? 0;
   const allIndices = new Set(Array.from({ length: totalCategories }, (_, i) => i));
@@ -86,8 +87,11 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
         )}
       </div>
 
+      {/* In summaryMode, stop after header */}
+      {summaryMode && null}
+
       {/* Category Score Bars — all expanded by default */}
-      {totalCategories > 0 && (
+      {!summaryMode && totalCategories > 0 && (
         <div className="coverage-categories-header">
           <button className="btn-toggle-all" onClick={toggleAll}>
             {allExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -95,7 +99,7 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
           </button>
         </div>
       )}
-      <div className="coverage-categories coverage-categories-full">
+      {!summaryMode && <div className="coverage-categories coverage-categories-full">
         {coverage.categories?.map((cat: any, idx: number) => {
           const isExpanded = !collapsedCategories.has(idx);
           return (
@@ -157,10 +161,10 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
             </div>
           );
         })}
-      </div>
+      </div>}
 
       {/* Synopsis */}
-      {coverage.synopsis && (
+      {!summaryMode && coverage.synopsis && (
         <div className="glass-panel coverage-synopsis">
           <h3 style={{ margin: '0 0 0.5rem' }}>{ko ? '시놉시스' : 'Synopsis'}</h3>
           <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{coverage.synopsis}</p>
@@ -168,7 +172,7 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
       )}
 
       {/* Strengths & Weaknesses */}
-      {(coverage.strengths?.length > 0 || coverage.weaknesses?.length > 0) && (
+      {!summaryMode && (coverage.strengths?.length > 0 || coverage.weaknesses?.length > 0) && (
         <div className="strengths-weaknesses">
           <div className="glass-panel sw-col">
             <h3 style={{ margin: '0 0 0.75rem', color: 'var(--color-success)' }}>
@@ -196,7 +200,7 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
       )}
 
       {/* Market Potential & Comparable Titles */}
-      {(coverage.marketPotential || coverage.comparableTitles?.length > 0) && (
+      {!summaryMode && (coverage.marketPotential || coverage.comparableTitles?.length > 0) && (
         <div className="strengths-weaknesses">
           {coverage.marketPotential && (
             <div className="glass-panel sw-col">
@@ -222,7 +226,7 @@ export default function CoverageReport({ coverage, locale = 'en' }: CoverageRepo
       )}
 
       {/* Recommendation */}
-      {coverage.recommendation && (
+      {!summaryMode && coverage.recommendation && (
         <div className="glass-panel recommendation-box">
           <h3 style={{ margin: '0 0 0.5rem' }}>{ko ? '애널리스트 의견' : 'Analyst Recommendation'}</h3>
           <p style={{ color: 'var(--text-dim)', lineHeight: 1.6, margin: 0 }}>{coverage.recommendation}</p>

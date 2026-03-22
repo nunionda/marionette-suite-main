@@ -9,13 +9,11 @@ interface ReportCoverProps {
 }
 
 const TOC_ITEMS = [
-  { en: 'Script Coverage Report', ko: '시나리오 커버리지 리포트' },
+  { en: 'Investment Verdict', ko: '투자 판정' },
+  { en: 'Financial Viability', ko: '재무 분석' },
+  { en: 'Content Quality', ko: '콘텐츠 품질' },
   { en: 'Production Feasibility', ko: '제작 타당성' },
-  { en: 'Overview & Emotional Arc', ko: '개요 및 감정 아크' },
-  { en: 'Character Intelligence', ko: '캐릭터 인텔리전스' },
-  { en: 'Narrative Arc', ko: '서사 아크' },
-  { en: 'Market Predictions', ko: '마켓 예측' },
-  { en: 'Narrative Beat Sheet', ko: '비트 시트' },
+  { en: 'Deep Dive', ko: '상세 분석' },
 ];
 
 function getVerdictLabel(verdict: string, ko: boolean) {

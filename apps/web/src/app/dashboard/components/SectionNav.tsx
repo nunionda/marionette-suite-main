@@ -2,46 +2,45 @@
 
 import React, { useState, useEffect } from 'react';
 
-interface Section {
+interface Phase {
   id: string;
   label: string;
   labelKo: string;
   icon: string;
+  number: number;
 }
 
-const SECTIONS: Section[] = [
-  { id: 'coverage', label: 'Coverage', labelKo: '커버리지', icon: '📋' },
-  { id: 'production', label: 'Production', labelKo: '제작', icon: '🎬' },
-  { id: 'stats', label: 'Stats', labelKo: '통계', icon: '📊' },
-  { id: 'characters', label: 'Characters', labelKo: '캐릭터', icon: '👥' },
-  { id: 'arc', label: 'Arc', labelKo: '아크', icon: '📈' },
-  { id: 'market', label: 'Market', labelKo: '마켓', icon: '💰' },
-  { id: 'beats', label: 'Beats', labelKo: '비트', icon: '🎵' },
-  { id: 'scenes', label: 'Scenes', labelKo: '장면', icon: '🎞️' },
+const PHASES: Phase[] = [
+  { id: 'verdict',    label: 'Verdict',    labelKo: '투자 판정',   icon: '🎯', number: 1 },
+  { id: 'financials', label: 'Financials', labelKo: '재무 분석',   icon: '💰', number: 2 },
+  { id: 'quality',    label: 'Quality',    labelKo: '콘텐츠 품질', icon: '📋', number: 3 },
+  { id: 'production', label: 'Production', labelKo: '제작 타당성', icon: '🎬', number: 4 },
+  { id: 'deep-dive',  label: 'Deep Dive',  labelKo: '상세 분석',   icon: '🔍', number: 5 },
 ];
 
 interface SectionNavProps {
   locale?: 'en' | 'ko';
+  onExpandPhase?: (id: string) => void;
 }
 
-export default function SectionNav({ locale = 'en' }: SectionNavProps) {
+export default function SectionNav({ locale = 'en', onExpandPhase }: SectionNavProps) {
   const ko = locale === 'ko';
-  const [activeSection, setActiveSection] = useState('');
+  const [activePhase, setActivePhase] = useState('');
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+            setActivePhase(entry.target.id);
           }
         }
       },
-      { rootMargin: '-20% 0px -60% 0px' }
+      { rootMargin: '-10% 0px -70% 0px' }
     );
 
-    for (const section of SECTIONS) {
-      const el = document.getElementById(section.id);
+    for (const phase of PHASES) {
+      const el = document.getElementById(phase.id);
       if (el) observer.observe(el);
     }
 
@@ -49,22 +48,36 @@ export default function SectionNav({ locale = 'en' }: SectionNavProps) {
   }, []);
 
   function scrollTo(id: string) {
+    onExpandPhase?.(id);
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  const activeIndex = PHASES.findIndex(p => p.id === activePhase);
+
   return (
-    <nav className="section-nav no-print" aria-label={ko ? '섹션 탐색' : 'Section navigation'}>
-      {SECTIONS.map(s => (
-        <button
-          key={s.id}
-          className={`section-nav-item ${activeSection === s.id ? 'active' : ''}`}
-          onClick={() => scrollTo(s.id)}
-          title={ko ? s.labelKo : s.label}
-        >
-          <span className="section-nav-icon">{s.icon}</span>
-          <span className="section-nav-label">{ko ? s.labelKo : s.label}</span>
-        </button>
-      ))}
+    <nav className="phase-nav no-print" aria-label={ko ? '분석 단계 탐색' : 'Analysis phase navigation'}>
+      {PHASES.map((phase, idx) => {
+        const isActive = activePhase === phase.id;
+        const isCompleted = activeIndex > idx;
+
+        return (
+          <React.Fragment key={phase.id}>
+            {idx > 0 && (
+              <div className={`phase-nav-connector ${isCompleted ? 'connector-completed' : ''}`} />
+            )}
+            <button
+              className={`phase-nav-step ${isActive ? 'step-active' : ''} ${isCompleted ? 'step-completed' : ''}`}
+              onClick={() => scrollTo(phase.id)}
+              title={ko ? phase.labelKo : phase.label}
+            >
+              <span className="phase-nav-number">
+                {isCompleted ? '✓' : phase.number}
+              </span>
+              <span className="phase-nav-label">{ko ? phase.labelKo : phase.label}</span>
+            </button>
+          </React.Fragment>
+        );
+      })}
     </nav>
   );
 }

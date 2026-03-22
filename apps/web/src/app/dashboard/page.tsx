@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { Film, Users, TrendingUp, Activity, AlertCircle, Download, Globe, Loader2, Sparkles } from 'lucide-react';
+import { AlertCircle, Download, Globe, Loader2, Sparkles } from 'lucide-react';
 import './dashboard.css';
 
 import UploadPanel, { ENGINE_LABELS, PROVIDER_LABELS } from './components/UploadPanel';
@@ -21,6 +21,8 @@ import ChatPanel from './components/ChatPanel';
 import SceneExplorer from './components/SceneExplorer';
 import DraftComparison from './components/DraftComparison';
 import StatisticalROIPanel from './components/StatisticalROIPanel';
+import PhaseSection from './components/PhaseSection';
+import InvestmentVerdict from './components/InvestmentVerdict';
 
 export default function Dashboard() {
   const [mode, setMode] = useState<ViewMode>('idle');
@@ -49,6 +51,29 @@ export default function Dashboard() {
   const [isTranslating, setIsTranslating] = useState(false);
   const translationCache = useRef<Map<string, any>>(new Map());
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // Phase expand/collapse state
+  const [expandedPhases, setExpandedPhases] = useState<Set<string>>(
+    new Set(['verdict', 'financials'])
+  );
+
+  const togglePhase = useCallback((id: string) => {
+    setExpandedPhases(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const expandPhase = useCallback((id: string) => {
+    setExpandedPhases(prev => {
+      if (prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     fetchReportHistory();
@@ -215,7 +240,7 @@ export default function Dashboard() {
   return (
     <div className="dashboard-bg">
     <main className="dashboard-container" aria-label="Script Intelligence Dashboard">
-      <a href="#stats" className="skip-link">Skip to results</a>
+      <a href="#verdict" className="skip-link">Skip to results</a>
       <header className="dashboard-header">
         <div className="dashboard-header-left">
           <Link href="/" className="dashboard-home-link" title={ko ? '홈으로' : 'Home'}>
@@ -331,98 +356,48 @@ export default function Dashboard() {
       {/* Loading Progress */}
       {mode === 'analyzing' && <AnalysisProgress locale={locale} />}
 
-      {/* Section Navigation */}
-      {data && <SectionNav locale={locale} />}
+      {/* Phase Navigation */}
+      {data && <SectionNav locale={locale} onExpandPhase={expandPhase} />}
 
       {/* Print-only Report Cover */}
       {data && <ReportCover data={displayData} locale={locale} providers={data?.providers} />}
 
-      {/* Script Coverage Report */}
-      {data?.coverage && (
-        <section id="coverage">
-          <div className="section-label no-print">{ko ? '커버리지' : 'Coverage'}</div>
-          <div className="print-section-header print-only">
-            <span className="print-section-number">1</span> {ko ? '시나리오 커버리지 리포트' : 'Script Coverage Report'}
-          </div>
-          <CoverageReport coverage={displayData.coverage} locale={locale} />
-        </section>
-      )}
-
-      {/* Draft Comparison */}
-      {data && reports.length > 1 && (
-        <section className="no-print">
-          <DraftComparison currentScriptId={data.scriptId} reports={reports} locale={locale} />
-        </section>
-      )}
-
-      {/* Production Breakdown */}
-      {data?.production && (
-        <section id="production">
-          <div className="section-label no-print">{ko ? '제작 분석' : 'Production'}</div>
-          <div className="print-section-header print-only">
-            <span className="print-section-number">2</span> {ko ? '제작 타당성' : 'Production Feasibility'}
-          </div>
-          <ProductionBreakdown production={displayData.production} locale={locale} market={data?.market || 'hollywood'} />
-        </section>
-      )}
-
-      {/* Results Dashboard */}
+      {/* ═══════════════════════════════════════════════════
+          Phase 1: Investment Verdict — 투자 판정
+          ═══════════════════════════════════════════════════ */}
       {data && (
-        <div className="grid-layout">
-          <div className="section-label no-print" style={{ gridColumn: '1 / -1', margin: '0 0 -0.5rem' }}>{ko ? '분석 결과' : 'Analysis Results'}</div>
-          <div className="print-section-header print-only" style={{ width: '100%' }}>
-            <span className="print-section-number">3</span> {ko ? '개요 및 감정 아크' : 'Overview & Emotional Arc'}
-          </div>
-
-          <div id="stats" className="glass-panel stat-card">
-            <Film className="icon" style={{ color: 'var(--accent-gold)' }} />
-            <h3>{ko ? '주인공' : 'Protagonist'}</h3>
-            <p className="stat-value">{data.summary.protagonist}</p>
-          </div>
-          <div className="glass-panel stat-card">
-            <TrendingUp className="icon" style={{ color: 'var(--color-success-dark)' }} />
-            <h3>{ko ? 'ROI 배수' : 'ROI Multiplier'}</h3>
-            <p className="stat-value">
-              {data.predictions?.roi?.predictedMultiplier
-                ? `${data.predictions.roi.predictedMultiplier}x`
-                : '—'}
-            </p>
-          </div>
-          <div className="glass-panel stat-card">
-            <Users className="icon" style={{ color: 'var(--accent-blue)' }} />
-            <h3>{ko ? '등장인물' : 'Cast Members'}</h3>
-            <p className="stat-value">
-              {(data.characterNetwork?.characters ?? data.characterNetwork)?.length ?? 0}
-            </p>
-          </div>
-          <div className="glass-panel stat-card">
-            <Activity className="icon" style={{ color: 'var(--color-danger)' }} />
-            <h3>{ko ? '장면 수' : 'Scenes'}</h3>
-            <p className="stat-value">{data.features?.sceneCount ?? '—'}</p>
-          </div>
-
-          <EmotionChart emotionGraph={displayData.emotionGraph} locale={locale} />
-
-          <div id="characters" className="grid-section">
-            <div className="print-section-header print-only" style={{ width: '100%' }}>
-              <span className="print-section-number">4</span> {ko ? '캐릭터 인텔리전스' : 'Character Intelligence'}
-            </div>
-            <CharacterIntelligence characterNetwork={displayData.characterNetwork} locale={locale} />
-          </div>
-
-          {data.narrativeArc && (
-            <div id="arc" className="grid-section">
-              <div className="print-section-header print-only" style={{ width: '100%' }}>
-                <span className="print-section-number">5</span> {ko ? '서사 아크' : 'Narrative Arc'}
-              </div>
-              <NarrativeArcPanel narrativeArc={displayData.narrativeArc} locale={locale} />
-            </div>
+        <PhaseSection
+          id="verdict"
+          number={1}
+          title="Investment Verdict"
+          titleKo="투자 판정"
+          locale={locale}
+          expanded={expandedPhases.has('verdict')}
+          onToggle={togglePhase}
+          defaultExpanded
+        >
+          <InvestmentVerdict data={displayData} locale={locale} />
+          {data.coverage && (
+            <CoverageReport coverage={displayData.coverage} locale={locale} summaryMode />
           )}
+        </PhaseSection>
+      )}
 
-          <div id="market" className="grid-section">
-            <div className="print-section-header print-only" style={{ width: '100%' }}>
-              <span className="print-section-number">6</span> {ko ? '마켓 예측' : 'Market Predictions'}
-            </div>
+      {/* ═══════════════════════════════════════════════════
+          Phase 2: Financial Viability — 재무 분석
+          ═══════════════════════════════════════════════════ */}
+      {data && (
+        <PhaseSection
+          id="financials"
+          number={2}
+          title="Financial Viability"
+          titleKo="재무 분석"
+          locale={locale}
+          expanded={expandedPhases.has('financials')}
+          onToggle={togglePhase}
+          defaultExpanded
+        >
+          <div className="grid-section">
             <MarketPredictions predictions={displayData.predictions} tropes={displayData.tropes} locale={locale} market={data?.market || 'hollywood'} />
             <StatisticalROIPanel
               statisticalRoi={displayData.predictions?.statisticalRoi}
@@ -431,19 +406,75 @@ export default function Dashboard() {
               market={data?.market || 'hollywood'}
             />
           </div>
+        </PhaseSection>
+      )}
 
-          <div id="beats" className="grid-section">
-            <div className="print-section-header print-only" style={{ width: '100%' }}>
-              <span className="print-section-number">7</span> {ko ? '비트 시트' : 'Narrative Beat Sheet'}
+      {/* ═══════════════════════════════════════════════════
+          Phase 3: Content Quality — 콘텐츠 품질
+          ═══════════════════════════════════════════════════ */}
+      {data && (
+        <PhaseSection
+          id="quality"
+          number={3}
+          title="Content Quality"
+          titleKo="콘텐츠 품질"
+          locale={locale}
+          expanded={expandedPhases.has('quality')}
+          onToggle={togglePhase}
+        >
+          {data.coverage && (
+            <CoverageReport coverage={displayData.coverage} locale={locale} />
+          )}
+          <EmotionChart emotionGraph={displayData.emotionGraph} locale={locale} />
+          <div className="grid-section">
+            <CharacterIntelligence characterNetwork={displayData.characterNetwork} locale={locale} />
+          </div>
+          {data.narrativeArc && (
+            <div className="grid-section">
+              <NarrativeArcPanel narrativeArc={displayData.narrativeArc} locale={locale} />
             </div>
+          )}
+        </PhaseSection>
+      )}
+
+      {/* ═══════════════════════════════════════════════════
+          Phase 4: Production Feasibility — 제작 타당성
+          ═══════════════════════════════════════════════════ */}
+      {data?.production && (
+        <PhaseSection
+          id="production"
+          number={4}
+          title="Production Feasibility"
+          titleKo="제작 타당성"
+          locale={locale}
+          expanded={expandedPhases.has('production')}
+          onToggle={togglePhase}
+        >
+          <ProductionBreakdown production={displayData.production} locale={locale} market={data?.market || 'hollywood'} />
+        </PhaseSection>
+      )}
+
+      {/* ═══════════════════════════════════════════════════
+          Phase 5: Deep Dive — 상세 분석
+          ═══════════════════════════════════════════════════ */}
+      {data && (
+        <PhaseSection
+          id="deep-dive"
+          number={5}
+          title="Deep Dive"
+          titleKo="상세 분석"
+          locale={locale}
+          expanded={expandedPhases.has('deep-dive')}
+          onToggle={togglePhase}
+        >
+          {reports.length > 1 && (
+            <DraftComparison currentScriptId={data.scriptId} reports={reports} locale={locale} />
+          )}
+          <div className="grid-section">
             <BeatSheetTimeline beatSheet={displayData.beatSheet} locale={locale} />
           </div>
-
           {displayData.emotionGraph && (
-            <div id="scenes" className="grid-section">
-              <div className="print-section-header print-only" style={{ width: '100%' }}>
-                <span className="print-section-number">8</span> {ko ? '장면 탐색기' : 'Scene Explorer'}
-              </div>
+            <div className="grid-section">
               <SceneExplorer
                 emotionGraph={displayData.emotionGraph}
                 beatSheet={displayData.beatSheet || []}
@@ -452,7 +483,7 @@ export default function Dashboard() {
               />
             </div>
           )}
-        </div>
+        </PhaseSection>
       )}
 
       {/* AI Chat Panel — only visible when analysis results exist */}
