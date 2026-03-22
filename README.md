@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Provider Benchmark**](./docs/plans/19-provider-benchmark.md)
 - [**Plan: E2E Simulation & Korean Parser**](./docs/plans/18-e2e-simulation-korean-parser.md)
 - [**Plan: Naming Convention**](./docs/plans/17-naming-convention.md)
 - [**Plan: Investor Dashboard Redesign**](./docs/plans/16-investor-dashboard-redesign.md)
@@ -57,6 +58,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 32 (Investor Dashboard Redesign)**](./docs/results/session-32-investor-dashboard-redesign.md) - 온데스크 참고 5-Phase 투자자 플로우, PhaseSection/InvestmentVerdict 신규, 수평 스테퍼 네비, Progressive Disclosure.
 - [**Result: Session 33 (Naming Convention)**](./docs/results/session-33-naming-convention.md) - 스크립트 임포트 `{name}_analysis_{YYMMDD}_v{NNN}`, PDF 익스포트 `{name}_investor_analysis_{YYMMDD}_v{NNN}.pdf`, 버전 자동 증가.
 - [**Result: Session 34 (E2E Simulation & Korean Parser)**](./docs/results/session-34-e2e-simulation-korean-parser.md) - 3편 E2E 시뮬레이션 프레임워크, 한국 인라인 대사 파서, CharacterAnalyzer 인라인 추출 확장, 27 PASS / 0 FAIL.
+- [**Result: Session 35 (Provider Benchmark)**](./docs/results/session-35-provider-benchmark.md) - 6 프로바이더 × 3 시나리오 × 7 엔진 벤치마크, groq 최고 성능(AVG 93), gemini+groq 무료 최적 조합, checkpoint/resume CLI.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
