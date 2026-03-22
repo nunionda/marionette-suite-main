@@ -13,8 +13,85 @@ export interface ScriptElement {
   };
 }
 
+/**
+ * Pre-processes Korean screenplays that use inline dialogue format:
+ * "동수 야야 너희들..." → splits into "동수\n야야 너희들..."
+ * Detects recurring character names at line starts via frequency analysis.
+ */
+function preprocessKoreanInlineDialogue(text: string): string {
+  const lines = text.split("\n");
+
+  // Pass 1: collect candidate names — Korean 2-4 chars (optional trailing digit) at line start
+  const candidateRe = /^([가-힣]{2,4}\d?)\s+(.+)/;
+  const nameCount = new Map<string, number>();
+
+  // Words that look like names but are action/narration starters
+  const excludedWords = new Set([
+    '그런', '하는데', '하지만', '그래서', '그리고', '그때', '잠시', '여기', '거기',
+    '보면', '하며', '하고', '하면', '웃는', '우는', '놀란', '들어온', '나가는',
+    '클로즈업', '인서트', '컷투', '플래시백', '타이틀', '자막', '몽타주',
+    '오전', '오후', '새벽', '저녁', '아침', '어둠', '복도', '바깥', '안쪽',
+    '인터커팅', '인터컷', '모니터', '바닥에', '문이', '전화가',
+  ]);
+  // Verb/adjective endings — line-start words ending in these are not character names
+  const verbEndingRe = /[다고며면서지요네까죠게할된건걸는데만런은]$/;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const m = trimmed.match(candidateRe);
+    if (!m) continue;
+    const name = m[1];
+    if (name.length < 2) continue;
+    if (excludedWords.has(name)) continue;
+    if (verbEndingRe.test(name)) continue;
+    // Reject words ending in object/possessive/locative particles
+    if (/[을를의에]$/.test(name)) continue;
+    // Reject 3+ char words ending in subject/topic particles (protects 2-char names)
+    if (name.length >= 3 && /[이가]$/.test(name)) continue;
+    nameCount.set(name, (nameCount.get(name) || 0) + 1);
+  }
+
+  // Pass 1.5: remove particle-suffixed duplicates (유진이 when 유진 exists with higher count)
+  for (const [name, count] of nameCount) {
+    if (name.length >= 3) {
+      const base = name.slice(0, -1);
+      const baseCount = nameCount.get(base) || 0;
+      if (baseCount > count) {
+        nameCount.delete(name);
+      }
+    }
+  }
+
+  // Confirmed characters: appear ≥ 5 times at line starts
+  const confirmedNames = new Set<string>();
+  for (const [name, count] of nameCount) {
+    if (count >= 5) confirmedNames.add(name);
+  }
+
+  if (confirmedNames.size === 0) return text;
+
+  // Pass 2: split lines where confirmed character name starts the line
+  const result: string[] = [];
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const m = trimmed.match(candidateRe);
+    if (m && confirmedNames.has(m[1])) {
+      // Split into character line + dialogue line
+      result.push(m[1]);
+      result.push(m[2]);
+    } else {
+      result.push(line);
+    }
+  }
+
+  return result.join("\n");
+}
+
 export function parseFountain(script: string): ScriptElement[] {
-  const lines = script.split("\n");
+  // Pre-process Korean inline dialogue format before parsing
+  const preprocessed = preprocessKoreanInlineDialogue(script);
+  const lines = preprocessed.split("\n");
   const elements: ScriptElement[] = [];
 
   let currentCharacter = "";
@@ -92,13 +169,18 @@ export function parseFountain(script: string): ScriptElement[] {
       const nameWithoutParens = line.replace(/\s*\(.*?\)\s*/g, '').trim();
       const isCjkNamePattern = !isBracketedMessage && !hasBracketsOrUnmatchedParen && /^[가-힣ぁ-んァ-ヴー一-龯A-Za-z0-9\s]+$/.test(nameWithoutParens) && /[가-힣ぁ-んァ-ヴー一-龯]/.test(nameWithoutParens);
       const wordCount = nameWithoutParens.split(/\s+/).length;
-      const hasKoreanParticle = /[이가을를은는도의에서와로들야님오]$/.test(nameWithoutParens);
-      // Korean common nouns that should not be character names (check each word individually)
-      const koreanCommonWordRe = /^(오전|오후|새벽|저녁|아침|밤|낮|단계|행동|순간|현재|계속|시작|완료)$/;
-      const isKoreanCommonWord = nameWithoutParens.split(/\s+/).every(w => koreanCommonWordRe.test(w));
-      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 6 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；\]\)]$/) && !hasKoreanParticle && !isKoreanCommonWord;
+      // Korean particle check: reject words > 3 chars ending in particles
+      // Short names (≤3 chars) like 을순이, 동수 are protected from false particle rejection
+      // 오 excluded from particles (common surname Oh)
+      const hasKoreanParticle = nameWithoutParens.length > 3 && /[이가을를은는도의에서와로들야님]$/.test(nameWithoutParens);
+      // Korean common nouns / action-like phrases that should not be character names
+      const koreanCommonWordRe = /^(오전|오후|새벽|저녁|아침|밤|낮|단계|행동|순간|현재|계속|시작|완료|하지만|그때|갑자기|잠시|여기|거기|나중|다시)$/;
+      const isKoreanCommonWord = nameWithoutParens.split(/\s+/).some(w => koreanCommonWordRe.test(w));
+      // Korean verb/adjective endings that indicate action text, not character names
+      const hasKoreanVerbEnding = /[다고며면서지요네까죠게할된건걸]$/.test(nameWithoutParens);
+      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 6 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；\]\)]$/) && !hasKoreanParticle && !isKoreanCommonWord && !hasKoreanVerbEnding;
 
-      // Short CJK names (≤3 chars) allow a blank line before dialogue (common in Korean PDF screenplays)
+      // CJK names: short names (≤3 chars) allow a blank line before dialogue (Korean PDF screenplays)
       const nextNextLine = i + 2 < lines.length ? (lines[i + 2]?.trim() ?? "") : "";
       const isShortName = nameWithoutParens.length <= 3;
       const hasFollowingContent = nextLine !== "" || (isShortName && nextNextLine !== "");

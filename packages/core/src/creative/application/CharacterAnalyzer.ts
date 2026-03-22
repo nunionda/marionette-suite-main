@@ -11,7 +11,42 @@ export class CharacterAnalyzer {
    * Deterministically analyzes the structural presence of characters throughout the screenplay.
    * Includes SNA edges, voice scoring, and diversity metrics.
    */
+  /**
+   * Extract character names embedded inline in action text.
+   * Handles cinematographic format: "MS — 강설희(32)가 앉아 있다."
+   * Pattern: Korean/CJK name followed by (age) in action lines.
+   */
+  private extractInlineCharacters(elements: ScriptElement[]): Map<string, Set<number>> {
+    const inlineChars = new Map<string, Set<number>>();
+    let currentScene = 0;
+
+    // Pattern: Korean name (2-4 chars) followed by parenthetical containing age info
+    // Matches: 강설희(32), 오유진(17/여), 아키(50대/남), 마유(30대)
+    const inlineNameRe = /([가-힣]{2,4})\([^)]*\d[^)]*\)/g;
+
+    for (const el of elements) {
+      if (el.type === "scene_heading") {
+        currentScene++;
+      } else if (el.type === "action") {
+        let match;
+        inlineNameRe.lastIndex = 0;
+        while ((match = inlineNameRe.exec(el.text)) !== null) {
+          const name = match[1];
+          if (!inlineChars.has(name)) {
+            inlineChars.set(name, new Set());
+          }
+          if (currentScene > 0) inlineChars.get(name)!.add(currentScene);
+        }
+      }
+    }
+
+    return inlineChars;
+  }
+
   public analyze(scriptId: string, elements: ScriptElement[]): CharacterNetwork {
+    // ---------- Pass 0: extract inline characters from action text (cinematographic format) ----------
+    const inlineCharacters = this.extractInlineCharacters(elements);
+
     // ---------- Pass 1: collect per-character stats + scene tracking ----------
     const characterStats = new Map<
       string,
@@ -63,6 +98,32 @@ export class CharacterAnalyzer {
         previousSpeaker = currentCharacter;
       } else if (el.type === "action") {
         currentCharacter = "";
+      }
+    }
+
+    // ---------- Pass 1.5: merge inline characters (cinematographic format) ----------
+    // Only add inline characters that weren't already found via standard character cues
+    for (const [name, scenes] of inlineCharacters) {
+      if (!characterStats.has(name) && scenes.size >= 1) {
+        // Character appears inline with age annotation — likely a real character
+        characterStats.set(name, {
+          lines: 0,
+          words: 0,
+          wordSet: new Set(),
+          scenes,
+          dialogues: [],
+        });
+        // Register in sceneCharacters for edge computation
+        for (const scene of scenes) {
+          if (!sceneCharacters.has(scene)) {
+            sceneCharacters.set(scene, new Set());
+          }
+          sceneCharacters.get(scene)!.add(name);
+        }
+      } else if (characterStats.has(name)) {
+        // Merge scene appearances from inline detection
+        const stats = characterStats.get(name)!;
+        for (const scene of scenes) stats.scenes.add(scene);
       }
     }
 

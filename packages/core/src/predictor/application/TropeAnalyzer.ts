@@ -35,18 +35,47 @@ Only output the JSON array, nothing else.`;
     const response = await this.provider.generateText(systemPrompt, synopsis);
 
     try {
-      const parsed = JSON.parse(response.content.replace(/```json?\n?/g, "").replace(/```/g, "").trim());
-      if (Array.isArray(parsed)) {
-        // Filter to only valid dictionary tropes
-        const valid = parsed.filter(
-          (t: unknown): t is string =>
-            typeof t === "string" &&
-            dictionary.some((d) => d.toLowerCase() === (t as string).toLowerCase()),
-        );
-        return { scriptId, tropes: valid.slice(0, 10) };
+      // Strip markdown fences and extra text around JSON array
+      let content = response.content.trim();
+      content = content.replace(/```json?\s*\n?/g, "").replace(/```/g, "").trim();
+      // Extract JSON array if surrounded by extra text
+      const arrayMatch = content.match(/\[[\s\S]*\]/);
+      if (!arrayMatch) {
+        console.warn(`⚠️ TropeAnalyzer: No JSON array found in response (${this.provider.name}): ${content.slice(0, 100)}`);
+        return { scriptId, tropes: [] };
       }
-    } catch {
-      // Parse failure → return empty
+
+      const parsed = JSON.parse(arrayMatch[0]);
+      if (Array.isArray(parsed)) {
+        // Filter to valid dictionary tropes (partial match: LLM trope contains or is contained by dictionary entry)
+        const valid = parsed.filter(
+          (t: unknown): t is string => {
+            if (typeof t !== "string") return false;
+            const lower = (t as string).toLowerCase();
+            return dictionary.some((d) => {
+              const dLower = d.toLowerCase();
+              // Exact match, or LLM trope matches the primary name (before parenthetical Korean)
+              return dLower === lower
+                || dLower.startsWith(lower)
+                || lower.startsWith(dLower.split("(")[0].trim());
+            });
+          },
+        );
+        // Map back to canonical dictionary names
+        const canonical = valid.map((t) => {
+          const lower = t.toLowerCase();
+          const match = dictionary.find((d) => {
+            const dLower = d.toLowerCase();
+            return dLower === lower
+              || dLower.startsWith(lower)
+              || lower.startsWith(dLower.split("(")[0].trim());
+          });
+          return match || t;
+        });
+        return { scriptId, tropes: [...new Set(canonical)].slice(0, 10) };
+      }
+    } catch (err: any) {
+      console.warn(`⚠️ TropeAnalyzer: Parse failure (${this.provider.name}): ${err.message?.slice(0, 80)}`);
     }
 
     return { scriptId, tropes: [] };

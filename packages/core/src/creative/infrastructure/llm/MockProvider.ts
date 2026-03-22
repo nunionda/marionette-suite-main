@@ -8,7 +8,7 @@ export class MockProvider implements ILLMProvider {
     
     let content = "{}";
 
-    if (systemPrompt.includes("3-Act")) {
+    if ((systemPrompt.includes("3-Act") || systemPrompt.includes("15-beat framework")) && !systemPrompt.includes("coverage")) {
       content = JSON.stringify({
         beats: [
           { act: 1, name: "Setup", sceneStart: 1, sceneEnd: 2, description: "The world and protagonist are introduced, establishing the status quo." },
