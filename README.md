@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Investor Dashboard Redesign**](./docs/plans/16-investor-dashboard-redesign.md)
 - [**Plan: Frontend Design Overhaul**](./docs/plans/15-frontend-design-overhaul.md)
 - [**Plan: Design & PDF Upgrade**](./docs/plans/14-design-pdf-upgrade.md)
 - [**Plan: Korean Market Expansion**](./docs/plans/13-korean-market-expansion.md)
@@ -51,6 +52,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 29 (AI Chat Agent)**](./docs/results/session-29-ai-chat-agent.md) - Report-context Q&A with floating chat panel.
 - [**Result: Session 30 (Phase 3-5 Completion)**](./docs/results/session-30-phase345-completion.md) - Draft Comparison, Statistical k-NN ROI, Scene Explorer.
 - [**Result: Session 31 (Frontend Design Overhaul)**](./docs/results/session-31-frontend-design-overhaul.md) - Landing page, dashboard frame, grid whitespace fix, CSS variable unification, PDF print orphan card handling.
+- [**Result: Session 32 (Investor Dashboard Redesign)**](./docs/results/session-32-investor-dashboard-redesign.md) - 온데스크 참고 5-Phase 투자자 플로우, PhaseSection/InvestmentVerdict 신규, 수평 스테퍼 네비, Progressive Disclosure.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
