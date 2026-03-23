@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Engine Verification & Calibration**](./docs/plans/21-engine-verification-calibration.md)
 - [**Plan: Deterministic Engine Calibration**](./docs/plans/20-deterministic-calibration.md)
 - [**Plan: Provider Benchmark**](./docs/plans/19-provider-benchmark.md)
 - [**Plan: E2E Simulation & Korean Parser**](./docs/plans/18-e2e-simulation-korean-parser.md)
@@ -61,6 +62,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 34 (E2E Simulation & Korean Parser)**](./docs/results/session-34-e2e-simulation-korean-parser.md) - 3편 E2E 시뮬레이션 프레임워크, 한국 인라인 대사 파서, CharacterAnalyzer 인라인 추출 확장, 27 PASS / 0 FAIL.
 - [**Result: Session 35 (Provider Benchmark)**](./docs/results/session-35-provider-benchmark.md) - 6 프로바이더 × 3 시나리오 × 7 엔진 벤치마크, groq 최고 성능(AVG 93), gemini+groq 무료 최적 조합, checkpoint/resume CLI.
 - [**Result: Session 36 (Deterministic Calibration)**](./docs/results/session-36-deterministic-calibration.md) - Rating/VFX/Trope 결정론적 전환, Groq 교정 루프 4회, Rating 100% 일치, 한국어 \b 버그 수정.
+- [**Result: Session 37 (Engine Verification)**](./docs/results/session-37-engine-verification-calibration.md) - 9차 반복 교정, MAX_PER_KEYWORD=3 알고리즘, Ground Truth 검증 ALL PASS.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
