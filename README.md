@@ -4,6 +4,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 
 ## Development Track (Plans & Results)
 
+- [**Plan: Character Extraction & Naming**](./docs/plans/22-character-extraction-naming.md)
 - [**Plan: Engine Verification & Calibration**](./docs/plans/21-engine-verification-calibration.md)
 - [**Plan: Deterministic Engine Calibration**](./docs/plans/20-deterministic-calibration.md)
 - [**Plan: Provider Benchmark**](./docs/plans/19-provider-benchmark.md)
@@ -63,6 +64,7 @@ A comprehensive script intelligence system designed to ingest, analyze, and fore
 - [**Result: Session 35 (Provider Benchmark)**](./docs/results/session-35-provider-benchmark.md) - 6 프로바이더 × 3 시나리오 × 7 엔진 벤치마크, groq 최고 성능(AVG 93), gemini+groq 무료 최적 조합, checkpoint/resume CLI.
 - [**Result: Session 36 (Deterministic Calibration)**](./docs/results/session-36-deterministic-calibration.md) - Rating/VFX/Trope 결정론적 전환, Groq 교정 루프 4회, Rating 100% 일치, 한국어 \b 버그 수정.
 - [**Result: Session 37 (Engine Verification)**](./docs/results/session-37-engine-verification-calibration.md) - 9차 반복 교정, MAX_PER_KEYWORD=3 알고리즘, Ground Truth 검증 ALL PASS.
+- [**Result: Session 38 (Character Extraction & Naming)**](./docs/results/session-38-character-extraction-naming.md) - 캐릭터 추출 오탐지 수정 (기관명/감탄사/이름병합), PDF 잘림 수정, Gemini 1.5→2.5 체인, 한글→영어 네이밍.
 
 ## 🚀 Quick Setup (One-Click Initialization)
 
