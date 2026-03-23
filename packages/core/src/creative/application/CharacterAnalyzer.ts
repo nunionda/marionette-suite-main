@@ -127,6 +127,146 @@ export class CharacterAnalyzer {
       }
     }
 
+    // ---------- Pass 1.6: merge full names into short names ----------
+    // Korean scripts use full names in action (강설희(32)) but short names in dialogue (설희).
+    // Also handles surname+name (한진우) vs given name only (진우).
+    // Merge the longer form into the shorter form (which has dialogue stats).
+    const allNames = Array.from(characterStats.keys());
+    const mergeMap = new Map<string, string>(); // longName → shortName
+
+    for (const longName of allNames) {
+      if (longName.length < 2) continue;
+      for (const shortName of allNames) {
+        if (longName === shortName) continue;
+        if (shortName.length < 2 || shortName.length >= longName.length) continue;
+        // Short name is a suffix of long name (강설희 → 설희, 한진우 → 진우)
+        // Also handles particle-prefixed names (이리철 → 리철, where 이 is a particle)
+        if (longName.endsWith(shortName) ||
+            (longName.length === shortName.length + 1 && /^[이가은는]/.test(longName) && longName.slice(1) === shortName)) {
+          const longStats = characterStats.get(longName)!;
+          const shortStats = characterStats.get(shortName)!;
+          // Merge into the version with more dialogue (usually the short name)
+          if (shortStats.lines >= longStats.lines) {
+            mergeMap.set(longName, shortName);
+          } else {
+            mergeMap.set(shortName, longName);
+          }
+        }
+      }
+    }
+
+    // Apply merges
+    for (const [fromName, toName] of mergeMap) {
+      const fromStats = characterStats.get(fromName);
+      const toStats = characterStats.get(toName);
+      if (!fromStats || !toStats) continue;
+
+      // Merge stats into target
+      toStats.lines += fromStats.lines;
+      toStats.words += fromStats.words;
+      for (const w of fromStats.wordSet) toStats.wordSet.add(w);
+      for (const s of fromStats.scenes) toStats.scenes.add(s);
+      toStats.dialogues.push(...fromStats.dialogues);
+
+      // Remove source
+      characterStats.delete(fromName);
+
+      // Update sceneCharacters references
+      for (const [, chars] of sceneCharacters) {
+        if (chars.has(fromName)) {
+          chars.delete(fromName);
+          chars.add(toName);
+        }
+      }
+
+      // Update dialoguePairs references
+      for (const pair of dialoguePairs) {
+        if (pair.from === fromName) pair.from = toName;
+        if (pair.to === fromName) pair.to = toName;
+      }
+    }
+
+    // ---------- Pass 1.6b: strip particle prefixes when short form doesn't exist ----------
+    // e.g., 이리철 → 리철 (이 is a common surname/particle prefix)
+    // Only applies when the stripped name doesn't already exist
+    const PARTICLE_PREFIXES = /^[이가은는]/;
+    const renameMap = new Map<string, string>();
+    for (const [name] of characterStats) {
+      if (name.length >= 3 && PARTICLE_PREFIXES.test(name)) {
+        const stripped = name.slice(1);
+        if (!characterStats.has(stripped) && !renameMap.has(name)) {
+          // Check if stripped name is a valid Korean name (2+ chars, all Korean)
+          if (/^[가-힣]{2,}$/.test(stripped)) {
+            renameMap.set(name, stripped);
+          }
+        }
+      }
+    }
+    for (const [oldName, newName] of renameMap) {
+      const stats = characterStats.get(oldName);
+      if (!stats) continue;
+      // Only rename if this is an inline-only character (0 dialogue lines)
+      // Characters with dialogue lines have their name set by the script's character cues
+      if (stats.lines > 0) continue;
+      characterStats.set(newName, stats);
+      characterStats.delete(oldName);
+      for (const [, chars] of sceneCharacters) {
+        if (chars.has(oldName)) {
+          chars.delete(oldName);
+          chars.add(newName);
+        }
+      }
+    }
+
+    // ---------- Pass 1.7: filter non-character entries ----------
+    // Remove entries with 0 dialogue lines AND 0 scene appearances (formatting noise)
+    // Also remove entries that are likely organization names or titles
+    const ORG_SUFFIXES_RE = /(?:총국|정찰국|본부|위원회|사무실|경찰서|사령부|연구소|검찰청|특공대|수사대|카르텔)$/;
+    const NOISE_WORDS = new Set([
+      '크기', '간격', '속도', '높이', '너비', '위치', '방향', '비율', '굵기',
+      '그냥', '그래', '아마', '내가', '우리', '뉴스', '헤이', '제단', '수술실', '현장',
+      '씨발', '으악', '부웅', '하더니', '그러자',
+    ]);
+
+    for (const [name, stats] of characterStats) {
+      // Remove formatting noise words
+      if (NOISE_WORDS.has(name)) {
+        characterStats.delete(name);
+        continue;
+      }
+      // Remove organization names
+      if (ORG_SUFFIXES_RE.test(name)) {
+        characterStats.delete(name);
+        continue;
+      }
+      // Remove multi-word entries that are action text fragments (verb endings in any word)
+      if (name.includes(' ')) {
+        const words = name.split(/\s+/);
+        const hasVerbWord = words.some(w => /[다고며면서지요네까죠게할된건걸인]$/.test(w));
+        if (hasVerbWord || stats.lines <= 2) {
+          characterStats.delete(name);
+          continue;
+        }
+      }
+    }
+
+    // ---------- Pass 1.8: clean up sceneCharacters and dialoguePairs to match filtered characterStats ----------
+    const validCharacters = new Set(characterStats.keys());
+    for (const [, chars] of sceneCharacters) {
+      for (const name of chars) {
+        if (!validCharacters.has(name)) {
+          chars.delete(name);
+        }
+      }
+    }
+    // Remove dialogue pairs referencing filtered-out characters
+    for (let i = dialoguePairs.length - 1; i >= 0; i--) {
+      const pair = dialoguePairs[i]!;
+      if (!validCharacters.has(pair.from) || !validCharacters.has(pair.to)) {
+        dialoguePairs.splice(i, 1);
+      }
+    }
+
     // ---------- Pass 2: build CharacterNode[] ----------
     const sortedEntries = Array.from(characterStats.entries()).sort(
       (a, b) => b[1].lines - a[1].lines,

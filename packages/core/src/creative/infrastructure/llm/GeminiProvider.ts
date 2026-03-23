@@ -4,16 +4,17 @@ import type { ILLMProvider, LLMResponse } from './ILLMProvider';
 
 export type GeminiTier = 'standard' | 'pro' | 'long-context';
 
+// Ordered low → high: try cheapest/oldest first, escalate on rate-limit
 const MODEL_CHAINS: Record<GeminiTier, string[]> = {
-  standard: ['gemini-2.5-flash', 'gemini-2.0-flash'],
-  pro: ['gemini-2.5-pro', 'gemini-2.5-flash'],
+  standard: ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-2.5-flash'],
+  pro: ['gemini-1.5-pro', 'gemini-2.0-flash', 'gemini-2.5-pro'],
   'long-context': ['gemini-1.5-pro', 'gemini-2.5-pro'],
 };
 
 // Shared rate limiter across all GeminiProvider instances.
-// Gemini free tier: ~10 RPM → 1 request per 6 seconds minimum.
+// Gemini paid tier: generous RPM, keep minimal interval to avoid bursts.
 let lastApiCallMs = 0;
-const MIN_INTERVAL_MS = 6_500;
+const MIN_INTERVAL_MS = 1_000;
 
 export class GeminiProvider implements ILLMProvider {
   readonly name: string;

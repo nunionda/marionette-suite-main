@@ -32,6 +32,14 @@ function preprocessKoreanInlineDialogue(text: string): string {
     '클로즈업', '인서트', '컷투', '플래시백', '타이틀', '자막', '몽타주',
     '오전', '오후', '새벽', '저녁', '아침', '어둠', '복도', '바깥', '안쪽',
     '인터커팅', '인터컷', '모니터', '바닥에', '문이', '전화가',
+    // Formatting/layout artifacts (PDF parsing noise)
+    '크기', '간격', '속도', '높이', '너비', '위치', '방향', '비율', '굵기',
+    // Organization names / non-character nouns
+    '카르텔', '총국', '본부', '위원회', '사무실', '경찰서', '병원',
+    '정찰총국', '수사대', '특공대', '사령부', '연구소', '검찰청',
+    // Common words / exclamations / pronouns misidentified as characters
+    '그냥', '그래', '아마', '내가', '우리', '뉴스', '헤이',
+    '제단', '수술실', '현장',
   ]);
   // Verb/adjective endings — line-start words ending in these are not character names
   const verbEndingRe = /[다고며면서지요네까죠게할된건걸는데만런은]$/;
@@ -49,6 +57,8 @@ function preprocessKoreanInlineDialogue(text: string): string {
     if (/[을를의에]$/.test(name)) continue;
     // Reject 3+ char words ending in subject/topic particles (protects 2-char names)
     if (name.length >= 3 && /[이가]$/.test(name)) continue;
+    // Reject organization/location suffixes (총국, 본부, 위원회, etc.)
+    if (/(?:총국|정찰국|본부|위원회|사무실|경찰서|사령부|연구소|검찰청|특공대|수사대|카르텔)$/.test(name)) continue;
     nameCount.set(name, (nameCount.get(name) || 0) + 1);
   }
 
@@ -174,11 +184,13 @@ export function parseFountain(script: string): ScriptElement[] {
       // 오 excluded from particles (common surname Oh)
       const hasKoreanParticle = nameWithoutParens.length > 3 && /[이가을를은는도의에서와로들야님]$/.test(nameWithoutParens);
       // Korean common nouns / action-like phrases that should not be character names
-      const koreanCommonWordRe = /^(오전|오후|새벽|저녁|아침|밤|낮|단계|행동|순간|현재|계속|시작|완료|하지만|그때|갑자기|잠시|여기|거기|나중|다시)$/;
+      const koreanCommonWordRe = /^(오전|오후|새벽|저녁|아침|밤|낮|단계|행동|순간|현재|계속|시작|완료|하지만|그때|갑자기|잠시|여기|거기|나중|다시|크기|간격|속도|높이|너비|위치|방향|비율|굵기|카르텔|정찰총국|총국|본부|위원회|사무실|경찰서|병원|수사대|특공대|사령부|연구소|검찰청|그냥|그래|아마|내가|우리|뉴스|헤이|제단|수술실|현장|씨발|으악|부웅|하더니|그러자)$/;
       const isKoreanCommonWord = nameWithoutParens.split(/\s+/).some(w => koreanCommonWordRe.test(w));
       // Korean verb/adjective endings that indicate action text, not character names
       const hasKoreanVerbEnding = /[다고며면서지요네까죠게할된건걸]$/.test(nameWithoutParens);
-      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 6 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；\]\)]$/) && !hasKoreanParticle && !isKoreanCommonWord && !hasKoreanVerbEnding;
+      // Organization/location suffix check
+      const hasOrgSuffix = /(?:총국|정찰국|본부|위원회|사무실|경찰서|사령부|연구소|검찰청|특공대|수사대|카르텔)$/.test(nameWithoutParens);
+      const isCjkCharacter = isCjkNamePattern && nameWithoutParens.length <= 6 && wordCount <= 2 && !line.match(/[.?!,:;。？！、；\]\)]$/) && !hasKoreanParticle && !isKoreanCommonWord && !hasKoreanVerbEnding && !hasOrgSuffix;
 
       // CJK names: short names (≤3 chars) allow a blank line before dialogue (Korean PDF screenplays)
       const nextNextLine = i + 2 < lines.length ? (lines[i + 2]?.trim() ?? "") : "";

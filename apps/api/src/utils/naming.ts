@@ -1,15 +1,59 @@
 /**
  * Naming Convention Utility
  *
- * Script Import:  {name}_analysis_{YYMMDD}_v{NNN}
- * PDF Export:     {name}_investor_analysis_{YYMMDD}_v{NNN}.pdf
+ * Script Import:  {slug}_{YYMMDD}_v{NNN}
+ * PDF Export:     {slug}_report_{YYMMDD}_v{NNN}_{locale}.pdf
+ *
+ * Slug rules:
+ *   - Extract title tokens from filename (strip dates, authors, meta keywords)
+ *   - Korean titles are translated to English via dictionary lookup (fallback: romanization)
+ *   - Max 2 meaningful tokens, hyphen-joined, max 30 chars
  *
  * Examples:
- *   "미궁.fountain"  → migung_analysis_260322_v001
- *   "The Matrix.txt" → thematrix_analysis_260322_v001
+ *   "전율미궁_귀신의집_시나리오_김진영_20260320.pdf" → thrill-maze_260323_v001
+ *   "비트세비어_260320.pdf"                        → beat-savior_260323_v001
+ *   "더킹.pdf"                                    → the-king_260323_v001
+ *   "The Matrix.txt"                              → the-matrix_260323_v001
+ *   "Inception_screenplay_final_v2.pdf"            → inception_260323_v001
  */
 
-/* ─── Korean → Revised Romanization ─── */
+/* ─── Korean → English Translation Dictionary ─── */
+// Known Korean movie/script titles → English translations
+// Add new entries as scripts are imported
+const KO_EN_DICTIONARY: Record<string, string> = {
+  '전율미궁': 'thrill-maze',
+  '귀신의집': 'haunted-house',
+  '비트세비어': 'beat-savior',
+  '더킹': 'the-king',
+  '기생충': 'parasite',
+  '올드보이': 'oldboy',
+  '부산행': 'train-to-busan',
+  '살인의추억': 'memories-of-murder',
+  '아가씨': 'the-handmaiden',
+  '괴물': 'the-host',
+  '내부자들': 'inside-men',
+  '범죄도시': 'the-outlaws',
+  '신세계': 'new-world',
+  '타짜': 'tazza',
+  '암살': 'assassination',
+  '베테랑': 'veteran',
+  '국제시장': 'ode-to-my-father',
+  '명량': 'roaring-currents',
+  '택시운전사': 'a-taxi-driver',
+  '변호인': 'the-attorney',
+  '광해': 'masquerade',
+  '도둑들': 'the-thieves',
+  '해운대': 'haeundae',
+  '극한직업': 'extreme-job',
+  '엑시트': 'exit',
+  '반도': 'peninsula',
+  '서복': 'seobok',
+  '승리호': 'space-sweepers',
+  '모가디슈': 'escape-from-mogadishu',
+  '헌트': 'hunt',
+};
+
+/* ─── Korean → Revised Romanization (fallback) ─── */
 const CHO  = ['g','kk','n','d','tt','r','m','b','pp','s','ss','','j','jj','ch','k','t','p','h'];
 const JUNG = ['a','ae','ya','yae','eo','e','yeo','ye','o','wa','wae','oe','yo','u','wo','we','wi','yu','eu','ui','i'];
 const JONG = ['','k','k','k','n','n','n','t','l','l','l','l','l','l','l','l','m','p','p','t','t','ng','t','t','k','t','p','t'];
@@ -33,32 +77,69 @@ export function hasKorean(text: string): boolean {
 }
 
 /**
- * Sanitize a filename into a clean base name for the naming convention.
- * - Strips file extension
- * - Romanizes Korean characters
- * - Removes special characters (keeps alphanumeric and spaces)
- * - Converts spaces to underscores
- * - Lowercases everything
+ * Translate a Korean token to English using the dictionary.
+ * Returns null if no translation is found.
+ */
+function translateKorean(token: string): string | null {
+  // Direct lookup (e.g., "비트세비어" → "beat-savior")
+  if (KO_EN_DICTIONARY[token]) return KO_EN_DICTIONARY[token];
+  // Try without spaces (e.g., "살인의 추억" → "살인의추억")
+  const compact = token.replace(/\s+/g, '');
+  if (KO_EN_DICTIONARY[compact]) return KO_EN_DICTIONARY[compact];
+  return null;
+}
+
+/* ─── Stop-word filters ─── */
+const STOP_WORDS_KO = ['시나리오', '각본', '대본', '원고', '극본', '작가', '감독', '연출'];
+const STOP_WORDS_EN = ['screenplay', 'script', 'final', 'draft', 'revised', 'rewrite', 'outline'];
+const DATE_PATTERN = /^\d{6,8}$/;
+const VERSION_PATTERN = /^v\d+$/i;
+const MAX_SLUG_LENGTH = 30;
+const MAX_TITLE_TOKENS = 2;
+
+/**
+ * Sanitize a filename into a short slug for the naming convention.
+ *
+ * 1. Strip extension
+ * 2. Tokenize by _ - space
+ * 3. Remove stop-words (dates, numbers, meta keywords, author names)
+ * 4. Keep first 2 meaningful tokens (= title)
+ * 5. Romanize Korean, hyphen-join, max 20 chars
  */
 export function sanitizeBaseName(fileName: string): string {
   // Remove extension
-  let name = fileName.replace(/\.[^.]+$/, '');
+  const name = fileName.replace(/\.[^.]+$/, '');
 
-  // Romanize Korean if present
-  if (hasKorean(name)) {
-    name = romanizeKorean(name);
-  }
+  // Tokenize
+  const tokens = name.split(/[_\-\s]+/).filter(Boolean);
 
-  // Remove special characters, keep alphanumeric and spaces
-  name = name.replace(/[^a-zA-Z0-9\s]/g, '');
+  // Filter out stop-words and noise
+  const meaningful = tokens.filter(t => {
+    if (DATE_PATTERN.test(t)) return false;
+    if (VERSION_PATTERN.test(t)) return false;
+    if (/^\d+$/.test(t)) return false;
+    if (STOP_WORDS_KO.includes(t)) return false;
+    if (STOP_WORDS_EN.includes(t.toLowerCase())) return false;
+    return true;
+  });
 
-  // Collapse whitespace → single underscore, trim, lowercase
-  name = name.trim().replace(/\s+/g, '_').toLowerCase();
+  // Take first N title tokens
+  const titleTokens = meaningful.slice(0, MAX_TITLE_TOKENS);
 
-  // Fallback if empty
-  if (!name) name = 'untitled';
+  // Translate Korean tokens to English (dictionary), fallback to romanization
+  const slug = titleTokens
+    .map(t => {
+      if (!hasKorean(t)) return t;
+      const translated = translateKorean(t);
+      return translated || romanizeKorean(t);
+    })
+    .join('-')
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .slice(0, MAX_SLUG_LENGTH) || 'untitled';
 
-  return name;
+  return slug;
 }
 
 /**
@@ -82,38 +163,43 @@ export function formatVersion(version: number): string {
 /**
  * Generate a scriptId following the naming convention.
  *
- * Pattern: {name}_analysis_{YYMMDD}_v{NNN}
+ * Pattern: {slug}_{YYMMDD}_v{NNN}
  *
- * @param fileName - Original filename (e.g., "미궁.fountain")
+ * @param fileName - Original filename (e.g., "전율미궁_귀신의집_시나리오_김진영_20260320.pdf")
  * @param version - Version number (default: 1)
  * @param date - Optional date override (default: today)
- * @returns scriptId (e.g., "migung_analysis_260322_v001")
+ * @returns scriptId (e.g., "jeonyul-migung_260323_v001")
  */
 export function generateScriptId(
   fileName: string,
   version: number = 1,
   date?: Date,
 ): string {
-  const baseName = sanitizeBaseName(fileName);
+  const slug = sanitizeBaseName(fileName);
   const dateStamp = getDateStamp(date);
   const ver = formatVersion(version);
-  return `${baseName}_analysis_${dateStamp}_${ver}`;
+  return `${slug}_${dateStamp}_${ver}`;
 }
 
 /**
- * Extract the base name from a scriptId.
+ * Extract the base name (slug) from a scriptId.
  *
- * "migung_analysis_260322_v001" → "migung"
+ * New:    "jeonyul-migung_260323_v001" → "jeonyul-migung"
+ * Legacy: "migung_analysis_260322_v001" → "migung"
  */
 export function extractBaseName(scriptId: string): string {
-  const match = scriptId.match(/^(.+?)_analysis_/);
+  // Legacy format with _analysis_
+  const legacy = scriptId.match(/^(.+?)_analysis_/);
+  if (legacy) return legacy[1];
+  // New format: slug_YYMMDD_vNNN
+  const match = scriptId.match(/^(.+?)_\d{6}_v\d{3}$/);
   return match ? match[1] : scriptId;
 }
 
 /**
  * Extract version number from a scriptId.
  *
- * "migung_analysis_260322_v001" → 1
+ * "jeonyul-migung_260323_v001" → 1
  */
 export function extractVersion(scriptId: string): number {
   const match = scriptId.match(/_v(\d{3})$/);
@@ -121,23 +207,27 @@ export function extractVersion(scriptId: string): number {
 }
 
 /**
- * Generate PDF export filename from a scriptId.
+ * Generate PDF/HTML export filename from a scriptId.
  *
- * Pattern: {name}_investor_analysis_{YYMMDD}_v{NNN}
- *
- * "migung_analysis_260322_v001" → "migung_investor_analysis_260322_v001"
+ * New:    "jeonyul-migung_260323_v001" → "jeonyul-migung_report_260323_v001"
+ * Legacy: "migung_analysis_260322_v001" → "migung_report_260322_v001"
  */
 export function generateExportFileName(scriptId: string): string {
-  return scriptId.replace('_analysis_', '_investor_analysis_');
+  // Legacy format: replace _analysis_ with _report_
+  if (scriptId.includes('_analysis_')) {
+    return scriptId.replace('_analysis_', '_report_');
+  }
+  // New format: insert _report_ before date stamp
+  return scriptId.replace(/^(.+?)_(\d{6}_v\d{3})$/, '$1_report_$2');
 }
 
 /**
  * Build the search pattern for finding existing versions of the same script + date.
  *
- * Returns a prefix like "migung_analysis_260322_" for DB LIKE queries.
+ * Returns a prefix like "jeonyul-migung_260323_" for DB LIKE queries.
  */
 export function getVersionSearchPattern(fileName: string, date?: Date): string {
-  const baseName = sanitizeBaseName(fileName);
+  const slug = sanitizeBaseName(fileName);
   const dateStamp = getDateStamp(date);
-  return `${baseName}_analysis_${dateStamp}_`;
+  return `${slug}_${dateStamp}_`;
 }

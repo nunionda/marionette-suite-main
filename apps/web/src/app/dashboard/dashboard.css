@@ -707,6 +707,90 @@ input:focus-visible {
   color: rgba(255, 255, 255, 0.6);
 }
 
+/* Model Selector */
+.model-selector {
+  margin: 1rem 0 0;
+}
+
+.model-selector-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  margin-bottom: 0.5rem;
+}
+
+.model-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.model-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.75rem 0.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-glass);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.model-card:hover:not(.unavailable) {
+  border-color: var(--model-color);
+  background: color-mix(in srgb, var(--model-color) 8%, transparent);
+}
+
+.model-card.active {
+  border-color: var(--model-color);
+  background: color-mix(in srgb, var(--model-color) 12%, transparent);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--model-color) 20%, transparent);
+}
+
+.model-card.unavailable {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.model-icon {
+  font-size: 1.2rem;
+  color: var(--model-color);
+  line-height: 1;
+}
+
+.model-card.active .model-icon {
+  filter: brightness(1.3);
+}
+
+.model-name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: white;
+}
+
+.model-desc {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  text-align: center;
+  line-height: 1.2;
+}
+
+.model-card.active .model-desc {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.model-no-key {
+  font-size: 0.55rem;
+  color: #f87171;
+  position: absolute;
+  bottom: 3px;
+}
+
 /* Custom Provider Grid */
 .custom-grid {
   display: grid;
@@ -1451,6 +1535,9 @@ input:focus-visible {
   .upload-row {
     flex-direction: column;
   }
+  .model-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
   .stat-card {
     grid-column: span 6;
   }
@@ -2120,6 +2207,12 @@ input:focus-visible {
 
   .budget-item {
     font-size: 8pt;
+  }
+
+  .location-list,
+  .vfx-list {
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   .location-item {
