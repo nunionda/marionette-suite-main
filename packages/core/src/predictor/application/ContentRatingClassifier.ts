@@ -120,8 +120,9 @@ function countKeywordMatches(text: string, keywords: string[]): number {
         count++;
         idx += kwLower.length;
       }
-    } else if (kw.length <= 3) {
-      // Short English keywords: use word boundary to reduce false positives
+    } else if (kw.length <= 5) {
+      // Short English keywords (≤5 chars): word boundary to prevent substring matches
+      // e.g. 'hell' shouldn't match 'hello', 'dick' shouldn't match 'dictionary'
       const regex = new RegExp(`\\b${kw}\\b`, 'gi');
       const matches = lower.match(regex);
       if (matches) count += matches.length;

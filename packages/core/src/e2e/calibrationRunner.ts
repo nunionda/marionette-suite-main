@@ -68,29 +68,44 @@ async function analyzeScenario(
     ? `${API_BASE}/analyze?deterministic=true`
     : `${API_BASE}/analyze`;
 
+  // Deterministic mode: use mock for non-calibrated engines (beatSheet, emotion, roi, coverage)
+  // to avoid expensive LLM calls that only delay calibration without adding value
+  const providers = deterministic
+    ? {
+        beatSheet: 'mock' as const,
+        emotion: 'mock' as const,
+        rating: 'mock' as const,     // overridden by ?deterministic=true
+        roi: 'mock' as const,
+        coverage: 'mock' as const,
+        vfx: 'mock' as const,        // overridden by ?deterministic=true
+        trope: 'mock' as const,       // overridden by ?deterministic=true
+      }
+    : {
+        beatSheet: 'gemini' as const,
+        emotion: 'gemini' as const,
+        rating: 'gemini' as const,
+        roi: 'gemini' as const,
+        coverage: 'gemini' as const,
+        vfx: 'groq' as const,
+        trope: 'groq' as const,
+      };
+
   const body = {
     scriptBase64,
     isPdf: true,
     fileName: path.basename(pdfPath),
     movieId: `calibration_${deterministic ? 'det' : 'llm'}_${movieId}`,
     strategy: 'custom',
-    customProviders: {
-      beatSheet: 'groq',
-      emotion: 'groq',
-      rating: 'groq',
-      roi: 'groq',
-      coverage: 'groq',
-      vfx: 'groq',
-      trope: 'groq',
-    },
+    customProviders: providers,
     market: 'korean',
-    noFallback: true,
+    noFallback: false,
   };
 
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
+    signal: AbortSignal.timeout(600_000), // 10 min timeout for large PDFs
   });
 
   if (!res.ok) {
@@ -410,6 +425,58 @@ async function main() {
   }
 
   console.log(`\n💾 Full report: ${reportPath}`);
+
+  // ── Step 4: Ground Truth Validation ──
+  console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log('  Step 4: Ground Truth Validation');
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+
+  const { GROUND_TRUTH, validateAgainstGroundTruth } = await import('./calibrationGroundTruth');
+
+  let allValidationsPass = true;
+
+  for (const s of SCENARIOS) {
+    const det = detResults[s.name];
+    if (!det) {
+      console.log(`  ⚠️  Skipping ${s.name} — no deterministic data`);
+      continue;
+    }
+
+    const detVfx = det.production?.vfxRequirements || [];
+    const detHours = detVfx.reduce((sum: number, r: any) => sum + (r.estimatedHours || 0), 0);
+
+    const validation = validateAgainstGroundTruth(s.name, {
+      rating: det.predictions?.rating?.rating,
+      vfxShots: detVfx.length,
+      vfxHours: detHours,
+      vfxComplexity: det.production?.vfxComplexityScore || 0,
+      tropes: det.tropes || [],
+    });
+
+    const statusIcon = validation.allPass ? '✅' : '❌';
+    console.log(`\n  ${statusIcon} ${s.name}`);
+    console.log(`     Rating: ${validation.ratingPass ? 'PASS' : 'FAIL'} (${det.predictions?.rating?.rating})`);
+    console.log(`     VFX shots deviation: ${validation.vfxShotsDeviation.toFixed(0)}% (target ≤${GROUND_TRUTH[s.name]!.vfx.tolerancePercent}%)`);
+    console.log(`     VFX hours deviation: ${validation.vfxHoursDeviation.toFixed(0)}%`);
+    console.log(`     Trope Jaccard: ${(validation.tropeJaccard * 100).toFixed(0)}% (target ≥${GROUND_TRUTH[s.name]!.trope.minJaccard * 100}%)`);
+    console.log(`     Trope overlap (${validation.tropeOverlap.length}): [${validation.tropeOverlap.join(', ')}]`);
+    if (validation.tropeMissed.length > 0) {
+      console.log(`     Trope missed (${validation.tropeMissed.length}): [${validation.tropeMissed.join(', ')}]`);
+    }
+    if (validation.tropeFalsePositive.length > 0) {
+      console.log(`     Trope false+ (${validation.tropeFalsePositive.length}): [${validation.tropeFalsePositive.join(', ')}]`);
+    }
+
+    if (!validation.allPass) allValidationsPass = false;
+  }
+
+  console.log('\n╔═══════════════════════════════════════════════════╗');
+  if (allValidationsPass) {
+    console.log('║  ✅ ALL GROUND TRUTH VALIDATIONS PASSED            ║');
+  } else {
+    console.log('║  ❌ SOME GROUND TRUTH VALIDATIONS FAILED           ║');
+  }
+  console.log('╚═══════════════════════════════════════════════════╝');
 }
 
 main().catch(err => {
