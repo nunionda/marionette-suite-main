@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 export const aiRoutes = new Elysia({ prefix: "/ai" })
   .post("/stream", async ({ body, set }) => {
     const { prompt, system, model = "google/gemini-2.0-flash-001" } = body as any;
-    const apiKey = process.env.VITE_OPENROUTER_API_KEY || "";
+    const apiKey = process.env.OPENROUTER_API_KEY || process.env.VITE_OPENROUTER_API_KEY || "";
 
     if (!apiKey) {
       set.status = 500;
