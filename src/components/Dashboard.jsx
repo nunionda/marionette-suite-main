@@ -10,6 +10,7 @@ const ProjectCard = ({ project, onEnter }) => (
         <h3 className="project-title">{project.title}</h3>
         <span className="project-genre">{project.genre}</span>
       </div>
+      <div className="card-badge category">{project.category}</div>
       <span className="badge production">{project.status || 'Active'}</span>
     </div>
     <p className="project-logline">{project.logline || 'Logline pending generation...'}</p>
@@ -34,6 +35,18 @@ const ProjectCard = ({ project, onEnter }) => (
 const Dashboard = ({ onEnterLab }) => {
   const { projects, addProject, deleteProject } = useContext(ProjectContext);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filterTab, setFilterTab] = useState('ALL');
+
+  const getGroupedCategory = (cat) => {
+    if (cat === 'Feature Film' || cat === 'Short Film') return 'MOVIE';
+    if (cat === 'Netflix Original') return 'DRAMA';
+    if (cat === 'Commercial') return 'AD';
+    return 'OTHER';
+  };
+
+  const filteredProjects = filterTab === 'ALL' 
+    ? projects 
+    : projects.filter(p => getGroupedCategory(p.category) === filterTab);
 
   const handleCreateProject = (data) => {
     addProject({
@@ -73,6 +86,17 @@ const Dashboard = ({ onEnterLab }) => {
           <h2 style={{ margin: 0, fontWeight: 300, fontSize: '2rem', letterSpacing: '4px' }}>
             ACTIVE <span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>PRODUCTIONS</span>
           </h2>
+          <div className="category-tabs">
+            {['ALL', 'MOVIE', 'DRAMA', 'AD'].map(tab => (
+              <button 
+                key={tab}
+                className={`category-tab ${filterTab === tab ? 'active' : ''}`}
+                onClick={() => setFilterTab(tab)}
+              >
+                {tab === 'MOVIE' ? '영화' : tab === 'DRAMA' ? '드라마' : tab === 'AD' ? '광고' : '전체'}
+              </button>
+            ))}
+          </div>
         </div>
         
         {projects.length === 0 ? (
@@ -81,7 +105,7 @@ const Dashboard = ({ onEnterLab }) => {
           </div>
         ) : (
           <div className="bulletin-grid">
-            {projects.map(p => (
+            {filteredProjects.map(p => (
               <div key={p.id} style={{ position: 'relative' }}>
                  <button 
                     className="delete-card-btn"

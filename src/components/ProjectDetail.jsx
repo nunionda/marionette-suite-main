@@ -25,6 +25,8 @@ const GENRE_HINTS = {
 const ProjectDetail = ({ project, onBack }) => {
   const { updateProject } = useContext(ProjectContext);
   const [activeTab, setActiveTab] = useState('CONCEPT');
+  const [zenMode, setZenMode] = useState(false);
+  const [orchestrationIntensity, setOrchestrationIntensity] = useState(1);
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openRouterApiKey') || '');
   
   // Concept Form State
@@ -146,13 +148,22 @@ const ProjectDetail = ({ project, onBack }) => {
       return;
     }
 
-    baseTextRef.current = pipelineData.scenario ? (pipelineData.scenario + "\n\n") : "";
+    baseTextRef.current = pipelineData.scenario ? (pipelineData.scenario.trim() + "\n\n") : "";
+    
+    // Calculate the next scene number to prevent duplication
+    const lastSceneMatch = pipelineData.scenario ? pipelineData.scenario.match(/S#(\d+)/g) : null;
+    const lastSceneNum = lastSceneMatch ? parseInt(lastSceneMatch[lastSceneMatch.length - 1].replace('S#', '')) : 0;
+    const nextSceneNum = lastSceneNum + 1;
+
     const prompt = `
 [Mode]: INCREMENTAL DRAFTING (새로운 씬 추가)${genreContext}
 [Standard]: MASTER SCENE FORMAT (INT./EXT. 필수)
-[Context]: 트리트먼트 내용:\n${pipelineData.treatment}\n\n
+[Next Scene Start]: S#${nextSceneNum}
+[Context]: 
+기존 시나리오 요약:\n${pipelineData.scenario ? pipelineData.scenario.slice(-1000) : '없음 (검사 시작)'}\n\n
+트리트먼트 내용:\n${pipelineData.treatment}\n\n
 [Producer's Note]: 사용자의 특별 지시사항:\n${producerNote}\n\n
-[Task]: 위 지단사항을 반영하며 다음 5개 씬을 집필하세요. 모든 씬 헤딩에 INT./EXT.를 명시적으로 기입하세요. (예: S#1. INT. 거실 - 밤)
+[Task]: 위 지단사항을 반영하며 S#${nextSceneNum}부터 시작하여 다음 5개 씬을 집필하세요. 모든 씬 헤딩에 INT./EXT.를 명시적으로 기입하세요. 절대 이전 시나리오 내용을 반복하지 마세요.
 `;
     executeAgent(fullSystemPrompt, prompt, 'scenario', true, 'Executing Master Scene Format...');
   };
@@ -182,7 +193,10 @@ const ProjectDetail = ({ project, onBack }) => {
   const tabs = Object.keys(TAB_META);
 
   return (
-    <div className={`project-detail ${isGenerating ? 'orchestration-active' : ''}`}>
+    <div 
+      className={`project-detail ${isGenerating ? 'orchestration-active' : ''} ${zenMode ? 'is-zen' : ''}`}
+      style={{ '--orchestration-intensity': orchestrationIntensity }}
+    >
       {/* 🏙️ STUDIO HEADER: Operational Status & Global Meta */}
       <header className="detail-header">
         <div className="header-meta">
@@ -207,9 +221,18 @@ const ProjectDetail = ({ project, onBack }) => {
               onChange={(e) => saveApiKey(e.target.value)} 
             />
           </div>
-          <button className="btn-primary" onClick={saveToContext}>
-            SAVE CHANGES
-          </button>
+          <div className="header-actions">
+            <button 
+              className={`btn-secondary ${zenMode ? 'active' : ''}`}
+              onClick={() => setZenMode(!zenMode)}
+              title="Spatial Zen Mode"
+            >
+              {zenMode ? '📡 EXIT ZEN' : '🪐 ZEN MODE'}
+            </button>
+            <button className="btn-primary" onClick={saveToContext}>
+              SAVE CHANGES
+            </button>
+          </div>
         </div>
       </header>
 
