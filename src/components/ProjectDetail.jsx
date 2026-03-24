@@ -7,6 +7,7 @@ import loglineRule from '../.agents/rules/logline_engine.md?raw';
 import architectRule from '../.agents/rules/architect_ai.md?raw';
 import treatmentRule from '../.agents/rules/treatment_engine.md?raw';
 import scenarioRule from '../.agents/rules/scenario_writer.md?raw';
+import reviewRule from '../.agents/rules/production_review.md?raw';
 
 import { useAgentEngine } from '../hooks/useAgentEngine';
 
@@ -16,15 +17,16 @@ const ProjectDetail = ({ project, onBack }) => {
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openRouterApiKey') || '');
   
   // Concept Form State
-  const [conceptBrief, setConceptBrief] = useState('');
-  const [conceptDirection, setConceptDirection] = useState('글로벌 텐트폴 및 한국 상업 영화 표준');
+  const [conceptBrief, setConceptBrief] = useState(project.conceptBrief || '');
+  const [conceptDirection, setConceptDirection] = useState(project.conceptDirection || '글로벌 텐트폴 및 한국 상업 영화 표준');
   
   // Pipeline State
   const [pipelineData, setPipelineData] = useState({
     concept: project.concept || '',
     architecture: project.architecture || '',
     treatment: project.treatment || '',
-    scenario: project.scenario || ''
+    scenario: project.scenario || '',
+    review: project.review || ''
   });
 
   const outputRef = useRef(null);
@@ -35,8 +37,11 @@ const ProjectDetail = ({ project, onBack }) => {
       concept: project.concept || '',
       architecture: project.architecture || '',
       treatment: project.treatment || '',
-      scenario: project.scenario || ''
+      scenario: project.scenario || '',
+      review: project.review || ''
     });
+    setConceptBrief(project.conceptBrief || '');
+    setConceptDirection(project.conceptDirection || '글로벌 텐트폴 및 한국 상업 영화 표준');
   }, [project]);
 
   const handleDataChange = (field, value) => {
@@ -59,7 +64,11 @@ const ProjectDetail = ({ project, onBack }) => {
   };
 
   const saveToContext = () => {
-    updateProject(project.id, { ...pipelineData });
+    updateProject(project.id, { 
+      ...pipelineData, 
+      conceptBrief, 
+      conceptDirection 
+    });
     alert("Project Data Saved!");
   };
 
@@ -92,7 +101,12 @@ const ProjectDetail = ({ project, onBack }) => {
     executeAgent(scenarioRule, `Treatment:\\n${pipelineData.treatment}\\n\\n극단적 미장센과 택티컬 텐션을 살려 실제 대본(Master Scene Format)을 작성하세요.`, 'scenario');
   };
 
-  const tabs = ['CONCEPT', 'ARCHITECTURE', 'TREATMENT', 'SCENARIO'];
+  const generateReview = () => {
+    if (!pipelineData.scenario) { alert("Please generate Scenario first."); return; }
+    executeAgent(reviewRule, `Full Screenplay Segment:\\n${pipelineData.scenario}\\n\\n이 시나리오가 실제 영화로 제작될 때의 실현 가능성, 예산 효율성, 상업적 매력을 제작자 및 투자자 관점에서 냉정하게 리뷰하세요.`, 'review');
+  };
+
+  const tabs = ['CONCEPT', 'ARCHITECTURE', 'TREATMENT', 'SCENARIO', 'REVIEW'];
 
   return (
     <div className="project-detail">
@@ -139,7 +153,8 @@ const ProjectDetail = ({ project, onBack }) => {
             <h2 className="section-title" style={{ margin: 0 }}>
               {activeTab === 'CONCEPT' ? 'Logline Engine' : 
                activeTab === 'ARCHITECTURE' ? 'Architect AI' : 
-               activeTab === 'TREATMENT' ? 'Treatment Engine' : 'Scenario Writer'}
+               activeTab === 'TREATMENT' ? 'Treatment Engine' : 
+               activeTab === 'SCENARIO' ? 'Scenario Writer' : 'Production Review'}
             </h2>
             <button 
               className="tactical-btn" 
@@ -148,6 +163,7 @@ const ProjectDetail = ({ project, onBack }) => {
                 if(activeTab === 'ARCHITECTURE') generateArchitecture();
                 if(activeTab === 'TREATMENT') generateTreatment();
                 if(activeTab === 'SCENARIO') generateScenario();
+                if(activeTab === 'REVIEW') generateReview();
               }}
               disabled={isGenerating}
               style={{ background: isGenerating ? 'transparent' : 'var(--accent-primary)', color: isGenerating ? 'var(--accent-primary)' : 'black', padding: '12px 24px', fontWeight: 'bold' }}
