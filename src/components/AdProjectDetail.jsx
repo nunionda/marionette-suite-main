@@ -11,9 +11,10 @@ import { useAgentEngine } from '../hooks/useAgentEngine';
 import AnalyticsDashboard from './AnalyticsDashboard';
 
 const AD_GENRE_HINTS = {
-  'Brand Film': { icon: '✨', cues: ['Cinematic', 'Emotional', 'Poetic', 'Manifesto'] },
-  'TVC (Product)': { icon: '📦', cues: ['Clear USP', 'Fast Rhythms', 'Call to Action', 'AIDA'] },
-  'Social/Viral': { icon: '📱', cues: ['Hook in 3s', 'Loud Audio', 'UGC Style', 'Bold Text'] }
+  'BrandFilm': { icon: '✨', name: 'Brand Film', cues: ['Cinematic', 'Emotional', 'Poetic', 'Manifesto'] },
+  'ProductDemo': { icon: '📦', name: 'Product Demo', cues: ['Hard Sell', 'USP', 'X-Ray View', 'Tech Specs'] },
+  'Cinematic': { icon: '🎥', name: 'Cinematic Narrative', cues: ['Storytelling', 'Subtle Branding', 'High Mise-en-scène', 'Character Driven'] },
+  'Social': { icon: '🤳', name: 'Social / Digital', cues: ['UGC Style', 'Fast Pace', 'Vertical-ready', 'Hook-first'] }
 };
 
 const AdProjectDetail = ({ project, onBack }) => {
@@ -46,7 +47,8 @@ const AdProjectDetail = ({ project, onBack }) => {
       architecture: project.architecture || '',
       treatment: project.treatment || '',
       scenario: project.scenario || '',
-      review: project.review || ''
+      review: project.review || '',
+      analysisData: project.analysisData || null
     });
   }, [project]);
 
@@ -216,7 +218,7 @@ const AdProjectDetail = ({ project, onBack }) => {
             </div>
             
             {activeTab === 'VISION' ? (
-              <AnalyticsDashboard data={project.analysisData} />
+              <AnalyticsDashboard data={pipelineData.analysisData} />
             ) : (
               <textarea 
                 ref={outputRef}

@@ -8,17 +8,42 @@ const CATEGORIES = [
   { id: 'Commercial', name: '💼 Commercial / Ad', desc: 'USP-focused, A/V Two-Column format (15-60s)' }
 ];
 
-const GENRES = [
-  { id: 'Thriller', name: '🔪 Thriller / Action' },
-  { id: 'Drama', name: '🫂 Human Drama' },
-  { id: 'SF', name: '🛸 SF / Mystery' },
-  { id: 'Comedy', name: '🤡 Comedy / Satire' }
-];
+const GENRES_BY_CATEGORY = {
+  'Feature Film': [
+    { id: 'Thriller', name: '🔪 Thriller / Action' },
+    { id: 'Drama', name: '🫂 Human Drama' },
+    { id: 'SF', name: '🛸 SF / Mystery' },
+    { id: 'Comedy', name: '🤡 Comedy / Satire' }
+  ],
+  'Short Film': [
+    { id: 'Thriller', name: '🔪 Thriller / Action' },
+    { id: 'Drama', name: '🫂 Human Drama' },
+    { id: 'SF', name: '🛸 SF / Mystery' },
+    { id: 'Comedy', name: '🤡 Comedy / Satire' }
+  ],
+  'Netflix Original': [
+    { id: 'SciFi', name: '🚀 Sci-Fi / Space' },
+    { id: 'Mystery', name: '🕵️ Serial Mystery' },
+    { id: 'Procedural', name: '⚖️ Procedural' },
+    { id: 'Epic', name: '📜 Period / Epic' }
+  ],
+  'Commercial': [
+    { id: 'BrandFilm', name: '✨ Brand Film' },
+    { id: 'ProductDemo', name: '📦 Product Demo' },
+    { id: 'Cinematic', name: '🎥 Cinematic Narrative' },
+    { id: 'Social', name: '📱 Social / Digital' }
+  ]
+};
 
 const ProjectCreateModal = ({ isOpen, onClose, onCreate }) => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Feature Film');
-  const [genre, setGenre] = useState('Thriller');
+  const [genre, setGenre] = useState(GENRES_BY_CATEGORY['Feature Film'][0].id);
+
+  const handleCategoryChange = (catId) => {
+    setCategory(catId);
+    setGenre(GENRES_BY_CATEGORY[catId][0].id);
+  };
 
   if (!isOpen) return null;
 
@@ -60,7 +85,7 @@ const ProjectCreateModal = ({ isOpen, onClose, onCreate }) => {
                   <div 
                     key={cat.id} 
                     className={`category-item glass-hover ${category === cat.id ? 'active' : ''}`}
-                    onClick={() => setCategory(cat.id)}
+                    onClick={() => handleCategoryChange(cat.id)}
                   >
                     <div className="cat-name">{cat.name}</div>
                     <div className="cat-desc">{cat.desc}</div>
@@ -72,7 +97,7 @@ const ProjectCreateModal = ({ isOpen, onClose, onCreate }) => {
             <div className="form-group">
               <label>GENRE MODULE</label>
               <div className="genre-grid">
-                {GENRES.map(g => (
+                {GENRES_BY_CATEGORY[category].map(g => (
                   <div 
                     key={g.id} 
                     className={`genre-item glass-hover ${genre === g.id ? 'active' : ''}`}

@@ -59,7 +59,8 @@ const ProjectDetail = ({ project, onBack }) => {
       architecture: project.architecture || '',
       treatment: project.treatment || '',
       scenario: project.scenario || '',
-      review: project.review || ''
+      review: project.review || '',
+      analysisData: project.analysisData || null
     });
     setConceptBrief(project.conceptBrief || '');
     setConceptDirection(project.conceptDirection || '글로벌 텐트폴 및 한국 상업 영화 표준');
@@ -386,7 +387,7 @@ const ProjectDetail = ({ project, onBack }) => {
               </div>
 
               {activeTab === 'VISION' ? (
-                <AnalyticsDashboard data={project.analysisData} />
+                <AnalyticsDashboard data={pipelineData.analysisData} />
               ) : (
                 <textarea 
                   ref={outputRef}

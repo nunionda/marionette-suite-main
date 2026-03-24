@@ -44,7 +44,8 @@ const DramaProjectDetail = ({ project, onBack }) => {
       bible: project.bible || '',
       episodes: project.episodes || '',
       script: project.script || '',
-      review: project.review || ''
+      review: project.review || '',
+      analysisData: project.analysisData || null
     });
   }, [project]);
 
@@ -200,7 +201,7 @@ const DramaProjectDetail = ({ project, onBack }) => {
             </div>
             
             {activeTab === 'VISION' ? (
-              <AnalyticsDashboard data={project.analysisData} />
+              <AnalyticsDashboard data={pipelineData.analysisData} />
             ) : (
               <textarea 
                 ref={outputRef}
