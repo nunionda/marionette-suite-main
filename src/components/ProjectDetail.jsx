@@ -383,15 +383,24 @@ const ProjectDetail = ({ project, onBack }) => {
                   SCENE INVENTORY
                 </div>
                 <div className="context-sidebar-content">
-                  {[...Array(120)].map((_, i) => (
-                    <div 
-                      key={i} 
-                      className={`inventory-item ${selectedSceneId === i + 1 ? 'active' : ''}`}
-                      onClick={() => setSelectedSceneId(i + 1)}
-                    >
-                      S#{i + 1} {i < 10 ? '✓' : ''}
-                    </div>
-                  ))}
+                  {(() => {
+                    const completedScenes = pipelineData.scenario ? pipelineData.scenario.match(/S#(\d+)/g) || [] : [];
+                    const completedIds = new Set(completedScenes.map(s => parseInt(s.replace('S#', ''))));
+                    
+                    return [...Array(120)].map((_, i) => {
+                      const id = i + 1;
+                      const isCompleted = completedIds.has(id);
+                      return (
+                        <div 
+                          key={i} 
+                          className={`inventory-item ${selectedSceneId === id ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                          onClick={() => setSelectedSceneId(id)}
+                        >
+                          S#{id} {isCompleted ? '✓' : ''}
+                        </div>
+                      );
+                    });
+                  })()}
                 </div>
               </div>
             )}
