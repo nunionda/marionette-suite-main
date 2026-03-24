@@ -52,6 +52,9 @@
   justify-content: space-between;
   padding: 0 24px;
   background: var(--bg-secondary);
+  position: relative;
+  z-index: 1000;
+  flex-shrink: 0;
 }
 
 .header-meta {
@@ -271,6 +274,20 @@
   z-index: 5;
   opacity: 0;
   transition: opacity 0.5s ease;
+}
+
+.orchestration-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .neural-mesh-overlay.active {

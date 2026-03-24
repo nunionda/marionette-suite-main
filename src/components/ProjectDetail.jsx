@@ -408,30 +408,6 @@ const ProjectDetail = ({ project, onBack }) => {
               </div>
             </div>
           
-          {/* 🔘 ACTION BAR: Contextual Pipeline Controls */}
-          {activeTab !== 'VISION' && (
-            <div className="action-bar">
-              <div className="action-info">
-                <span className="input-label">OUTPUT MODE:</span>
-                <span className="active-val">{TAB_META[activeTab].engine}</span>
-              </div>
-              <div className="stage-actions">
-                <button 
-                  className="btn-accent" 
-                  onClick={() => {
-                    if(activeTab === 'CONCEPT') generateConcept();
-                    if(activeTab === 'ARCHITECTURE') generateArchitecture();
-                    if(activeTab === 'TREATMENT') generateTreatment();
-                    if(activeTab === 'SCENARIO') generateScenario();
-                    if(activeTab === 'REVIEW') generateReview();
-                  }}
-                  disabled={isGenerating}
-                >
-                  {isGenerating ? generationStatus.toUpperCase() : `⚡ EXECUTE ${activeTab}`}
-                </button>
-              </div>
-            </div>
-          )}
 
           {/* 📑 TAB CONTENT AREAS */}
           <div className="tab-pane-container">
