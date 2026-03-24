@@ -8,22 +8,15 @@
 export class OpenRouterAdapter {
   static async streamChatCompletion(apiKey, systemPrompt, userPrompt, onChunk, onError, onComplete) {
     try {
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      const response = await fetch('http://localhost:3001/ai/stream', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'http://localhost:5173',
-          'X-Title': 'Cine-Script-Writer'
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'qwen/qwen-turbo',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }
-          ],
-          stream: true,
-          temperature: 0.7
+          system: systemPrompt,
+          prompt: userPrompt,
+          model: 'google/gemini-2.0-flash-001'
         })
       });
 

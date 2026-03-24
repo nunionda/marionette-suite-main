@@ -33,11 +33,45 @@
 
 ---
 
-## 3. 핵심 개발 마일스톤 (Milestones)
+## 4. 미디어 카테고리별 특화 파이프라인 (Media Categories)
 
-- **Phase 1 (기반 작업)**: 프로젝트 폴더트리 표준화 (`src/` 구조 이관 완료) 및 통합 `package.json` 세팅.
-- **Phase 2 (에이전트 이식)**: Logline Engine 및 Architect AI의 시스템 프롬프트를 `/src/.agents/rules/` 하위에 이식 및 고도화.
-- **Phase 3 (웹 콘솔 UI 연동)**: React/Vite 기반의 `cine-script-writer` 프론트엔드에서 파이프라인 4단계를 시각적으로 트래킹할 수 있는 콘솔 대시보드 개발.
-- **Phase 4 (검증 시스템)**: 도출된 시나리오가 "제작 실현 가능성"과 "예산/스펙터클 비례성"을 통과하는지 평가하는 Review Agent 추가.
+`cine-script-writer`는 프로젝트 생성 시 선택한 카테고리에 따라 에이전트의 페르소나와 출력 포맷을 동적으로 전환합니다.
+
+- **[숏필름] 단편영화 모드**: 단일 테마와 강렬한 미장센 중심 (5~20p).
+- **[시리즈] 넷플릭스 오리지널 모드**: 빈지워치(Binge-watch) 유발 및 복합 플롯, 글로벌 감각의 서사 (8~10부작 시즌제).
+- **[광고] 비즈니스 모드**: USP 중심의 전략적 메시지 및 2단(A/V) 포매팅 (15/30/60s).
+
+---
+
+## 5. 장르별 특화 모듈 (Genre Modules)
+
+에이전트는 선택된 장르에 따라 서사적 '톤 앤 매너'를 즉각적으로 전환합니다.
+
+- **[스릴러/액션]**: 정보 제한, 택티컬 텐션, 짧고 강렬한 호흡.
+- **[휴먼 드라마]**: 함축적 대사(Subtext), 인물의 깊은 내면 묘사, 여운 중심.
+- **[SF/미스테리]**: 논리적 세계관, 비일상적 비주얼 임합트, 복선의 치밀한 배치.
+- **[코미디/풍자]**: 아이러니, 타이밍, 셋업-페이오프 구조 강화.
+
+---
+
+## 7. 고도화된 서사 전략 (Advanced Narrative Strategy)
+
+`cine-script-writer`는 단순한 텍스트 생성을 넘어, 산업 표준의 '흥행 공식'을 기술적으로 구현합니다.
+
+- **빈지-훅 설계 (Binge-Hook Design)**: 넷플릭스 오리지널 표준에 따라 파일럿 에피소드의 오프닝 5분과 엔딩 클리프행어를 서사적으로 강제 설계합니다. ([상세보기](file:///Users/daniel/dev/antigravity-dev/cine-script-writer/docs/narrative/PILOT_HOOK_DESIGN.md))
+- **클리셰 서브버전 (Cliché Subversion)**: 뻔한 장르적 관습을 인지하고 이를 리얼리티나 아이러니로 뒤집는 'Anti-Slop' 모듈을 가동합니다. ([상세보기](file:///Users/daniel/dev/antigravity-dev/docs/narrative/CLICHE_STRATEGY.md))
+- **마스터클래스 프레임워크 (Masterclass Frameworks)**: Syd Field(3막), Robert McKee(가치 변화), Blake Snyder(15비트)의 핵심 이론을 엔진 로직에 결합하여 산업 표준 이상의 서사 완성도를 보장합니다. ([연구 분석 문서](file:///Users/daniel/dev/antigravity-dev/cine-script-writer/docs/research/RESEARCH_SCREENWRITING_MASTERS.md))
+
+---
+
+## 8. 핵심 개발 마일스톤 (Milestones)
+
+- **Phase 1 (기반 작업)**: 프로젝트 폴더트리 표준화 및 통합 `package.json` 세팅. [ 완료 ]
+- **Phase 2 (에이전트 이식)**: Logline Engine 및 Architect AI 이식 및 고도화. [ 완료 ]
+- **Phase 3 (웹 콘솔 UI 연동)**: 파이프라인 4단계 콘솔 대시보드 개발. [ 완료 ]
+- **Phase 4 (검증 시스템)**: Review Agent 추가 및 제작 실현 가능성 평가. [ 완료 ]
+- **Phase 5 (카테고리/장르 확장)**: 단편/넷플릭스/광고 및 장르별 스타일 가이드 UI 연동. [ 완료 ]
+- **Phase 6 (서사 전략 엔진)**: 빈지-훅, 클리셰 서브버전 및 마스터클래스 비트 시트 자동 제안 시스템 구축. [ 계획중 ]
+- **Phase 7 (백엔드 고도화)**: Elysia.js + PostgreSQL 기반의 시나리오 데이터 아카이빙 및 멀티 유저 협업 환경 구축. [ 완료 ]
 
 이 개발 계획 문서는 `cine-script-writer`를 가장 진보된 AI 시나리오 스튜디오로 발전시키는 청사진 역할을 합니다.

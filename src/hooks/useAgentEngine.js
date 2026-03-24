@@ -10,7 +10,7 @@ import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
 export const useAgentEngine = (apiKey, onUpdateField) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const executeAgent = async (systemPrompt, userPrompt, targetField) => {
+  const executeAgent = async (systemPrompt, userPrompt, targetField, isAppend = false) => {
     if (!apiKey) {
       alert("⚠️ OpenRouter API Key를 입력해주세요.");
       return;
@@ -23,9 +23,9 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
     }
 
     setIsGenerating(true);
-    onUpdateField(targetField, ''); // 초기화
+    
     let accumulatedText = '';
-
+    
     await OpenRouterAdapter.streamChatCompletion(
       cleanApiKey,
       systemPrompt,
@@ -33,11 +33,12 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
       // onChunk
       (chunk) => {
         accumulatedText += chunk;
-        onUpdateField(targetField, accumulatedText);
+        // Use functional update or pass the incremental chunk if handled by higher level
+        onUpdateField(targetField, accumulatedText, isAppend);
       },
       // onError
       (errorMessage) => {
-        onUpdateField(targetField, `Error generating content: ${errorMessage}`);
+        onUpdateField(targetField, `Error generating content: ${errorMessage}`, isAppend);
         console.error("Agent Engine Error:", errorMessage);
       },
       // onComplete

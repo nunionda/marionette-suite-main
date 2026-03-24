@@ -1,0 +1,21 @@
+{
+  "project": "FIRST SNOW",
+  "characters": [
+    {
+      "name": "JIN-HO",
+      "age": 78,
+      "role": "Protagonist",
+      "persona": "Grounded but fading",
+      "motivation": "To say a final goodbye to Min-ji",
+      "tone": "Quiet, hesitant, yet deeply emotional",
+      "background": "Clockmaker for 50 years. Lives in the same house since marriage."
+    },
+    {
+      "name": "MIN-JI",
+      "role": "Memory / Voice",
+      "persona": "Vibrant and eternal",
+      "tone": "Warm, sunny, slightly teasing",
+      "background": "Died 5 years ago. Was a florist."
+    }
+  ]
+}
