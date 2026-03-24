@@ -13,6 +13,7 @@ import categoryRules from '../.agents/rules/categories.md?raw';
 import clicheRules from '../.agents/rules/cliche_strategy.md?raw';
 
 import { useAgentEngine } from '../hooks/useAgentEngine';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 const GENRE_HINTS = {
   'Thriller/Action': { icon: '🔪', cues: ['Shaky Cam', 'Dutch Tilt', 'Jump Cuts', 'Drones'] },
@@ -155,7 +156,15 @@ const ProjectDetail = ({ project, onBack }) => {
 
   const generateReview = () => {
     if (!pipelineData.scenario) { alert("Please generate Scenario first."); return; }
-    executeAgent(reviewRule, `Full Screenplay Segment:\\n${pipelineData.scenario}\\n\\n이 시나리오가 실제 영화로 제작될 때의 실현 가능성, 예산 효율성, 상업적 매력을 제작자 및 투자자 관점에서 'Brutally Honest'하게 분석하세요. 특히 Robert McKee의 '대항 세력 감사(Antagonism Audit)'를 포함하여 서사적 깊이를 검증하세요.`, 'review');
+    const prompt = `Full Screenplay Segment:\n${pipelineData.scenario}\n\n이 시나리오가 실제 영화로 제작될 때의 실현 가능성, 예산 효율성, 상업적 매력을 제작자 및 투자자 관점에서 'Brutally Honest'하게 분석하세요. 특히 Robert McKee의 '대항 세력 감사(Antagonism Audit)'를 포함하여 서사적 깊이를 검증하세요.
+    [IMPORTANT]: 분석 완료 시 마지막에 반드시 아래 JSON 형식을 [ANALYSIS_JSON] 태그와 함께 포함하세요.
+    [ANALYSIS_JSON] 
+    {
+      "emotionalArc": [{"name": "Opener", "valence": 5}, {"name": "Plot Point 1", "valence": -2}, {"name": "Midpoint", "valence": 8}, {"name": "Climax", "valence": 10}],
+      "characterMap": [{"subject": "PROTAG", "A": 85, "B": 80}, {"subject": "ANTAG", "A": 90, "B": 95}, {"subject": "SIDEKICK", "A": 40, "B": 30}],
+      "beatProgress": [{"completed": 8, "total": 15}]
+    }`;
+    executeAgent(reviewRule, prompt, 'review');
   };
 
   const TAB_META = {
@@ -163,7 +172,8 @@ const ProjectDetail = ({ project, onBack }) => {
     ARCHITECTURE: { label: 'ARCHITECTURE', engine: 'Architect AI', icon: '🏛️' },
     TREATMENT: { label: 'TREATMENT', engine: 'Treatment Engine', icon: '🎬' },
     SCENARIO: { label: 'SCENARIO', engine: 'Scenario Writer', icon: '🖋️' },
-    REVIEW: { label: 'REVIEW', engine: 'Production Review', icon: '⚖️' }
+    REVIEW: { label: 'REVIEW', engine: 'Production Review', icon: '⚖️' },
+    VISION: { label: 'VISION', engine: 'Analytic Engine', icon: '📊' }
   };
 
   const tabs = Object.keys(TAB_META);
@@ -375,27 +385,31 @@ const ProjectDetail = ({ project, onBack }) => {
                 ▾ {TAB_META[activeTab].engine} Cinema View ▾
               </div>
 
-              <textarea 
-                ref={outputRef}
-                className="logline-editor" 
-                style={{ 
-                  flexGrow: 1, 
-                  resize: 'none', 
-                  background: activeTab === 'SCENARIO' ? '#f5f5f5' : 'rgba(0,0,0,0.3)', 
-                  color: activeTab === 'SCENARIO' ? '#111' : 'white',
-                  lineHeight: '1.8', 
-                  fontSize: '1.1rem', 
-                  padding: activeTab === 'SCENARIO' ? '60px 80px' : '20px',
-                  fontFamily: activeTab === 'SCENARIO' ? "'Courier Prime', 'Courier New', Courier, monospace" : 'inherit',
-                  boxShadow: activeTab === 'SCENARIO' ? 'inset 0 0 50px rgba(0,0,0,0.1)' : 'none',
-                  borderRadius: '12px',
-                  border: '1px solid var(--surface-border)'
-                }}
-                value={pipelineData[activeTab.toLowerCase()]}
-                onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
-                disabled={isGenerating}
-                placeholder={`Scenario will appear as a professional script here...`}
-              />
+              {activeTab === 'VISION' ? (
+                <AnalyticsDashboard data={project.analysisData} />
+              ) : (
+                <textarea 
+                  ref={outputRef}
+                  className="logline-editor" 
+                  style={{ 
+                    flexGrow: 1, 
+                    resize: 'none', 
+                    background: activeTab === 'SCENARIO' ? '#f5f5f5' : 'rgba(0,0,0,0.3)', 
+                    color: activeTab === 'SCENARIO' ? '#111' : 'white',
+                    lineHeight: '1.8', 
+                    fontSize: '1.1rem', 
+                    padding: activeTab === 'SCENARIO' ? '60px 80px' : '20px',
+                    fontFamily: activeTab === 'SCENARIO' ? "'Courier Prime', 'Courier New', Courier, monospace" : 'inherit',
+                    boxShadow: activeTab === 'SCENARIO' ? 'inset 0 0 50px rgba(0,0,0,0.1)' : 'none',
+                    borderRadius: '12px',
+                    border: '1px solid var(--surface-border)'
+                  }}
+                  value={pipelineData[activeTab.toLowerCase()]}
+                  onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
+                  disabled={isGenerating}
+                  placeholder={`Scenario will appear as a professional script here...`}
+                />
+              )}
             </div>
           </div>
         </div>

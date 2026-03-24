@@ -8,6 +8,7 @@ import categoryRules from '../.agents/rules/categories.md?raw';
 import genreRules from '../.agents/rules/genres.md?raw';
 
 import { useAgentEngine } from '../hooks/useAgentEngine';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 const AD_GENRE_HINTS = {
   'Brand Film': { icon: '✨', cues: ['Cinematic', 'Emotional', 'Poetic', 'Manifesto'] },
@@ -68,7 +69,8 @@ const AdProjectDetail = ({ project, onBack }) => {
     ARCHITECTURE: { label: 'COPY', engine: 'Ideation/Copy', icon: '✍️' },
     TREATMENT: { label: 'STORYBOARD', engine: 'Storyboard/Timing', icon: '🎞️' },
     SCENARIO: { label: 'A/V SCRIPT', engine: 'Master A/V Script', icon: '🎙️' },
-    REVIEW: { label: 'AUDIT', engine: 'Brand Audit', icon: '🕵️' }
+    REVIEW: { label: 'AUDIT', engine: 'Brand Audit', icon: '🕵️' },
+    VISION: { label: 'VISION', engine: 'Impact Analyst', icon: '📊' }
   };
 
   const generateContent = (tab) => {
@@ -87,7 +89,14 @@ const AdProjectDetail = ({ project, onBack }) => {
     } else if (tab === 'SCENARIO') {
       prompt = `[Task]: FINAL A/V SCRIPT. 스토리보드: ${pipelineData.treatment}\n${roleContext}\n현장 투입용 표준 2단 테이블 스크립트를 작성하세요. Visual(미장센)과 Audio(SFX/VO)를 분리하세요.`;
     } else if (tab === 'REVIEW') {
-      prompt = `[Task]: BRAND & IMPACT AUDIT. 완료된 시나리오:\n${pipelineData.scenario}\n${roleContext}\n브랜드 가이드라인 준수 여부와 'Brutally Honest'한 소출 기대 효과를 냉정하게 평가하세요. 타겟 소비자에게 전달될 실질적인 메시지 파워를 검증하세요.`;
+      prompt = `[Task]: BRAND & IMPACT AUDIT. 완료된 시나리오:\n${pipelineData.scenario}\n${roleContext}\n브랜드 가이드라인 준수 여부와 'Brutally Honest'한 소출 기대 효과를 냉정하게 평가하세요. 타겟 소비자에게 전달될 실질적인 메시지 파워를 검증하세요.
+      [IMPORTANT]: 분석 완료 시 마지막에 반드시 아래 JSON 형식을 [ANALYSIS_JSON] 태그와 함께 포함하세요.
+      [ANALYSIS_JSON] 
+      {
+        "emotionalArc": [{"name": "Start", "valence": 4}, {"name": "USP", "valence": 9}, {"name": "CTA", "valence": 10}],
+        "characterMap": [{"subject": "BRAND", "A": 100, "B": 90}, {"subject": "CONSUMER", "A": 70, "B": 50}],
+        "beatProgress": [{"completed": 5, "total": 5}]
+      }`;
     }
 
     executeAgent(fullSystemPrompt, prompt, target);
@@ -206,17 +215,21 @@ const AdProjectDetail = ({ project, onBack }) => {
               </button>
             </div>
             
-            <textarea 
-              ref={outputRef}
-              className="ad-editor"
-              value={pipelineData[activeTab.toLowerCase()]}
-              onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
-              style={{ 
-                width: '100%', height: 'calc(100% - 40px)', background: 'rgba(0,0,0,0.4)', 
-                color: 'white', padding: '20px', border: '1px solid var(--surface-border)',
-                lineHeight: '1.6', fontSize: '1.05rem', resize: 'none'
-              }}
-            />
+            {activeTab === 'VISION' ? (
+              <AnalyticsDashboard data={project.analysisData} />
+            ) : (
+              <textarea 
+                ref={outputRef}
+                className="ad-editor"
+                value={pipelineData[activeTab.toLowerCase()]}
+                onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
+                style={{ 
+                  width: '100%', height: 'calc(100% - 40px)', background: 'rgba(0,0,0,0.4)', 
+                  color: 'white', padding: '20px', border: '1px solid var(--surface-border)',
+                  lineHeight: '1.6', fontSize: '1.05rem', resize: 'none'
+                }}
+              />
+            )}
           </div>
         </div>
       </div>

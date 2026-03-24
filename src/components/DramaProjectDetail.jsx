@@ -9,6 +9,7 @@ import categoryRules from '../.agents/rules/categories.md?raw';
 import genreRules from '../.agents/rules/genres.md?raw';
 
 import { useAgentEngine } from '../hooks/useAgentEngine';
+import AnalyticsDashboard from './AnalyticsDashboard';
 
 const GENRE_HINTS = {
   'Thriller/Action': { icon: '🔪', cues: ['Shaky Cam', 'Dutch Tilt', 'Jump Cuts', 'Drones'] },
@@ -65,7 +66,8 @@ const DramaProjectDetail = ({ project, onBack }) => {
     BIBLE: { label: 'SERIES BIBLE', engine: 'Series Architect', icon: '📖' },
     EPISODES: { label: 'EPISODE ARC', engine: 'Arc Designer', icon: '🎞️' },
     SCRIPT: { label: 'SCRIPT LAB', engine: 'Episode Writer', icon: '🖋️' },
-    REVIEW: { label: 'BINGE AUDIT', engine: 'Hook Auditor', icon: '⚡' }
+    REVIEW: { label: 'BINGE AUDIT', engine: 'Hook Auditor', icon: '⚡' },
+    VISION: { label: 'VISION', engine: 'Series Analyst', icon: '📊' }
   };
 
   const generateContent = (tab) => {
@@ -82,7 +84,14 @@ const DramaProjectDetail = ({ project, onBack }) => {
     } else if (tab === 'SCRIPT') {
       prompt = `[Task]: Write Episode Script. Current Arc: ${pipelineData.episodes}\n${context}\n에피소드 ${selectedEpisode}의 오프닝부터 주요 씬 5개를 집필하세요. 모든 씬 헤더에 실내외 구분(INT./EXT.)을 반드시 포함하여 넷플릭스 표준 텐션을 유지하세요.`;
     } else if (tab === 'REVIEW') {
-      prompt = `[Task]: Binge-Watch & Antagonism Audit. Script Content: ${pipelineData.script}\n${context}\n이 에피소드가 끝났을 때 관객이 즉시 '다음 화' 버튼을 누를 확률을 분석하고, 'Brutally Honest'한 제작 실현 가능성 및 대항 세력(Antagonism)의 깊이를 검증하세요.`;
+      prompt = `[Task]: Binge-Watch & Antagonism Audit. Script Content: ${pipelineData.script}\n${context}\n이 에피소드가 끝났을 때 관객이 즉시 '다음 화' 버튼을 누를 확률을 분석하고, 'Brutally Honest'한 제작 실현 가능성 및 대항 세력(Antagonism)의 깊이를 검증하세요.
+      [IMPORTANT]: 분석 완료 시 마지막에 반드시 아래 JSON 형식을 [ANALYSIS_JSON] 태그와 함께 포함하세요.
+      [ANALYSIS_JSON] 
+      {
+        "emotionalArc": [{"name": "Opener", "valence": 7}, {"name": "Cliffhanger", "valence": 9}],
+        "characterMap": [{"subject": "PROTAG", "A": 88, "B": 82}],
+        "beatProgress": [{"completed": 12, "total": 15}]
+      }`;
     }
 
     executeAgent(fullSystemPrompt, prompt, target);
@@ -190,18 +199,22 @@ const DramaProjectDetail = ({ project, onBack }) => {
               </button>
             </div>
             
-            <textarea 
-              ref={outputRef}
-              className="drama-editor"
-              value={pipelineData[activeTab.toLowerCase()]}
-              onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
-              style={{ 
-                width: '100%', height: 'calc(100% - 40px)', background: 'white', 
-                color: '#111', padding: '60px 80px', border: '1px solid var(--surface-border)',
-                lineHeight: '1.8', fontSize: '1.1rem', resize: 'none',
-                fontFamily: activeTab === 'SCRIPT' ? "'Courier Prime', monospace" : 'inherit'
-              }}
-            />
+            {activeTab === 'VISION' ? (
+              <AnalyticsDashboard data={project.analysisData} />
+            ) : (
+              <textarea 
+                ref={outputRef}
+                className="drama-editor"
+                value={pipelineData[activeTab.toLowerCase()]}
+                onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
+                style={{ 
+                  width: '100%', height: 'calc(100% - 40px)', background: 'white', 
+                  color: '#111', padding: '60px 80px', border: '1px solid var(--surface-border)',
+                  lineHeight: '1.8', fontSize: '1.1rem', resize: 'none',
+                  fontFamily: activeTab === 'SCRIPT' ? "'Courier Prime', monospace" : 'inherit'
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
