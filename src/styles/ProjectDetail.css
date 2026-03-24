@@ -30,13 +30,14 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--text-muted);
+  color: #fff;
+  opacity: 0.8;
   cursor: pointer;
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.85rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  transition: color 0.2s;
+  letter-spacing: 0.15em;
+  transition: all 0.2s;
 }
 
 .back-btn:hover {
@@ -60,11 +61,12 @@
 }
 
 .project-title-mini {
-  font-size: 0.9rem;
-  font-weight: 800;
+  font-size: 1.05rem;
+  font-weight: 900;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   color: var(--text-primary);
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
 .studio-container {
