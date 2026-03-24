@@ -81,7 +81,7 @@ const LoglineLab = () => {
             </div>
             <textarea 
               className="tactical-input lab-textarea"
-              placeholder="e.g. A rogue algorithm that predicts the day humans will stop loving."
+              placeholder="예: [어린 소년 토토]가 [전쟁과 가난]에 맞서 [영화감독의 꿈]을 이루기 위해 [영사기사 알프레도와 우정을 쌓는] 이야기"
               value={inputBrief}
               onChange={(e) => setInputBrief(e.target.value)}
             />
