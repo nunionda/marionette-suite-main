@@ -58,3 +58,30 @@ After every change, Claude must verify its work:
 1. `bun run typecheck` — must pass with zero errors
 2. `bun run test` — all tests must pass
 3. `bun run lint` — no lint errors before committing
+
+## Scenario analysis workspace
+
+Self-contained LLM-based screenplay analysis sub-system within the monorepo.
+
+### Structure
+- `packages/scenario-core` — Analysis engines (beat sheet, emotion, rating, ROI, coverage, VFX, trope)
+- `packages/scenario-db` — Prisma client (separate DB: `SCENARIO_DATABASE_URL`)
+- `apps/scenario-api` — Elysia server (port 4005)
+- `apps/scenario-web` — Next.js dashboard (port 4000)
+- `docs/scenario/` — 22 plans + 38 session results + architecture docs
+
+### Running
+```sh
+bun run dev:scenario-api   # API server on :4005
+bun run dev:scenario-web   # Web dashboard on :4000
+```
+
+### Provider chain (fallback order)
+Gemini Pro → Groq → DeepSeek → Anthropic → OpenAI → Mock
+
+### Note on TypeScript
+Scenario packages have own tsconfig, excluded from root typecheck.
+
+## Compact instructions
+
+When compacting, preserve: current task context, file paths being modified, test/lint results, and architectural decisions. Discard: exploration output, verbose tool results, and intermediate search results.
