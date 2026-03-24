@@ -74,7 +74,7 @@ const ProjectDetail = ({ project, onBack }) => {
   };
 
   // 1. Instantiate Application Layer (Engine Hook)
-  const { executeAgent, isGenerating } = useAgentEngine(apiKey, handleDataChange);
+  const { executeAgent, isGenerating, generationStatus } = useAgentEngine(apiKey, handleDataChange);
 
   // 2. Manage View Side Effects (Auto-Scroll)
   useEffect(() => {
@@ -107,18 +107,20 @@ const ProjectDetail = ({ project, onBack }) => {
     executeAgent(
       loglineRule, 
       `사용자 브리프(아이디어/주제):\n${conceptBrief}\n\n기획 방향성:\n${conceptDirection}\n\n이 아이디어와 방향성을 바탕으로 글로벌 스펙터클과 한국 관객의 카타르시스를 모두 충족하는 완벽한 하이컨셉을 도출하세요.`, 
-      'concept'
+      'concept',
+      false,
+      'Conceptualizing Vision...'
     );
   };
 
   const generateArchitecture = () => {
     if (!pipelineData.concept) { alert("Please generate the Concept first."); return; }
-    executeAgent(architectRule, `Logline/Concept:\\n${pipelineData.concept}\\n\\n이 컨셉을 바탕으로 핵심 캐릭터 시트와 역동적인 3막 시놉시스를 설계하세요.`, 'architecture');
+    executeAgent(architectRule, `Logline/Concept:\\n${pipelineData.concept}\\n\\n이 컨셉을 바탕으로 핵심 캐릭터 시트와 역동적인 3막 시놉시스를 설계하세요.`, 'architecture', false, 'Drafting Structural Blueprint...');
   };
 
   const generateTreatment = () => {
     if (!pipelineData.architecture) { alert("Please generate Architecture first."); return; }
-    executeAgent(treatmentRule, `Synopsis & Characters:\\n${pipelineData.architecture}\\n\\n이를 Blake Snyder의 15-Beat Sheet (Save the Cat!) 구조에 맞게 배열하고 단계별 트리트먼트와 세부 비트 시트를 작성하세요.`, 'treatment');
+    executeAgent(treatmentRule, `Synopsis & Characters:\\n${pipelineData.architecture}\\n\\n이를 Blake Snyder의 15-Beat Sheet (Save the Cat!) 구조에 맞게 배열하고 단계별 트리트먼트와 세부 비트 시트를 작성하세요.`, 'treatment', false, 'Sequencing Beat Sheet...');
   };
 
   const generateScenario = () => {
@@ -140,7 +142,7 @@ const ProjectDetail = ({ project, onBack }) => {
 [Current Script]:\n${pipelineData.scenario}\n\n
 [Task]: 위 피드백을 반영하여 시나리오를 수정하세요. 모든 씬 헤딩에 INT. 또는 EXT. 를 명시하세요. 수정된 전체 시나리오를 반환하세요.
 `;
-      executeAgent(fullSystemPrompt, prompt, 'scenario', false);
+      executeAgent(fullSystemPrompt, prompt, 'scenario', false, 'Refining Scene Dynamics...');
       return;
     }
 
@@ -152,7 +154,7 @@ const ProjectDetail = ({ project, onBack }) => {
 [Producer's Note]: 사용자의 특별 지시사항:\n${producerNote}\n\n
 [Task]: 위 지단사항을 반영하며 다음 5개 씬을 집필하세요. 모든 씬 헤딩에 INT./EXT.를 명시적으로 기입하세요. (예: S#1. INT. 거실 - 밤)
 `;
-    executeAgent(fullSystemPrompt, prompt, 'scenario', true);
+    executeAgent(fullSystemPrompt, prompt, 'scenario', true, 'Executing Master Scene Format...');
   };
 
   const generateReview = () => {
@@ -165,7 +167,7 @@ const ProjectDetail = ({ project, onBack }) => {
       "characterMap": [{"subject": "PROTAG", "A": 85, "B": 80}, {"subject": "ANTAG", "A": 90, "B": 95}, {"subject": "SIDEKICK", "A": 40, "B": 30}],
       "beatProgress": [{"completed": 8, "total": 15}]
     }`;
-    executeAgent(reviewRule, prompt, 'review');
+    executeAgent(reviewRule, prompt, 'review', false, 'Performing Production Audit...');
   };
 
   const TAB_META = {
@@ -222,7 +224,20 @@ const ProjectDetail = ({ project, onBack }) => {
       </div>
 
       <div className="content" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-        <div className="section-card glass" style={{ display: 'flex', flexDirection: 'column', minHeight: '1600px' }}>
+        <div className="section-card glass" style={{ display: 'flex', flexDirection: 'column', minHeight: '1600px', position: 'relative', overflow: 'hidden' }}>
+          {/* 🛰️ Stage 2.1 AI Progress Indicators */}
+          {isGenerating && (
+            <>
+              <div className="status-indicator-bar" />
+              <div className="status-text-bubble">
+                <div className="status-dot" />
+                {generationStatus}
+              </div>
+              <div className="neural-mesh-overlay active">
+                <div className="scan-line" />
+              </div>
+            </>
+          )}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 className="section-title" style={{ margin: 0 }}>
               {TAB_META[activeTab].engine}
@@ -247,7 +262,7 @@ const ProjectDetail = ({ project, onBack }) => {
                 disabled={isGenerating}
                 style={{ background: isGenerating ? 'transparent' : 'var(--accent-primary)', color: isGenerating ? 'var(--accent-primary)' : 'black', padding: '12px 24px', fontWeight: 'bold' }}
               >
-                {isGenerating ? 'Generating Stream...' : `⚡ ${scriptMode === 'REFINE' && activeTab === 'SCENARIO' ? 'Refine' : 'Run'} ${TAB_META[activeTab].engine}`}
+                {isGenerating ? generationStatus : `⚡ ${scriptMode === 'REFINE' && activeTab === 'SCENARIO' ? 'Refine' : 'Run'} ${TAB_META[activeTab].engine}`}
               </button>
             </div>
           </div>

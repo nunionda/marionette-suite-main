@@ -9,18 +9,20 @@ import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
  */
 export const useAgentEngine = (apiKey, onUpdateField) => {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationStatus, setGenerationStatus] = useState('');
 
-  const executeAgent = async (systemPrompt, userPrompt, targetField, isAppend = false) => {
+  const executeAgent = async (systemPrompt, userPrompt, targetField, isAppend = false, statusLabel = 'Processing...') => {
     // Note: Backend now handles API key via proxy. 
     // apiKey is preserved here for backward compatibility if needed by the adapter, 
     // but the engine no longer blocks execution if it's missing.
 
     setIsGenerating(true);
+    setGenerationStatus(statusLabel);
     
     let accumulatedText = '';
     
     await OpenRouterAdapter.streamChatCompletion(
-      cleanApiKey,
+      apiKey,
       systemPrompt,
       userPrompt,
       // onChunk
@@ -50,7 +52,8 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
     );
 
     setIsGenerating(false);
+    setGenerationStatus('');
   };
 
-  return { executeAgent, isGenerating };
+  return { executeAgent, isGenerating, generationStatus };
 };

@@ -10,6 +10,8 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       return { error: "API Key missing in server environment" };
     }
 
+    console.log(`[AI_STREAM] Request: ${model} | Prompt Length: ${prompt?.length || 0}`);
+    
     const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -29,10 +31,12 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
     });
 
     if (!response.ok) {
+      console.error(`[AI_STREAM] Error: ${response.status}`);
       set.status = response.status;
       return response.json();
     }
 
+    console.log(`[AI_STREAM] Streaming started...`);
     return response.body; // Return the stream directly to Elysia
   }, {
     body: t.Object({
