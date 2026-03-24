@@ -23,7 +23,8 @@ const LoglineLab = () => {
 
   const fetchSavedLoglines = async () => {
     try {
-      const res = await fetch('http://localhost:3005/api/loglines');
+      console.log("Fetching loglines via proxy /api/loglines...");
+      const res = await fetch('/api/loglines');
       const data = await res.json();
       setSavedLoglines(data.loglines || []);
     } catch (e) {
@@ -60,29 +61,34 @@ const LoglineLab = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:3005/api/loglines', {
+      console.log("Saving logline via proxy /api/loglines...", { content: finalContent, category: finalTitle, genre });
+      const res = await fetch('/api/loglines', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           content: finalContent,
-          category: finalTitle ? `${category} | ${finalTitle}` : category, // We use category field to store title-ish info too if needed
+          category: finalTitle ? `${category} | ${finalTitle}` : category,
           genre
         })
       });
       const data = await res.json();
+      console.log("Save Result:", data);
       if (data.success) {
-        setSavedLoglines([data.logline, ...savedLoglines]);
-        alert("Idea saved to storage!");
+        setSavedLoglines(prev => [data.logline, ...prev]);
+        alert("Idea saved successfully!");
+      } else {
+        alert("Server Error: " + (data.error || "Unknown"));
       }
     } catch (e) {
-      alert("Failed to save idea.");
+      console.error("Save failed:", e);
+      alert("Network Error: " + e.message + "\n(Is the server running on port 3005?)");
     }
   };
 
   const deleteLogline = async (id) => {
     if (!window.confirm("Delete this idea?")) return;
     try {
-      const res = await fetch(`http://localhost:3005/api/loglines/${id}`, {
+      const res = await fetch(`/api/loglines/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();
