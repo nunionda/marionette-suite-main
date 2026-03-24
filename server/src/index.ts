@@ -68,6 +68,10 @@ const app = new Elysia()
           category: t.Optional(t.String())
         })
       })
+      .delete("/loglines/:id", async ({ params: { id } }) => {
+        await db.delete(loglineIdeas).where(eq(loglineIdeas.id, parseInt(id)));
+        return { success: true };
+      })
   )
   .listen({
     port: 3005,

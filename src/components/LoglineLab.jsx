@@ -63,6 +63,21 @@ const LoglineLab = () => {
     }
   };
 
+  const deleteLogline = async (id) => {
+    if (!window.confirm("Delete this idea?")) return;
+    try {
+      const res = await fetch(`http://127.0.0.1:3005/api/loglines/${id}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSavedLoglines(savedLoglines.filter(idea => idea.id !== id));
+      }
+    } catch (e) {
+      console.error("Failed to delete logline.");
+    }
+  };
+
   return (
     <div className="logline-lab-container animate-in">
       <div className="lab-header">
@@ -131,7 +146,14 @@ const LoglineLab = () => {
               <div className="empty-ideas">No saved ideas yet.</div>
             ) : (
               savedLoglines.map(idea => (
-                <div key={idea.id} className="saved-idea-card glass-hover">
+                <div key={idea.id} className="saved-idea-card glass-hover" style={{ position: 'relative' }}>
+                  <button 
+                    className="delete-card-btn" 
+                    onClick={() => deleteLogline(idea.id)}
+                    style={{ position: 'absolute', top: '10px', right: '10px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '10px' }}
+                  >
+                    ✕
+                  </button>
                   <div className="idea-meta">
                     <span className="idea-cat">{idea.category}</span>
                     <span className="idea-genre">{idea.genre}</span>
