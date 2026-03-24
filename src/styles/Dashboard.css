@@ -1,0 +1,192 @@
+/* src/styles/Dashboard.css */
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* 🎭 HERO SECTION */
+.hero-section {
+  position: relative;
+  width: 100%;
+  height: 65vh;
+  min-height: 500px;
+  background-image: url('/hero-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed; /* Parallax effect */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  /* Dark fade to match the projects section below */
+  background: linear-gradient(to bottom, rgba(14, 16, 15, 0.4) 0%, rgba(14, 16, 15, 0.95) 100%);
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 50px 60px;
+  border-radius: 16px;
+  max-width: 800px;
+  animation: fadeIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.glass-dark {
+  background: rgba(10, 10, 12, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(195, 160, 90, 0.2);
+  box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+.cinematic-title {
+  font-family: 'Orbitron', 'Inter', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.hero-headline {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 4.5rem;
+  font-weight: 300;
+  color: #fff;
+  margin: 0 0 20px 0;
+  line-height: 1.1;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.8);
+}
+
+.hero-subtext {
+  font-size: 1.2rem;
+  color: #a0a0a5;
+  line-height: 1.6;
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+
+.massive-btn {
+  padding: 20px 40px;
+  letter-spacing: 3px;
+  border-radius: 4px;
+}
+
+.glow-effect:hover {
+  box-shadow: 0 0 30px rgba(195, 160, 90, 0.4);
+  transform: translateY(-2px);
+}
+
+/* 📂 PROJECTS SECTION */
+.projects-section {
+  padding: 60px 5%;
+  flex-grow: 1;
+  background-color: var(--bg-dark);
+}
+
+.section-header {
+  margin-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 20px;
+}
+
+.bulletin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 30px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 0;
+  font-size: 1.5rem;
+  font-style: italic;
+  opacity: 0.6;
+}
+
+/* 🗂️ PROJECT CARD */
+.project-card {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.hover-glow:hover {
+  border-color: rgba(195, 160, 90, 0.5);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  transform: translateY(-4px);
+}
+
+.project-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.project-title {
+  font-size: 1.8rem;
+  margin: 0 0 8px 0;
+  font-family: 'Cormorant Garamond', serif;
+}
+
+.project-genre {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-secondary);
+}
+
+.project-logline {
+  color: var(--text-dim);
+  line-height: 1.6;
+  flex-grow: 1;
+  font-style: italic;
+  border-left: 2px solid rgba(255,255,255,0.1);
+  padding-left: 15px;
+  margin-bottom: 24px;
+}
+
+.card-footer {
+  margin-bottom: 20px;
+}
+
+.full-width {
+  width: 100%;
+  padding: 14px;
+  letter-spacing: 2px;
+}
+
+.delete-card-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+  background: rgba(255,0,0,0.1);
+  border: 1px solid rgba(255,0,0,0.3);
+  color: #ff6b6b;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.delete-card-btn:hover {
+  background: red;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
