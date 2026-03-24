@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
 import ProjectCreateModal from './ProjectCreateModal';
+import LoglineLab from './LoglineLab';
 import '../styles/Dashboard.css';
 
 const ProjectCard = ({ project, onEnter }) => (
@@ -34,6 +35,7 @@ const ProjectCard = ({ project, onEnter }) => (
 
 const Dashboard = ({ onEnterLab }) => {
   const { projects, addProject, deleteProject } = useContext(ProjectContext);
+  const [activeMainTab, setActiveMainTab] = useState('PRODUCTIONS');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterTab, setFilterTab] = useState('ALL');
 
@@ -69,6 +71,22 @@ const Dashboard = ({ onEnterLab }) => {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <div className="hero-content glass-dark">
+          <div className="header-top-nav">
+            <div className="main-nav-tabs">
+              <button 
+                className={`nav-tab ${activeMainTab === 'PRODUCTIONS' ? 'active' : ''}`}
+                onClick={() => setActiveMainTab('PRODUCTIONS')}
+              >
+                PRODUCTIONS
+              </button>
+              <button 
+                className={`nav-tab ${activeMainTab === 'LOGLINE_LAB' ? 'active' : ''}`}
+                onClick={() => setActiveMainTab('LOGLINE_LAB')}
+              >
+                LOGLINE LAB
+              </button>
+            </div>
+          </div>
           <div className="brand gradient-text cinematic-title">AI CINEMA LAB</div>
           <h1 className="hero-headline">Engineer the Perfect Screenplay</h1>
           <p className="hero-subtext">
@@ -81,9 +99,11 @@ const Dashboard = ({ onEnterLab }) => {
         </div>
       </section>
 
-      {/* 📂 PROJECT BULLETIN GRID */}
-      <section className="projects-section">
-        <div className="section-header">
+      {activeMainTab === 'LOGLINE_LAB' ? (
+        <LoglineLab />
+      ) : (
+        <section className="projects-section">
+          <div className="section-header">
           <h2 style={{ margin: 0, fontWeight: 300, fontSize: '2rem', letterSpacing: '4px' }}>
             ACTIVE <span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>PRODUCTIONS</span>
           </h2>
@@ -121,6 +141,7 @@ const Dashboard = ({ onEnterLab }) => {
           </div>
         )}
       </section>
+      )}
     </div>
   );
 };

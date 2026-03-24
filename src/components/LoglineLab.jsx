@@ -1,0 +1,148 @@
+import React, { useState, useEffect } from 'react';
+import { useAgentEngine } from '../hooks/useAgentEngine';
+import loglineRule from '../.agents/rules/logline_engine.md?raw';
+
+const LoglineLab = () => {
+  const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openRouterApiKey') || '');
+  const [inputBrief, setInputBrief] = useState('');
+  const [generatedLogline, setGeneratedLogline] = useState('');
+  const [savedLoglines, setSavedLoglines] = useState([]);
+  const [category, setCategory] = useState('Movie');
+  const [genre, setGenre] = useState('Thriller');
+
+  // We use useAgentEngine to handle the streaming
+  const handleUpdateField = (field, value) => {
+    if (field === 'logline') setGeneratedLogline(value);
+  };
+  
+  const { executeAgent, isGenerating, generationStatus } = useAgentEngine(apiKey, handleUpdateField);
+
+  useEffect(() => {
+    fetchSavedLoglines();
+  }, []);
+
+  const fetchSavedLoglines = async () => {
+    try {
+      const res = await fetch('http://127.0.0.1:3005/api/loglines');
+      const data = await res.json();
+      setSavedLoglines(data.loglines || []);
+    } catch (e) {
+      console.error("Failed to fetch loglines.");
+    }
+  };
+
+  const generateIdea = () => {
+    if (!inputBrief.trim()) {
+      alert("Please enter an idea or theme first.");
+      return;
+    }
+    setGeneratedLogline('');
+    const prompt = `[Categorical Context]: ${category}\n[Genre]: ${genre}\n[User Brief]: ${inputBrief}\n\n위 아이디어를 바탕으로 천만 관객의 심장을 관통하는 단 한 문장의 하이-컨셉 로그라인을 도출하세요.`;
+    executeAgent(loglineRule, prompt, 'logline', false, 'Brainstorming...');
+  };
+
+  const saveToDatabase = async () => {
+    if (!generatedLogline) return;
+    try {
+      const res = await fetch('http://127.0.0.1:3005/api/loglines', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: generatedLogline,
+          category,
+          genre
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setSavedLoglines([data.logline, ...savedLoglines]);
+        alert("Idea saved to storage!");
+      }
+    } catch (e) {
+      alert("Failed to save idea.");
+    }
+  };
+
+  return (
+    <div className="logline-lab-container animate-in">
+      <div className="lab-header">
+        <h2 className="gradient-text cinematic-title">💡 LOGLINE IDEA LAB</h2>
+        <p className="lab-desc">Standalone repository for high-concept brainstorming.</p>
+      </div>
+
+      <div className="lab-grid">
+        {/* 🧠 GENERATION ZONE */}
+        <section className="lab-section brainstorm-zone glass-dark">
+          <h3 className="section-title">Brainstorming Stage</h3>
+          <div className="form-group">
+            <label>CORE IDEA / THEME</label>
+            <textarea 
+              className="tactical-input lab-textarea"
+              placeholder="e.g. A rogue algorithm that predicts the day humans will stop loving."
+              value={inputBrief}
+              onChange={(e) => setInputBrief(e.target.value)}
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label>CATEGORY</label>
+              <select className="tactical-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+                <option>Movie</option>
+                <option>Series</option>
+                <option>Commercial</option>
+              </select>
+            </div>
+            <div className="form-group">
+              <label>GENRE</label>
+              <select className="tactical-select" value={genre} onChange={(e) => setGenre(e.target.value)}>
+                <option>Thriller</option>
+                <option>Drama</option>
+                <option>SF</option>
+                <option>Horror</option>
+                <option>Comedy</option>
+              </select>
+            </div>
+          </div>
+
+          <button className="tactical-btn glow-effect full-width" onClick={generateIdea} disabled={isGenerating}>
+            {isGenerating ? generationStatus.toUpperCase() : "⚡ GENERATE LOGLINE"}
+          </button>
+
+          {generatedLogline && (
+            <div className="generation-result animate-in">
+              <div className="result-header">
+                <span className="badge production">RESULT</span>
+                <button className="btn-save-idea" onClick={saveToDatabase}>💾 SAVE TO STORAGE</button>
+              </div>
+              <p className="result-text">{generatedLogline}</p>
+            </div>
+          )}
+        </section>
+
+        {/* 📂 STORAGE ZONE */}
+        <section className="lab-section storage-zone glass-dark">
+          <h3 className="section-title">Idea Repository ({savedLoglines.length})</h3>
+          <div className="ideas-scroll">
+            {savedLoglines.length === 0 ? (
+              <div className="empty-ideas">No saved ideas yet.</div>
+            ) : (
+              savedLoglines.map(idea => (
+                <div key={idea.id} className="saved-idea-card glass-hover">
+                  <div className="idea-meta">
+                    <span className="idea-cat">{idea.category}</span>
+                    <span className="idea-genre">{idea.genre}</span>
+                  </div>
+                  <p className="idea-content">{idea.content}</p>
+                  <span className="idea-date">{new Date(idea.createdAt).toLocaleDateString()}</span>
+                </div>
+              ))
+            )}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+export default LoglineLab;

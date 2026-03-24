@@ -1,8 +1,8 @@
 import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { aiRoutes } from "./ai";
-import { db, projects } from "./db";
-import { eq } from "drizzle-orm";
+import { db, projects, loglineIdeas } from "./db";
+import { eq, desc } from "drizzle-orm";
 import { syncProjectToFileSystem } from "./lib/sync";
 
 const API_BASE = "http://localhost:3005/api";
@@ -53,6 +53,20 @@ const app = new Elysia()
       .delete("/projects/:id", async ({ params: { id } }) => {
         await db.delete(projects).where(eq(projects.id, parseInt(id)));
         return { success: true };
+      })
+      .get("/loglines", async () => {
+        const allIdeas = await db.select().from(loglineIdeas).orderBy(desc(loglineIdeas.createdAt));
+        return { loglines: allIdeas };
+      })
+      .post("/loglines", async ({ body }) => {
+        const [newIdea] = await db.insert(loglineIdeas).values(body).returning();
+        return { success: true, logline: newIdea };
+      }, {
+        body: t.Object({
+          content: t.String(),
+          genre: t.Optional(t.String()),
+          category: t.Optional(t.String())
+        })
       })
   )
   .listen({

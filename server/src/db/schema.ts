@@ -30,3 +30,11 @@ export const sceneVersions = pgTable("scene_versions", {
   producerNote: text("producer_note"),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const loglineIdeas = pgTable("logline_ideas", {
+  id: serial("id").primaryKey(),
+  content: text("content").notNull(),
+  genre: text("genre"),
+  category: text("category"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
