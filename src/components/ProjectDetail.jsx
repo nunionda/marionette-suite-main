@@ -106,7 +106,15 @@ const ProjectDetail = ({ project, onBack }) => {
     executeAgent(reviewRule, `Full Screenplay Segment:\\n${pipelineData.scenario}\\n\\n이 시나리오가 실제 영화로 제작될 때의 실현 가능성, 예산 효율성, 상업적 매력을 제작자 및 투자자 관점에서 냉정하게 리뷰하세요.`, 'review');
   };
 
-  const tabs = ['CONCEPT', 'ARCHITECTURE', 'TREATMENT', 'SCENARIO', 'REVIEW'];
+  const TAB_META = {
+    CONCEPT: { label: 'CONCEPT', engine: 'Logline Engine', icon: '🎯' },
+    ARCHITECTURE: { label: 'ARCHITECTURE', engine: 'Architect AI', icon: '🏛️' },
+    TREATMENT: { label: 'TREATMENT', engine: 'Treatment Engine', icon: '🎬' },
+    SCENARIO: { label: 'SCENARIO', engine: 'Scenario Writer', icon: '🖋️' },
+    REVIEW: { label: 'REVIEW', engine: 'Production Review', icon: '⚖️' }
+  };
+
+  const tabs = Object.keys(TAB_META);
 
   return (
     <div className="project-detail">
@@ -130,7 +138,7 @@ const ProjectDetail = ({ project, onBack }) => {
           />
           <div style={{ width: '1px', height: '24px', background: 'var(--surface-border)', margin: '0 8px' }}></div>
           <button className="tactical-btn" onClick={saveToContext} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>💾</span> 프로젝트 전체 저장
+            <span>💾</span> SAVE ALL
           </button>
         </div>
       </div>
@@ -142,7 +150,7 @@ const ProjectDetail = ({ project, onBack }) => {
             className={`tab ${activeTab === tab ? 'active' : ''}`}
             onClick={() => setActiveTab(tab)}
           >
-            {tab}
+            {TAB_META[tab].icon} {TAB_META[tab].label}
           </div>
         ))}
       </div>
@@ -151,10 +159,7 @@ const ProjectDetail = ({ project, onBack }) => {
         <div className="section-card glass" style={{ display: 'flex', flexDirection: 'column', height: '600px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h2 className="section-title" style={{ margin: 0 }}>
-              {activeTab === 'CONCEPT' ? 'Logline Engine' : 
-               activeTab === 'ARCHITECTURE' ? 'Architect AI' : 
-               activeTab === 'TREATMENT' ? 'Treatment Engine' : 
-               activeTab === 'SCENARIO' ? 'Scenario Writer' : 'Production Review'}
+              {TAB_META[activeTab].engine}
             </h2>
             <button 
               className="tactical-btn" 
@@ -168,7 +173,7 @@ const ProjectDetail = ({ project, onBack }) => {
               disabled={isGenerating}
               style={{ background: isGenerating ? 'transparent' : 'var(--accent-primary)', color: isGenerating ? 'var(--accent-primary)' : 'black', padding: '12px 24px', fontWeight: 'bold' }}
             >
-              {isGenerating ? 'Generating Stream...' : `⚡ Run ${activeTab} AI`}
+              {isGenerating ? 'Generating Stream...' : `⚡ Run ${TAB_META[activeTab].engine}`}
             </button>
           </div>
           
