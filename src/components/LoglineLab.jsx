@@ -43,13 +43,29 @@ const LoglineLab = () => {
 
   const saveToDatabase = async () => {
     if (!generatedLogline) return;
+    
+    // Extract JSON if present in the response
+    let finalContent = generatedLogline;
+    let finalTitle = "";
+    
+    try {
+      const jsonMatch = generatedLogline.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        finalContent = parsed.logline || generatedLogline;
+        finalTitle = parsed.title || "";
+      }
+    } catch (e) {
+      console.warn("Could not parse AI response as JSON, saving as raw string.");
+    }
+
     try {
       const res = await fetch('http://127.0.0.1:3005/api/loglines', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          content: generatedLogline,
-          category,
+          content: finalContent,
+          category: finalTitle ? `${category} | ${finalTitle}` : category, // We use category field to store title-ish info too if needed
           genre
         })
       });
@@ -158,7 +174,9 @@ const LoglineLab = () => {
                     <span className="idea-cat">{idea.category}</span>
                     <span className="idea-genre">{idea.genre}</span>
                   </div>
-                  <p className="idea-content">{idea.content}</p>
+                  <p className="idea-content" style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
+                    {idea.content}
+                  </p>
                   <span className="idea-date">{new Date(idea.createdAt).toLocaleDateString()}</span>
                 </div>
               ))
