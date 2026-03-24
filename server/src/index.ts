@@ -4,8 +4,18 @@ import { aiRoutes } from "./ai";
 import { db, projects } from "./db";
 import { eq } from "drizzle-orm";
 
+const API_BASE = "http://localhost:3005/api";
 const app = new Elysia()
-  .use(cors())
+  .use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    maxAge: 5
+  }))
+  .onError(({ code, error, set }) => {
+    console.error(`💥 Error [${code}]:`, error);
+    return { error: error.message };
+  })
   .get("/", () => "Cinematic Engine Backend Alive")
   .use(aiRoutes)
   .group("/api", (app) =>
@@ -29,7 +39,7 @@ const app = new Elysia()
         return project;
       })
       .patch("/projects/:id", async ({ params: { id }, body }) => {
-        const updateData: any = { ...body, updatedAt: new Date() };
+        const updateData: any = { ...(body as any), updatedAt: new Date() };
         const [updatedProject] = await db.update(projects)
           .set(updateData)
           .where(eq(projects.id, parseInt(id)))
@@ -41,6 +51,9 @@ const app = new Elysia()
         return { success: true };
       })
   )
-  .listen(3001);
+  .listen({
+    port: 3005,
+    hostname: "0.0.0.0"
+  });
 
 console.log(`🎬 Cinematic Engine Backend running at ${app.server?.hostname}:${app.server?.port}`);

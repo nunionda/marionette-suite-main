@@ -54,7 +54,7 @@ const defaultProjects = [
 
 export const ProjectProvider = ({ children }) => {
   const [projects, setProjects] = useState([]);
-  const API_BASE = "http://localhost:3001/api";
+  const API_BASE = "http://127.0.0.1:3005/api";
 
   // 1. Initial Load from Server
   useEffect(() => {

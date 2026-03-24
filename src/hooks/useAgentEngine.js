@@ -11,16 +11,9 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const executeAgent = async (systemPrompt, userPrompt, targetField, isAppend = false) => {
-    if (!apiKey) {
-      alert("⚠️ OpenRouter API Key를 입력해주세요.");
-      return;
-    }
-
-    const cleanApiKey = apiKey.replace(/^Bearer\s+/i, "").trim().replace(/[^\x00-\x7F]/g, "");
-    if (!cleanApiKey) {
-      alert("⚠️ 입력하신 API Key가 유효하지 않습니다. (영문/숫자로만 이루어진 정상적인 키를 입력해주세요)");
-      return;
-    }
+    // Note: Backend now handles API key via proxy. 
+    // apiKey is preserved here for backward compatibility if needed by the adapter, 
+    // but the engine no longer blocks execution if it's missing.
 
     setIsGenerating(true);
     
