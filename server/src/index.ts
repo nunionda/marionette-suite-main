@@ -3,6 +3,7 @@ import { cors } from "@elysiajs/cors";
 import { aiRoutes } from "./ai";
 import { db, projects } from "./db";
 import { eq } from "drizzle-orm";
+import { syncProjectToFileSystem } from "./lib/sync";
 
 const API_BASE = "http://localhost:3005/api";
 const app = new Elysia()
@@ -14,7 +15,7 @@ const app = new Elysia()
   }))
   .onError(({ code, error, set }) => {
     console.error(`💥 Error [${code}]:`, error);
-    return { error: error.message };
+    return { error: (error as any).message || "Internal Server Error" };
   })
   .get("/", () => "Cinematic Engine Backend Alive")
   .use(aiRoutes)
@@ -26,6 +27,7 @@ const app = new Elysia()
       })
       .post("/projects", async ({ body }) => {
         const [newProject] = await db.insert(projects).values(body).returning();
+        await syncProjectToFileSystem(newProject);
         return { success: true, project: newProject };
       }, {
         body: t.Object({
@@ -44,6 +46,8 @@ const app = new Elysia()
           .set(updateData)
           .where(eq(projects.id, parseInt(id)))
           .returning();
+        
+        await syncProjectToFileSystem(updatedProject);
         return { success: true, project: updatedProject };
       })
       .delete("/projects/:id", async ({ params: { id } }) => {

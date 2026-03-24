@@ -182,256 +182,254 @@ const ProjectDetail = ({ project, onBack }) => {
   const tabs = Object.keys(TAB_META);
 
   return (
-    <div className="project-detail-container" style={{ maxWidth: '1600px', margin: '0 auto', padding: '20px' }}>
-      <header className="detail-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div className="back-btn" onClick={onBack}>
-          ← BACK TO DASHBOARD
-        </div>
-        <div>
-          <h1 style={{ fontSize: '2.5rem', margin: '0 0 8px 0' }}>{project.title}</h1>
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <span className="badge category-badge">{project.category || 'Movie'}</span>
-            <span className="badge genre-badge">{project.genre || 'Thriller'}</span>
-            <span className="badge status-badge">{project.status || 'Active'}</span>
+    <div className={`project-detail ${isGenerating ? 'orchestration-active' : ''}`}>
+      {/* 🏙️ STUDIO HEADER: Operational Status & Global Meta */}
+      <header className="detail-header">
+        <div className="header-meta">
+          <div className="back-btn" onClick={onBack}>
+            <span>←</span> EXIT STUDIO
+          </div>
+          <div className="project-title-mini">
+            PROJECT: {project.title}
+          </div>
+          <div className="badge status-badge">
+            {project.status || 'DEVELOPMENT'}
           </div>
         </div>
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', background: 'rgba(0,0,0,0.4)', padding: '12px 24px', borderRadius: '8px', border: '1px solid var(--surface-border)' }}>
-          <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '1px' }}>🔑 OPENROUTER API KEY</span>
-          <input 
-            type="password" 
-            placeholder="sk-or-v1-..." 
-            value={apiKey} 
-            onChange={(e) => saveApiKey(e.target.value)} 
-            style={{ width: '220px', padding: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', borderRadius: '4px', outline: 'none' }}
-          />
-          <div style={{ width: '1px', height: '24px', background: 'var(--surface-border)', margin: '0 8px' }}></div>
-          <button className="tactical-btn" onClick={saveToContext} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <span>💾</span> SAVE ALL
+
+        <div className="orchestration-controls">
+          <div className="input-group-row">
+            <span className="input-label">📡 OPENROUTER</span>
+            <input 
+              type="password" 
+              className="key-input"
+              value={apiKey} 
+              onChange={(e) => saveApiKey(e.target.value)} 
+            />
+          </div>
+          <button className="btn-primary" onClick={saveToContext}>
+            SAVE CHANGES
           </button>
         </div>
       </header>
 
-      <div className="tabs">
-        {tabs.map(tab => (
-          <div 
-            key={tab} 
-            className={`tab ${activeTab === tab ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab)}
-          >
-            {TAB_META[tab].icon} {TAB_META[tab].label}
-          </div>
-        ))}
+      {/* 🛰️ AI PROGRESS OVERLAY (Cinematic) */}
+      <div className={`status-indicator-bar ${isGenerating ? 'active' : ''}`} />
+      <div className={`neural-mesh-overlay ${isGenerating ? 'active' : ''}`}>
+        <div className="scan-line" />
       </div>
+      
+      {isGenerating && (
+        <div className="status-text-bubble">
+          <div className="status-dot" />
+          {generationStatus || 'AI GENERATING...'}
+        </div>
+      )}
 
-      <div className="content" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-        <div className="section-card glass" style={{ display: 'flex', flexDirection: 'column', minHeight: '1600px', position: 'relative', overflow: 'hidden' }}>
-          {/* 🛰️ Stage 2.1 AI Progress Indicators */}
-          {isGenerating && (
-            <>
-              <div className="status-indicator-bar" />
-              <div className="status-text-bubble">
-                <div className="status-dot" />
-                {generationStatus}
-              </div>
-              <div className="neural-mesh-overlay active">
-                <div className="scan-line" />
-              </div>
-            </>
-          )}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-            <h2 className="section-title" style={{ margin: 0 }}>
-              {TAB_META[activeTab].engine}
-            </h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button 
-                className={`tactical-btn ${scriptMode === 'REFINE' ? 'active' : ''}`}
-                onClick={() => setScriptMode(scriptMode === 'DRAFT' ? 'REFINE' : 'DRAFT')}
-                style={{ background: scriptMode === 'REFINE' ? 'var(--accent-secondary)' : 'rgba(255,255,255,0.1)', color: scriptMode === 'REFINE' ? 'black' : 'white', fontSize: '0.8rem' }}
-              >
-                {scriptMode === 'REFINE' ? '⚖️ REFINE MODE ON' : '⚙️ DRAFT MODE'}
-              </button>
-              <button 
-                className="tactical-btn" 
-                onClick={() => {
-                  if(activeTab === 'CONCEPT') generateConcept();
-                  if(activeTab === 'ARCHITECTURE') generateArchitecture();
-                  if(activeTab === 'TREATMENT') generateTreatment();
-                  if(activeTab === 'SCENARIO') generateScenario();
-                  if(activeTab === 'REVIEW') generateReview();
-                }}
-                disabled={isGenerating}
-                style={{ background: isGenerating ? 'transparent' : 'var(--accent-primary)', color: isGenerating ? 'var(--accent-primary)' : 'black', padding: '12px 24px', fontWeight: 'bold' }}
-              >
-                {isGenerating ? generationStatus : `⚡ ${scriptMode === 'REFINE' && activeTab === 'SCENARIO' ? 'Refine' : 'Run'} ${TAB_META[activeTab].engine}`}
-              </button>
+      {/* 🏢 STUDIO CONTAINER: Sidebar & Stage Controller */}
+      <div className="studio-container">
+        
+        {/* 📋 PRODUCTION SIDEBAR (Context & Rules) */}
+        <aside className="studio-sidebar">
+          <section className="sidebar-section">
+            <h4 className="section-title">Narrative Vitals</h4>
+            <div className="vitals-row">
+              <div className="badge category-badge">{project.category}</div>
+              <div className="badge genre-badge">{project.genre}</div>
             </div>
-          </div>
-          
-          {/* Concept Input Form (Only visible in CONCEPT tab) */}
-          {activeTab === 'CONCEPT' && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '16px', padding: '20px', background: 'rgba(0,0,0,0.2)', border: '1px solid var(--surface-border)', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ color: 'var(--accent-primary)', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '1px' }}>[단계 1] 아이디어 및 주제 (Brief)</label>
-                <textarea 
-                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid var(--surface-border)', padding: '12px', color: 'white', borderRadius: '4px', resize: 'vertical', minHeight: '80px', fontFamily: 'inherit' }}
-                  value={conceptBrief}
-                  onChange={(e) => setConceptBrief(e.target.value)}
-                  placeholder="예: 해커가 재벌 회장의 뇌파 금고를 턴다"
+          </section>
+
+          <section className="sidebar-section">
+            <h4 className="section-title">Production Controls</h4>
+            <div className="control-group">
+              <label className="input-label">BINGE-HOOK ENGINE</label>
+              <div className="control-item">
+                <input 
+                  type="checkbox" 
+                  checked={bingeHookEnabled} 
+                  onChange={(e) => setBingeHookEnabled(e.target.checked)}
                 />
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <label style={{ color: 'var(--accent-primary)', marginBottom: '8px', fontSize: '0.85rem', fontWeight: 'bold', letterSpacing: '1px' }}>[단계 2] 기획 방향성 (Direction)</label>
-                <textarea 
-                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid var(--surface-border)', padding: '12px', color: 'white', borderRadius: '4px', resize: 'vertical', minHeight: '80px', fontFamily: 'inherit' }}
-                  value={conceptDirection}
-                  onChange={(e) => setConceptDirection(e.target.value)}
-                />
+                <span className="control-text">Hardened Tension</span>
               </div>
             </div>
-          )}
-
-          <div style={{ flexGrow: 1, display: 'flex', gap: '20px', marginTop: '16px', overflow: 'hidden' }}>
-            {/* 📋 Scene Inventory Sidebar (Only for SCENARIO/ARCHITECTURE) */}
-            {(activeTab === 'SCENARIO' || activeTab === 'ARCHITECTURE') && (
-              <div style={{ width: '280px', background: 'rgba(0,0,0,0.5)', border: '1px solid var(--surface-border)', borderRadius: '8px', padding: '12px', display: 'flex', flexDirection: 'column' }}>
-                <h4 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--accent-primary)', letterSpacing: '2px' }}>🎞️ SCENE INVENTORY (120)</h4>
-                <div style={{ flexGrow: 1, overflowY: 'auto', fontSize: '0.8rem', paddingRight: '5px' }}>
-                  {[...Array(120)].map((_, i) => {
-                    const id = i + 1;
-                    return (
-                      <div 
-                        key={id} 
-                        onClick={() => setSelectedSceneId(id)}
-                        style={{ 
-                          padding: '8px 10px', 
-                          borderBottom: '1px solid rgba(255,255,255,0.05)', 
-                          color: id <= 10 ? 'var(--accent-secondary)' : '#666', 
-                          cursor: 'pointer',
-                          background: selectedSceneId === id ? 'rgba(255,255,255,0.1)' : 'transparent',
-                          display: 'flex', 
-                          justifyContent: 'space-between',
-                          borderRadius: '4px',
-                          marginBottom: '2px'
-                        }}>
-                        <span>S#{id} {id <= 10 ? '✓' : ''}</span>
-                        <span style={{ fontSize: '0.7rem' }}>{id <= 10 ? 'DONE' : 'PENDING'}</span>
-                      </div>
-                    );
-                  })}
+            <div className="control-group">
+              <label className="input-label">SUBVERSION INTENSITY</label>
+              <div className="control-item">
+                <input 
+                  type="range" 
+                  min="1" max="10" 
+                  value={clicheSubversionIntensity}
+                  onChange={(e) => setClicheSubversionIntensity(parseInt(e.target.value))}
+                  className="range-input"
+                />
+                <div className="range-labels">
+                  <span>LO</span>
+                  <span className="active-val">{clicheSubversionIntensity}</span>
+                  <span>HI</span>
                 </div>
-                
-                <div style={{ marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-                  <h4 style={{ margin: '0 0 12px 0', fontSize: '0.8rem', color: 'var(--accent-secondary)', letterSpacing: '1px' }}>🛠️ NARRATIVE CONTROLS</h4>
-                  
-                  <div className="control-item" style={{ marginBottom: '15px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>BINGE-HOOK AI</span>
-                      <input 
-                        type="checkbox" 
-                        checked={bingeHookEnabled} 
-                        onChange={(e) => setBingeHookEnabled(e.target.checked)}
-                      />
-                    </div>
-                    <div style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)' }}>Forces cliffhangers between episodes/acts.</div>
-                  </div>
+              </div>
+            </div>
+          </section>
 
-                  <div className="control-item">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '0.75rem', fontWeight: '800' }}>ANTI-SLOP INTENSITY</span>
-                      <span style={{ color: 'var(--accent-primary)', fontSize: '0.75rem' }}>{clicheSubversionIntensity}</span>
-                    </div>
-                    <input 
-                      type="range" 
-                      min="1" 
-                      max="10" 
-                      value={clicheSubversionIntensity} 
-                      onChange={(e) => setClicheSubversionIntensity(parseInt(e.target.value))}
-                      style={{ width: '100%', accentColor: 'var(--accent-primary)' }}
-                    />
-                  </div>
+          <section className="sidebar-section" style={{ marginTop: 'auto' }}>
+            <h4 className="section-title">Director's Notepad</h4>
+            <textarea 
+              className="logline-editor"
+              value={producerNote}
+              onChange={(e) => setProducerNote(e.target.value)}
+              placeholder="Inject tactical notes here..."
+              style={{ minHeight: '120px' }}
+            />
+          </section>
+        </aside>
 
-                  <div className="genre-tactics" style={{ marginTop: '20px', padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '6px' }}>
-                    <h5 style={{ margin: '0 0 8px 0', fontSize: '0.75rem', color: 'var(--accent-primary)' }}>
-                      {GENRE_HINTS[project.genre]?.icon} {project.genre} TACTICS
-                    </h5>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-                      {GENRE_HINTS[project.genre]?.cues?.map(cue => (
-                        <span key={cue} style={{ fontSize: '0.65rem', padding: '3px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '3px', color: 'var(--text-dim)' }}>
-                          #{cue}
-                        </span>
-                      ))}
+        {/* 🎬 STAGE CONTROLLER (Tabbed Content) */}
+        <main className="studio-main">
+          <div className="tabs">
+            {tabs.map(tab => (
+              <div 
+                key={tab} 
+                className={`tab ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {TAB_META[tab].icon} {TAB_META[tab].label}
+              </div>
+            ))}
+          </div>
+
+          <div className="stage-content animate-in" key={activeTab}>
+            <div className="stage-header">
+              <h2 className="section-title">
+                {TAB_META[activeTab].engine}
+              </h2>
+              <div className="stage-actions">
+                <button 
+                  className={`btn-secondary ${scriptMode === 'REFINE' ? 'active' : ''}`}
+                  onClick={() => setScriptMode(scriptMode === 'DRAFT' ? 'REFINE' : 'DRAFT')}
+                >
+                  {scriptMode === 'REFINE' ? '⚖️ REFINEMENT MODE' : '⚙️ DRAFT MODE'}
+                </button>
+                <button 
+                  className="btn-primary" 
+                  onClick={() => {
+                    if(activeTab === 'CONCEPT') generateConcept();
+                    if(activeTab === 'ARCHITECTURE') generateArchitecture();
+                    if(activeTab === 'TREATMENT') generateTreatment();
+                    if(activeTab === 'SCENARIO') generateScenario();
+                    if(activeTab === 'REVIEW') generateReview();
+                  }}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? generationStatus : `RUN PIPELINE`}
+                </button>
+              </div>
+            </div>
+          
+          {/* 🔘 ACTION BAR: Contextual Pipeline Controls */}
+          {activeTab !== 'VISION' && (
+            <div className="action-bar">
+              <div className="action-info">
+                <span className="input-label">OUTPUT MODE:</span>
+                <span className="active-val">{TAB_META[activeTab].engine}</span>
+              </div>
+              <div className="stage-actions">
+                <button 
+                  className="btn-accent" 
+                  onClick={() => {
+                    if(activeTab === 'CONCEPT') generateConcept();
+                    if(activeTab === 'ARCHITECTURE') generateArchitecture();
+                    if(activeTab === 'TREATMENT') generateTreatment();
+                    if(activeTab === 'SCENARIO') generateScenario();
+                    if(activeTab === 'REVIEW') generateReview();
+                  }}
+                  disabled={isGenerating}
+                >
+                  {isGenerating ? generationStatus.toUpperCase() : `⚡ EXECUTE ${activeTab}`}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 📑 TAB CONTENT AREAS */}
+          <div className="tab-pane-container">
+            
+            {/* 📋 CONTEXTUAL SIDEBAR: Scene Inventory (Contextual to SCENARIO/STORY/TREATMENT) */}
+            {(activeTab === 'SCENARIO' || activeTab === 'STORY' || activeTab === 'TREATMENT') && (
+              <div className="context-sidebar">
+                <div className="context-sidebar-header">
+                  SCENE INVENTORY
+                </div>
+                <div className="context-sidebar-content">
+                  {[...Array(120)].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className={`inventory-item ${selectedSceneId === i + 1 ? 'active' : ''}`}
+                      onClick={() => setSelectedSceneId(i + 1)}
+                    >
+                      S#{i + 1} {i < 10 ? '✓' : ''}
                     </div>
-                  </div>
+                  ))}
                 </div>
               </div>
             )}
 
-            <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-              {selectedSceneId && activeTab === 'SCENARIO' && (
-                <div style={{ background: 'rgba(var(--accent-primary-rgb), 0.1)', border: '1px solid var(--accent-primary)', borderRadius: '8px', padding: '15px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ margin: 0, color: 'var(--accent-primary)', fontSize: '1rem' }}>📌 S#{selectedSceneId} Metadata</h3>
-                    <button onClick={() => setSelectedSceneId(null)} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>✕</button>
+            {/* 🖋️ MAIN EDITOR / VIEWER AREA */}
+            <div className="editor-frame" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+              {activeTab === 'CONCEPT' && (
+                <div className="concept-inputs" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                  <div className="input-group">
+                    <label style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: '800', display: 'block', marginBottom: '8px' }}>IDEA BRIEF</label>
+                    <textarea 
+                      className="logline-editor"
+                      value={conceptBrief}
+                      onChange={(e) => setConceptBrief(e.target.value)}
+                      placeholder="Enter core idea..."
+                    />
                   </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px', fontSize: '0.85rem' }}>
-                    <div><span style={{ color: 'var(--text-dim)' }}>Location:</span> {selectedSceneId === 1 ? '강의 펜트하우스' : selectedSceneId === 2 ? '지하 서버실' : '...'}</div>
-                    <div><span style={{ color: 'var(--text-dim)' }}>Conflict:</span> {selectedSceneId === 1 ? '폭락의 전조' : '...'}</div>
-                    <div><span style={{ color: 'var(--text-dim)' }}>Goal:</span> {selectedSceneId === 1 ? '리스크 관리' : '...'}</div>
-                    <div style={{ gridColumn: 'span 2' }}><span style={{ color: 'var(--text-dim)' }}>Twist:</span> {selectedSceneId === 1 ? '오차가 아닌 시스템의 의도적 조작임' : '...'}</div>
+                  <div className="input-group">
+                    <label style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: '800', display: 'block', marginBottom: '8px' }}>PRODUCTION DIRECTION</label>
+                    <textarea 
+                      className="logline-editor"
+                      value={conceptDirection}
+                      onChange={(e) => setConceptDirection(e.target.value)}
+                    />
                   </div>
                 </div>
               )}
-
-              {activeTab === 'SCENARIO' && (
-                <div style={{ marginBottom: '12px', borderLeft: '4px solid var(--accent-secondary)', paddingLeft: '15px' }}>
-                  <label style={{ color: 'var(--accent-secondary)', fontSize: '0.9rem', fontWeight: 'bold', display: 'flex', justifyContent: 'space-between' }}>
-                    <span>🎬 {scriptMode === 'REFINE' ? 'REFINEMENT DIRECTIVE' : "PRODUCER'S NOTE"}</span>
-                    {selectedSceneId && <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>Targeting S#{selectedSceneId}</span>}
-                  </label>
-                  <textarea 
-                    style={{ width: '100%', background: 'rgba(0,0,0,0.4)', border: '1px solid var(--surface-border)', padding: '12px', color: 'white', borderRadius: '4px', fontSize: '1rem', marginTop: '8px', outline: 'none', minHeight: '80px' }}
-                    value={producerNote}
-                    onChange={(e) => setProducerNote(e.target.value)}
-                    placeholder={scriptMode === 'REFINE' ? `명령 예: "S#${selectedSceneId || 'X'}의 대사를 좀 더 건조하게 바꾸고 미장센을 강화해줘."` : "다음 5개 씬에 대한 지시사항을 입력하세요."}
-                  />
-                </div>
-              )}
-              
-              <div style={{ color: 'var(--text-dim)', marginBottom: '8px', fontSize: '0.9rem' }}>
-                ▾ {TAB_META[activeTab].engine} Cinema View ▾
-              </div>
 
               {activeTab === 'VISION' ? (
-                <AnalyticsDashboard data={pipelineData.analysisData} />
+                <div style={{ flex: 1, overflowY: 'auto' }}>
+                  <AnalyticsDashboard data={pipelineData.analysisData} />
+                </div>
               ) : (
-                <textarea 
-                  ref={outputRef}
-                  className="logline-editor" 
-                  style={{ 
-                    flexGrow: 1, 
-                    resize: 'none', 
-                    background: activeTab === 'SCENARIO' ? '#f5f5f5' : 'rgba(0,0,0,0.3)', 
-                    color: activeTab === 'SCENARIO' ? '#111' : 'white',
-                    lineHeight: '1.8', 
-                    fontSize: '1.1rem', 
-                    padding: activeTab === 'SCENARIO' ? '60px 80px' : '20px',
-                    fontFamily: activeTab === 'SCENARIO' ? "'Courier Prime', 'Courier New', Courier, monospace" : 'inherit',
-                    boxShadow: activeTab === 'SCENARIO' ? 'inset 0 0 50px rgba(0,0,0,0.1)' : 'none',
-                    borderRadius: '12px',
-                    border: '1px solid var(--surface-border)'
-                  }}
-                  value={pipelineData[activeTab.toLowerCase()]}
-                  onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
-                  disabled={isGenerating}
-                  placeholder={`Scenario will appear as a professional script here...`}
-                />
+                <div style={{ flex: 1, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '1px' }}>
+                    [ SYSTEM_OUTPUT_STREAM :: {activeTab} ]
+                  </div>
+                  <textarea 
+                    ref={outputRef}
+                    className={activeTab === 'SCENARIO' ? 'script-view' : 'logline-editor'}
+                    style={{ 
+                      flex: 1,
+                      backgroundColor: activeTab === 'SCENARIO' ? 'white' : 'rgba(0,0,0,0.3)',
+                      color: activeTab === 'SCENARIO' ? '#111' : 'var(--text-primary)',
+                      resize: 'none',
+                      border: '1px solid var(--border-subtle)',
+                      borderRadius: '4px'
+                    }}
+                    value={pipelineData[activeTab.toLowerCase()]}
+                    onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
+                    disabled={isGenerating}
+                  />
+                </div>
               )}
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
-  );
+  </div>
+);
 };
 
 export default ProjectDetail;
