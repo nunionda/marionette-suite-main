@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { aiRoutes } from "./ai";
-import { db, projects, loglineIdeas } from "./db";
+import { db, projects, loglineIdeas, projectOutline } from "./db";
 import { eq, desc } from "drizzle-orm";
 import { syncProjectToFileSystem } from "./lib/sync";
 
@@ -53,6 +53,48 @@ const app = new Elysia()
       .delete("/projects/:id", async ({ params: { id } }) => {
         await db.delete(projects).where(eq(projects.id, parseInt(id)));
         return { success: true };
+      })
+      .get("/projects/:id/outline", async ({ params: { id } }) => {
+        const outline = await db.select().from(projectOutline)
+          .where(eq(projectOutline.projectId, parseInt(id)))
+          .orderBy(projectOutline.sceneNumber);
+        return { success: true, outline };
+      })
+      .post("/projects/:id/outline", async ({ params: { id }, body }) => {
+        const projectId = parseInt(id);
+        const scenes = body.scenes;
+        
+        // Simple strategy: Clear and re-insert for batch updates
+        await db.delete(projectOutline).where(eq(projectOutline.projectId, projectId));
+        
+        if (scenes && scenes.length > 0) {
+          const insertData = scenes.map((s: any) => ({
+            projectId,
+            act: s.act,
+            sceneNumber: s.sceneNumber,
+            title: s.title,
+            description: s.description,
+            status: s.status || 'Planned'
+          }));
+          await db.insert(projectOutline).values(insertData);
+        }
+        
+        // Trigger FS Sync
+        const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+        const outline = await db.select().from(projectOutline).where(eq(projectOutline.projectId, projectId));
+        await syncProjectToFileSystem({ ...project, outline });
+
+        return { success: true };
+      }, {
+        body: t.Object({
+          scenes: t.Array(t.Object({
+            act: t.Optional(t.Number()),
+            sceneNumber: t.Number(),
+            title: t.Optional(t.String()),
+            description: t.String(),
+            status: t.Optional(t.String())
+          }))
+        })
       })
       .get("/loglines", async () => {
         const allIdeas = await db.select().from(loglineIdeas).orderBy(desc(loglineIdeas.createdAt));

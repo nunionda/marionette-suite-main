@@ -26,7 +26,7 @@ export const syncProjectToFileSystem = async (project: any) => {
     }
 
     const files = [
-      { name: "outline.md", content: project.concept || "" },
+      { name: "outline.md", content: project.outline ? project.outline.map((s: any) => `S#${s.sceneNumber}. ${s.description}`).join('\n') : (project.concept || "") },
       { name: "treatment.md", content: project.treatment || "" },
       { name: "script.md", content: project.scenario || "" },
       { name: "characters.json", content: JSON.stringify(project.characters || {}, null, 2) },

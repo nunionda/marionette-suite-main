@@ -31,6 +31,17 @@ export const sceneVersions = pgTable("scene_versions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const projectOutline = pgTable("project_outline", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id),
+  act: integer("act"), // 1, 2, 3
+  sceneNumber: integer("scene_number"),
+  title: text("title"),
+  description: text("description"),
+  status: text("status").default("Planned"), // Planned, Drafted, Refined
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const loglineIdeas = pgTable("logline_ideas", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
