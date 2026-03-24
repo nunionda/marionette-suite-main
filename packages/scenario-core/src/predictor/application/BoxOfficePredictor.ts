@@ -3,6 +3,7 @@ import type { MarketLocale } from "../../shared/MarketConfig";
 import { getMarketConfig } from "../../shared/MarketConfig";
 import type { ScreenplayFeatures } from "../domain/ScreenplayFeatures";
 import type { ROITier } from "../domain/PredictionResult";
+import { cleanAndParseJSON } from "../../shared/jsonParser";
 
 export class BoxOfficePredictor {
   constructor(private readonly llm: ILLMProvider) {}
@@ -58,11 +59,9 @@ Screenplay Features:
     if (response.error) throw new Error(`LLM Prediction Error: ${response.error}`);
 
     try {
-      const match = response.content.match(/\{[\s\S]*\}/);
-      const jsonStr = match ? match[0] : response.content;
-      return JSON.parse(jsonStr);
+      return cleanAndParseJSON(response.content);
     } catch (e) {
-      throw new Error(`Failed to parse ROI prediction JSON from LLM: \n${response.content}`);
+      throw new Error(`Failed to parse ROI prediction JSON from LLM: \n${response.content.slice(0, 500)}`);
     }
   }
 }

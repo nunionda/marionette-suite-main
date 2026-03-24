@@ -1,6 +1,7 @@
 import type { ILLMProvider } from "../infrastructure/llm/ILLMProvider";
 import type { EmotionGraph } from "../domain/EmotionGraph";
 import type { ScriptElement } from "../../script/infrastructure/parser";
+import { cleanAndParseJSON } from "../../shared/jsonParser";
 
 export class EmotionAnalyzer {
   constructor(private readonly llm: ILLMProvider) {}
@@ -44,10 +45,8 @@ CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
     if (response.error) throw new Error(`LLM Emotion Analysis Error: ${response.error}`);
 
     try {
-      const match = response.content.match(/\{[\s\S]*\}/);
-      const jsonStr = match ? match[0] : response.content;
-      const parsed = JSON.parse(jsonStr);
-      
+      const parsed = cleanAndParseJSON<{ scenes: Record<string, unknown>[] }>(response.content);
+
       return {
         scriptId,
         scenes: (parsed.scenes || []).map((s: Record<string, unknown>) => ({
@@ -58,7 +57,7 @@ CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
         }))
       };
     } catch (e) {
-      throw new Error(`Failed to parse Emotion JSON from LLM: \n${response.content}`);
+      throw new Error(`Failed to parse Emotion JSON from LLM: \n${response.content.slice(0, 500)}`);
     }
   }
 }

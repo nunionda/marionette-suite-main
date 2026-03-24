@@ -93,16 +93,25 @@ export class GeminiProvider implements ILLMProvider {
           error.message?.includes('429') ||
           error.message?.includes('RESOURCE_EXHAUSTED');
 
-        if (isRateLimit) {
-          // Wait extra on rate limit before trying next model
-          console.warn(`⚠️ Gemini ${model} rate-limited, trying next model after cooldown...`);
+        const isRetryable =
+          isRateLimit ||
+          error?.status === 404 ||
+          error?.httpStatusCode === 404 ||
+          error.message?.includes('404') ||
+          error.message?.includes('not found');
+
+        if (isRetryable) {
+          const reason = isRateLimit ? 'rate-limited' : 'not found (404)';
+          console.warn(`⚠️ Gemini ${model} ${reason}, trying next model...`);
           lastError = error.message;
-          await this.sleep(MIN_INTERVAL_MS);
-          lastApiCallMs = Date.now();
+          if (isRateLimit) {
+            await this.sleep(MIN_INTERVAL_MS);
+            lastApiCallMs = Date.now();
+          }
           continue; // Move to next model in chain
         }
 
-        // Non-rate-limit error: fail immediately
+        // Non-retryable error: fail immediately
         return {
           provider: this.name,
           model,

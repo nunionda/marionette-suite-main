@@ -12,6 +12,7 @@ const WEB_BASE = 'http://localhost:4000';
 const OUTPUT_DIR = '/Users/daniel/Desktop/scripts/scripts-analysis-result';
 const WAIT_TIMEOUT_MS = 120_000; // 120s for KO translation
 const CHART_SETTLE_MS = 3_000;   // wait for chart animations
+const FALLBACK_WAIT_MS = 15_000; // fallback wait if __EXPORT_READY never fires
 
 const LOCALES = ['en', 'ko'] as const;
 
@@ -88,8 +89,9 @@ async function main() {
   }
   console.log('  ✅ API 서버 (4005) + Web 서버 (4000) 확인');
 
-  // 2. Get target report IDs
-  const scriptIds = await getLatestReportIds();
+  // 2. Get target report IDs (CLI args override auto-detection)
+  const cliIds = process.argv.slice(2).filter(a => !a.startsWith('--'));
+  const scriptIds = cliIds.length > 0 ? cliIds : await getLatestReportIds();
   if (scriptIds.length === 0) {
     console.error('\n  ❌ 대상 리포트를 찾을 수 없습니다.');
     process.exit(1);
@@ -123,13 +125,18 @@ async function main() {
 
         try {
           // Navigate and wait for the page to load
-          await page.goto(url, { waitUntil: 'load', timeout: 60_000 });
+          await page.goto(url, { waitUntil: 'networkidle', timeout: 60_000 });
 
-          // Wait for export-ready signal
-          await page.waitForFunction(
-            '(window).__EXPORT_READY === true',
-            { timeout: WAIT_TIMEOUT_MS }
-          );
+          // Wait for export-ready signal, with fallback timeout
+          try {
+            await page.waitForFunction(
+              '(window).__EXPORT_READY === true',
+              { timeout: WAIT_TIMEOUT_MS }
+            );
+          } catch {
+            console.log(`     ⚠️ __EXPORT_READY timeout, using fallback wait...`);
+            await page.waitForTimeout(FALLBACK_WAIT_MS);
+          }
 
           // Wait for chart animations to settle
           await page.waitForTimeout(CHART_SETTLE_MS);
@@ -180,11 +187,15 @@ async function main() {
           // ── Save PDF ──
           // Open a fresh page for PDF (HTML export modified the DOM)
           const pdfPage = await context.newPage();
-          await pdfPage.goto(url, { waitUntil: 'load', timeout: 60_000 });
-          await pdfPage.waitForFunction(
-            '(window).__EXPORT_READY === true',
-            { timeout: WAIT_TIMEOUT_MS }
-          );
+          await pdfPage.goto(url, { waitUntil: 'networkidle', timeout: 60_000 });
+          try {
+            await pdfPage.waitForFunction(
+              '(window).__EXPORT_READY === true',
+              { timeout: WAIT_TIMEOUT_MS }
+            );
+          } catch {
+            await pdfPage.waitForTimeout(FALLBACK_WAIT_MS);
+          }
           await pdfPage.waitForTimeout(CHART_SETTLE_MS);
 
           const pdfPath = `${OUTPUT_DIR}/${baseName}.pdf`;

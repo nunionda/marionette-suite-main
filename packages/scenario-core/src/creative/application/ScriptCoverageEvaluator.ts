@@ -6,6 +6,7 @@ import type { SceneEmotion } from "../domain/EmotionGraph";
 import type { CharacterNode } from "../domain/CharacterNetwork";
 import type { MarketLocale } from "../../shared/MarketConfig";
 import { getMarketConfig } from "../../shared/MarketConfig";
+import { cleanAndParseJSON } from "../../shared/jsonParser";
 
 export interface CoverageInput {
   beats: Beat[];
@@ -143,27 +144,25 @@ ${analysisContext}
     }
 
     try {
-      const match = response.content.match(/\{[\s\S]*\}/);
-      const jsonStr = match ? match[0] : response.content;
-      const parsed = JSON.parse(jsonStr);
+      const parsed = cleanAndParseJSON<Record<string, unknown>>(response.content);
 
       return {
         scriptId,
-        title: parsed.title || scriptId,
-        genre: parsed.genre || 'Unknown',
-        logline: parsed.logline || '',
-        synopsis: parsed.synopsis || '',
-        categories: parsed.categories || [],
-        overallScore: parsed.overallScore || 0,
-        verdict: parsed.verdict || 'Pass',
-        strengths: parsed.strengths || [],
-        weaknesses: parsed.weaknesses || [],
-        recommendation: parsed.recommendation || '',
-        marketPotential: parsed.marketPotential || '',
-        comparableTitles: parsed.comparableTitles || [],
+        title: (parsed.title as string) || scriptId,
+        genre: (parsed.genre as string) || 'Unknown',
+        logline: (parsed.logline as string) || '',
+        synopsis: (parsed.synopsis as string) || '',
+        categories: (parsed.categories as unknown[]) || [],
+        overallScore: (parsed.overallScore as number) || 0,
+        verdict: (parsed.verdict as string) || 'Pass',
+        strengths: (parsed.strengths as string[]) || [],
+        weaknesses: (parsed.weaknesses as string[]) || [],
+        recommendation: (parsed.recommendation as string) || '',
+        marketPotential: (parsed.marketPotential as string) || '',
+        comparableTitles: (parsed.comparableTitles as string[]) || [],
       };
     } catch (e) {
-      throw new Error(`Failed to parse Coverage JSON from LLM:\n${response.content}`);
+      throw new Error(`Failed to parse Coverage JSON from LLM:\n${response.content.slice(0, 500)}`);
     }
   }
 }

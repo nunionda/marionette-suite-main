@@ -3,6 +3,7 @@ import type { BeatSheet } from "../domain/BeatSheet";
 import type { ScriptElement } from "../../script/infrastructure/parser";
 import type { MarketLocale } from "../../shared/MarketConfig";
 import { getMarketConfig } from "../../shared/MarketConfig";
+import { cleanAndParseJSON } from "../../shared/jsonParser";
 
 export class BeatSheetGenerator {
   constructor(private readonly llm: ILLMProvider) {}
@@ -88,12 +89,8 @@ Rules for the output:
     }
 
     try {
-      // Regex extraction pattern to natively strip out markdown JSON block quotes 
-      // if the LLM disobeys the prompt.
-      const match = response.content.match(/\{[\s\S]*\}/);
-      const jsonStr = match ? match[0] : response.content;
-      const parsed = JSON.parse(jsonStr);
-      
+      const parsed = cleanAndParseJSON<{ beats: Record<string, unknown>[] }>(response.content);
+
       return {
         scriptId,
         beats: (parsed.beats || []).map((b: Record<string, unknown>) => ({
@@ -103,7 +100,7 @@ Rules for the output:
         }))
       };
     } catch (e) {
-      throw new Error(`Failed to parse structured JSON from LLM: \n${response.content}`);
+      throw new Error(`Failed to parse BeatSheet JSON from LLM: \n${response.content.slice(0, 500)}`);
     }
   }
 }

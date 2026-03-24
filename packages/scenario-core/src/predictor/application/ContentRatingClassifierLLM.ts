@@ -2,6 +2,7 @@ import type { ILLMProvider } from "../../creative/infrastructure/llm/ILLMProvide
 import type { ScriptElement } from "../../script/infrastructure/parser";
 import type { ContentRating, MarketLocale } from "../../shared/MarketConfig";
 import { getMarketConfig } from "../../shared/MarketConfig";
+import { cleanAndParseJSON } from "../../shared/jsonParser";
 
 export class ContentRatingClassifierLLM {
   constructor(private readonly llm: ILLMProvider) {}
@@ -58,11 +59,9 @@ CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
     if (response.error) throw new Error(`LLM Rating Error: ${response.error}`);
 
     try {
-      const match = response.content.match(/\{[\s\S]*\}/);
-      const jsonStr = match ? match[0] : response.content;
-      return JSON.parse(jsonStr);
+      return cleanAndParseJSON(response.content);
     } catch (e) {
-      throw new Error(`Failed to parse Rating JSON from LLM: \n${response.content}`);
+      throw new Error(`Failed to parse Rating JSON from LLM: \n${response.content.slice(0, 500)}`);
     }
   }
 }
