@@ -76,6 +76,9 @@ const LoglineLab = () => {
           <h3 className="section-title">Brainstorming Stage</h3>
           <div className="form-group">
             <label>CORE IDEA / THEME</label>
+            <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '10px', lineHeight: '1.4' }}>
+              TIP: <span style={{ color: 'var(--accent-secondary)' }}>"[주인공]이 [어떤 장애물]에 맞서 [목표]를 이루기 위해 [행동]하는 이야기"</span> 구조로 생각해보세요.
+            </div>
             <textarea 
               className="tactical-input lab-textarea"
               placeholder="e.g. A rogue algorithm that predicts the day humans will stop loving."
