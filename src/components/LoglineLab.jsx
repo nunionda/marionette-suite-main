@@ -23,7 +23,7 @@ const LoglineLab = () => {
 
   const fetchSavedLoglines = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:3005/api/loglines');
+      const res = await fetch('http://localhost:3005/api/loglines');
       const data = await res.json();
       setSavedLoglines(data.loglines || []);
     } catch (e) {
@@ -60,7 +60,7 @@ const LoglineLab = () => {
     }
 
     try {
-      const res = await fetch('http://127.0.0.1:3005/api/loglines', {
+      const res = await fetch('http://localhost:3005/api/loglines', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -82,7 +82,7 @@ const LoglineLab = () => {
   const deleteLogline = async (id) => {
     if (!window.confirm("Delete this idea?")) return;
     try {
-      const res = await fetch(`http://127.0.0.1:3005/api/loglines/${id}`, {
+      const res = await fetch(`http://localhost:3005/api/loglines/${id}`, {
         method: 'DELETE'
       });
       const data = await res.json();
