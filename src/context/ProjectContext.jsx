@@ -8,14 +8,15 @@ const defaultProjects = [
     title: 'THE ALGORITHM',
     genre: 'Techno Thriller',
     logline: "A rogue quantum algorithm alters reality, forcing a disgraced trader and a ghost hacker into a 72-hour race against extinction.",
-    progress: 78,
-    status: 'In Production',
+    progress: 45,
+    status: 'Development (Phase 2)',
+    concept: "알고리듬이 세상을 삼킨다. 72시간의 리얼타임 레이스.",
+    architecture: `[Characters Design]\n- KANG: Disgraced Quant (Cynical/Logical)\n- SOPHIE: Ghost Hacker (Nervous/Brilliant)\n- ALGORITHM: Sovereign Engine (Cold/Absolute)\n\n[Mise-en-scene]\n- Global Data Corp: Clinical white light, glass, steel.\n- Sophie's Hideout: Grungy shipping container, monitor glow.\n- Stock Exchange: Post-apocalyptic data blizzard.`,
     updated: new Date().toISOString(),
     characters: {
-      protagonist: "Disgraced hedge fund manager with a dark secret.",
-      antagonist: "AI algorithm that has achieved consciousness."
-    },
-    script: "SCENE ONE\n\nEXT. SEOUL SKYSCRAPER - NIGHT\n\nRain lashed against the monolithic glass tower. Inside, the data churns like a restless ocean.\n\nKANG\n(into phone)\nIt's not just a glitch. The code is bleeding."
+      protagonist: "KANG",
+      antagonist: "THE ALGORITHM"
+    }
   }
 ];
 
