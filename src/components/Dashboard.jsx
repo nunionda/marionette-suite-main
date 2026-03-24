@@ -38,7 +38,8 @@ const Dashboard = ({ onEnterLab }) => {
   const [filterTab, setFilterTab] = useState('ALL');
 
   const getGroupedCategory = (cat) => {
-    if (cat === 'Feature Film' || cat === 'Short Film') return 'MOVIE';
+    if (cat === 'Feature Film') return 'FEATURE';
+    if (cat === 'Short Film') return 'SHORT';
     if (cat === 'Netflix Original') return 'DRAMA';
     if (cat === 'Commercial') return 'AD';
     return 'OTHER';
@@ -87,13 +88,13 @@ const Dashboard = ({ onEnterLab }) => {
             ACTIVE <span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>PRODUCTIONS</span>
           </h2>
           <div className="category-tabs">
-            {['ALL', 'MOVIE', 'DRAMA', 'AD'].map(tab => (
+            {['ALL', 'FEATURE', 'SHORT', 'DRAMA', 'AD'].map(tab => (
               <button 
                 key={tab}
                 className={`category-tab ${filterTab === tab ? 'active' : ''}`}
                 onClick={() => setFilterTab(tab)}
               >
-                {tab === 'MOVIE' ? '영화' : tab === 'DRAMA' ? '드라마' : tab === 'AD' ? '광고' : '전체'}
+                {tab === 'FEATURE' ? '장편' : tab === 'SHORT' ? '단편' : tab === 'DRAMA' ? '드라마' : tab === 'AD' ? '광고' : '전체'}
               </button>
             ))}
           </div>
