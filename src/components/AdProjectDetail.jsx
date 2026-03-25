@@ -1,5 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
+import { parseStoryboardFrames } from '../utils/adUtils';
+import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
 import '../styles/ProjectDetail.css';
 
 // Rules
@@ -15,6 +17,54 @@ const AD_GENRE_HINTS = {
   'ProductDemo': { icon: '📦', name: 'Product Demo', cues: ['Hard Sell', 'USP', 'X-Ray View', 'Tech Specs'] },
   'Cinematic': { icon: '🎥', name: 'Cinematic Narrative', cues: ['Storytelling', 'Subtle Branding', 'High Mise-en-scène', 'Character Driven'] },
   'Social': { icon: '🤳', name: 'Social / Digital', cues: ['UGC Style', 'Fast Pace', 'Vertical-ready', 'Hook-first'] }
+};
+
+const StoryboardView = ({ raw, imageUrls, onGenerate, loadingFrames }) => {
+  const frames = parseStoryboardFrames(raw);
+
+  if (frames.length === 0) return <div style={{ padding: '20px', color: 'var(--text-dim)' }}>Waiting for ART role to structured storyboard...</div>;
+
+  return (
+    <div className="storyboard-grid">
+      {frames.map((frame, index) => (
+        <div key={index} className="storyboard-card">
+          <div className="storyboard-visual-placeholder">
+            {imageUrls[frame.number] ? (
+              <img src={imageUrls[frame.number]} alt={`Frame ${frame.number}`} className="storyboard-image" />
+            ) : loadingFrames[frame.number] ? (
+              <div className="gen-loading">
+                <div className="spinner"></div>
+                <span>Generating Visual...</span>
+              </div>
+            ) : (
+              <button 
+                className="gen-visual-btn"
+                onClick={() => onGenerate(frame.number, frame.genPrompt)}
+              >
+                📸 Generate Visual
+              </button>
+            )}
+            <span className="storyboard-frame-number">#{frame.number}</span>
+          </div>
+          <div className="storyboard-content">
+            <span className="storyboard-label">Visual</span>
+            <p className="storyboard-text">{frame.visual}</p>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+              <div>
+                <span className="storyboard-label">Lighting</span>
+                <p className="storyboard-text" style={{ fontSize: '0.75rem' }}>{frame.lighting}</p>
+              </div>
+              <div>
+                <span className="storyboard-label">Camera</span>
+                <p className="storyboard-text" style={{ fontSize: '0.75rem' }}>{frame.camera}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 };
 
 const AdProjectDetail = ({ project, onBack }) => {
@@ -38,6 +88,12 @@ const AdProjectDetail = ({ project, onBack }) => {
   const [conceptBrief, setConceptBrief] = useState(project.conceptBrief || '');
   const [conceptDirection, setConceptDirection] = useState(project.conceptDirection || 'Brand Impact First, AIDA Structure');
   const [producerNote, setProducerNote] = useState('');
+  
+  const [isOptimizingBrief, setIsOptimizingBrief] = useState(false);
+  const [briefingResult, setBriefingResult] = useState(null);
+
+  const [storyboardImages, setStoryboardImages] = useState(project.storyboardImages || {});
+  const [loadingFrames, setLoadingFrames] = useState({});
 
   const outputRef = useRef(null);
   const baseTextRef = useRef('');
@@ -74,6 +130,64 @@ const AdProjectDetail = ({ project, onBack }) => {
     SCENARIO: { label: 'A/V SCRIPT', engine: '🎙️ A/V 스크립트 (Master A/V Script)', icon: '🎙️' },
     REVIEW: { label: 'AUDIT', engine: '🕵️ 임팩트 감사 (Brand & Impact Audit)', icon: '🕵️' },
     VISION: { label: 'VISION', engine: '📊 비전 분석 (Vision Analyst)', icon: '📊' }
+  };
+
+  const refineBriefWithCD = async () => {
+    if (!conceptBrief) return alert("Please enter a basic brief first.");
+    setIsOptimizingBrief(true);
+    
+    const prompt = `
+[Task]: Refine the following Campaign Brief.
+[Role]: Creative Director (CD)
+[Context]: Output structured strategic advice and a refined version of the brief.
+[Language]: ${language}
+
+Current Brief: ${conceptBrief}
+
+Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona).
+`;
+
+    try {
+      let fullResponse = "";
+      await executeAgent(prompt, (chunk) => {
+        fullResponse += chunk;
+        setBriefingResult(fullResponse);
+      });
+    } catch (error) {
+      console.error("Briefing Error:", error);
+    } finally {
+      setIsOptimizingBrief(false);
+    }
+  };
+
+  const applyRefinedBrief = () => {
+    if (!briefingResult) return;
+    // Extract the text between [REFINED BRIEF] indices if present, or take the whole thing
+    const match = briefingResult.match(/### \[REFINED BRIEF\]([\s\S]*?)(?=###|$)/i);
+    if (match && match[1]) {
+      setConceptBrief(match[1].trim());
+    } else {
+      setConceptBrief(briefingResult);
+    }
+    setBriefingResult(null);
+  };
+
+  const handleGenerateVisual = async (frameNumber, prompt) => {
+    if (!prompt) return alert("No prompt available for this frame. Regenerate Storyboard to get GEN_PROMPT.");
+    
+    setLoadingFrames(prev => ({ ...prev, [frameNumber]: true }));
+    try {
+      const result = await OpenRouterAdapter.generateImage(prompt);
+      const url = result.data?.[0]?.url;
+      if (url) {
+        setStoryboardImages(prev => ({ ...prev, [frameNumber]: url }));
+      }
+    } catch (error) {
+      console.error("Image Gen Error:", error);
+      alert("Failed to generate image: " + error.message);
+    } finally {
+      setLoadingFrames(prev => ({ ...prev, [frameNumber]: false }));
+    }
   };
 
   const generateContent = (tab) => {
@@ -202,13 +316,40 @@ const AdProjectDetail = ({ project, onBack }) => {
           </div>
 
           <div style={{ marginTop: '30px' }}>
-            <h4 style={{ fontSize: '0.85rem', color: 'var(--accent-secondary)' }}>📝 CAMPAIGN BRIEF</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h4 style={{ fontSize: '0.85rem', color: 'var(--accent-secondary)', margin: 0 }}>📝 CAMPAIGN BRIEF</h4>
+              <button 
+                className="refine-btn" 
+                onClick={refineBriefWithCD}
+                disabled={isOptimizingBrief || !conceptBrief}
+              >
+                {isOptimizingBrief ? 'Analyzing...' : '✨ Refine with CD'}
+              </button>
+            </div>
+            
             <textarea 
               value={conceptBrief}
               onChange={(e) => setConceptBrief(e.target.value)}
               placeholder="Enter core brand requirement..."
               style={{ width: '100%', height: '120px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--surface-border)', padding: '10px', marginTop: '10px' }}
             />
+
+            {briefingResult && (
+              <div className="briefing-assistant">
+                <div className="briefing-header">
+                  <span className="briefing-title">🧠 CD's Feedback</span>
+                </div>
+                <div className="briefing-content">
+                  {briefingResult.split('\n').map((line, i) => (
+                    <p key={i} style={{ margin: '4px 0' }}>{line}</p>
+                  ))}
+                </div>
+                <div className="briefing-actions">
+                  <button className="refine-btn" onClick={applyRefinedBrief}>Adopt This Brief</button>
+                  <button className="tactical-btn" style={{ padding: '6px 12px' }} onClick={() => setBriefingResult(null)}>Discard</button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -240,6 +381,13 @@ const AdProjectDetail = ({ project, onBack }) => {
             
             {activeTab === 'VISION' ? (
               <AnalyticsDashboard data={pipelineData.analysisData} />
+            ) : (activeTab === 'STORYBOARD' && creativeRole === 'ART' && pipelineData.storyboard) ? (
+              <StoryboardView 
+                raw={pipelineData.storyboard} 
+                imageUrls={storyboardImages}
+                onGenerate={handleGenerateVisual}
+                loadingFrames={loadingFrames}
+              />
             ) : (
               <textarea 
                 ref={outputRef}

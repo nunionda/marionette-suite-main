@@ -57,4 +57,19 @@ export class OpenRouterAdapter {
       if (onError) onError(err.message);
     }
   }
+  
+  static async generateImage(prompt) {
+    const response = await fetch('http://127.0.0.1:3005/ai/generate-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error((errorData.error?.message) || response.statusText || 'Image Generation Failed');
+    }
+
+    return await response.json(); // Returns { data: [{ url: "..." }] }
+  }
 }

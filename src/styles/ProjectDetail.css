@@ -680,3 +680,228 @@
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Storyboard Grid Styles */
+.storyboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+.storyboard-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.storyboard-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.storyboard-visual-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(45deg, #1a1a1a, #2a2a2a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.storyboard-visual-placeholder::after {
+  content: 'SCENE PREVIEW';
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: 2px;
+}
+
+.storyboard-frame-number {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--accent-primary);
+  color: black;
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+
+.storyboard-content {
+  padding: 15px;
+  font-size: 0.9rem;
+}
+
+.storyboard-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  opacity: 0.8;
+}
+
+.storyboard-text {
+  color: var(--text-main);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.storyboard-text:last-child {
+  margin-bottom: 0;
+}
+
+/* Briefing Assistant Styles */
+.briefing-assistant {
+  margin-top: 15px;
+  background: rgba(var(--accent-primary-rgb), 0.05);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.2);
+  border-radius: 6px;
+  padding: 15px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.briefing-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(var(--accent-primary-rgb), 0.1);
+  padding-bottom: 8px;
+}
+
+.briefing-title {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: var(--accent-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.briefing-content {
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-main);
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.briefing-content h3 {
+  font-size: 0.9rem;
+  margin: 15px 0 8px 0;
+  color: var(--accent-secondary);
+}
+
+.briefing-content ul {
+  padding-left: 20px;
+  margin-bottom: 10px;
+}
+
+.briefing-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.refine-btn {
+  background: var(--accent-primary) !important;
+  color: black !important;
+  font-weight: bold !important;
+  font-size: 0.75rem !important;
+  padding: 6px 12px !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.refine-btn:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.refine-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Image Generation UI */
+.gen-visual-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s;
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.storyboard-visual-placeholder:hover .gen-visual-btn {
+  opacity: 1;
+}
+
+.gen-visual-btn:hover {
+  background: var(--accent-primary);
+  color: black;
+}
+
+.storyboard-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.gen-loading {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  font-size: 0.7rem;
+  color: var(--accent-primary);
+  gap: 10px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(var(--accent-primary-rgb), 0.2);
+  border-top-color: var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
