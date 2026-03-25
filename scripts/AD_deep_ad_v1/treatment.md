@@ -1,75 +1,107 @@
-## 🎾 Nike Tennis Brand Film: 30s A/V Storyboard (COPY Focus)
+## 🎬 나이키 브랜드 필름 (30초): 스토리보드 - 시안 1 (힙합 & 도시)
 
-Here's a detailed A/V storyboard, focusing on rhythmic copywriting and impactful visuals, crafted for each of the five provided options. The emphasis is on how the copy integrates with, and enhances, the visual narrative.
+**[컨셉]**: 도시의 역동성, 힙합 비트, 좌절을 딛고 일어나는 젊음
 
-*   **Role:** COPY
-*   **Ad Type:** Brand Film
-*   **Duration:** 30s
-*   **Category:** Commercial
+**[타겟]**: 10대 후반 - 20대 초반의 스트릿 패션 & 스포츠 문화 선호층
 
----
-
-### **✨ Option 1: "Unleash Your Court"**
-
-*   **Headline:** 코트, 그 이상의 가능성. Unleash Your Court.
-
-| Time (s) | Visuals                                                                                                                                           | Audio (VO/SFX)                                                                                                                                                              | Notes                                                                                                                                                                                                   |
-| :------- | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0-3 \[A]** | Extreme close-up of a player's eye, intensely focused. Quick cuts between the ball being served. Distorted sound of a tennis ball hitting a racket. | (VO) 찰나의 순간, 승패가 갈린다. *SFX: ball impact, subtle distortion*                                                                                                      | 빠르게 전개되는 몽타주 시퀀스로 시각적 충격을 극대화. "찰나"의 의미를 시각적으로 표현.                                                                                                                    |
-| **3-10 \[I]** | Dynamic shots of a player lunging, leaping, and dominating the court. Slow-motion highlights of footwork and racket swing.                         | (VO) 한계를 넘어서는 퍼포먼스, 상상을 초월하는 몰입감. *SFX: amplified breathing, court squeaks, subtle synth undertones*                                                    | 완벽한 퍼포먼스를 보여주는 플레이어의 역동적인 움직임을 강조. 시각적 & 청각적으로 몰입감을 높임.                                                                                                         |
-| **10-25 \[D]** | Close-ups of the Nike tennis shoe flexing, gripping the court. Visuals transition to show players of diverse backgrounds and skill levels wearing the shoes.  | (VO) 나이키 테니스화, 당신 안의 코트를 깨우다. *SFX: crisp movement sounds, subtle 'awakening' sound design, music intensifies with a driving beat*                     | 제품의 USP(접지력, 착용감)를 보여주는 클로즈업. 다양한 플레이어 등장으로 공감대 형성.                                                                                                             |
-| **25-30 \[A]** | Wide shot of a packed stadium, spotlight on the athlete, confident pose. Nike logo prominently displayed.                                        | (VO) 승리를 넘어, 코트를 지배하라. Nike Tennis. Unleash Your Court.  *SFX: stadium roar fades in, powerful Nike signature sound.*                                         | 웅장한 배경과 자신감 넘치는 모델의 모습으로 브랜드의 위상을 강조. 슬로건 반복으로 메시지 각인.                                                                                                          |
+**[톤 앤 무드]**: 강렬하고 에너지 넘치는, 도전적인
 
 ---
 
-### **⚡ Option 2: "Dominate the Moment"**
+**[FRAME 1: 0-3초]**
 
-*   **Headline:** 찰나를 지배하다. Dominate the Moment.
-
-| Time (s) | Visuals                                                                                       | Audio (VO/SFX)                                                                                                                                          | Notes                                                                                                                                           |
-| :------- | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0-3 \[A]** | Digital counter rapidly decreasing from 0.1 to 0. Flickering lights, pulsing energy effect. | (VO) 0.1초, 모든 것이 결정된다.  *SFX: electronic pulse, ticking clock, impactful bass drop*                                                         | "0.1초"의 긴박함을 시각/청각적으로 표현.                                                                                                            |
-| **3-10 \[I]** | Slow-motion replay of a crucial point, showcasing player's reaction and agility.         | (VO) 반응 속도, 민첩성, 그리고 완벽한 균형.  *SFX: slows down with the visual, emphasize sounds of movement and court interaction*                    | 플레이어의 놀라운 반사 신경, 민첩성을 슬로우 모션으로 강조.                                                                                                 |
-| **10-25 \[D]** | Focus on shoe technology: cushioning, grip, and stability. Visuals show the shoe in action. | (VO) 나이키 테니스화, 한계를 뛰어넘는 퍼포먼스를 선사하다. *SFX: futuristic sounds, seamless transition with each movement showing the shoe features* | 제품의 기술적 강점을 시각적으로 보여줌. 미래지향적인 사운드 효과.                                                                                                 |
-| **25-30 \[A]** | Player triumphant pose, sweat dripping. Nike swoosh highlighted.                       | (VO) 매 순간을 지배하라. Nike Tennis. Dominate the Moment. *SFX: triumphant music swell, crowd cheering*                                         | 승리의 순간을 극적으로 연출. 슬로건 반복, 브랜드 로고 강조.                                                                                                |
+*   **Visual**: 농구 코트 위, 점프 직전 덩크슛하는 Молодые люди. 얼굴은 가려짐. 땀방울이 렌즈에 맺히는 듯한 극단적인 클로즈업. 나이키 로고 음각 처리된 농구공.
+*   **Lighting**: 코트 조명 + 자연광 혼합. 드리마틱한 그림자 연출.
+*   **Camera**: 초고속 촬영 후 슬로우 모션. 짐벌을 사용, 부드러운 카메라 워크.
+*   **Mood**: 압도적인 긴장감, 에너지. 흑백 대비 강조.
+*   **[GEN_PROMPT]**: Extreme close-up of sweat droplets on a basketball player's face during a dunk, hyperrealistic, high contrast black and white, dynamic lighting, shallow depth of field, intense focus on texture.
 
 ---
 
-### **🔥 Option 3: "Beyond the Game"**
+**[FRAME 2: 3-5초]**
 
-*   **Headline:** 게임, 그 이상의 존재감. Beyond the Game.
-
-| Time (s) | Visuals                                                                                      | Audio (VO/SFX)                                                                                                                               | Notes                                                                                                                                                                                                      |
-| :------- | :--------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0-3 \[A]** | Silhouette of a player against a vibrant sunset.  Focus on the artistic form, not just gameplay. | (VO) 코트 위, 당신은 누구인가?  *SFX: subtle wind sounds, emotive piano note*                                                              | 미학적 접근: 코트 위의 플레이어를 단순히 선수 이상으로 보여줌. 감성적인 분위기 조성.                                                                                                                          |
-| **3-10 \[I]** | Transition to high-fashion shots of players off-court, showcasing their style and personality.  | (VO) 퍼포먼스와 스타일, 그 완벽한 조화.  *SFX: stylish, subtle music with a beat that reflects confidence and elegance.*                         | 선수들의 개성과 스타일을 부각. 퍼포먼스와 스타일의 조화를 시각적으로 보여줌.                                                                                                                                      |
-| **10-25 \[D]** | Visuals emphasize the craftsmanship and design of the Nike tennis shoes, comparing it to an art piece. | (VO) 나이키 테니스화, 당신의 모든 움직임을 예술로 승화시키다. *SFX: delicate sounds, brushstrokes, emphasizing the shoe's design and form.* | 제품을 예술 작품처럼 표현. "움직임의 예술"이라는 메시지를 전달.                                                                                                                                      |
-| **25-30 \[A]** | Stylish player walking away from the court, leaving a lasting impression. Nike logo.       | (VO) 게임 그 이상의 존재감. Nike Tennis. Beyond the Game. *SFX: final stylish music cue, Nike brand signature*                               | 코트를 떠나는 선수의 뒷모습을 통해 '존재감'을 각인. 브랜드 로고로 마무리.                                                                                                                                   |
+*   **Visual**: Молодые люди 러닝, город 질주. 힘겹게 언덕을 오르는 모습. 숨을 헐떡이는 얼굴 클로즈업.
+*   **Lighting**: 도시의 네온사인, 자동차 헤드라이트 활용. 역광.
+*   **Camera**: 핸드헬드 카메라. Молодые люди 뒤를 바짝 쫓아가는 듯한 앵글.
+*   **Mood**: 고통, 인내. 땀과 열기로 가득 찬 분위기.
+*   **[GEN_PROMPT]**: Young runner struggling uphill at night, neon city lights reflecting on sweat-soaked face, handheld camera, shallow depth of field, realistic skin texture, grit and determination.
 
 ---
 
-### **🚀 Option 4: "Elevate Your Game"**
+**[FRAME 3: 5-7초]**
 
-*   **Headline:** 한계를 초월하다. Elevate Your Game.
-
-| Time (s) | Visuals                                                                         | Audio (VO/SFX)                                                                                  | Notes                                                                                                                                       |
-| :------- | :-------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ |
-| **0-3 \[A]** | Slow motion of a tennis ball launched high in the air, defying gravity.    | (VO) 중력의 한계를 넘어. *SFX: echoing whoosh sound, deep bass*                               | "중력"이라는 물리적 한계를 시각적으로 표현.                                                                                                |
-| **3-10 \[I]** | Quick montage of intense training scenes. Emphasize speed and power.      | (VO) 더 높게, 더 빠르게, 더 강렬하게. *SFX: fast-paced athletic sounds, intense heartbeat*        | 선수들의 훈련 장면을 통해 "한계 초월"의 과정을 보여줌.                                                                                               |
-| **10-25 \[D]** | Visuals of players performing incredible shots, pushing their limits.    | (VO) 나이키 테니스화, 당신의 모든 잠재력을 폭발시키다. *SFX: powerful impacts, dynamic sound design* | 제품 착용 후 잠재력이 폭발하는 모습을 시각화. 다이나믹한 사운드 디자인.                                                                                                |
-| **25-30 \[A]** | Player soaring through the air, Nike logo prominently displayed.         | (VO) Elevate Your Game. Nike Tennis.  *SFX: soaring music, uplifting effect*                    | 플레이어가 하늘로 솟아오르는 모습으로 "Elevate"의 의미를 강조. 브랜드 로고로 마무리.                                                                                                |
+*   **Visual**: 웨이트 트레이닝 Молодые люди. 바벨을 들다 힘에 겨워 주저앉는 모습. 굳게 다문 입술.
+*   **Lighting**: 짐(Gym) 조명 + 핀 조명. 근육의 움직임 강조.
+*   **Camera**: 로우 앵글. Молодые люди 올려다보는 시점.
+*   **Mood**: 좌절, 한계. 무거운 분위기.
+*   **[GEN_PROMPT]**: Weightlifter failing a lift, intensely focused expression, straining muscles, gym environment with harsh lighting, low-angle shot, realistic muscle texture, dramatic shadows.
 
 ---
 
-### **🎯 Option 5: "The Art of Winning"**
+**[FRAME 4: 7-10초]**
 
-*   **Headline:** 승리, 그 예술의 경지. The Art of Winning.
+*   **Visual**: 댄스 연습 Молодые люди. 안무 실수, 멤버 간의 갈등. 짜증 섞인 표정.
+*   **Lighting**: 연습실 형광등 + 스마트폰 조명. 그림자 드리운 Молодые люди 얼굴.
+*   **Camera**: 빠른 컷 전환. 불안정한 구도.
+*   **Mood**: 혼란, 좌절감.
+*   **[GEN_PROMPT]**: Dance crew arguing in a dimly lit studio, frustrated expressions, fast cuts, shaky camera, fluorescent lighting, strong shadows, realistic skin imperfections, raw emotion.
 
-| Time (s) | Visuals                                                                                                | Audio (VO/SFX)                                                                                                                                          | Notes                                                                                                                                                                                                   |
-| :------- | :------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **0-3 \[A]** | Static image of a meticulously crafted tennis racket alongside a Nike Tennis shoe. Focus on the 'craft.' | (VO) 승리는 우연이 아니다. *SFX: quiet, almost sterile sound environment. Subtle string sound*                                                        | 정적인 이미지를 통해 "승리는 우연이 아니다"라는 메시지 전달.                                                                                                                                               |
-| **3-10 \[I]** | Analytical breakdowns of player movements, showing perfect control and technique.                           | (VO) 완벽한 컨트롤, 정밀한 움직임. *SFX: precision sounds, subtle "click" noises as the movement is analyzed. Minimalist music*                  | 선수들의 완벽한 움직임, 기술을 분석적으로 보여줌. "컨트롤", "정밀함" 강조.                                                                                                                                      |
-| **10-25 \[D]** | Visuals showcase how the Nike tennis shoe aids in control/ precision via biomechanical graphics.           | (VO) 나이키 테니스화, 승리를 위한 필연적인 선택.  *SFX: smooth sound transitions, data sounds, music building to show the product's impact.* | 제품의 기능성이 승리에 기여하는 바를 그래프, 데이터 등으로 시각화.                                                                                                                                   |
-| **25-30 \[A]** | Close up of a focused player winning the match with an almost serene expression.                      | (VO) The Art of Winning. Nike Tennis.  *SFX: satisfying final sound, perhaps a swish of the racket and the final point landing.*              | 승리 후 차분한 표정의 선수를 통해 "승리의 예술"을 표현. 브랜드 로고와 슬로건으로 마무리 .                                                                                                                             |
+---
 
-This storyboard breakdown provides a clear vision of how to integrate the copy with the visuals to create a compelling 30-second Nike tennis brand film, optimized for maximum impact.
+**[FRAME 5: 10-13초]**
+
+*   **Visual**: 다시 일어선 Молодые люди. 러닝, 웨이트, 댄스 재개. 결의에 찬 눈빛.
+*   **Lighting**: 역동적인 조명. Молодые люди 실루엣 강조.
+*   **Camera**: Молодые люди 움직임 따라가는 트래킹 숏. 속도감.
+*   **Mood**: 희망, 의지. 흑백 화면에 컬러 강조 (나이키 로고, 신발).
+*   **[GEN_PROMPT]**: Montage of diverse athletes resuming training with renewed determination, dynamic lighting, silhouettes, selective color highlighting Nike logos, upbeat tempo, sense of momentum and perseverance.
+
+---
+
+**[FRAME 6: 13-18초]**
+
+*   **Visual**: Молодые люди 극한의 운동. 땀, 근육, 숨소리. Молодые люди 환희.
+*   **Lighting**: 태양 광선. Молодые люди 얼굴 비춤.
+*   **Camera**: 클로즈업, 익스트림 클로즈업. 질감 강조.
+*   **Mood**: 강렬한 에너지, Молодые люди 열정.
+*   **[GEN_PROMPT]**: Intense workout montage, extreme close-ups of sweat, muscles, and determined faces, sun flares, high contrast, hyperrealistic skin texture, raw unfiltered energy, vibrant colors highlighting Nike apparel.
+
+---
+
+**[FRAME 7: 18-22초]**
+
+*   **Visual**: Молодые люди 도심 질주. 빌딩 숲 사이를 누비는 Молодые люди. город 야경.
+*   **Lighting**: 도시 야경 (네온사인, 자동차 불빛). Молодые люди 실루엣.
+*   **Camera**: 드론 촬영. 도시 전체 조망.
+*   **Mood**: 해방감, 자유. Молодые люди 역동적인 움직임.
+*   **[GEN_PROMPT]**: Drone shot of diverse youths sprinting through a neon-lit city at night, blurred lights, dynamic motion, colorful reflections, urban energy, focus on Nike footwear, feeling of freedom and exhilaration.
+
+---
+
+**[FRAME 8: 22-25초]**
+
+*   **Visual**: 덩크슛 성공. Молодые люди 환호. 슬로우 모션. 폭발하는 Молодые люди 에너지.
+*   **Lighting**: 코트 조명, 스포트라이트. Молодые люди 얼굴 비춤.
+*   **Camera**: 초고속 촬영, Молодые люди 움직임 따라가는 줌 인.
+*   **Mood**: 승리, 성취감. Молодые люди 역동적인 제스처.
+*   **[GEN_PROMPT]**: Slow-motion dunk shot with a victorious athlete celebrating, confetti falling, spotlight effect, high-definition details, intense focus on the player's expression, dynamic motion blur, euphoric atmosphere.
+
+---
+
+**[FRAME 9: 25-27초]**
+
+*   **Visual**: 전력 질주 후 카메라 응시. Молодые люди 강렬한 눈빛. 얼굴에 땀방울.
+*   **Lighting**: 정면에서 Молодые люди 비추는 강렬한 조명.
+*   **Camera**: Молодые люди 눈높이에서 클로즈업.
+*   **Mood**: 자신감, 도전. Модель 역동적인 표정.
+*   **[GEN_PROMPT]**: Close-up of a determined runner staring directly into the camera after an intense sprint, sweat-soaked face, piercing eyes, dramatic lighting, realistic skin texture, unwavering focus and intensity.
+
+---
+
+**[FRAME 10: 27-30초]**
+
+*   **Visual**: 나이키 로고 클로즈업. 나이키 스토어 App QR 코드 (하단). "지금 바로 시작하세요." 문구.
+*   **Lighting**: 은은한 조명. 나이키 로고 고급스럽게 표현.
+*   **Camera**: 천천히 줌 아웃.
+*   **Mood**: 신뢰감, 안정감.
+*   **[GEN_PROMPT]**: Nike logo reveal with a subtle light animation, QR code for the Nike app subtly placed below, clean and minimalist design, elegant typography, focus on brand recognition and easy call to action, modern and inviting aesthetic.

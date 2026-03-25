@@ -1,26 +1,20 @@
-Okay, here's the final 2-column A/V script, ready for production, based on the 'Art of Winning' concept.
+## 🎬 나이키 브랜드 필름 (30초): 최종 A/V 스크립트
 
-**[PROJECT]: The Art of Winning - Nike Tennis**
+**[컨셉]**: 도시의 역동성, 힙합 비트, 좌절을 딛고 일어나는 젊음
 
-**[ROLE]:** COPY
+**[타겟]**: 10대 후반 - 20대 초반의 스트릿 패션 & 스포츠 문화 선호층
 
-**[AD TYPE]:** Brand Film
+**[톤 앤 무드]**: 강렬하고 에너지 넘치는, 도전적인
 
-**[DURATION]:** 30s
-
-**[CATEGORY]:** Commercial
-
-**[HEADLINE]:** 승리, 그 예술의 경지. The Art of Winning.
-
----
-
-| **TIME (s)** | **VISUAL (미장센)**                                                                              | **AUDIO (SFX/VO)**                                                                      | **NOTES**                                                                                                |
-|--------------|----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
-| **0-3 \[A]**  |  *Still life*: Meticulously crafted tennis racket lies beside a pristine Nike Tennis shoe. Minimalist lighting. Depth of Field emphasizing the details of each item. | (VO) 승리는 우연이 아니다. *SFX: *Subtle 'string pluck' sound. Low-frequency hum.                     | The stillness implies precision. Sound design: Intimate, focused.                                   |
-| **3-10 \[I]** | Split-screen: Left shows an elite player's footwork, right shows a biomechanical graphic dissecting the perfect angle of their stride.  Color palette shift to cooler tones.   | (VO) 완벽한 컨트롤, 정밀한 움직임. *SFX: Precise clicks, swishes. Analytical blips. Minimalist drone music begins.*     | Analysis drives interest. Sound design: sterile, emphasizing calculated action.                          |
-| **10-25 \[D]** | Cut 1: Slow-motion close-up of the Nike Tennis shoe making contact with the court. Cut 2: Dynamic graphics visually map out the shoe's grip coefficient and energy return. Contrast of warm/cool colors.  | (VO) 나이키 테니스화, 승리를 위한 필연적인 선택.  *SFX: Data-driven soundscape swells. Racket-impact sound, perfectly clean.* | The product *is* precision. Sound builds, product attributes lead to a decisive moment.            |
-| **25-30 \[A]** | Extreme Close-Up: A player, eyes locked on the ball, wins the match. The expression is serene, not ecstatic.  Nike swoosh subtly placed. Fade to black.  | (VO) The Art of Winning. Nike Tennis.  *SFX: A single, clean "thwack" of the ball, followed by near silence.* | The art is control, composure. Sound: Emphasize one perfect sound. Quiet close. Strong ownership. |
-
----
-
-**[END SCRIPT]**
+| **TIMECODE** | **VISUAL (미장센)**                                                                                   | **AUDIO (SFX/VO)**                                                                                                                                       |
+| :----------: | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   0:00-0:03  | \[FRAME 1] 농구 코트 위 점프 직전 덩크슛. 얼굴 가려짐. 땀방울 클로즈업. 나이키 로고 음각 농구공. 슬로우 모션.                                    | (SFX) 심장이 쿵쾅거리는 듯한 묵직한 베이스 음, 코트화 마찰음                                                                                                |
+|   0:03-0:05  | \[FRAME 2] Молодые люди 러닝, 도시 질주. 언덕 오르는 모습. 헐떡이는 얼굴 클로즈업. 네온사인, 자동차 헤드라이트 역광. 핸드헬드.                         | (SFX) 거친 숨소리, 힙합 비트 시작 (로우파이 질감), 자동차 굉음                                                                                               |
+|   0:05-0:07  | \[FRAME 3] 웨이트 트레이닝 Молодые люди. 바벨 들다 주저앉음. 굳게 다문 입술. 로우 앵글.                                                   | (SFX) 바벨 떨어지는 둔탁한 소리, Молодые люди 신음 소리                                                                                                        |
+|   0:07-0:10  | \[FRAME 4] 댄스 연습 Молодые люди. 안무 실수, 멤버 갈등. 짜증 섞인 표정. 빠른 컷 전환, 불안정한 구도. 그림자 드리운 얼굴.                               | (SFX) 격렬한 댄스 비트 잠시 멈춤, 멤버 간 언쟁 (웅성거림)                                                                                                    |
+|   0:10-0:13  | \[FRAME 5] 다시 일어선 Молодые люди. 러닝, 웨이트, 댄스 재개. 결의에 찬 눈빛. Молодые люди 움직임 따라가는 트래킹 숏. 흑백 화면에 나이키 로고/신발 컬러 강조. | (SFX) 힙합 비트 고조, Молодые люди 발소리, 운동 기구 움직이는 소리. (VO) "넘어져도 괜찮아."                                                                 |
+|   0:13-0:18  | \[FRAME 6] Молодые люди 극한의 운동. 땀, 근육, 숨소리, 환희. 태양 광선. 클로즈업, 익스트림 클로즈업.                                              | (SFX) 강렬한 트랩 비트, Молодые люди 거친 숨소리, 탄성.                                                                                                |
+|   0:18-0:22  | \[FRAME 7] Молодые люди 도심 질주. 빌딩 숲 누비는 Молодые люди. 도시 야경. 드론 촬영.                                                          | (SFX) 도시의 앰비언스 (자동차, 사이렌), 힙합 비트 더욱 강렬하게.                                                                                             |
+|   0:22-0:25  | \[FRAME 8] 덩크슛 성공. Молодые люди 환호. 슬로우 모션. 폭발하는 Молодые люди 에너지. 코트 조명, 스포트라이트. Молодые люди 얼굴.                     | (SFX) 덩크슛 소리, Молодые люди 함성, 힙합 비트 클라이맥스. (VO) "다시, 뛰어!"                                                                       |
+|   0:25-0:27  | \[FRAME 9] 전력 질주 후 카메라 응시. Молодые люди 강렬한 눈빛. 땀방울. 정면 조명. Молодые люди 눈높이 클로즈업.                                    | (SFX) 심장 박동 소리 점점 빨라짐.                                                                                                                   |
+|   0:27-0:30  | \[FRAME 10] 나이키 로고 클로즈업. 나이키 스토어 App QR 코드 (하단). "지금 바로 시작하세요." 문구. 천천히 줌 아웃.                                      | (SFX) 나이키 브랜드 사운드, (VO) "Just Do It. 지금 바로 시작하세요."                                                                                      |

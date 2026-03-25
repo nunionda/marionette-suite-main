@@ -6,21 +6,22 @@ export const parseStoryboardFrames = (text) => {
   if (!text) return [];
   
   const frames = [];
-  const frameRegex = /\[FRAME\s+(\d+)\](?:\s+\*\*(.*?)\*\*)?([\s\S]*?)(?=\[FRAME|$)/gi;
+  // Relaxed regex to catch [FRAME N] even with timecodes or headers
+  const frameRegex = /\[FRAME\s*(\d+).*?\]([\s\S]*?)(?=\[FRAME|$)/gi;
   let match;
 
   while ((match = frameRegex.exec(text)) !== null) {
     const number = match[1];
-    const content = match[3];
+    const content = match[2];
     
-    // Parse attributes using regex
+    // Parse attributes using more flexible regex (ignoring bullets and trimming quotes)
     const frameData = {
       number,
-      visual: content.match(/- \*\*Visual\*\*: (.*)/)?.[1] || '',
-      lighting: content.match(/- \*\*Lighting\*\*: (.*)/)?.[1] || '',
-      camera: content.match(/- \*\*Camera\*\*: (.*)/)?.[1] || '',
-      mood: content.match(/- \*\*Mood\*\*: (.*)/)?.[1] || '',
-      genPrompt: content.match(/- \*\*\[GEN_PROMPT\]\*\*: (.*)/)?.[1] || ''
+      visual: content.match(/Visual\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
+      lighting: content.match(/Lighting\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
+      camera: content.match(/Camera\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
+      mood: content.match(/Mood\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
+      genPrompt: content.match(/\[GEN_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1]?.trim() || ''
     };
     frames.push(frameData);
   }

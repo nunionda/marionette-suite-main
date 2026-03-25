@@ -132,19 +132,20 @@ const AdProjectDetail = ({ project, onBack }) => {
     VISION: { label: 'VISION', engine: '📊 비전 분석 (Vision Analyst)', icon: '📊' }
   };
 
-  const refineBriefWithCD = async () => {
+  const refineBriefWithRole = async () => {
     if (!conceptBrief) return alert("Please enter a basic brief first.");
     setIsOptimizingBrief(true);
+    setBriefingResult(null); // Reset previous result
     
     const prompt = `
 [Task]: Refine the following Campaign Brief.
-[Role]: Creative Director (CD)
-[Context]: Output structured strategic advice and a refined version of the brief.
+[Role]: ${creativeRole === 'CD' ? 'Creative Director' : creativeRole === 'COPY' ? 'Copywriter' : 'Art Director'} (${creativeRole})
+[Context]: Output structured strategic advice and a refined version of the brief from your specific perspective.
 [Language]: ${language}
 
 Current Brief: ${conceptBrief}
 
-Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona).
+Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${creativeRole} focus.
 `;
 
     try {
@@ -191,6 +192,13 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona).
   };
 
   const generateContent = (tab) => {
+    // RESET LOGIC: Clear dependent data when regenerating
+    if (tab === 'TREATMENT') {
+      setStoryboardImages({});
+      setLoadingFrames({});
+    }
+    setBriefingResult(null); // Clear assistant results when moving to next stage
+
     const roleContext = `\n[Role]: ${creativeRole}\n[Language]: ${language}\n[Ad Type]: ${adType}\n[Duration]: ${adDuration}\n[Category]: Commercial\n`;
     const fullSystemPrompt = `${adRule}\n\n[SPECIFIC STANDARDS]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}`;
 
@@ -320,10 +328,10 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona).
               <h4 style={{ fontSize: '0.85rem', color: 'var(--accent-secondary)', margin: 0 }}>📝 CAMPAIGN BRIEF</h4>
               <button 
                 className="refine-btn" 
-                onClick={refineBriefWithCD}
+                onClick={refineBriefWithRole}
                 disabled={isOptimizingBrief || !conceptBrief}
               >
-                {isOptimizingBrief ? 'Analyzing...' : '✨ Refine with CD'}
+                {isOptimizingBrief ? 'Analyzing...' : `✨ Refine with ${creativeRole}`}
               </button>
             </div>
             
@@ -337,7 +345,7 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona).
             {briefingResult && (
               <div className="briefing-assistant">
                 <div className="briefing-header">
-                  <span className="briefing-title">🧠 CD's Feedback</span>
+                  <span className="briefing-title">🧠 {creativeRole}'s Feedback</span>
                 </div>
                 <div className="briefing-content">
                   {briefingResult.split('\n').map((line, i) => (
@@ -381,9 +389,9 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona).
             
             {activeTab === 'VISION' ? (
               <AnalyticsDashboard data={pipelineData.analysisData} />
-            ) : (activeTab === 'STORYBOARD' && creativeRole === 'ART' && pipelineData.storyboard) ? (
+            ) : (activeTab === 'TREATMENT' && creativeRole === 'ART' && pipelineData.treatment) ? (
               <StoryboardView 
-                raw={pipelineData.storyboard} 
+                raw={pipelineData.treatment} 
                 imageUrls={storyboardImages}
                 onGenerate={handleGenerateVisual}
                 loadingFrames={loadingFrames}

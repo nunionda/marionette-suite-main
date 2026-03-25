@@ -8,35 +8,42 @@ import { ProjectProvider, ProjectContext } from './context/ProjectContext';
 
 function AppContent() {
   const { projects } = useContext(ProjectContext);
-  const [currentProject, setCurrentProject] = useState(null);
+  const [currentProjectId, setCurrentProjectId] = React.useState(() => {
+    return localStorage.getItem('lastProjectId') || null;
+  });
 
   const handleEnterLab = (id) => {
-    const project = projects.find(p => p.id === id);
-    setCurrentProject(project);
+    setCurrentProjectId(id);
+    localStorage.setItem('lastProjectId', id);
   };
 
-  const activeProject = projects.find(p => p.id === currentProject?.id) || currentProject;
+  const activeProject = projects.find(p => p.id === currentProjectId);
+  
+  const handleBack = () => {
+    setCurrentProjectId(null);
+    localStorage.removeItem('lastProjectId');
+  };
   const isAd = activeProject?.category === 'Commercial';
   const isDrama = activeProject?.category === 'Netflix Original';
 
   return (
     <div className="App">
-      {!currentProject ? (
+      {!activeProject ? (
         <Dashboard onEnterLab={handleEnterLab} />
       ) : isAd ? (
         <AdProjectDetail 
           project={activeProject} 
-          onBack={() => setCurrentProject(null)} 
+          onBack={handleBack} 
         />
       ) : isDrama ? (
         <DramaProjectDetail
           project={activeProject}
-          onBack={() => setCurrentProject(null)}
+          onBack={handleBack}
         />
       ) : (
         <ProjectDetail 
           project={activeProject} 
-          onBack={() => setCurrentProject(null)} 
+          onBack={handleBack} 
         />
       )}
     </div>
