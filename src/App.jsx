@@ -11,13 +11,20 @@ function AppContent() {
   const [currentProjectId, setCurrentProjectId] = React.useState(() => {
     return localStorage.getItem('lastProjectId') || null;
   });
+  const [isSyncing, setIsSyncing] = React.useState(true);
+
+  React.useEffect(() => {
+    // Give a short window for projects to load from context
+    const timer = setTimeout(() => setIsSyncing(false), 1000);
+    return () => clearTimeout(timer);
+  }, [projects]);
 
   const handleEnterLab = (id) => {
     setCurrentProjectId(id);
     localStorage.setItem('lastProjectId', id);
   };
 
-  const activeProject = projects.find(p => p.id === currentProjectId);
+  const activeProject = projects.find(p => String(p.id) === String(currentProjectId));
   
   const handleBack = () => {
     setCurrentProjectId(null);
@@ -28,7 +35,7 @@ function AppContent() {
 
   return (
     <div className="App">
-      {currentProjectId && !activeProject ? (
+      {isSyncing && currentProjectId ? (
         <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a', color: 'var(--accent-primary)' }}>
           Restoring Project Session...
         </div>

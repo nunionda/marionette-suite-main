@@ -19,50 +19,101 @@ const AD_GENRE_HINTS = {
   'Social': { icon: '🤳', name: 'Social / Digital', cues: ['UGC Style', 'Fast Pace', 'Vertical-ready', 'Hook-first'] }
 };
 
-const StoryboardView = ({ raw, imageUrls, onGenerate, loadingFrames }) => {
+const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFrames }) => {
+  const [step, setStep] = useState('SCRIPT'); // 'SCRIPT' or 'VISUAL'
   const frames = parseStoryboardFrames(raw);
 
   if (frames.length === 0) return <div style={{ padding: '20px', color: 'var(--text-dim)' }}>Waiting for ART role to structured storyboard...</div>;
 
+  const isAnyLoading = Object.values(loadingFrames).some(v => v);
+
   return (
-    <div className="storyboard-grid">
-      {frames.map((frame, index) => (
-        <div key={index} className="storyboard-card">
-          <div className="storyboard-visual-placeholder">
-            {imageUrls[frame.number] ? (
-              <img src={imageUrls[frame.number]} alt={`Frame ${frame.number}`} className="storyboard-image" />
-            ) : loadingFrames[frame.number] ? (
-              <div className="gen-loading">
-                <div className="spinner"></div>
-                <span>Generating Visual...</span>
-              </div>
-            ) : (
-              <button 
-                className="gen-visual-btn"
-                onClick={() => onGenerate(frame.number, frame.genPrompt)}
-              >
-                📸 Generate Visual
-              </button>
-            )}
-            <span className="storyboard-frame-number">#{frame.number}</span>
+    <div className="storyboard-container">
+      <div className="storyboard-step-nav">
+        <div 
+          className={`step-item ${step === 'SCRIPT' ? 'active' : ''}`}
+          onClick={() => setStep('SCRIPT')}
+        >
+          📝 1. Script Design
+        </div>
+        <div 
+          className={`step-item ${step === 'VISUAL' ? 'active' : ''}`}
+          onClick={() => setStep('VISUAL')}
+        >
+          🎥 2. Video Creation
+        </div>
+      </div>
+
+      {step === 'VISUAL' && (
+        <div className="batch-gen-bar">
+          <div className="batch-gen-info">
+            <strong>Video Creation Mode</strong>: 각 프레임을 시네마틱 비디오 컨셉으로 생성하고 확인합니다.
           </div>
-          <div className="storyboard-content">
-            <span className="storyboard-label">Visual</span>
-            <p className="storyboard-text">{frame.visual}</p>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
-              <div>
-                <span className="storyboard-label">Lighting</span>
-                <p className="storyboard-text" style={{ fontSize: '0.75rem' }}>{frame.lighting}</p>
-              </div>
-              <div>
-                <span className="storyboard-label">Camera</span>
-                <p className="storyboard-text" style={{ fontSize: '0.75rem' }}>{frame.camera}</p>
-              </div>
+          <button 
+            className="tactical-btn"
+            onClick={() => onGenerateAll(frames)}
+            disabled={isAnyLoading}
+          >
+            {isAnyLoading ? 'Processing...' : '🎭 Generate All Videos'}
+          </button>
+        </div>
+      )}
+
+      <div className={`storyboard-grid ${step === 'VISUAL' ? 'visual-mode' : ''}`}>
+        {frames.map((frame, index) => (
+          <div key={index} className="storyboard-card">
+            <div className="storyboard-visual-placeholder">
+              {imageUrls[frame.number] ? (
+                <video 
+                  src={imageUrls[frame.number]} 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline
+                  className="storyboard-image" 
+                />
+              ) : loadingFrames[frame.number] ? (
+                <div className="gen-loading">
+                  <div className="spinner"></div>
+                  <span>Generating Video...</span>
+                </div>
+              ) : (
+                <button 
+                  className="gen-visual-btn"
+                  onClick={() => onGenerate(frame.number, frame.videoPrompt)}
+                >
+                  🎞️ Generate Video
+                </button>
+              )}
+              <span className="storyboard-frame-number">#{frame.number}</span>
+            </div>
+            <div className="storyboard-content">
+              {step === 'SCRIPT' && (
+                <>
+                  <span className="storyboard-label">Visual</span>
+                  <p className="storyboard-text">{frame.visual}</p>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '10px' }}>
+                    <div>
+                      <span className="storyboard-label">Lighting</span>
+                      <p className="storyboard-text" style={{ fontSize: '0.75rem' }}>{frame.lighting}</p>
+                    </div>
+                    <div>
+                      <span className="storyboard-label">Camera</span>
+                      <p className="storyboard-text" style={{ fontSize: '0.75rem' }}>{frame.camera}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+              {step === 'VISUAL' && (
+                <div style={{ fontSize: '0.750rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                   {frame.visual.substring(0, 60)}...
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
@@ -173,21 +224,32 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
     setBriefingResult(null);
   };
 
-  const handleGenerateVisual = async (frameNumber, prompt) => {
-    if (!prompt) return alert("No prompt available for this frame. Regenerate Storyboard to get GEN_PROMPT.");
+  const handleGenerateVideo = async (frameNumber, prompt) => {
+    if (!prompt) return alert("No video prompt available for this frame. Regenerate Storyboard.");
     
     setLoadingFrames(prev => ({ ...prev, [frameNumber]: true }));
     try {
-      const result = await OpenRouterAdapter.generateImage(prompt);
-      const url = result.data?.[0]?.url;
+      const result = await OpenRouterAdapter.generateVideo(prompt, apiKey);
+      // Minimax or dynamic model might return result.choices[0].message.content or result.data[0].url
+      const url = result.choices?.[0]?.message?.content || result.data?.[0]?.url;
       if (url) {
         setStoryboardImages(prev => ({ ...prev, [frameNumber]: url }));
       }
     } catch (error) {
-      console.error("Image Gen Error:", error);
-      alert("Failed to generate image: " + error.message);
+      console.error("Video Gen Error:", error);
+      alert("Failed to generate video: " + error.message);
     } finally {
       setLoadingFrames(prev => ({ ...prev, [frameNumber]: false }));
+    }
+  };
+
+  const handleGenerateAllVideos = async (frames) => {
+    if (!frames || frames.length === 0) return;
+    
+    for (const frame of frames) {
+      if (!storyboardImages[frame.number]) {
+        await handleGenerateVideo(frame.number, frame.videoPrompt);
+      }
     }
   };
 
@@ -394,6 +456,7 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
                 raw={pipelineData.treatment} 
                 imageUrls={storyboardImages}
                 onGenerate={handleGenerateVisual}
+                onGenerateAll={handleGenerateAllVisuals}
                 loadingFrames={loadingFrames}
               />
             ) : (

@@ -89,4 +89,31 @@ export const aiRoutes = new Elysia({ prefix: "/ai" })
       prompt: t.String(),
       model: t.Optional(t.String())
     })
+  })
+  .post('/generate-video', async ({ body, set }: { body: { prompt: string, apiKey: string }, set: any }) => {
+    try {
+      // Use Minimax or another high-quality video model on OpenRouter
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${body.apiKey}`,
+        },
+        body: JSON.stringify({
+          model: 'minimax/video-01',
+          messages: [{ role: 'user', content: body.prompt }]
+        })
+      });
+      const result = await response.json();
+      return result;
+    } catch (err: any) {
+      console.error(`[VIDEO_GEN] Fetch Error:`, err);
+      set.status = 500;
+      return { error: err.message };
+    }
+  }, {
+    body: t.Object({
+      prompt: t.String(),
+      apiKey: t.String()
+    })
   });

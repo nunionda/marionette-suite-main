@@ -21,7 +21,8 @@ export const parseStoryboardFrames = (text) => {
       lighting: content.match(/Lighting\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
       camera: content.match(/Camera\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
       mood: content.match(/Mood\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
-      genPrompt: content.match(/\[GEN_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1]?.trim() || ''
+      videoPrompt: (content.match(/\[VIDEO_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] || 
+                    content.match(/\[GEN_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1])?.trim() || ''
     };
     frames.push(frameData);
   }

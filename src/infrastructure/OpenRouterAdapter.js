@@ -72,4 +72,15 @@ export class OpenRouterAdapter {
 
     return await response.json(); // Returns { data: [{ url: "..." }] }
   }
+
+  static async generateVideo(prompt, apiKey) {
+    if (!apiKey) throw new Error("API Key is required");
+    const response = await fetch('/api/ai/generate-video', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, apiKey })
+    });
+    const data = await response.json();
+    return data;
+  }
 }
