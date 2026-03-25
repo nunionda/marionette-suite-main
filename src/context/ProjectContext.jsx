@@ -53,7 +53,7 @@ const defaultProjects = [
 ];
 
 export const ProjectProvider = ({ children }) => {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState(defaultProjects);
   const API_BASE = "/api";
 
   // 1. Initial Load from Server
