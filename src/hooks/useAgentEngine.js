@@ -53,7 +53,8 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
             console.warn("⚠️ Failed to parse dynamic analysis JSON. Dashboard will use estimate/mock values.", e);
           }
         }
-      }
+      },
+      'agent'
     );
 
     setIsGenerating(false);

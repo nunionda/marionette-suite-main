@@ -12,24 +12,39 @@ const KEYS = {
 
 export const aiRoutes = new Elysia()
   .post("/stream", async ({ body, set }) => {
-    const { prompt, system, model: requestedModel } = body as any;
+    const { prompt, system, model: requestedModel, mode = "agent" } = body as any;
     
+    // Determine priority based on mode
+    // 'chat' mode: OpenRouter first, then Direct
+    // 'agent' mode: Direct first, then OpenRouter (default)
+    const isChatMode = mode === "chat";
+
     const fallbackModels = [
-      requestedModel || "anthropic/claude-3.5-sonnet",
+      requestedModel || "anthropic/claude-3-5-sonnet",
       "google/gemini-2.0-flash-001",
       "google/gemini-2.5-flash",
       "google/gemini-2.0-flash-lite-001",
-      "deepseek/deepseek-chat",
-      "google/gemma-3-27b-it:free"
+      "deepseek/deepseek-chat"
     ];
 
     for (const currentModel of fallbackModels) {
-      console.log(`[AI_ORCHESTRATOR] Attempting: ${currentModel}`);
+      console.log(`[AI_ORCHESTRATOR][${mode.toUpperCase()}] Attempting: ${currentModel}`);
 
       try {
         let response: any = null;
 
-        // --- 1. DIRECT API ATTEMPT ---
+        // --- 1. CHAT MODE: OPENROUTER FIRST ---
+        if (isChatMode && KEYS.OPENROUTER) {
+          console.log(`[AI_ORCHESTRATOR] Chat Mode: Prioritizing OpenRouter for ${currentModel}`);
+          response = await callOpenRouterStream(currentModel, prompt, system, KEYS.OPENROUTER);
+          if (response && response.ok) {
+            console.log(`[AI_ORCHESTRATOR] OpenRouter Success (Chat Mode)`);
+            return new Response(response.body, { headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive" } });
+          }
+        }
+
+        // --- 2. DIRECT API ATTEMPT (Agent Mode priority or Chat Fallback) ---
+        console.log(`[AI_ORCHESTRATOR] Attempting Direct API for ${currentModel}`);
         if (currentModel.includes("claude") && KEYS.ANTHROPIC) {
           response = await callAnthropicDirect(currentModel, prompt, system);
         } else if (currentModel.includes("gemini") && KEYS.GEMINI) {
@@ -40,9 +55,9 @@ export const aiRoutes = new Elysia()
           response = await callDeepSeekDirect(currentModel, prompt, system);
         }
         
-        // --- 2. OPENROUTER FALLBACK ---
-        if ((!response || !response.ok) && KEYS.OPENROUTER) {
-          console.log(`[AI_ORCHESTRATOR] Falling back to OpenRouter for: ${currentModel}`);
+        // --- 3. OPENROUTER FALLBACK (Agent Mode) ---
+        if ((!response || !response.ok) && !isChatMode && KEYS.OPENROUTER) {
+          console.log(`[AI_ORCHESTRATOR] Agent Mode: Falling back to OpenRouter for ${currentModel}`);
           response = await callOpenRouterStream(currentModel, prompt, system, KEYS.OPENROUTER);
         }
 
@@ -75,7 +90,8 @@ export const aiRoutes = new Elysia()
     body: t.Object({
       prompt: t.String(),
       system: t.Optional(t.String()),
-      model: t.Optional(t.String())
+      model: t.Optional(t.String()),
+      mode: t.Optional(t.String())
     })
   })
   .post("/generate-image", async ({ body, set }) => {

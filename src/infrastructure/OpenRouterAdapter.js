@@ -6,7 +6,7 @@
  * 도메인(React UI나 비즈니스 룰)에 대한 지식 없이, 순수하게 HTTP 요청과 SSE 파싱만 수행합니다.
  */
 export class OpenRouterAdapter {
-  static async streamChatCompletion(apiKey, systemPrompt, userPrompt, onChunk, onError, onComplete) {
+  static async streamChatCompletion(apiKey, systemPrompt, userPrompt, onChunk, onError, onComplete, mode = 'agent') {
     try {
       const response = await fetch('http://127.0.0.1:3005/api/ai/stream', {
         method: 'POST',
@@ -15,8 +15,8 @@ export class OpenRouterAdapter {
         },
         body: JSON.stringify({
           system: systemPrompt,
-          prompt: userPrompt
-          // model is now handled by backend fallback logic
+          prompt: userPrompt,
+          mode
         })
       });
 
