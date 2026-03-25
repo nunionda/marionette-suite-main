@@ -25,6 +25,7 @@ const AdProjectDetail = ({ project, onBack }) => {
   const [adDuration, setAdDuration] = useState(project.adDuration || '30s');
   const [adType, setAdType] = useState(project.genre || 'Brand Film');
   const [creativeRole, setCreativeRole] = useState('CD'); // CD, Copywriter, Art Director
+  const [language, setLanguage] = useState('KO'); // KO, EN
   
   const [pipelineData, setPipelineData] = useState({
     concept: project.concept || '',
@@ -67,16 +68,16 @@ const AdProjectDetail = ({ project, onBack }) => {
   };
 
   const TAB_META = {
-    CONCEPT: { label: 'BRIEF', engine: 'Creative Brief', icon: '📋' },
-    ARCHITECTURE: { label: 'COPY', engine: 'Ideation/Copy', icon: '✍️' },
-    TREATMENT: { label: 'STORYBOARD', engine: 'Storyboard/Timing', icon: '🎞️' },
-    SCENARIO: { label: 'A/V SCRIPT', engine: 'Master A/V Script', icon: '🎙️' },
-    REVIEW: { label: 'AUDIT', engine: 'Brand Audit', icon: '🕵️' },
-    VISION: { label: 'VISION', engine: 'Impact Analyst', icon: '📊' }
+    CONCEPT: { label: 'BRIEF', engine: '📝 캠페인 기획안 (Campaign Brief)', icon: '📋' },
+    ARCHITECTURE: { label: 'COPY', engine: '✍️ 카피 시안 (Ideation / Copy)', icon: '✍️' },
+    TREATMENT: { label: 'STORYBOARD', engine: '🎞️ 스토리보드 (Storyboard / Timing)', icon: '🎞️' },
+    SCENARIO: { label: 'A/V SCRIPT', engine: '🎙️ A/V 스크립트 (Master A/V Script)', icon: '🎙️' },
+    REVIEW: { label: 'AUDIT', engine: '🕵️ 임팩트 감사 (Brand & Impact Audit)', icon: '🕵️' },
+    VISION: { label: 'VISION', engine: '📊 비전 분석 (Vision Analyst)', icon: '📊' }
   };
 
   const generateContent = (tab) => {
-    const roleContext = `\n[Role]: ${creativeRole}\n[Ad Type]: ${adType}\n[Duration]: ${adDuration}\n[Category]: Commercial\n`;
+    const roleContext = `\n[Role]: ${creativeRole}\n[Language]: ${language}\n[Ad Type]: ${adType}\n[Duration]: ${adDuration}\n[Category]: Commercial\n`;
     const fullSystemPrompt = `${adRule}\n\n[SPECIFIC STANDARDS]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}`;
 
     let prompt = "";
@@ -149,6 +150,26 @@ const AdProjectDetail = ({ project, onBack }) => {
                   }}
                 >
                   {role}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginBottom: '20px' }}>
+            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '8px' }}>OUTPUT LANGUAGE</label>
+            <div style={{ display: 'flex', gap: '5px' }}>
+              {['KO', 'EN'].map(lang => (
+                <button 
+                  key={lang}
+                  onClick={() => setLanguage(lang)}
+                  style={{ 
+                    flex: 1, padding: '8px', 
+                    background: language === lang ? 'var(--accent-secondary)' : 'rgba(255,255,255,0.1)',
+                    color: 'white',
+                    border: 'none', borderRadius: '4px', cursor: 'pointer'
+                  }}
+                >
+                  {lang === 'KO' ? 'KOREAN (한글)' : 'ENGLISH'}
                 </button>
               ))}
             </div>
