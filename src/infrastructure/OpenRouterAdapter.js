@@ -8,15 +8,15 @@
 export class OpenRouterAdapter {
   static async streamChatCompletion(apiKey, systemPrompt, userPrompt, onChunk, onError, onComplete) {
     try {
-      const response = await fetch('http://127.0.0.1:3005/ai/stream', {
+      const response = await fetch('http://127.0.0.1:3005/api/ai/stream', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           system: systemPrompt,
-          prompt: userPrompt,
-          model: 'google/gemini-2.0-flash-001'
+          prompt: userPrompt
+          // model is now handled by backend fallback logic
         })
       });
 
@@ -59,7 +59,7 @@ export class OpenRouterAdapter {
   }
   
   static async generateImage(prompt) {
-    const response = await fetch('http://127.0.0.1:3005/ai/generate-image', {
+    const response = await fetch('http://127.0.0.1:3005/api/ai/generate-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt })
@@ -75,7 +75,7 @@ export class OpenRouterAdapter {
 
   static async generateVideo(prompt, apiKey) {
     if (!apiKey) throw new Error("API Key is required");
-    const response = await fetch('/api/ai/generate-video', {
+    const response = await fetch('http://127.0.0.1:3005/api/ai/generate-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt, apiKey })

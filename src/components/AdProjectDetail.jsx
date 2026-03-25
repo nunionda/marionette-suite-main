@@ -23,7 +23,18 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
   const [step, setStep] = useState('SCRIPT'); // 'SCRIPT' or 'VISUAL'
   const frames = parseStoryboardFrames(raw);
 
-  if (frames.length === 0) return <div style={{ padding: '20px', color: 'var(--text-dim)' }}>Waiting for ART role to structured storyboard...</div>;
+  if (frames.length === 0) {
+    return (
+      <div style={{ padding: '20px', color: 'var(--text-dim)' }}>
+        {raw ? (
+          <div style={{ opacity: 0.6 }}>
+            <p>Parsing storyboard structure... (Found {raw.length} chars)</p>
+            <pre style={{ fontSize: '0.8rem', whiteSpace: 'pre-wrap' }}>{raw.substring(0, 300)}...</pre>
+          </div>
+        ) : 'Waiting for CONCEPT ARTIST role to structure storyboard...'}
+      </div>
+    );
+  }
 
   const isAnyLoading = Object.values(loadingFrames).some(v => v);
 
@@ -40,21 +51,21 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
           className={`step-item ${step === 'VISUAL' ? 'active' : ''}`}
           onClick={() => setStep('VISUAL')}
         >
-          🎥 2. Video Creation
+          🎨 2. Concept Sketches
         </div>
       </div>
 
       {step === 'VISUAL' && (
         <div className="batch-gen-bar">
           <div className="batch-gen-info">
-            <strong>Video Creation Mode</strong>: 각 프레임을 시네마틱 비디오 컨셉으로 생성하고 확인합니다.
+            <strong>Concept Sketch Mode</strong>: 주요 미장센과 구도를 러프한 스케치로 시각화합니다.
           </div>
           <button 
             className="tactical-btn"
             onClick={() => onGenerateAll(frames)}
             disabled={isAnyLoading}
           >
-            {isAnyLoading ? 'Processing...' : '🎭 Generate All Videos'}
+            {isAnyLoading ? 'Processing...' : '🎭 Generate All Sketches'}
           </button>
         </div>
       )}
@@ -64,25 +75,18 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
           <div key={index} className="storyboard-card">
             <div className="storyboard-visual-placeholder">
               {imageUrls[frame.number] ? (
-                <video 
-                  src={imageUrls[frame.number]} 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline
-                  className="storyboard-image" 
-                />
+                <img src={imageUrls[frame.number]} alt={`Frame ${frame.number}`} className="storyboard-image" />
               ) : loadingFrames[frame.number] ? (
                 <div className="gen-loading">
                   <div className="spinner"></div>
-                  <span>Generating Video...</span>
+                  <span>Drawing Sketch...</span>
                 </div>
               ) : (
                 <button 
                   className="gen-visual-btn"
-                  onClick={() => onGenerate(frame.number, frame.videoPrompt)}
+                  onClick={() => onGenerate(frame.number, frame.sketchPrompt)}
                 >
-                  🎞️ Generate Video
+                  🎨 Generate Sketch
                 </button>
               )}
               <span className="storyboard-frame-number">#{frame.number}</span>
@@ -156,8 +160,9 @@ const AdProjectDetail = ({ project, onBack }) => {
       treatment: project.treatment || '',
       scenario: project.scenario || '',
       review: project.review || '',
-      analysisData: project.analysisData || null
+      analysisData: project.analysisData || project.analysis_data || null
     });
+    setStoryboardImages(project.storyboardImages || project.storyboard_images || {});
   }, [project]);
 
   const handleDataChange = (field, value, isAppend = false) => {
@@ -170,17 +175,24 @@ const AdProjectDetail = ({ project, onBack }) => {
   const { executeAgent, isGenerating } = useAgentEngine(apiKey, handleDataChange);
 
   const saveToContext = () => {
-    updateProject(project.id, { ...pipelineData, adDuration, genre: adType, conceptBrief, conceptDirection });
-    alert("Ad Project Saved!");
+    updateProject(project.id, { 
+      ...pipelineData, 
+      adDuration, 
+      genre: adType, 
+      conceptBrief, 
+      conceptDirection,
+      storyboardImages 
+    });
+    alert("Campaign Data & Storyboard Saved!");
   };
 
   const TAB_META = {
     CONCEPT: { label: 'BRIEF', engine: '📝 캠페인 기획안 (Campaign Brief)', icon: '📋' },
     ARCHITECTURE: { label: 'COPY', engine: '✍️ 카피 시안 (Ideation / Copy)', icon: '✍️' },
-    TREATMENT: { label: 'STORYBOARD', engine: '🎞️ 스토리보드 (Storyboard / Timing)', icon: '🎞️' },
-    SCENARIO: { label: 'A/V SCRIPT', engine: '🎙️ A/V 스크립트 (Master A/V Script)', icon: '🎙️' },
-    REVIEW: { label: 'AUDIT', engine: '🕵️ 임팩트 감사 (Brand & Impact Audit)', icon: '🕵️' },
-    VISION: { label: 'VISION', engine: '📊 비전 분석 (Vision Analyst)', icon: '📊' }
+    TREATMENT: { label: 'STORYBOARD', engine: '🎨 컨셉 아트 (Concept Artist Sketch)', icon: '🎨' },
+    SCENARIO: { label: 'A/V SCRIPT', engine: '📽️ 최종 합본 (A/V Production Script)', icon: '📽️' },
+    REVIEW: { label: 'AUDIT', engine: '🔍 브랜드 검증 (Brand & Impact Audit)', icon: '🔍' },
+    VISION: { label: 'ANALYTICS', engine: '📊 데이터 분석 (AI Impact Matrix)', icon: '📊' }
   };
 
   const refineBriefWithRole = async () => {
@@ -188,15 +200,24 @@ const AdProjectDetail = ({ project, onBack }) => {
     setIsOptimizingBrief(true);
     setBriefingResult(null); // Reset previous result
     
+    const isCD = creativeRole === 'CD';
+    const contextInfo = isCD ? `
+[CROSS-ROLE FEEDS]:
+- Current Copy (CW): ${pipelineData.architecture || 'None'}
+- Current Storyboard (CA): ${pipelineData.treatment || 'None'}
+[Note]: As CD, your task is to SYNTHESIZE these inputs into the final Brief/Strategy.
+` : '';
+
     const prompt = `
-[Task]: Refine the following Campaign Brief.
-[Role]: ${creativeRole === 'CD' ? 'Creative Director' : creativeRole === 'COPY' ? 'Copywriter' : 'Art Director'} (${creativeRole})
-[Context]: Output structured strategic advice and a refined version of the brief from your specific perspective.
+[Task]: Refine and Synthesize the following Campaign Brief.
+[Role]: ${isCD ? 'Strategic Orchestrator / Creative Director' : creativeRole === 'COPY' ? 'Copywriter' : 'Concept Artist'} (${creativeRole})
+[Context]: Output structured strategic advice and a refined version of the brief. ${isCD ? 'Harmonize the Copy and Storyboard inputs into this final direction.' : 'Focus on your specific role perspective.'}
+${contextInfo}
 [Language]: ${language}
 
 Current Brief: ${conceptBrief}
 
-Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${creativeRole} focus.
+Follow the standards in ## 🏛️ STRATEGIC ORCHESTRATION (CD Persona) and ## 🧠 BRIEFING_OPTIMIZER (CD Persona).
 `;
 
     try {
@@ -224,31 +245,31 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
     setBriefingResult(null);
   };
 
-  const handleGenerateVideo = async (frameNumber, prompt) => {
-    if (!prompt) return alert("No video prompt available for this frame. Regenerate Storyboard.");
+  const handleGenerateSketch = async (frameNumber, prompt) => {
+    if (!prompt) return alert("No sketch prompt available for this frame. Regenerate Storyboard.");
     
     setLoadingFrames(prev => ({ ...prev, [frameNumber]: true }));
     try {
-      const result = await OpenRouterAdapter.generateVideo(prompt, apiKey);
-      // Minimax or dynamic model might return result.choices[0].message.content or result.data[0].url
-      const url = result.choices?.[0]?.message?.content || result.data?.[0]?.url;
+      // Use standard image generation for concept sketches
+      const result = await OpenRouterAdapter.generateImage(prompt);
+      const url = result.data?.[0]?.url;
       if (url) {
         setStoryboardImages(prev => ({ ...prev, [frameNumber]: url }));
       }
     } catch (error) {
-      console.error("Video Gen Error:", error);
-      alert("Failed to generate video: " + error.message);
+      console.error("Sketch Gen Error:", error);
+      alert("Failed to draw sketch: " + error.message);
     } finally {
       setLoadingFrames(prev => ({ ...prev, [frameNumber]: false }));
     }
   };
 
-  const handleGenerateAllVideos = async (frames) => {
+  const handleGenerateAllSketches = async (frames) => {
     if (!frames || frames.length === 0) return;
     
     for (const frame of frames) {
       if (!storyboardImages[frame.number]) {
-        await handleGenerateVideo(frame.number, frame.videoPrompt);
+        await handleGenerateSketch(frame.number, frame.sketchPrompt);
       }
     }
   };
@@ -261,6 +282,7 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
     }
     setBriefingResult(null); // Clear assistant results when moving to next stage
 
+    const isCD = creativeRole === 'CD';
     const roleContext = `\n[Role]: ${creativeRole}\n[Language]: ${language}\n[Ad Type]: ${adType}\n[Duration]: ${adDuration}\n[Category]: Commercial\n`;
     const fullSystemPrompt = `${adRule}\n\n[SPECIFIC STANDARDS]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}`;
 
@@ -270,19 +292,23 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
     if (tab === 'CONCEPT') {
       prompt = `[Task]: BRIEFING PHASE. 아이디어: ${conceptBrief}\n방향성: ${conceptDirection}\n${roleContext}\n위 브리프를 바탕으로 전략적 빅 아이디어와 캠페인 핵심 메시지를 도출하세요.`;
     } else if (tab === 'ARCHITECTURE') {
-      prompt = `[Task]: COPYWRITING PHASE. 컨셉: ${pipelineData.concept}\n${roleContext}\n헤드라인, 바디카피, 브랜드 슬로건을 포함한 다수의 카피 시안을 제안하세요.`;
+      const storyboardContext = isCD && pipelineData.treatment ? `\n[Storyboard Sketch Context]:\n${pipelineData.treatment}` : '';
+      prompt = `[Task]: COPYWRITING & SYNTHESIS PHASE. 컨셉: ${pipelineData.concept}\n${roleContext}${storyboardContext}\n헤드라인, 바디카피, 브랜드 슬로건을 포함한 다수의 카피 시안을 제안하세요. ${isCD ? '컨셉 아티스트의 시각적 방향성을 카피에 녹여내어 전략적으로 조율하세요.' : ''}`;
     } else if (tab === 'TREATMENT') {
-      prompt = `[Task]: STORYBOARDING PHASE. 카피안: ${pipelineData.architecture}\n${roleContext}\nAIDA 구조에 맞춰 각 초수별 시각적 구성과 리듬감을 설계하세요.`;
+      const visualContext = pipelineData.architecture || pipelineData.concept || conceptBrief;
+      prompt = `[Task]: STORYBOARDING PHASE. 컨셉/카피: ${visualContext}\n${roleContext}\nAIDA 구조에 맞춰 각 초수별 시각적 구성과 리듬감을 설계하세요. 각 프레임은 반드시 [FRAME 1], [FRAME 2] 형식을 사용하세요.`;
     } else if (tab === 'SCENARIO') {
       prompt = `[Task]: FINAL A/V SCRIPT. 스토리보드: ${pipelineData.treatment}\n${roleContext}\n현장 투입용 표준 2단 테이블 스크립트를 작성하세요. Visual(미장센)과 Audio(SFX/VO)를 분리하세요.`;
     } else if (tab === 'REVIEW') {
       prompt = `[Task]: BRAND & IMPACT AUDIT. 완료된 시나리오:\n${pipelineData.scenario}\n${roleContext}\n브랜드 가이드라인 준수 여부와 'Brutally Honest'한 소출 기대 효과를 냉정하게 평가하세요. 타겟 소비자에게 전달될 실질적인 메시지 파워를 검증하세요.
-      [IMPORTANT]: 분석 완료 시 마지막에 반드시 아래 JSON 형식을 [ANALYSIS_JSON] 태그와 함께 포함하세요.
+      [IMPORTANT]: 분석 완료 시 마지막에 반드시 아래 JSON 형식을 [ANALYSIS_JSON] 태그와 함께 포함하세요. 
+      [NOTE]: 아래의 값들은 예시일 뿐입니다. 실제 시나리오의 흐름에 맞는 임의의 다양한 수치(0~10, 0~100)를 직접 계산하여 정교하게 반영하십시오.
+      
       [ANALYSIS_JSON] 
       {
-        "emotionalArc": [{"name": "Start", "valence": 4}, {"name": "USP", "valence": 9}, {"name": "CTA", "valence": 10}],
-        "characterMap": [{"subject": "BRAND", "A": 100, "B": 90}, {"subject": "CONSUMER", "A": 70, "B": 50}],
-        "beatProgress": [{"completed": 5, "total": 5}]
+        "emotionalArc": [{"name": "Start", "valence": 5}, {"name": "USP", "valence": 8}, {"name": "CTA", "valence": 10}],
+        "characterMap": [{"subject": "BRAND", "A": 90, "B": 80}, {"subject": "CONSUMER", "A": 65, "B": 45}],
+        "beatProgress": [{"completed": 1, "total": 1}]
       }`;
     }
 
@@ -322,7 +348,7 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
           <div style={{ marginBottom: '20px' }}>
             <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '8px' }}>CREATIVE ROLE</label>
             <div style={{ display: 'flex', gap: '5px' }}>
-              {['CD', 'COPY', 'ART'].map(role => (
+              {['CD', 'COPY', 'CONCEPT ARTIST'].map(role => (
                 <button 
                   key={role}
                   onClick={() => setCreativeRole(role)}
@@ -386,14 +412,15 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
           </div>
 
           <div style={{ marginTop: '30px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
               <h4 style={{ fontSize: '0.85rem', color: 'var(--accent-secondary)', margin: 0 }}>📝 CAMPAIGN BRIEF</h4>
               <button 
-                className="refine-btn" 
+                className="tactical-btn refine-btn" 
                 onClick={refineBriefWithRole}
                 disabled={isOptimizingBrief || !conceptBrief}
+                style={{ background: 'var(--accent-primary)', color: 'black', padding: '4px 10px', fontSize: '0.75rem' }}
               >
-                {isOptimizingBrief ? 'Analyzing...' : `✨ Refine with ${creativeRole}`}
+                {isOptimizingBrief ? 'Optimizing...' : creativeRole === 'CD' ? '✨ Synthesize (CD)' : `⚡ Refine (${creativeRole})`}
               </button>
             </div>
             
@@ -451,12 +478,12 @@ Follow the standards in ## 🧠 BRIEFING_OPTIMIZER (CD Persona) but adapt for ${
             
             {activeTab === 'VISION' ? (
               <AnalyticsDashboard data={pipelineData.analysisData} />
-            ) : (activeTab === 'TREATMENT' && creativeRole === 'ART' && pipelineData.treatment) ? (
+            ) : (activeTab === 'TREATMENT' && (creativeRole === 'CONCEPT ARTIST' || creativeRole === 'CD')) ? (
               <StoryboardView 
                 raw={pipelineData.treatment} 
                 imageUrls={storyboardImages}
-                onGenerate={handleGenerateVisual}
-                onGenerateAll={handleGenerateAllVisuals}
+                onGenerate={handleGenerateSketch}
+                onGenerateAll={handleGenerateAllSketches}
                 loadingFrames={loadingFrames}
               />
             ) : (

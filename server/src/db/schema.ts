@@ -17,6 +17,7 @@ export const projects = pgTable("projects", {
   scenario: text("scenario"),
   review: text("review"),
   analysisData: jsonb("analysis_data"),
+  storyboardImages: jsonb("storyboard_images"),
   
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),

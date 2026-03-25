@@ -30,6 +30,13 @@ export const syncProjectToFileSystem = async (project: any) => {
       { name: "treatment.md", content: project.treatment || "" },
       { name: "script.md", content: project.scenario || "" },
       { name: "characters.json", content: JSON.stringify(project.characters || {}, null, 2) },
+      { name: "metadata.json", content: JSON.stringify({
+        storyboardImages: project.storyboardImages || {},
+        analysisData: project.analysisData || null,
+        conceptBrief: project.conceptBrief || "",
+        conceptDirection: project.conceptDirection || "",
+        adDuration: project.adDuration || "30s"
+      }, null, 2) },
     ];
 
     for (const file of files) {

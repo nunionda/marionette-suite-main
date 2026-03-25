@@ -7,20 +7,15 @@ import { syncProjectToFileSystem } from "./lib/sync";
 
 const API_BASE = "http://localhost:3005/api";
 const app = new Elysia()
-  .use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    maxAge: 5
-  }))
+  .use(cors())
   .onError(({ code, error, set }) => {
     console.error(`💥 Error [${code}]:`, error);
     return { error: (error as any).message || "Internal Server Error" };
   })
   .get("/", () => "Cinematic Engine Backend Alive")
-  .use(aiRoutes)
   .group("/api", (app) =>
     app
+      .group("/ai", (app) => app.use(aiRoutes))
       .get("/projects", async () => {
         const allProjects = await db.select().from(projects);
         return { projects: allProjects };

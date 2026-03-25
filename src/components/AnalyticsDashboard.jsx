@@ -28,9 +28,21 @@ const AnalyticsDashboard = ({ data }) => {
   };
 
   const chartData = data || defaultData;
+  const isLive = !!data;
 
   return (
-    <div className="analytics-dashboard" style={{ padding: '30px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', minHeight: '600px' }}>
+    <div className="analytics-dashboard" style={{ padding: '30px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', minHeight: '600px', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
+        <span className="badge" style={{ 
+          padding: '5px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 800,
+          background: isLive ? 'var(--accent-primary)' : 'rgba(255,255,255,0.1)',
+          color: isLive ? 'black' : 'var(--text-dim)',
+          boxShadow: isLive ? '0 0 15px var(--accent-primary)' : 'none'
+        }}>
+          {isLive ? '● LIVE AI ANALYSIS' : '○ ESTIMATED / SIMULATION'}
+        </span>
+      </div>
+      
       <header style={{ marginBottom: '40px', borderLeft: '4px solid var(--accent-primary)', paddingLeft: '20px' }}>
         <h2 style={{ margin: 0, letterSpacing: '2px' }}>NARRATIVE <span style={{ color: 'var(--accent-primary)' }}>VISION</span></h2>
         <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>AI-Driven Quantitative Analysis of Emotional Arc and Character Agency</p>

@@ -6,25 +6,54 @@ export const parseStoryboardFrames = (text) => {
   if (!text) return [];
   
   const frames = [];
-  // Relaxed regex to catch [FRAME N] even with timecodes or headers
-  const frameRegex = /\[FRAME\s*(\d+).*?\]([\s\S]*?)(?=\[FRAME|$)/gi;
+  // Much more aggressive regex to catch Frame N, [FRAME N], ### Frame N, etc.
+  const frameRegex = /(?:\[FRAME\s*(\d+).*?\]|###\s*Frame\s*(\d+)|(?:\*\*|#)\s*Frame\s*(\d+)\s*(?:\*\*|:)?|Frame\s*(\d+)\s*:?)([\s\S]*?)(?=\[FRAME|###\s*Frame|\*\*Frame|Frame\s*\d+|$)/gi;
+  
   let match;
-
   while ((match = frameRegex.exec(text)) !== null) {
-    const number = match[1];
-    const content = match[2];
+    const number = match[1] || match[2] || match[3] || match[4];
+    const content = match[5];
     
-    // Parse attributes using more flexible regex (ignoring bullets and trimming quotes)
+    // Parse attributes using more flexible regex (look for bolded keys)
     const frameData = {
       number,
-      visual: content.match(/Visual\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
-      lighting: content.match(/Lighting\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
-      camera: content.match(/Camera\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
-      mood: content.match(/Mood\*\*[:\s]+(.*)/i)?.[1]?.trim() || '',
-      videoPrompt: (content.match(/\[VIDEO_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] || 
-                    content.match(/\[GEN_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1])?.trim() || ''
+      visual: (content.match(/Visual\*\*[:\s]+(.*)/i)?.[1] || 
+               content.match(/Visual\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      lighting: (content.match(/Lighting\*\*[:\s]+(.*)/i)?.[1] || 
+                 content.match(/Lighting\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      camera: (content.match(/Camera\*\*[:\s]+(.*)/i)?.[1] || 
+               content.match(/Camera\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      mood: (content.match(/Mood\*\*[:\s]+(.*)/i)?.[1] || 
+             content.match(/Mood\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      sketchPrompt: (content.match(/\[IMAGE_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] || 
+                     content.match(/\[VIDEO_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] ||
+                     content.match(/\[GEN_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] ||
+                     content.match(/IMAGE_PROMPT\s*[:\s]+(.*)/i)?.[1])?.trim() || ''
     };
-    frames.push(frameData);
+    
+    // Only push if we have at least visual or some content
+    if (frameData.visual || frameData.lighting || frameData.camera) {
+      frames.push(frameData);
+    }
   }
+  
+  // FALLBACK: If regex fails but we have text, try simple split
+  if (frames.length === 0 && text.length > 100) {
+    const lines = text.split('\n');
+    let currentFrame = null;
+    lines.forEach(line => {
+      if (line.match(/Frame\s*(\d+)/i)) {
+        if (currentFrame) frames.push(currentFrame);
+        currentFrame = { number: line.match(/(\d+)/)[1], visual: '', lighting: '', camera: '', mood: '', sketchPrompt: '' };
+      } else if (currentFrame) {
+        if (line.toLowerCase().includes('visual')) currentFrame.visual = line.replace(/.*visual[:\s]*/i, '');
+        if (line.toLowerCase().includes('lighting')) currentFrame.lighting = line.replace(/.*lighting[:\s]*/i, '');
+        if (line.toLowerCase().includes('camera')) currentFrame.camera = line.replace(/.*camera[:\s]*/i, '');
+        if (line.toLowerCase().includes('prompt')) currentFrame.sketchPrompt = line.replace(/.*prompt[:\s]*/i, '');
+      }
+    });
+    if (currentFrame) frames.push(currentFrame);
+  }
+
   return frames;
 };

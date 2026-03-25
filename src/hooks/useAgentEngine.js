@@ -40,12 +40,17 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
       async () => {
         if (targetField === 'review' && accumulatedText.includes('[ANALYSIS_JSON]')) {
           try {
-            const jsonStr = accumulatedText.split('[ANALYSIS_JSON]')[1].trim();
+            const parts = accumulatedText.split('[ANALYSIS_JSON]');
+            let jsonStr = parts[parts.length - 1].trim();
+            
+            // Clean up markdown code blocks if present
+            jsonStr = jsonStr.replace(/^```json\s*/, '').replace(/^```\s*/, '').replace(/\s*```$/, '');
+            
             const analysisData = JSON.parse(jsonStr);
-            console.log("Extracted Analysis Data:", analysisData);
+            console.log("✅ Dynamic Analysis Data Extracted:", analysisData);
             onUpdateField('analysisData', analysisData);
           } catch (e) {
-            console.error("Failed to parse analysis JSON:", e);
+            console.warn("⚠️ Failed to parse dynamic analysis JSON. Dashboard will use estimate/mock values.", e);
           }
         }
       }

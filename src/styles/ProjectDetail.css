@@ -719,8 +719,15 @@
 .storyboard-visual-placeholder::after {
   content: 'SCENE PREVIEW';
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.1);
   letter-spacing: 2px;
+  position: absolute;
+  z-index: 0;
+}
+
+.storyboard-visual-placeholder img {
+  position: relative;
+  z-index: 1;
 }
 
 .storyboard-frame-number {
