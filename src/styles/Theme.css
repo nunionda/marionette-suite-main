@@ -34,11 +34,13 @@ body {
   background: transparent;
   border: 1px solid var(--accent-primary);
   color: var(--accent-primary);
-  padding: 8px 16px;
+  padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 0.9rem;
-  letter-spacing: 0.05em;
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
   transition: var(--transition-smooth);
   text-transform: uppercase;
 }
@@ -52,6 +54,7 @@ body {
 .gradient-text {
   background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 

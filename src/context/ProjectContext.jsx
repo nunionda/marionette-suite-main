@@ -71,6 +71,15 @@ export const ProjectProvider = ({ children }) => {
   }, []);
 
   const addProject = async (project) => {
+    // 🎭 LOCAL-FIRST OPTIMISTIC UPDATE
+    const newProject = {
+      ...project,
+      id: `local-${Date.now()}`,
+      updated: new Date().toISOString()
+    };
+    
+    setProjects(prev => [...prev, newProject]);
+
     try {
       const res = await fetch(`${API_BASE}/projects`, {
         method: "POST",
@@ -83,10 +92,11 @@ export const ProjectProvider = ({ children }) => {
       });
       const data = await res.json();
       if (data.success) {
-        setProjects(prev => [...prev, data.project]);
+        // Sync the temporary ID with the server ID
+        setProjects(prev => prev.map(p => p.id === newProject.id ? data.project : p));
       }
     } catch (e) {
-      console.error("Failed to add project to server.");
+      console.warn("Backend connection failed. Operating in local-only mode.", e);
     }
   };
 
@@ -107,16 +117,16 @@ export const ProjectProvider = ({ children }) => {
   };
 
   const deleteProject = async (id) => {
+    // 🎭 LOCAL-FIRST UPDATE
+    setProjects(prev => prev.filter(p => p.id !== id));
+
     try {
       const res = await fetch(`${API_BASE}/projects/${id}`, {
         method: "DELETE"
       });
-      const data = await res.json();
-      if (data.success) {
-        setProjects(prev => prev.filter(p => p.id !== id));
-      }
+      await res.json();
     } catch (e) {
-      console.error("Failed to delete project on server.");
+      console.warn("Server deletion failed. Project removed locally only.", e);
     }
   };
 

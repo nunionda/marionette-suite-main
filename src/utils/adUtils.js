@@ -7,7 +7,8 @@ export const parseStoryboardFrames = (text) => {
   
   const frames = [];
   // Much more aggressive regex to catch Frame N, [FRAME N], ### Frame N, etc.
-  const frameRegex = /(?:\[FRAME\s*(\d+).*?\]|###\s*Frame\s*(\d+)|(?:\*\*|#)\s*Frame\s*(\d+)\s*(?:\*\*|:)?|Frame\s*(\d+)\s*:?)([\s\S]*?)(?=\[FRAME|###\s*Frame|\*\*Frame|Frame\s*\d+|$)/gi;
+  // Made the closing bracket for [FRAME N optional to catch Nike-style headers
+  const frameRegex = /(?:\[FRAME\s*(\d+)[^\]\n]*\]?|###\s*Frame\s*(\d+)|(?:\*\*|#)\s*Frame\s*(\d+)\s*(?:\*\*|:)?|Frame\s*(\d+)\s*:?)([\s\S]*?)(?=\[FRAME|###\s*Frame|\*\*Frame|Frame\s*\d+|$)/gi;
   
   let match;
   while ((match = frameRegex.exec(text)) !== null) {
@@ -15,24 +16,19 @@ export const parseStoryboardFrames = (text) => {
     const content = match[5];
     
     // Parse attributes using more flexible regex (look for bolded keys)
+    // Removed strict end-of-line anchors and added handling for optional quotes/parentheses
     const frameData = {
       number,
-      visual: (content.match(/Visual\*\*[:\s]+(.*)/i)?.[1] || 
-               content.match(/Visual\s*[:\s]+(.*)/i)?.[1] || '').trim(),
-      lighting: (content.match(/Lighting\*\*[:\s]+(.*)/i)?.[1] || 
-                 content.match(/Lighting\s*[:\s]+(.*)/i)?.[1] || '').trim(),
-      camera: (content.match(/Camera\*\*[:\s]+(.*)/i)?.[1] || 
-               content.match(/Camera\s*[:\s]+(.*)/i)?.[1] || '').trim(),
-      mood: (content.match(/Mood\*\*[:\s]+(.*)/i)?.[1] || 
-             content.match(/Mood\s*[:\s]+(.*)/i)?.[1] || '').trim(),
-      sketchPrompt: (content.match(/\[IMAGE_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] || 
-                     content.match(/\[VIDEO_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] ||
-                     content.match(/\[GEN_PROMPT\]\*\*[:\s]+["']?(.*?)["']?$/im)?.[1] ||
-                     content.match(/IMAGE_PROMPT\s*[:\s]+(.*)/i)?.[1])?.trim() || ''
+      visual: (content.match(/(?:Visual|영상|이미지)\s*\*\*?\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      lighting: (content.match(/(?:Lighting|조명)\s*\*\*?\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      camera: (content.match(/(?:Camera|카메라)\s*\*\*?\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      mood: (content.match(/(?:Mood|분위기)\s*\*\*?\s*[:\s]+(.*)/i)?.[1] || '').trim(),
+      sketchPrompt: (content.match(/\[(?:IMAGE|VIDEO|GEN)_PROMPT\]\s*\*\*?\s*[:\s]+["'\(]?(.*?)["'\)]?$/im)?.[1] || 
+                     content.match(/(?:IMAGE|VIDEO|GEN)_PROMPT\s*[:\s]+(.*)/i)?.[1])?.trim() || ''
     };
     
     // Only push if we have at least visual or some content
-    if (frameData.visual || frameData.lighting || frameData.camera) {
+    if (frameData.visual || frameData.lighting || frameData.camera || frameData.sketchPrompt) {
       frames.push(frameData);
     }
   }

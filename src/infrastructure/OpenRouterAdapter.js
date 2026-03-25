@@ -83,4 +83,19 @@ export class OpenRouterAdapter {
     const data = await response.json();
     return data;
   }
+
+  static async refineImagePrompt(prompt) {
+    const response = await fetch('http://127.0.0.1:3005/api/ai/refine-image-prompt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error((errorData.error) || response.statusText || 'Prompt Refinement Failed');
+    }
+
+    return await response.json(); // Returns { success: true, refinedPrompt: "..." }
+  }
 }
