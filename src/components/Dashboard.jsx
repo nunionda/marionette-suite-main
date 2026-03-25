@@ -94,7 +94,7 @@ const Dashboard = ({ onEnterLab }) => {
             Refine concepts, structure acts, and execute Master Scenes with tactical precision.
           </p>
           <button className="tactical-btn massive-btn glow-effect" onClick={() => setIsModalOpen(true)}>
-            <span style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>+ INITIATE NEW SCENARIO</span>
+            + INITIATE NEW SCENARIO
           </button>
         </div>
       </section>
@@ -142,6 +142,11 @@ const Dashboard = ({ onEnterLab }) => {
         )}
       </section>
       )}
+      <ProjectCreateModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onCreate={handleCreateProject}
+      />
     </div>
   );
 };

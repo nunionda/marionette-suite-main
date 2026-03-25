@@ -562,7 +562,7 @@ const AdProjectDetail = ({ project, onBack }) => {
 
           <section className="sidebar-section">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <h4 className="section-title" style={{ marginBottom: 0 }}>Campaign Brief</h4>
+              <h4 className="section-title" style={{ marginBottom: 0, fontSize: '0.75rem', whiteSpace: 'nowrap' }}>Campaign Brief</h4>
               <button 
                 className="btn-primary" 
                 onClick={refineBriefWithRole}

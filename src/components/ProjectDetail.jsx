@@ -22,12 +22,34 @@ const GENRE_HINTS = {
   'Comedy/Satire': { icon: '🤡', cues: ['Fast Pan', 'Rule of Three', 'Anticlimax', 'Bright'] }
 };
 
+const PRODUCTION_STANDARDS = {
+  'GL_TENTPOLE': { 
+    label: 'Global Tentpole', 
+    rules: 'Maximize high-stakes spectacle, 3-act structure with 8 sequences, clear hero\'s journey, and global market appeal.' 
+  },
+  'KR_COMMERCIAL': { 
+    label: 'K-Commercial Standard', 
+    rules: 'Focus on emotional catharsis, fast-paced narrative twists, high-density dialogue subtext, and Korean domestic market archetypes.' 
+  },
+  'INDIE_NOIR': { 
+    label: 'Indie Noir', 
+    rules: 'Experimental structure, heavy subtext, low-key lighting descriptions, and non-linear character arcs.' 
+  }
+};
+
 const ProjectDetail = ({ project, onBack }) => {
   const { updateProject } = useContext(ProjectContext);
   const [activeTab, setActiveTab] = useState('CONCEPT');
   const [zenMode, setZenMode] = useState(false);
   const [orchestrationIntensity, setOrchestrationIntensity] = useState(1);
+  const [productionStandard, setProductionStandard] = useState('GL_TENTPOLE');
+  const [styleIntensity, setStyleIntensity] = useState(5); // Stage-aware intensity
+  const [creativeRole, setCreativeRole] = useState('DIRECTOR'); // DIRECTOR, WRITER, PRODUCER
+  const [language, setLanguage] = useState('KO'); // KO, EN
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openRouterApiKey') || '');
+  
+  const [isOptimizingBrief, setIsOptimizingBrief] = useState(false);
+  const [briefingResult, setBriefingResult] = useState(null);
   
   // Concept Form State
   const [conceptBrief, setConceptBrief] = useState(project.conceptBrief || '');
@@ -130,6 +152,44 @@ const ProjectDetail = ({ project, onBack }) => {
     alert("Project Data Saved!");
   };
 
+  const getRoleContext = () => `\n[Creative Role]: ${creativeRole}\n[Output Language]: ${language}\n`;
+
+  const refineBriefWithRole = async () => {
+    if (!conceptBrief) return alert("Please enter a basic brief first.");
+    setIsOptimizingBrief(true);
+    setBriefingResult(null);
+    
+    const contextInfo = `\n[Role]: ${creativeRole}\n[Standard]: ${PRODUCTION_STANDARDS[productionStandard].label}\n`;
+    const prompt = `[Task]: Refine and expand the following creative brief.
+    [Original Brief]: ${conceptBrief}
+    ${contextInfo}
+    [Note]: Provide a professional, high-concept expansion with tactical suggestions for the ${creativeRole} role.
+    마지막에 반드시 ### [REFINED BRIEF] 태그 뒤에 수정된 최종 기획안을 포함하세요.`;
+
+    try {
+      let fullResponse = "";
+      await executeAgent(prompt, (chunk) => {
+        fullResponse += chunk;
+        setBriefingResult(fullResponse);
+      }, 'concept', false, 'Synthesizing Creative Brief...');
+    } catch (error) {
+      console.error("Briefing Error:", error);
+    } finally {
+      setIsOptimizingBrief(false);
+    }
+  };
+
+  const applyRefinedBrief = () => {
+    if (!briefingResult) return;
+    const match = briefingResult.match(/### \[REFINED BRIEF\]([\s\S]*?)(?=###|$)/i);
+    if (match && match[1]) {
+      setConceptBrief(match[1].trim());
+    } else {
+      setConceptBrief(briefingResult);
+    }
+    setBriefingResult(null);
+  };
+
   // Agent UseCase Triggers
   const generateConcept = () => {
     if (!conceptBrief.trim()) {
@@ -137,9 +197,11 @@ const ProjectDetail = ({ project, onBack }) => {
       return;
     }
     
+    const standardRules = PRODUCTION_STANDARDS[productionStandard].rules;
+    
     executeAgent(
       loglineRule, 
-      `사용자 브리프(아이디어/주제):\n${conceptBrief}\n\n기획 방향성:\n${conceptDirection}\n\n이 아이디어와 방향성을 바탕으로 글로벌 스펙터클과 한국 관객의 카타르시스를 모두 충족하는 완벽한 하이컨셉을 도출하세요.`, 
+      `[Production Standard]: ${standardRules}${getRoleContext()}\n[Creative Brief]: ${conceptBrief}\n[Direction]: ${conceptDirection}\n\n[Task]: 위의 기획 방향성과 표준을 바탕으로, 글로벌 시장에서 통용될 수 있는 강력한 하이컨셉과 로그라인을 도출하세요.`, 
       'concept',
       false,
       'Conceptualizing Vision...'
@@ -171,7 +233,15 @@ const ProjectDetail = ({ project, onBack }) => {
 
   const generateArchitecture = () => {
     if (!pipelineData.concept) { alert("Please generate the Concept first."); return; }
-    executeAgent(architectRule, `Logline/Concept:\\n${pipelineData.concept}\\n\\n이 컨셉을 바탕으로 핵심 캐릭터 시트와 역동적인 3막 시놉시스를 설계하세요.`, 'architecture', false, 'Drafting Structural Blueprint...');
+    const standardRules = PRODUCTION_STANDARDS[productionStandard].rules;
+    
+    executeAgent(
+      architectRule, 
+      `[Production Standard]: ${standardRules}${getRoleContext()}\n[Concept]: ${pipelineData.concept}\n\n[Task]: 위 컨셉과 제작 표준을 바탕으로 3막 구조의 시놉시스와 캐릭터 시트를 설계하세요.`, 
+      'architecture', 
+      false, 
+      'Drafting Structural Blueprint...'
+    );
   };
 
   const generateTreatment = () => {
@@ -182,27 +252,30 @@ const ProjectDetail = ({ project, onBack }) => {
       ? `현재 트리트먼트 상태 (씬 ${scenes.length}개):\n${scenes.map(s => `S#${s.sceneNumber}. ${s.description}`).join('\n')}\n\n[TASK]: 위 리스트를 유지하며, 장편 규격(100씬 내외)에 맞게 서사를 대폭 확장하세요. 기존 씬들 사이사이에 마이크로 비트를 추가하여 드라마틱한 텐션을 확보하세요. 반드시 전체 구성을 포함한 새로운 JSON Step Outline을 반환하세요.`
       : `Synopsis & Characters:\\n${pipelineData.architecture}\\n\\n이를 헐리우드 표준 3막 8시퀀스 및 Save the Cat 15비트 구조에 맞게 배열하고 장편 상업영화 규격(100씬 내외)의 고밀도 Step Outline을 작성하세요.`;
 
-    executeAgent(treatmentRule, prompt, 'treatment', false, isExpanding ? 'Expanding Narrative Density...' : 'Sequencing Beat Sheet...');
+    executeAgent(treatmentRule, `${getRoleContext()}${prompt}`, 'treatment', false, isExpanding ? 'Expanding Narrative Density...' : 'Sequencing Beat Sheet...');
   };
 
   const generateScenario = () => {
     if (!pipelineData.treatment) { alert("Please generate Treatment first."); return; }
     
-    const genreContext = `\n[Genre Mode]: ${project.genre}\n[Category]: ${project.category}\n[Binge-Hook]: ${bingeHookEnabled ? 'ENABLED (Force cliffhanger)' : 'DISABLED'}\n[Cliché Subversion]: Intensity ${clicheSubversionIntensity}/10\n`;
+    const standardRules = PRODUCTION_STANDARDS[productionStandard].rules;
+    const styleContext = activeTab === 'SCENARIO' ? `\n[Dialogue Density]: ${styleIntensity}/10\n` : '';
+    
+    const genreContext = `\n[Genre Mode]: ${project.genre}\n[Category]: ${project.category}\n[Standard Rules]: ${standardRules}\n[Binge-Hook]: ${bingeHookEnabled ? 'ENABLED' : 'DISABLED'}\n[Cliché Subversion]: Intensity ${clicheSubversionIntensity}/10${styleContext}${getRoleContext()}\n`;
     
     // Choose the base engine rule based on project category
     const baseEngineRule = project.category === 'Commercial' ? adRule : scenarioRule;
     
-    const fullSystemPrompt = `${baseEngineRule}\n\n[SPECIFIC STANDARDS]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}\n\n[CLICHE STRATEGY]\n${clicheRules}`;
+    const fullSystemPrompt = `${baseEngineRule}\n\n[SPECIFIC STANDARDS]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}\n\n[CLICHE STRATEGY]\n${clicheRules}\n\n[PRODUCTION STANDARD]\n${standardRules}`;
 
     if (scriptMode === 'REFINE') {
       const targetScene = selectedSceneId ? `S#${selectedSceneId}` : '전체';
       const prompt = `
 [Mode]: DIRECTOR'S REFINEMENT (대상: ${targetScene})${genreContext}
-[Standard]: MASTER SCENE FORMAT (전문 시나리오 규격 - INT./EXT. 필수)
+[Standard]: MASTER SCENE FORMAT (전문 시나리오 규격)${styleContext}
 [Feedback]:\n${producerNote}\n\n
 [Current Script]:\n${pipelineData.scenario}\n\n
-[Task]: 위 피드백을 반영하여 시나리오를 수정하세요. 모든 씬 헤딩에 INT. 또는 EXT. 를 명시하세요. 수정된 전체 시나리오를 반환하세요.
+[Task]: 위 피드백과 스타일 규격을 반영하여 시나리오를 수정하세요.
 `;
       executeAgent(fullSystemPrompt, prompt, 'scenario', false, 'Refining Scene Dynamics...');
       return;
@@ -210,20 +283,19 @@ const ProjectDetail = ({ project, onBack }) => {
 
     baseTextRef.current = pipelineData.scenario ? (pipelineData.scenario.trim() + "\n\n") : "";
     
-    // Calculate the next scene number to prevent duplication
     const lastSceneMatch = pipelineData.scenario ? pipelineData.scenario.match(/S#(\d+)/g) : null;
     const lastSceneNum = lastSceneMatch ? parseInt(lastSceneMatch[lastSceneMatch.length - 1].replace('S#', '')) : 0;
     const nextSceneNum = lastSceneNum + 1;
 
     const prompt = `
 [Mode]: INCREMENTAL DRAFTING (새로운 씬 추가)${genreContext}
-[Standard]: MASTER SCENE FORMAT (INT./EXT. 필수)
+[Standard]: MASTER SCENE FORMAT${styleContext}
 [Next Scene Start]: S#${nextSceneNum}
 [Context]: 
-기존 시나리오 요약:\n${pipelineData.scenario ? pipelineData.scenario.slice(-1000) : '없음 (검사 시작)'}\n\n
-상세 트리트먼트 씬 리스트 (Target Outline):\n${scenes.map(s => `S#${s.sceneNumber}. ${s.description}`).join('\n')}\n\n
-[Producer's Note]: 사용자의 특별 지시사항:\n${producerNote}\n\n
-[Task]: 위 상세 리스트의 S#${nextSceneNum}부터 시작하여 다음 5개 씬을 집필하세요. 모든 씬 헤딩에 INT./EXT.를 명시적으로 기입하세요. 절대 이전 시나리오 내용을 반복하지 마세요.
+기존 시나리오 요약:\n${pipelineData.scenario ? pipelineData.scenario.slice(-1000) : '없음'}\n\n
+상세 트리트먼트 씬 리스트:\n${scenes.map(s => `S#${s.sceneNumber}. ${s.description}`).join('\n')}\n\n
+[Producer's Note]:\n${producerNote}\n\n
+[Task]: S#${nextSceneNum}부터 시작하여 다음 씬을 집필하세요. 제작 표준(${productionStandard})과 스타일 강도(${styleIntensity})를 엄수하세요.
 `;
     executeAgent(fullSystemPrompt, prompt, 'scenario', true, 'Executing Master Scene Format...');
   };
@@ -253,48 +325,40 @@ const ProjectDetail = ({ project, onBack }) => {
   const tabs = Object.keys(TAB_META);
 
   return (
-    <div 
-      className={`project-detail ${isGenerating ? 'orchestration-active' : ''} ${zenMode ? 'is-zen' : ''}`}
-      style={{ '--orchestration-intensity': orchestrationIntensity }}
-    >
+    <div className="studio-root">
+      <div 
+        className={`project-detail ${project.category === 'Commercial' ? 'ad-theme' : 'drama-theme'} ${isGenerating ? 'orchestration-active' : ''} ${zenMode ? 'is-zen' : ''}`}
+      >
       {/* 🏙️ STUDIO HEADER: Operational Status & Global Meta */}
-      <header className="detail-header">
-        <div className="header-meta">
-          <div className="back-btn" onClick={onBack}>
-            <span>←</span> EXIT STUDIO
-          </div>
-          <div className="project-title-mini">
-            PROJECT: {project.title}
-          </div>
-          <div className="badge status-badge">
-            {project.status || 'DEVELOPMENT'}
-          </div>
+      <header className="detail-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="back-btn" onClick={onBack} style={{ fontSize: '0.8rem', letterSpacing: '1px', cursor: 'pointer', opacity: 0.7 }}>← BACK TO DASHBOARD</div>
+        <div style={{ textAlign: 'center' }}>
+          <h1 style={{ fontSize: '2.2rem', margin: '0', letterSpacing: '2px' }}>{project.title.toUpperCase()}</h1>
+          <span className="badge category-badge" style={{ letterSpacing: '1.2px', fontWeight: 700 }}>🎞️ {project.category.toUpperCase()} PRODUCTION</span>
         </div>
-
-        <div className="orchestration-controls">
-          <div className="input-group-row">
-            <span className="input-label">📡 OPENROUTER</span>
-            <input 
-              type="password" 
-              className="key-input"
-              value={apiKey} 
-              onChange={(e) => saveApiKey(e.target.value)} 
-            />
-          </div>
-          <div className="header-actions">
-            <button 
-              className={`btn-secondary ${zenMode ? 'active' : ''}`}
-              onClick={() => setZenMode(!zenMode)}
-              title="Spatial Zen Mode"
-            >
-              {zenMode ? '📡 EXIT ZEN' : '🪐 ZEN MODE'}
-            </button>
-            <button className="btn-primary" onClick={saveToContext}>
-              SAVE CHANGES
-            </button>
-          </div>
-        </div>
+        <button className="tactical-btn" onClick={saveToContext}>💾 SAVE PROJECT</button>
       </header>
+
+      <div className="orchestration-controls">
+        <div className="input-group-row">
+          <span className="input-label">📡 OPENROUTER</span>
+          <input 
+            type="password" 
+            className="key-input"
+            value={apiKey} 
+            onChange={(e) => saveApiKey(e.target.value)} 
+          />
+        </div>
+        <div className="header-actions">
+          <button 
+            className={`btn-secondary ${zenMode ? 'active' : ''}`}
+            onClick={() => setZenMode(!zenMode)}
+            title="Spatial Zen Mode"
+          >
+            {zenMode ? '📡 EXIT ZEN' : '🪐 ZEN MODE'}
+          </button>
+        </div>
+      </div>
 
       {/* 🛰️ AI PROGRESS OVERLAY (Cinematic) */}
       <div className={`status-indicator-bar ${isGenerating ? 'active' : ''}`} />
@@ -317,52 +381,143 @@ const ProjectDetail = ({ project, onBack }) => {
           <section className="sidebar-section">
             <h4 className="section-title">Narrative Vitals</h4>
             <div className="vitals-row">
-              <div className="badge category-badge">{project.category}</div>
-              <div className="badge genre-badge">{project.genre}</div>
+              <div className="badge category-badge" style={{ fontSize: 'var(--sidebar-badge-fs)' }}>{project.category}</div>
+              <div className="badge genre-badge" style={{ fontSize: 'var(--sidebar-badge-fs)' }}>{project.genre}</div>
             </div>
           </section>
 
           <section className="sidebar-section">
             <h4 className="section-title">Production Controls</h4>
-            <div className="control-group">
-              <label className="input-label">BINGE-HOOK ENGINE</label>
-              <div className="control-item">
-                <input 
-                  type="checkbox" 
-                  checked={bingeHookEnabled} 
-                  onChange={(e) => setBingeHookEnabled(e.target.checked)}
-                />
-                <span className="control-text">Hardened Tension</span>
+            
+            <div className="control-group" style={{ marginBottom: '15px' }}>
+              <label className="input-label">CREATIVE ROLE</label>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {['DIRECTOR', 'WRITER', 'PRODUCER'].map(role => (
+                  <button 
+                    key={role}
+                    onClick={() => setCreativeRole(role)}
+                    className={`btn-secondary ${creativeRole === role ? 'active' : ''}`}
+                    style={{ flex: 1, fontSize: 'var(--sidebar-btn-fs)' }}
+                  >
+                    {role}
+                  </button>
+                ))}
               </div>
             </div>
-            <div className="control-group">
-              <label className="input-label">SUBVERSION INTENSITY</label>
-              <div className="control-item">
-                <input 
-                  type="range" 
-                  min="1" max="10" 
-                  value={clicheSubversionIntensity}
-                  onChange={(e) => setClicheSubversionIntensity(parseInt(e.target.value))}
-                  className="range-input"
-                />
-                <div className="range-labels">
-                  <span>LO</span>
-                  <span className="active-val">{clicheSubversionIntensity}</span>
-                  <span>HI</span>
-                </div>
+
+            <div className="control-group" style={{ marginBottom: '15px' }}>
+              <label className="input-label">LANGUAGE</label>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {['KO', 'EN'].map(lang => (
+                  <button 
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    className={`btn-secondary ${language === lang ? 'active' : ''}`}
+                    style={{ flex: 1, fontSize: 'var(--sidebar-btn-fs)' }}
+                  >
+                    {lang}
+                  </button>
+                ))}
               </div>
+            </div>
+
+            <div className="control-group">
+              <label className="input-label">PRODUCTION STANDARD</label>
+              <select 
+                value={productionStandard} 
+                onChange={(e) => setProductionStandard(e.target.value)}
+                className="logline-editor"
+                style={{ fontSize: '0.8rem', padding: '8px', minHeight: 'auto' }}
+              >
+                {Object.keys(PRODUCTION_STANDARDS).map(std => (
+                  <option key={std} value={std}>{PRODUCTION_STANDARDS[std].label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="genre-tactics" style={{ marginTop: '15px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+               <div style={{ fontSize: 'var(--sidebar-badge-fs)', color: 'var(--accent-primary)', marginBottom: '5px' }}>
+                 {GENRE_HINTS[project.genre]?.icon} {project.genre?.toUpperCase()} TACTICS
+               </div>
+               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                 {GENRE_HINTS[project.genre]?.cues.map(cue => (
+                   <span key={cue} style={{ fontSize: 'var(--sidebar-badge-fs)', padding: '2px 5px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', color: 'var(--text-muted)' }}>
+                     #{cue}
+                   </span>
+                 ))}
+               </div>
             </div>
           </section>
 
+          <section className="sidebar-section">
+            <h4 className="section-title">
+              {activeTab === 'SCENARIO' ? 'Script Stylometrics' : 'Agent Guardrails'}
+            </h4>
+            
+            {activeTab === 'SCENARIO' ? (
+              <>
+                <div className="control-group">
+                  <label className="input-label">DIALOGUE DENSITY</label>
+                  <input 
+                    type="range" min="1" max="10" 
+                    value={styleIntensity}
+                    onChange={(e) => setStyleIntensity(parseInt(e.target.value))}
+                    className="range-input"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="control-group">
+                  <label className="input-label">NARRATIVE TENSION</label>
+                  <div className="control-item">
+                    <input 
+                      type="checkbox" 
+                      checked={bingeHookEnabled} 
+                      onChange={(e) => setBingeHookEnabled(e.target.checked)}
+                    />
+                    <span className="control-text">Cliche Subversion</span>
+                  </div>
+                </div>
+              </>
+            )}
+          </section>
+
           <section className="sidebar-section" style={{ marginTop: 'auto' }}>
-            <h4 className="section-title">Director's Notepad</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <h4 className="section-title" style={{ marginBottom: 0 }}>Idea Brief</h4>
+              <button 
+                className="btn-primary" 
+                onClick={refineBriefWithRole}
+                disabled={isOptimizingBrief || !conceptBrief}
+                style={{ padding: '6px 12px', height: 'auto', fontSize: 'var(--sidebar-btn-fs)' }}
+              >
+                {isOptimizingBrief ? '...' : creativeRole === 'DIRECTOR' ? '✨ Synthesize' : `⚡ Refine`}
+              </button>
+            </div>
+            
             <textarea 
               className="logline-editor"
-              value={producerNote}
-              onChange={(e) => setProducerNote(e.target.value)}
-              placeholder="Inject tactical notes here..."
-              style={{ minHeight: '120px' }}
+              value={conceptBrief}
+              onChange={(e) => setConceptBrief(e.target.value)}
+              placeholder="Enter core idea..."
+              style={{ minHeight: '100px', fontSize: '0.85rem' }}
             />
+
+            {briefingResult && (
+              <div className="briefing-assistant" style={{ marginTop: '10px', border: '1px solid var(--accent-primary)', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', padding: '10px' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', fontWeight: 'bold', marginBottom: '8px' }}>
+                  🧠 {creativeRole} AI Insight
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', marginBottom: '10px', maxHeight: '150px', overflowY: 'auto' }}>
+                  {briefingResult}
+                </div>
+                <div className="control-actions" style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={applyRefinedBrief} className="btn-primary" style={{ flex: 1, padding: '8px', fontSize: '0.7rem' }}>Adopt</button>
+                  <button onClick={() => setBriefingResult(null)} className="btn-secondary" style={{ flex: 1, padding: '8px', fontSize: '0.7rem' }}>Discard</button>
+                </div>
+              </div>
+            )}
           </section>
         </aside>
 
@@ -394,16 +549,11 @@ const ProjectDetail = ({ project, onBack }) => {
                 </button>
                 <button 
                   className="btn-primary" 
-                  onClick={() => {
-                    if(activeTab === 'CONCEPT') generateConcept();
-                    if(activeTab === 'ARCHITECTURE') generateArchitecture();
-                    if(activeTab === 'TREATMENT') generateTreatment();
-                    if(activeTab === 'SCENARIO') generateScenario();
-                    if(activeTab === 'REVIEW') generateReview();
-                  }}
+                  onClick={() => generateContent(activeTab)}
                   disabled={isGenerating}
+                  style={{ padding: '8px 20px', minWidth: '160px' }}
                 >
-                  {isGenerating ? generationStatus : `RUN PIPELINE`}
+                  {isGenerating ? 'Computing...' : `⚡ RUN ${TAB_META[activeTab].label}`}
                 </button>
               </div>
             </div>
@@ -453,27 +603,7 @@ const ProjectDetail = ({ project, onBack }) => {
 
             {/* 🖋️ MAIN EDITOR / VIEWER AREA */}
             <div className="editor-frame" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-              {activeTab === 'CONCEPT' && (
-                <div className="concept-inputs" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
-                  <div className="input-group">
-                    <label style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: '800', display: 'block', marginBottom: '8px' }}>IDEA BRIEF</label>
-                    <textarea 
-                      className="logline-editor"
-                      value={conceptBrief}
-                      onChange={(e) => setConceptBrief(e.target.value)}
-                      placeholder="Enter core idea..."
-                    />
-                  </div>
-                  <div className="input-group">
-                    <label style={{ fontSize: '0.65rem', color: 'var(--accent-primary)', fontWeight: '800', display: 'block', marginBottom: '8px' }}>PRODUCTION DIRECTION</label>
-                    <textarea 
-                      className="logline-editor"
-                      value={conceptDirection}
-                      onChange={(e) => setConceptDirection(e.target.value)}
-                    />
-                  </div>
-                </div>
-              )}
+              {/* Concept Inputs removed (now in sidebar) */}
 
               {activeTab === 'VISION' ? (
                 <div style={{ flex: 1, overflowY: 'auto' }}>
@@ -507,6 +637,7 @@ const ProjectDetail = ({ project, onBack }) => {
       </main>
     </div>
   </div>
+</div>
 );
 };
 

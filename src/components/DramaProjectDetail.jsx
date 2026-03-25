@@ -25,6 +25,11 @@ const DramaProjectDetail = ({ project, onBack }) => {
   
   const [selectedEpisode, setSelectedEpisode] = useState(1);
   const [bingeHookIntensity, setBingeHookIntensity] = useState(8);
+  const [creativeRole, setCreativeRole] = useState('DIRECTOR'); // DIRECTOR, WRITER, PRODUCER
+  const [language, setLanguage] = useState('KO'); // KO, EN
+  
+  const [isOptimizingBrief, setIsOptimizingBrief] = useState(false);
+  const [briefingResult, setBriefingResult] = useState(null);
   
   const [pipelineData, setPipelineData] = useState({
     bible: project.bible || '',
@@ -63,6 +68,44 @@ const DramaProjectDetail = ({ project, onBack }) => {
     alert("Series Data Saved!");
   };
 
+  const getRoleContext = () => `\n[Creative Role]: ${creativeRole}\n[Output Language]: ${language}\n`;
+
+  const refineBriefWithRole = async () => {
+    if (!seriesConcept) return alert("Please enter a basic logline first.");
+    setIsOptimizingBrief(true);
+    setBriefingResult(null);
+    
+    const contextInfo = `\n[Role]: ${creativeRole}\n[Standard]: Netflix Original Series\n`;
+    const prompt = `[Task]: Refine and expand the following series concept/logline.
+    [Original Concept]: ${seriesConcept}
+    ${contextInfo}
+    [Note]: Provide a professional, high-concept expansion with tactical suggestions for the ${creativeRole} role.
+    마지막에 반드시 ### [REFINED BRIEF] 태그 뒤에 수정된 최종 기획안을 포함하세요.`;
+
+    try {
+      let fullResponse = "";
+      await executeAgent(prompt, (chunk) => {
+        fullResponse += chunk;
+        setBriefingResult(fullResponse);
+      }, 'bible', false, 'Synthesizing Series Vision...');
+    } catch (error) {
+      console.error("Briefing Error:", error);
+    } finally {
+      setIsOptimizingBrief(false);
+    }
+  };
+
+  const applyRefinedBrief = () => {
+    if (!briefingResult) return;
+    const match = briefingResult.match(/### \[REFINED BRIEF\]([\s\S]*?)(?=###|$)/i);
+    if (match && match[1]) {
+      setSeriesConcept(match[1].trim());
+    } else {
+      setSeriesConcept(briefingResult);
+    }
+    setBriefingResult(null);
+  };
+
   const TAB_META = {
     BIBLE: { label: 'SERIES BIBLE', engine: 'Series Architect', icon: '📖' },
     EPISODES: { label: 'EPISODE ARC', engine: 'Arc Designer', icon: '🎞️' },
@@ -72,7 +115,8 @@ const DramaProjectDetail = ({ project, onBack }) => {
   };
 
   const generateContent = (tab) => {
-    const context = `\n[Series Category]: Netflix Original\n[Episode]: ${selectedEpisode}/10\n[Binge-Hook Intensity]: ${bingeHookIntensity}/10\n`;
+    const roleContext = getRoleContext();
+    const context = `\n[Series Category]: Netflix Original\n[Episode]: ${selectedEpisode}/10\n[Binge-Hook Intensity]: ${bingeHookIntensity}/10\n${roleContext}`;
     const fullSystemPrompt = `${scenarioRule}\n\n[SERIES RULES]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}`;
 
     let prompt = "";
@@ -99,82 +143,147 @@ const DramaProjectDetail = ({ project, onBack }) => {
   };
 
   return (
-    <div className="project-detail-container drama-theme" style={{ maxWidth: '1600px', margin: '0 auto', padding: '20px' }}>
-      <header className="detail-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between' }}>
-        <div className="back-btn" onClick={onBack}>← BACK TO DASHBOARD</div>
+    <div className="studio-root">
+      <div className="project-detail drama-theme">
+      <header className="detail-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="back-btn" onClick={onBack} style={{ fontSize: '0.8rem', letterSpacing: '1px', cursor: 'pointer', opacity: 0.7 }}>← BACK TO DASHBOARD</div>
         <div style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '2.5rem', margin: '0' }}>{project.title}</h1>
-          <span className="badge category-badge" style={{ background: '#E50914', color: 'white' }}>📺 NETFLIX ORIGINAL SERIES</span>
+          <h1 style={{ fontSize: '2.5rem', margin: '0', letterSpacing: '2px' }}>{project.title.toUpperCase()}</h1>
+          <span className="badge category-badge" style={{ background: '#E50914', color: 'white', letterSpacing: '1.2px', fontWeight: 700 }}>📺 NETFLIX ORIGINAL SERIES</span>
         </div>
         <button className="tactical-btn" onClick={saveToContext}>💾 SAVE SEASON</button>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '30px' }}>
-        {/* Left Control Panel */}
-        <div className="section-card glass" style={{ padding: '20px' }}>
-          <h3 style={{ color: '#E50914', marginBottom: '20px', letterSpacing: '1px' }}>🧛 SERIES CONTROL</h3>
-          
-          <div style={{ marginBottom: '25px' }}>
-            <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-dim)', marginBottom: '12px' }}>EPISODE SELECTOR (1-10)</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '5px' }}>
-              {[...Array(10)].map((_, i) => (
-                <button 
-                  key={i+1}
-                  onClick={() => setSelectedEpisode(i+1)}
-                  style={{ 
-                    padding: '8px 0', 
-                    background: selectedEpisode === i+1 ? '#E50914' : 'rgba(255,255,255,0.05)',
-                    color: 'white', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', borderRadius: '4px'
-                  }}
-                >
-                  E{i+1}
-                </button>
-              ))}
+      <div className="studio-container">
+        {/* 📋 PRODUCTION SIDEBAR (Context & Rules) */}
+        <aside className="studio-sidebar">
+          <section className="sidebar-section">
+            <h4 className="section-title">Narrative Vitals</h4>
+            <div className="vitals-row">
+              <div className="badge category-badge" style={{ background: '#E50914', color: 'white', border: 'none', fontSize: 'var(--sidebar-badge-fs)' }}>Netflix Series</div>
+              <div className="badge genre-badge" style={{ fontSize: 'var(--sidebar-badge-fs)' }}>{project.genre}</div>
             </div>
-          </div>
+          </section>
 
-          <div style={{ marginBottom: '25px', padding: '15px', background: 'rgba(229, 9, 20, 0.1)', border: '1px solid #E50914', borderRadius: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>BINGE-HOOK INTENSITY</span>
-              <span style={{ color: '#E50914' }}>{bingeHookIntensity}</span>
+          <section className="sidebar-section">
+            <h4 className="section-title">Production Controls</h4>
+            
+            <div className="control-group" style={{ marginBottom: '15px' }}>
+              <label className="input-label">CREATIVE ROLE</label>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {['DIRECTOR', 'WRITER', 'PRODUCER'].map(role => (
+                  <button 
+                    key={role}
+                    onClick={() => setCreativeRole(role)}
+                    className={`btn-secondary ${creativeRole === role ? 'active' : ''}`}
+                    style={{ flex: 1, fontSize: 'var(--sidebar-btn-fs)' }}
+                  >
+                    {role}
+                  </button>
+                ))}
+              </div>
             </div>
-            <input 
-              type="range" min="1" max="10" 
-              value={bingeHookIntensity} 
-              onChange={(e) => setBingeHookIntensity(parseInt(e.target.value))}
-              style={{ width: '100%', accentColor: '#E50914' }}
-            />
-            <p style={{ fontSize: '0.65rem', color: 'var(--text-dim)', marginTop: '8px' }}>
-              Increases the psychological impact of cliffhangers and character stakes.
-            </p>
-          </div>
 
-          <div className="genre-tactics" style={{ marginBottom: '25px', padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--surface-border)', borderRadius: '8px' }}>
-            <h5 style={{ margin: '0 0 10px 0', fontSize: '0.8rem', color: '#E50914', letterSpacing: '1px' }}>
-              {GENRE_HINTS[project.genre]?.icon} {project.genre?.toUpperCase()} TACTICS
-            </h5>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
-              {GENRE_HINTS[project.genre]?.cues.map(cue => (
-                <span key={cue} style={{ fontSize: '0.65rem', padding: '4px 8px', background: 'rgba(229, 9, 20, 0.1)', border: '1px solid rgba(229, 9, 20, 0.2)', borderRadius: '4px', color: 'white' }}>
-                  #{cue}
-                </span>
-              ))}
+            <div className="control-group" style={{ marginBottom: '15px' }}>
+              <label className="input-label">LANGUAGE</label>
+              <div style={{ display: 'flex', gap: '4px' }}>
+                {['KO', 'EN'].map(lang => (
+                  <button 
+                    key={lang}
+                    onClick={() => setLanguage(lang)}
+                    className={`btn-secondary ${language === lang ? 'active' : ''}`}
+                    style={{ flex: 1, fontSize: 'var(--sidebar-btn-fs)' }}
+                  >
+                    {lang}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div style={{ marginTop: '20px' }}>
-            <h4 style={{ fontSize: '0.85rem', color: 'var(--text-dim)' }}>🎥 SERIES LOGLINE</h4>
+            <div className="control-group" style={{ marginBottom: '15px' }}>
+              <label className="input-label">EPISODE SELECTOR (1-10)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px' }}>
+                {[...Array(10)].map((_, i) => (
+                  <button 
+                    key={i+1}
+                    onClick={() => setSelectedEpisode(i+1)}
+                    className={`btn-secondary ${selectedEpisode === i+1 ? 'active' : ''}`}
+                    style={{ padding: '6px 0', fontSize: 'var(--sidebar-btn-fs)' }}
+                  >
+                    E{i+1}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="control-group" style={{ marginBottom: '15px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label className="input-label" style={{ marginBottom: 0 }}>BINGE-HOOK INTENSITY</label>
+                <span style={{ color: '#E50914', fontSize: '0.8rem', fontWeight: 800 }}>{bingeHookIntensity}</span>
+              </div>
+              <input 
+                type="range" min="1" max="10" 
+                value={bingeHookIntensity} 
+                onChange={(e) => setBingeHookIntensity(parseInt(e.target.value))}
+                className="range-input"
+                style={{ accentColor: '#E50914' }}
+              />
+            </div>
+
+            <div className="genre-tactics" style={{ marginTop: '15px', padding: '10px', background: 'rgba(229, 9, 20, 0.05)', borderRadius: '4px', border: '1px solid rgba(229, 9, 20, 0.2)' }}>
+               <div style={{ fontSize: '0.65rem', color: '#E50914', marginBottom: '5px', fontWeight: 800 }}>
+                 {GENRE_HINTS[project.genre]?.icon} {project.genre?.toUpperCase()} TACTICS
+               </div>
+               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                 {GENRE_HINTS[project.genre]?.cues.map(cue => (
+                   <span key={cue} style={{ fontSize: '0.6rem', padding: '2px 5px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}>
+                     #{cue}
+                   </span>
+                 ))}
+               </div>
+            </div>
+          </section>
+
+          <section className="sidebar-section" style={{ marginTop: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+              <h4 className="section-title" style={{ marginBottom: 0 }}>Series Logline</h4>
+              <button 
+                className="btn-primary" 
+                onClick={refineBriefWithRole}
+                disabled={isOptimizingBrief || !seriesConcept}
+                style={{ padding: '6px 12px', height: 'auto', fontSize: 'var(--sidebar-btn-fs)', background: '#E50914', color: 'white', border: 'none' }}
+              >
+                {isOptimizingBrief ? '...' : creativeRole === 'DIRECTOR' ? '✨ Synthesize' : `⚡ Refine`}
+              </button>
+            </div>
+            
             <textarea 
+              className="logline-editor"
               value={seriesConcept}
               onChange={(e) => setSeriesConcept(e.target.value)}
               placeholder="What is the overall story of this season?"
-              style={{ width: '100%', height: '100px', background: 'rgba(0,0,0,0.3)', color: 'white', border: '1px solid var(--surface-border)', padding: '10px', marginTop: '10px' }}
+              style={{ minHeight: '100px', fontSize: '0.85rem' }}
             />
-          </div>
-        </div>
 
-        {/* Right Content Area */}
-        <div className="section-card glass" style={{ display: 'flex', flexDirection: 'column', minHeight: '800px' }}>
+            {briefingResult && (
+              <div className="briefing-assistant" style={{ marginTop: '10px', border: '1px solid #E50914', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', padding: '10px' }}>
+                <div style={{ fontSize: '0.75rem', color: '#E50914', fontWeight: 'bold', marginBottom: '8px' }}>
+                  🧠 {creativeRole} AI Insight
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', marginBottom: '10px', maxHeight: '150px', overflowY: 'auto' }}>
+                  {briefingResult}
+                </div>
+                <div className="control-actions" style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={applyRefinedBrief} className="btn-primary" style={{ flex: 1, padding: '8px', fontSize: 'var(--sidebar-btn-fs)', background: '#E50914', border: 'none', color: 'white' }}>Adopt</button>
+                  <button onClick={() => setBriefingResult(null)} className="btn-secondary" style={{ flex: 1, padding: '8px', fontSize: 'var(--sidebar-btn-fs)' }}>Discard</button>
+                </div>
+              </div>
+            )}
+          </section>
+        </aside>
+
+        {/* 🎬 STAGE CONTROLLER (Tabbed Content) */}
+        <main className="studio-main" style={{ flex: 1, minHeight: '800px', display: 'flex', flexDirection: 'column' }}>
           <div className="tabs" style={{ marginBottom: '20px' }}>
             {Object.keys(TAB_META).map(tab => (
               <div 
@@ -194,9 +303,9 @@ const DramaProjectDetail = ({ project, onBack }) => {
                 className="tactical-btn" 
                 onClick={() => generateContent(activeTab)}
                 disabled={isGenerating}
-                style={{ background: '#E50914', color: 'white' }}
+                style={{ background: '#E50914', color: 'white', border: 'none' }}
               >
-                {isGenerating ? 'Orchestrating Arcs...' : `⚡ RUN ${TAB_META[activeTab].label}`}
+                {isGenerating ? 'Orchestrating...' : `⚡ RUN ${TAB_META[activeTab].label}`}
               </button>
             </div>
             
@@ -217,10 +326,11 @@ const DramaProjectDetail = ({ project, onBack }) => {
               />
             )}
           </div>
-        </div>
+        </main>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default DramaProjectDetail;
