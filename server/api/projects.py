@@ -59,6 +59,26 @@ def update_project(project_id: str, data: ProjectUpdate, db: Session = Depends(g
     return ProjectResponse(**project.to_dict())
 
 
+@router.patch("/{project_id}/status", response_model=ProjectResponse)
+def update_project_status(project_id: str, data: ProjectUpdate, db: Session = Depends(get_db)):
+    """서비스 간 자동화를 위한 프로젝트 상태 전용 업데이트"""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+
+    # 업데이트 가능한 필드 제한 (보안 및 데이터 정합성)
+    allowed_fields = ["analysis_status", "analysis_id", "art_bible_status", "production_book_path", "status"]
+    update_data = data.model_dump(exclude_unset=True)
+    
+    for key, value in update_data.items():
+        if key in allowed_fields:
+            setattr(project, key, value)
+
+    db.commit()
+    db.refresh(project)
+    return ProjectResponse(**project.to_dict())
+
+
 @router.delete("/{project_id}", status_code=204)
 def delete_project(project_id: str, db: Session = Depends(get_db)):
     """프로젝트 삭제"""

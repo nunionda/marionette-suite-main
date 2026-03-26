@@ -11,6 +11,7 @@ const navItems = [
   { href: "/agents", label: "Agents", icon: "🤖" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },
   { href: "/prompt-guide", label: "Prompt Guide", icon: "🎨" },
+  { href: "http://localhost:4000/dashboard", label: "Scenario Analysis", icon: "📊", external: true },
 ];
 
 export default function DashboardLayout({
@@ -53,16 +54,32 @@ export default function DashboardLayout({
         </div>
         <nav className="flex-1 px-3 py-4">
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
+            const isActive = !("external" in item) && pathname.startsWith(item.href);
+            const className = `mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              isActive
+                ? "bg-gray-800 text-white"
+                : "text-gray-400 hover:bg-gray-900 hover:text-white"
+            }`;
+            if ("external" in item) {
+              return (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={className}
+                >
+                  <span>{item.icon}</span>
+                  {item.label}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="ml-auto h-3 w-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+              );
+            }
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`mb-1 flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  isActive
-                    ? "bg-gray-800 text-white"
-                    : "text-gray-400 hover:bg-gray-900 hover:text-white"
-                }`}
+                className={className}
               >
                 <span>{item.icon}</span>
                 {item.label}

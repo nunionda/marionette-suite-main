@@ -60,9 +60,14 @@ class Project(Base):
     worldview = Column(Text, default="")
     script = Column(Text, default="")
 
-    # DirectionPlan JSON (ScriptWriter 산출물)
     direction_plan_json = Column(JSON, nullable=True)
     direction_plan_path = Column(String(500), nullable=True)
+
+    # 🔗 통합 상태 추적 (Phase 60)
+    analysis_id = Column(String(100), nullable=True)
+    analysis_status = Column(String(50), default="none")  # none | analyzing | done
+    art_bible_status = Column(String(50), default="none")  # none | generating | ready | failed
+    production_book_path = Column(String(500), nullable=True)
 
     # 타임스탬프
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -85,6 +90,10 @@ class Project(Base):
             "worldview": self.worldview,
             "script": self.script,
             "direction_plan_json": self.direction_plan_json,
+            "analysis_id": self.analysis_id,
+            "analysis_status": self.analysis_status,
+            "art_bible_status": self.art_bible_status,
+            "production_book_path": self.production_book_path,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

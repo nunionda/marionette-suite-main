@@ -48,18 +48,51 @@ const Dashboard = ({ onEnterLab }) => {
 
   return (
     <div className="dashboard">
-      <div className="sidebar">
-        <div className="brand gradient-text">AI CINEMA LAB</div>
-        <div className="nav-item active">Dashboard</div>
-        <div className="nav-item">Projects</div>
-        <div className="nav-item">Scripting</div>
-        <div className="nav-item">Mise-en-scène</div>
-        <div className="nav-item" style={{ marginTop: 'auto' }}>Settings</div>
+      <div className="sidebar glass">
+        <div className="sidebar-section">
+          <div className="sidebar-label mono">NAVIGATION</div>
+          <div className="nav-item active">DASHBOARD</div>
+          <div className="nav-item">ARCHIVE</div>
+        </div>
+        
+        <div className="sidebar-section" style={{ marginTop: '32px' }}>
+          <div className="sidebar-label mono">RECENT ACTIVITY</div>
+          <div className="activity-feed">
+            {projects.slice(0, 4).map(p => (
+              <div key={p.id} className="activity-item">
+                <div className="activity-dot"></div>
+                <div className="activity-info">
+                  <span className="activity-project">{p.title}</span>
+                  <span className="activity-desc">{p.status === 'Ready' ? 'Production Ready' : 'In Progress'}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="nav-item" style={{ marginTop: 'auto' }}>SETTINGS</div>
       </div>
       <div className="main-content">
+        <div className="studio-stats-grid">
+          <div className="stat-card glass">
+            <span className="stat-label">TOTAL PROJECTS</span>
+            <span className="stat-value">{projects.length}</span>
+          </div>
+          <div className="stat-card glass">
+            <span className="stat-label">ANALYSES DONE</span>
+            <span className="stat-value">{projects.filter(p => p.analysis_status === 'done').length}</span>
+          </div>
+          <div className="stat-card glass">
+            <span className="stat-label">ART BIBLES READY</span>
+            <span className="stat-value">{projects.filter(p => p.art_bible_status === 'ready').length}</span>
+          </div>
+        </div>
+
         <div className="header">
-          <h2 style={{ margin: 0, fontWeight: 300, fontSize: '2rem' }}>PROJECT <span style={{ fontWeight: 800 }}>BULLETIN BOARD</span></h2>
-          <button className="tactical-btn" onClick={handleNewMovie}>+ New Movie</button>
+          <h2 style={{ margin: 0, fontWeight: 300, fontSize: '1.5rem', letterSpacing: '0.1em' }}>
+            STUDIO <span style={{ fontWeight: 800 }}>BULLETIN</span>
+          </h2>
+          <button className="tactical-btn primary" onClick={handleNewMovie}>+ Add Project</button>
         </div>
         <div className="bulletin-grid">
           {projects.map(p => (

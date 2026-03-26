@@ -2,6 +2,7 @@ import React, { useState, useContext } from 'react';
 import './styles/Theme.css';
 import Dashboard from './components/Dashboard';
 import ProjectDetail from './components/ProjectDetail';
+import StudioHeader from './components/StudioHeader';
 import { ProjectProvider, ProjectContext } from './context/ProjectContext';
 
 function AppContent() {
@@ -16,6 +17,7 @@ function AppContent() {
 
   return (
     <div className="App">
+      <StudioHeader currentModule={!currentProject ? 'MANAGEMENT' : 'MANAGEMENT'} />
       {!currentProject ? (
         <Dashboard onEnterLab={handleEnterLab} />
       ) : (

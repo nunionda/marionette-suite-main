@@ -64,7 +64,7 @@ app.route("/api/batch", batchRoutes)
 initWSHandler(pipelineBus, prisma)
 
 export default {
-  port: 3001,
+  port: Number(process.env.PORT) || 3005,
   fetch(req: Request, server: Server<{ token?: string; userId?: string }>) {
     // Intercept WebSocket upgrade before Hono
     if (new URL(req.url).pathname === "/api/pipeline/ws") {

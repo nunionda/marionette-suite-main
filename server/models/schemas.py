@@ -26,6 +26,10 @@ class ProjectUpdate(BaseModel):
     antagonist: Optional[str] = None
     worldview: Optional[str] = None
     script: Optional[str] = None
+    analysis_id: Optional[str] = None
+    analysis_status: Optional[str] = None
+    art_bible_status: Optional[str] = None
+    production_book_path: Optional[str] = None
 
 
 class ProjectResponse(BaseModel):
@@ -40,6 +44,10 @@ class ProjectResponse(BaseModel):
     antagonist: str
     worldview: str
     script: str
+    analysis_id: Optional[str] = None
+    analysis_status: Optional[str] = "none"
+    art_bible_status: Optional[str] = "none"
+    production_book_path: Optional[str] = None
     direction_plan_json: Optional[dict] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
