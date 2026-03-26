@@ -83,6 +83,44 @@ const STATUS_COLORS: Record<string, string> = {
   DRAFT: "bg-gray-500/20 text-gray-400",
 }
 
+const AGENT_DISPLAY_NAMES: Record<string, string> = {
+  script_writer: "Script Writer",
+  scripter: "Scripter",
+  concept_artist: "Concept Artist",
+  casting_director: "Casting Director",
+  location_scout: "Location Scout",
+  previsualizer: "Previsualizer",
+  cinematographer: "Cinematographer",
+  generalist: "Generalist",
+  asset_designer: "Asset Designer",
+  vfx_compositor: "VFX Compositor",
+  sound_designer: "Sound Designer",
+  composer: "Composer",
+  master_editor: "Master Editor",
+  colorist: "Colorist",
+  mixing_engineer: "Mixing Engineer",
+}
+
+const PHASE_PRESETS = {
+  "pre-production": ["concept_artist", "casting_director", "location_scout", "previsualizer"],
+  production: ["cinematographer", "generalist", "asset_designer"],
+  "post-production": ["vfx_compositor", "sound_designer", "composer", "master_editor", "colorist", "mixing_engineer"],
+} as const
+
+const FULL_PIPELINE = [
+  "script_writer", "scripter",
+  "concept_artist", "casting_director", "location_scout", "previsualizer",
+  "cinematographer", "generalist", "asset_designer",
+  "vfx_compositor", "sound_designer", "composer",
+  "master_editor", "colorist", "mixing_engineer",
+]
+
+const PHASE_GROUPS = [
+  { label: "Pre-Production", agents: ["script_writer", "scripter", "concept_artist", "casting_director", "location_scout", "previsualizer"] },
+  { label: "Production", agents: ["cinematographer", "generalist", "asset_designer"] },
+  { label: "Post-Production", agents: ["vfx_compositor", "sound_designer", "composer", "master_editor", "colorist", "mixing_engineer"] },
+]
+
 function getPhaseFromStatus(status: string): Phase {
   switch (status) {
     case "PRE_PRODUCTION": return "pre-production"
@@ -91,6 +129,39 @@ function getPhaseFromStatus(status: string): Phase {
     case "COMPLETED": return "post-production"
     default: return "development"
   }
+}
+
+// ─── Reusable Agent Card ───
+
+function AgentCard({
+  step, label, description, buttonLabel, buttonColor, onRun, disabled,
+}: {
+  step: string
+  label: string
+  description: string
+  buttonLabel: string
+  buttonColor: string
+  onRun: () => void
+  disabled: boolean
+}) {
+  return (
+    <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
+      <div className="mb-2 flex items-center gap-2">
+        <span className={`rounded px-2 py-0.5 text-xs font-bold ${buttonColor.replace("bg-", "bg-").split(" ")[0]}/20 ${buttonColor.replace("bg-", "text-").split(" ")[0].replace("text-", "text-")}`}>
+          {step}
+        </span>
+        <h2 className="text-lg font-semibold">{label}</h2>
+      </div>
+      <p className="mb-4 text-sm text-gray-400">{description}</p>
+      <button
+        onClick={onRun}
+        disabled={disabled}
+        className={`rounded-lg ${buttonColor} px-6 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50`}
+      >
+        {disabled ? "Running..." : buttonLabel}
+      </button>
+    </div>
+  )
 }
 
 // ─── Main Component ───
@@ -102,7 +173,7 @@ export default function ProjectDetailPage() {
 
   const [project, setProject] = useState<Project | null>(null)
   const [runs, setRuns] = useState<PipelineRun[]>([])
-  const [activePhase, setActivePhase] = useState<Phase | null>(null) // null = not yet decided
+  const [activePhase, setActivePhase] = useState<Phase | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [runningPipeline, setRunningPipeline] = useState(false)
@@ -116,7 +187,6 @@ export default function ProjectDetailPage() {
       .catch((err: Error) => setError(err.message))
   }, [id])
 
-  // Initial load — set active tab based on project data
   useEffect(() => {
     fetchAPI<Project>(`/api/projects/${id}`)
       .then((p) => {
@@ -168,6 +238,12 @@ export default function ProjectDetailPage() {
     }
   }
 
+  const runFullPipeline = () => {
+    if (window.confirm("15개 에이전트를 순차 실행합니다. API 크레딧이 소모됩니다. 계속하시겠습니까?")) {
+      runPipeline(FULL_PIPELINE)
+    }
+  }
+
   const saveProject = async () => {
     try {
       const updated = await fetchAPI<Project>(`/api/projects/${id}`, {
@@ -207,13 +283,22 @@ export default function ProjectDetailPage() {
               </span>
             </div>
           </div>
-          <a
-            href={`${API_BASE}/api/export/${project.id}`}
-            className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
-            download
-          >
-            Export ZIP
-          </a>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={runFullPipeline}
+              disabled={runningPipeline}
+              className="rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 px-5 py-2 text-sm font-bold text-white transition hover:from-blue-600 hover:to-purple-600 disabled:opacity-50"
+            >
+              {runningPipeline ? "Pipeline Running..." : "Auto-Generate"}
+            </button>
+            <a
+              href={`${API_BASE}/api/export/${project.id}`}
+              className="rounded-lg border border-gray-700 bg-gray-800 px-4 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+              download
+            >
+              Export ZIP
+            </a>
+          </div>
         </div>
         {project.logline && <p className="mt-2 text-sm text-gray-400">{project.logline}</p>}
       </div>
@@ -248,24 +333,59 @@ export default function ProjectDetailPage() {
         })}
       </div>
 
-      {/* Active Pipeline Run */}
+      {/* Active Pipeline Run — Phase-Grouped Progress */}
       {activeRun && (
         <div className="mb-6 rounded-xl border border-blue-500/30 bg-blue-500/5 p-4">
           <div className="mb-2 flex items-center gap-3">
             <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-blue-500" />
             <span className="text-sm font-medium">Pipeline Running</span>
-            <span className="text-sm text-gray-400">Step: {activeRun.current_step}</span>
+            <span className="text-sm text-gray-400">
+              {AGENT_DISPLAY_NAMES[activeRun.current_step ?? ""] ?? activeRun.current_step}
+            </span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
             <div className="h-full rounded-full bg-blue-500 transition-all duration-500" style={{ width: `${Math.round(activeRun.progress)}%` }} />
           </div>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {activeRun.steps.map((step) => {
-              const result = activeRun.step_results[step]
-              const icon = result?.status === "completed" ? "✅" : result?.status === "running" ? "⏳" : result?.status === "failed" ? "❌" : "⬜"
-              return <span key={step} className="flex items-center gap-1 rounded bg-gray-800 px-2 py-1 text-xs">{icon} {step}</span>
+          <div className="mt-3 space-y-2">
+            {PHASE_GROUPS.map((group) => {
+              const activeSteps = group.agents.filter((s) => activeRun.steps.includes(s))
+              if (activeSteps.length === 0) return null
+              return (
+                <div key={group.label}>
+                  <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">{group.label}</span>
+                  <div className="flex flex-wrap gap-1.5 mt-1">
+                    {activeSteps.map((step) => {
+                      const result = activeRun.step_results[step]
+                      const isRunning = result?.status === "running" || activeRun.current_step === step
+                      const isCompleted = result?.status === "completed"
+                      const isFailed = result?.status === "failed"
+                      return (
+                        <span
+                          key={step}
+                          className={`flex items-center gap-1 rounded px-2 py-1 text-xs ${
+                            isCompleted ? "bg-green-500/10 text-green-400" :
+                            isRunning ? "bg-blue-500/10 text-blue-400 animate-pulse" :
+                            isFailed ? "bg-red-500/10 text-red-400" :
+                            "bg-gray-800 text-gray-500"
+                          }`}
+                        >
+                          {isCompleted ? "✅" : isRunning ? "⏳" : isFailed ? "❌" : "⬜"}
+                          {AGENT_DISPLAY_NAMES[step] ?? step}
+                        </span>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
             })}
           </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          {error}
         </div>
       )}
 
@@ -291,7 +411,8 @@ export default function ProjectDetailPage() {
       {activePhase === "pre-production" && (
         <PreProductionTab
           plan={plan}
-          onRunConceptArtist={() => runPipeline(["concept_artist"])}
+          onRunAgent={(agent) => runPipeline([agent])}
+          onRunAll={() => runPipeline([...PHASE_PRESETS["pre-production"]])}
           runningPipeline={runningPipeline}
           projectId={id}
         />
@@ -300,8 +421,8 @@ export default function ProjectDetailPage() {
       {activePhase === "production" && (
         <ProductionTab
           plan={plan}
-          onRunCinematographer={() => runPipeline(["cinematographer"])}
-          onRunGeneralist={() => runPipeline(["generalist"])}
+          onRunAgent={(agent) => runPipeline([agent])}
+          onRunAll={() => runPipeline([...PHASE_PRESETS.production])}
           runningPipeline={runningPipeline}
           projectId={id}
         />
@@ -310,8 +431,8 @@ export default function ProjectDetailPage() {
       {activePhase === "post-production" && (
         <PostProductionTab
           plan={plan}
-          onRunSoundDesigner={() => runPipeline(["sound_designer"])}
-          onRunMasterEditor={() => runPipeline(["master_editor"])}
+          onRunAgent={(agent) => runPipeline([agent])}
+          onRunAll={() => runPipeline([...PHASE_PRESETS["post-production"]])}
           runningPipeline={runningPipeline}
           projectId={id}
         />
@@ -326,7 +447,7 @@ export default function ProjectDetailPage() {
               <div key={run.id} className="flex items-center justify-between rounded-lg border border-gray-800 bg-gray-900/50 px-4 py-2.5 text-sm">
                 <div className="flex items-center gap-3">
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[run.status] ?? STATUS_COLORS.DRAFT}`}>{run.status}</span>
-                  <span className="text-gray-400">{run.steps.join(" → ")}</span>
+                  <span className="text-gray-400">{run.steps.map((s) => AGENT_DISPLAY_NAMES[s] ?? s).join(" → ")}</span>
                 </div>
                 <span className="text-xs text-gray-500">{run.started_at ? new Date(run.started_at).toLocaleString() : ""}</span>
               </div>
@@ -436,8 +557,24 @@ function DevelopmentTab({
         )}
       </div>
 
-      {/* ─── Version History ─── */}
       <VersionHistory projectId={project.id} />
+    </div>
+  )
+}
+
+// ─── Phase Header with Run All ───
+
+function PhaseHeader({ label, onRunAll, disabled }: { label: string; onRunAll: () => void; disabled: boolean }) {
+  return (
+    <div className="flex items-center justify-between mb-6">
+      <h2 className="text-lg font-semibold text-white">{label}</h2>
+      <button
+        onClick={onRunAll}
+        disabled={disabled}
+        className="rounded-lg bg-gradient-to-r from-purple-500 to-blue-500 px-5 py-2 text-sm font-medium text-white transition hover:from-purple-600 hover:to-blue-600 disabled:opacity-50"
+      >
+        {disabled ? "Running..." : `Run All ${label}`}
+      </button>
     </div>
   )
 }
@@ -445,10 +582,11 @@ function DevelopmentTab({
 // ─── Pre-Production Tab ───
 
 function PreProductionTab({
-  plan, onRunConceptArtist, runningPipeline, projectId,
+  plan, onRunAgent, onRunAll, runningPipeline, projectId,
 }: {
   plan: DirectionPlan | null
-  onRunConceptArtist: () => void
+  onRunAgent: (agent: string) => void
+  onRunAll: () => void
   runningPipeline: boolean
   projectId: string
 }) {
@@ -463,6 +601,8 @@ function PreProductionTab({
 
   return (
     <div className="space-y-6">
+      <PhaseHeader label="Pre-Production" onRunAll={onRunAll} disabled={runningPipeline} />
+
       {/* Direction Plan Overview */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
         <h2 className="mb-1 text-lg font-semibold">Direction Plan</h2>
@@ -493,25 +633,53 @@ function PreProductionTab({
         </div>
       </div>
 
-      {/* Storyboard Generation */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <h2 className="mb-2 text-lg font-semibold">Storyboard Generation</h2>
-        <p className="mb-4 text-sm text-gray-400">
-          AI ConceptArtist가 각 씬의 image_prompt를 기반으로 스토리보드 이미지를 생성합니다.
-          스타일: Webtoon, Photorealistic, Anime, Noir, Concept Art
-        </p>
-        <button
-          onClick={onRunConceptArtist}
-          disabled={runningPipeline}
-          className="rounded-lg bg-purple-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-purple-700 disabled:opacity-50"
-        >
-          {runningPipeline ? "Generating..." : "Generate Storyboards"}
-        </button>
-      </div>
+      {/* Concept Artist */}
+      <AgentCard
+        step="Step 1"
+        label="Storyboard Generation"
+        description="AI ConceptArtist가 각 씬의 image_prompt를 기반으로 스토리보드 이미지를 생성합니다. 스타일: Webtoon, Photorealistic, Anime, Noir, Concept Art"
+        buttonLabel="Generate Storyboards"
+        buttonColor="bg-purple-600"
+        onRun={() => onRunAgent("concept_artist")}
+        disabled={runningPipeline}
+      />
+
+      {/* Casting Director */}
+      <AgentCard
+        step="Step 2"
+        label="Casting Director"
+        description="AI CastingDirector가 캐릭터 설정을 분석하여 주요 캐릭터(최대 8명)의 레퍼런스 시트를 생성합니다. 정면/3/4각도/전신 3뷰 시트로 제작됩니다."
+        buttonLabel="Run Casting"
+        buttonColor="bg-indigo-600"
+        onRun={() => onRunAgent("casting_director")}
+        disabled={runningPipeline}
+      />
+
+      {/* Location Scout */}
+      <AgentCard
+        step="Step 3"
+        label="Location Scout"
+        description="AI LocationScout가 씬의 배경 설정에서 고유한 로케이션을 추출하고, 각 장소의 환경 컨셉 아트를 생성합니다. 캐릭터 없는 순수 환경 이미지입니다."
+        buttonLabel="Scout Locations"
+        buttonColor="bg-teal-600"
+        onRun={() => onRunAgent("location_scout")}
+        disabled={runningPipeline}
+      />
+
+      {/* Previsualizer */}
+      <AgentCard
+        step="Step 4"
+        label="Previsualizer"
+        description="AI Previsualizer가 각 씬의 카메라 블로킹과 움직임을 분석하여 저해상도 프리비즈 비디오(5-8초)를 생성합니다. 카메라 무빙 검증용입니다."
+        buttonLabel="Generate Previz"
+        buttonColor="bg-pink-600"
+        onRun={() => onRunAgent("previsualizer")}
+        disabled={runningPipeline}
+      />
 
       {/* Storyboard Gallery */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <h2 className="mb-4 text-lg font-semibold">Storyboard Gallery</h2>
+        <h2 className="mb-4 text-lg font-semibold">Pre-Production Gallery</h2>
         <AssetGallery projectId={projectId} filter="IMAGE" />
       </div>
     </div>
@@ -521,11 +689,11 @@ function PreProductionTab({
 // ─── Production Tab ───
 
 function ProductionTab({
-  plan, onRunCinematographer, onRunGeneralist, runningPipeline, projectId,
+  plan, onRunAgent, onRunAll, runningPipeline, projectId,
 }: {
   plan: DirectionPlan | null
-  onRunCinematographer: () => void
-  onRunGeneralist: () => void
+  onRunAgent: (agent: string) => void
+  onRunAll: () => void
   runningPipeline: boolean
   projectId: string
 }) {
@@ -540,47 +708,43 @@ function ProductionTab({
 
   return (
     <div className="space-y-6">
+      <PhaseHeader label="Production" onRunAll={onRunAll} disabled={runningPipeline} />
+
       {/* Batch Production */}
       <BatchMonitor projectId={projectId} />
 
-      {/* Step 1: Cinematography */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <div className="mb-2 flex items-center gap-2">
-          <span className="rounded bg-blue-500/20 px-2 py-0.5 text-xs font-bold text-blue-400">Step 1</span>
-          <h2 className="text-lg font-semibold">Cinematography Enhancement</h2>
-        </div>
-        <p className="mb-4 text-sm text-gray-400">
-          AI Cinematographer가 각 씬의 video_prompt를 전문 촬영감독 관점에서 강화합니다.
-          렌즈 선택, 조명 설계, 카메라 무빙, 컬러 팔레트 디테일이 추가됩니다.
-        </p>
-        <button
-          onClick={onRunCinematographer}
-          disabled={runningPipeline}
-          className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:opacity-50"
-        >
-          {runningPipeline ? "Enhancing..." : "Enhance Video Prompts"}
-        </button>
-      </div>
+      {/* Cinematographer */}
+      <AgentCard
+        step="Step 1"
+        label="Cinematography Enhancement"
+        description="AI Cinematographer가 각 씬의 video_prompt를 전문 촬영감독 관점에서 강화합니다. 렌즈 선택, 조명 설계, 카메라 무빙, 컬러 팔레트 디테일이 추가됩니다."
+        buttonLabel="Enhance Video Prompts"
+        buttonColor="bg-blue-600"
+        onRun={() => onRunAgent("cinematographer")}
+        disabled={runningPipeline}
+      />
 
-      {/* Step 2: Video Generation */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <div className="mb-2 flex items-center gap-2">
-          <span className="rounded bg-green-500/20 px-2 py-0.5 text-xs font-bold text-green-400">Step 2</span>
-          <h2 className="text-lg font-semibold">AI Video Generation</h2>
-        </div>
-        <p className="mb-4 text-sm text-gray-400">
-          AI Generalist가 Veo 3.0을 통해 씬별 비디오 클립을 생성합니다.
-          각 씬의 video_prompt를 기반으로 8초 분량의 AI 영상이 제작됩니다.
-        </p>
-        <button
-          onClick={onRunGeneralist}
-          disabled={runningPipeline}
-          className="rounded-lg bg-green-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-green-700 disabled:opacity-50"
-        >
-          {runningPipeline ? "Generating..." : "Generate Scene Videos"}
-        </button>
-        <p className="mt-2 text-xs text-gray-500">Veo 3.0 REST API 연동 완료 — 씬당 약 60초 소요</p>
-      </div>
+      {/* Generalist */}
+      <AgentCard
+        step="Step 2"
+        label="AI Video Generation"
+        description="AI Generalist가 Veo 3.0을 통해 씬별 비디오 클립을 생성합니다. 각 씬의 video_prompt를 기반으로 8초 분량의 AI 영상이 제작됩니다."
+        buttonLabel="Generate Scene Videos"
+        buttonColor="bg-green-600"
+        onRun={() => onRunAgent("generalist")}
+        disabled={runningPipeline}
+      />
+
+      {/* Asset Designer */}
+      <AgentCard
+        step="Step 3"
+        label="Asset Design"
+        description="AI AssetDesigner가 프로젝트의 세계관과 씬을 분석하여 필요한 3D 에셋(소품, 차량, 가구, 건축물 등)의 컨셉 아트 턴어라운드 시트와 스펙 문서를 생성합니다."
+        buttonLabel="Design Assets"
+        buttonColor="bg-amber-600"
+        onRun={() => onRunAgent("asset_designer")}
+        disabled={runningPipeline}
+      />
 
       {/* Video Gallery */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
@@ -594,11 +758,11 @@ function ProductionTab({
 // ─── Post-Production Tab ───
 
 function PostProductionTab({
-  plan, onRunSoundDesigner, onRunMasterEditor, runningPipeline, projectId,
+  plan, onRunAgent, onRunAll, runningPipeline, projectId,
 }: {
   plan: DirectionPlan | null
-  onRunSoundDesigner: () => void
-  onRunMasterEditor: () => void
+  onRunAgent: (agent: string) => void
+  onRunAll: () => void
   runningPipeline: boolean
   projectId: string
 }) {
@@ -614,10 +778,23 @@ function PostProductionTab({
 
   return (
     <div className="space-y-6">
-      {/* Step 1: Sound Design */}
+      <PhaseHeader label="Post-Production" onRunAll={onRunAll} disabled={runningPipeline} />
+
+      {/* VFX Compositor */}
+      <AgentCard
+        step="Step 1"
+        label="VFX Compositing"
+        description="AI VFXCompositor가 씬 키워드를 분석하여 적절한 VFX 프리셋(홀로그램, 드림 블러, 비 효과, 폭발 흔들림, 감시 카메라)을 적용합니다. FFMPEG 필터 체인 기반입니다."
+        buttonLabel="Apply VFX"
+        buttonColor="bg-cyan-600"
+        onRun={() => onRunAgent("vfx_compositor")}
+        disabled={runningPipeline}
+      />
+
+      {/* Sound Designer */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
         <div className="mb-2 flex items-center gap-2">
-          <span className="rounded bg-yellow-500/20 px-2 py-0.5 text-xs font-bold text-yellow-400">Step 1</span>
+          <span className="rounded bg-yellow-500/20 px-2 py-0.5 text-xs font-bold text-yellow-400">Step 2</span>
           <h2 className="text-lg font-semibold">Sound Design & TTS</h2>
         </div>
         <p className="mb-4 text-sm text-gray-400">
@@ -627,7 +804,7 @@ function PostProductionTab({
             : " (대사가 있는 씬이 없습니다)"}
         </p>
         <button
-          onClick={onRunSoundDesigner}
+          onClick={() => onRunAgent("sound_designer")}
           disabled={runningPipeline || dialogueScenes.length === 0}
           className="rounded-lg bg-yellow-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-yellow-700 disabled:opacity-50"
         >
@@ -635,25 +812,51 @@ function PostProductionTab({
         </button>
       </div>
 
-      {/* Step 2: Video Editing */}
-      <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <div className="mb-2 flex items-center gap-2">
-          <span className="rounded bg-orange-500/20 px-2 py-0.5 text-xs font-bold text-orange-400">Step 2</span>
-          <h2 className="text-lg font-semibold">Master Edit</h2>
-        </div>
-        <p className="mb-4 text-sm text-gray-400">
-          AI MasterEditor가 FFMPEG를 이용하여 개별 씬 영상을 하나의 마스터 영상으로 병합합니다.
-        </p>
-        <button
-          onClick={onRunMasterEditor}
-          disabled={runningPipeline}
-          className="rounded-lg bg-orange-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-orange-700 disabled:opacity-50"
-        >
-          {runningPipeline ? "Merging..." : "Merge Videos"}
-        </button>
-      </div>
+      {/* Composer */}
+      <AgentCard
+        step="Step 3"
+        label="Score Composition"
+        description="AI Composer가 씬들을 무드별로 그룹화(2-5씬씩)하고, 각 그룹에 맞는 배경 음악을 Suno API로 생성합니다. 장르, 분위기, 악기, 템포, 다이나믹이 자동 결정됩니다."
+        buttonLabel="Compose Score"
+        buttonColor="bg-pink-600"
+        onRun={() => onRunAgent("composer")}
+        disabled={runningPipeline}
+      />
 
-      {/* Audio & Video Assets */}
+      {/* Master Editor */}
+      <AgentCard
+        step="Step 4"
+        label="Master Edit"
+        description="AI MasterEditor가 FFMPEG를 이용하여 개별 씬 영상을 하나의 마스터 영상으로 병합합니다. libx264 인코딩으로 최종 마스터 MP4를 생성합니다."
+        buttonLabel="Merge Videos"
+        buttonColor="bg-orange-600"
+        onRun={() => onRunAgent("master_editor")}
+        disabled={runningPipeline}
+      />
+
+      {/* Colorist */}
+      <AgentCard
+        step="Step 5"
+        label="Color Grading"
+        description="AI Colorist가 프로젝트의 장르와 무드를 분석하여 적절한 컬러 프리셋(Cinematic Warm, Noir Cold, Neon Cyberpunk, Natural, Vintage)을 적용합니다."
+        buttonLabel="Color Grade"
+        buttonColor="bg-amber-600"
+        onRun={() => onRunAgent("colorist")}
+        disabled={runningPipeline}
+      />
+
+      {/* Mixing Engineer */}
+      <AgentCard
+        step="Step 6"
+        label="Final Audio Mix"
+        description="AI MixingEngineer가 대사, BGM, 비디오 원본 오디오를 최적 볼륨으로 믹싱합니다. 대사 0.5, BGM 0.15, 원본 0.08 비율로 3채널 오디오 믹스를 생성합니다."
+        buttonLabel="Mix Audio"
+        buttonColor="bg-emerald-600"
+        onRun={() => onRunAgent("mixing_engineer")}
+        disabled={runningPipeline}
+      />
+
+      {/* Assets Gallery */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
         <h2 className="mb-4 text-lg font-semibold">Generated Assets</h2>
         <AssetGallery projectId={projectId} />
