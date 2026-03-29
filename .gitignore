@@ -62,3 +62,6 @@ output/
 # Duplicate files
 README 2.md
 packages/scenario-db/src/generated/
+
+# Git worktrees (Claude Code)
+.claude/worktrees/
