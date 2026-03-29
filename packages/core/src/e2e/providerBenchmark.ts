@@ -55,11 +55,11 @@ const SCENARIOS: ScenarioConfig[] = [
 
 // Ordered by rate-limit friendliness (free/generous first)
 const ALL_PROVIDERS: ProviderChoice[] = [
-  'groq', 'deepseek', 'openai', 'anthropic', 'gemini', 'gemini-pro',
+  'gemini', 'gemini-pro', 'groq', 'ollama', 'huggingface', 'anthropic',
 ];
 
-const COOLDOWN_SCENARIO_MS = 10_000;  // 10s between scenarios
-const COOLDOWN_PROVIDER_MS = 15_000;  // 15s between provider switches
+const COOLDOWN_SCENARIO_MS = 30_000;  // 30s between scenarios (rate limit buffer)
+const COOLDOWN_PROVIDER_MS = 45_000;  // 45s between provider switches
 
 const SEP = '═'.repeat(72);
 const CHECKPOINT_DIR = 'packages/core/output';
@@ -144,6 +144,7 @@ async function runBenchmark(
     strategy: 'custom',
     customProviders,
     market: MARKET,
+    noFallback: true,
   });
 
   try {

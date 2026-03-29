@@ -17,7 +17,7 @@ import type { BenchmarkSuite } from './ProviderBenchmark';
 function parseArgs(): { engines: EngineName[]; providers: ProviderChoice[] } {
   const args = process.argv.slice(2);
   let engines: EngineName[] = ['beatSheet', 'emotion', 'rating', 'trope'];
-  let providers: ProviderChoice[] = ['gemini', 'groq', 'deepseek'];
+  let providers: ProviderChoice[] = ['gemini', 'groq', 'ollama'];
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--engines' && args[i + 1]) {
