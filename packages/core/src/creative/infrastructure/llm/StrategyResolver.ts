@@ -2,12 +2,12 @@ import type { AnalysisStrategy, AnalysisStrategyName, CustomStrategyInput, Provi
 import { env } from '../../../shared/env';
 
 function getDefaultProvider(): ProviderChoice {
-  // Priority: Gemini (free) → Groq (free) → DeepSeek (cheap) → Anthropic → OpenAI → Mock
+  // Priority: Gemini Free → Ollama (local) → HuggingFace → Groq Free → Anthropic (credits) → Mock
   if (env.GEMINI_API_KEY) return 'gemini';
+  if (env.OLLAMA_BASE_URL) return 'ollama';
+  if (env.HUGGINGFACE_API_KEY) return 'huggingface';
   if (env.GROQ_API_KEY) return 'groq';
-  if (env.DEEPSEEK_API_KEY) return 'deepseek';
   if (env.ANTHROPIC_API_KEY) return 'anthropic';
-  if (env.OPENAI_API_KEY) return 'openai';
   return 'mock';
 }
 
@@ -50,16 +50,15 @@ export function resolveStrategy(
     }
 
     case 'budget': {
-      // Zero/near-zero cost: Groq (free) + DeepSeek (cheapest paid)
-      const freeProvider: ProviderChoice = env.GROQ_API_KEY ? 'groq' : defaultProvider;
-      const cheapProvider: ProviderChoice = env.DEEPSEEK_API_KEY ? 'deepseek' : freeProvider;
+      // Zero-cost: Groq free tier + Ollama local fallback
+      const freeProvider: ProviderChoice = env.GROQ_API_KEY ? 'groq' : (env.OLLAMA_BASE_URL ? 'ollama' : defaultProvider);
       return {
         name: 'budget',
         engineProviders: {
           beatSheet: freeProvider,
           emotion: freeProvider,
-          rating: cheapProvider,
-          roi: cheapProvider,
+          rating: freeProvider,
+          roi: freeProvider,
           coverage: freeProvider,
           vfx: freeProvider,
           trope: freeProvider,
@@ -68,7 +67,6 @@ export function resolveStrategy(
     }
 
     case 'premium': {
-      // Highest quality: Claude Sonnet 4.6 for creative, Gemini for classification
       const premiumCreative: ProviderChoice = env.ANTHROPIC_API_KEY ? 'anthropic' : defaultProvider;
       const premiumClassifier: ProviderChoice = env.GEMINI_API_KEY ? 'gemini' : defaultProvider;
       return {
@@ -86,10 +84,9 @@ export function resolveStrategy(
     }
 
     case 'long-context': {
-      // Ultra-long scripts: Gemini 1.5 Pro (2M context) for creative engines
       const longCtx: ProviderChoice = env.GEMINI_API_KEY ? 'gemini-long' : defaultProvider;
       const standard: ProviderChoice = env.GEMINI_API_KEY ? 'gemini' : defaultProvider;
-      const reasoning: ProviderChoice = env.DEEPSEEK_API_KEY ? 'deepseek' : standard;
+      const reasoning: ProviderChoice = env.OLLAMA_BASE_URL ? 'ollama' : standard;
       return {
         name: 'long-context',
         engineProviders: {
@@ -108,13 +105,13 @@ export function resolveStrategy(
       return {
         name: 'custom',
         engineProviders: {
-          beatSheet: custom?.beatSheet || defaultProvider,
-          emotion: custom?.emotion || defaultProvider,
-          rating: custom?.rating || defaultProvider,
-          roi: custom?.roi || defaultProvider,
-          coverage: custom?.coverage || defaultProvider,
-          vfx: custom?.vfx || defaultProvider,
-          trope: custom?.trope || defaultProvider,
+          beatSheet: custom?.beatSheet ?? defaultProvider,
+          emotion: custom?.emotion ?? defaultProvider,
+          rating: custom?.rating ?? defaultProvider,
+          roi: custom?.roi ?? defaultProvider,
+          coverage: custom?.coverage ?? defaultProvider,
+          vfx: custom?.vfx ?? defaultProvider,
+          trope: custom?.trope ?? defaultProvider,
         },
       };
 
