@@ -2,8 +2,10 @@ import type { AnalysisStrategy, AnalysisStrategyName, CustomStrategyInput, Provi
 import { env } from '../../../shared/env';
 
 function getDefaultProvider(): ProviderChoice {
-  // Priority: Gemini Pro → Groq (free) → Anthropic → Mock
-  if (env.GEMINI_API_KEY) return 'gemini-pro';
+  // Priority: Gemini Free → Ollama → HuggingFace → Groq → Anthropic → Mock
+  if (env.GEMINI_API_KEY) return 'gemini';
+  if (env.OLLAMA_BASE_URL) return 'ollama';
+  if (env.HUGGINGFACE_API_KEY) return 'huggingface';
   if (env.GROQ_API_KEY) return 'groq';
   if (env.ANTHROPIC_API_KEY) return 'anthropic';
   return 'mock';
