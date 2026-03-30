@@ -32,7 +32,7 @@ async function getLatestStepResult(projectId: string, stepName: string) {
 // ─── GET /casting-director ───
 
 agentOutputRoutes.get("/casting-director", async (c) => {
-  const projectId = c.req.param("projectId")
+  const projectId = c.req.param("projectId") as string
 
   // Check project exists
   const project = await prisma.project.findUnique({ where: { id: projectId } })
@@ -72,7 +72,7 @@ agentOutputRoutes.get("/casting-director", async (c) => {
 // ─── GET /location-scout ───
 
 agentOutputRoutes.get("/location-scout", async (c) => {
-  const projectId = c.req.param("projectId")
+  const projectId = c.req.param("projectId") as string
 
   const project = await prisma.project.findUnique({ where: { id: projectId } })
   if (!project) throw new NotFoundError("Project", projectId)
@@ -108,7 +108,7 @@ agentOutputRoutes.get("/location-scout", async (c) => {
 // ─── GET /cinematographer ───
 
 agentOutputRoutes.get("/cinematographer", async (c) => {
-  const projectId = c.req.param("projectId")
+  const projectId = c.req.param("projectId") as string
 
   const project = await prisma.project.findUnique({ where: { id: projectId } })
   if (!project) throw new NotFoundError("Project", projectId)
