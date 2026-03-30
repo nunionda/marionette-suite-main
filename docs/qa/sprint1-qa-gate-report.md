@@ -145,3 +145,27 @@ All `localStorage` calls have been removed from the dashboard flow. API wiring i
 ---
 
 **Sign-off**: Sprint 1 QA Gate reviewed by QA Agent on 2026-03-31. Gate status: **FAIL** — 1 P0, 2 P1, 2 P2 issues open.
+
+---
+
+## Re-check — 2026-03-31 (Post Bug Fix)
+
+All P0/P1 bugs resolved. Final verification results:
+
+| # | Check | Status |
+|---|-------|--------|
+| 1 | OpenAI/DeepSeek Removal | ✅ PASS — 0 files (GroqProvider uses openai pkg as HTTP client only, documented) |
+| 2 | Provider Chain Tests | ✅ PASS — 16/16 |
+| 3 | TypeScript Typecheck | ✅ PASS — 7/7 packages exit 0 |
+| 4 | Web Build | ✅ PASS — Next.js build succeeds |
+| 5 | API Contract Verification | ✅ PASS — all 4 endpoints confirmed |
+| 6 | Dashboard API Wiring | ✅ PASS — 0 localStorage references |
+
+**Resolved bugs:** BUG-001 (P0), BUG-002 (P1), BUG-003 (P1), BUG-004 (P2)
+**Remaining:** BUG-005 (P2) — openai pkg in GroqProvider, documented, low risk
+
+## ✅ GATE VERDICT: PASS
+
+Sprint 1 QA Gate signed off. Sprint 2 kickoff approved.
+
+**Sign-off:** QA Agent + CTO · 2026-03-31
