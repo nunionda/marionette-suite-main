@@ -138,7 +138,9 @@ function parseSequences(outline: string): SequenceCard[] {
   const sections = outline.split(/^#{2,3}\s+/m).filter(Boolean)
 
   for (let i = 0; i < sections.length && sequences.length < 8; i++) {
-    const section = sections[i].trim()
+    const raw = sections[i]
+    if (!raw) continue
+    const section = raw.trim()
     const lines = section.split("\n")
     const title = lines[0]?.trim() ?? `Sequence ${sequences.length + 1}`
     const content = lines.slice(1).join("\n").trim()
@@ -173,7 +175,7 @@ function parseScreenplayFormatting(text: string): { type: "heading" | "action" |
       result.push({ type: "camera", content: trimmed })
     } else if (/^[A-Z가-힣\s]+:?$/.test(trimmed) && trimmed.length < 30) {
       result.push({ type: "character", content: trimmed })
-    } else if (result.length > 0 && result[result.length - 1].type === "character") {
+    } else if (result.length > 0 && result[result.length - 1]?.type === "character") {
       result.push({ type: "dialogue", content: trimmed })
     } else {
       result.push({ type: "text", content: trimmed })
@@ -237,8 +239,9 @@ export default function ScreenplayPage() {
       if (sp.draft) setDraftEdit(sp.draft)
       if (sp.outline) setOutlineEdit(sp.outline)
       // Load direction plan data
-      if ((proj as Record<string, unknown>).direction_plan_json) {
-        const dpJson = (proj as Record<string, unknown>).direction_plan_json as { scenes?: DPScene[] }
+      const projRecord = proj as unknown as Record<string, unknown>
+      if (projRecord.direction_plan_json) {
+        const dpJson = projRecord.direction_plan_json as { scenes?: DPScene[] }
         if (dpJson?.scenes) setDpScenes(dpJson.scenes)
       }
     } catch (err) {
@@ -909,7 +912,7 @@ function Step2Characters({
             <CharacterCard
               key={idx}
               character={char}
-              colorClass={CHARACTER_BORDER_COLORS[idx % CHARACTER_BORDER_COLORS.length]}
+              colorClass={CHARACTER_BORDER_COLORS[idx % CHARACTER_BORDER_COLORS.length] ?? "border-l-gray-500"}
               editing={editingIdx === idx}
               onEdit={() => onEditStart(idx)}
               onCancel={onEditEnd}
@@ -1123,7 +1126,7 @@ function Step3Treatment({
   let match: RegExpExecArray | null
   let seqIdx = 1
   while ((match = seqPattern.exec(outline)) !== null) {
-    sequenceTitles[seqIdx] = match[1].trim()
+    sequenceTitles[seqIdx] = match[1]?.trim() ?? `시퀀스 ${seqIdx}`
     seqIdx++
   }
   // Fallback if no sequences found
@@ -1320,16 +1323,16 @@ function Step4Screenplay({
   if (draft) {
     const matches = draft.matchAll(/S#(\d+)\.\s*(.+)/g)
     for (const match of matches) {
-      const num = parseInt(match[1])
+      const num = parseInt(match[1] ?? "0")
       if (!scenes.find((s) => s.num === num)) {
-        const location = match[2].split("-")[0].trim().slice(0, 12)
+        const location = (match[2] ?? "").split("-")[0]?.trim().slice(0, 12) ?? ""
         scenes.push({ num, location })
       }
     }
   }
 
   const sceneCount = scenes.length
-  const lastScene = scenes.length > 0 ? scenes[scenes.length - 1].num : 0
+  const lastScene = scenes.length > 0 ? (scenes[scenes.length - 1]?.num ?? 0) : 0
   const nextStart = lastScene + 1
   const nextEnd = lastScene + 5
   const isComplete = sceneCount >= totalTreatmentScenes && totalTreatmentScenes > 0
@@ -1735,7 +1738,7 @@ function Step6DirectionPlan({
   let match: RegExpExecArray | null
   let seqIdx = 1
   while ((match = seqPattern.exec(outline)) !== null) {
-    sequenceTitles[seqIdx] = match[1].trim()
+    sequenceTitles[seqIdx] = match[1]?.trim() ?? `시퀀스 ${seqIdx}`
     seqIdx++
   }
   for (let i = 1; i <= 8; i++) {
