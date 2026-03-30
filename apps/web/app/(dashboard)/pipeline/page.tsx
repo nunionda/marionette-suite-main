@@ -30,7 +30,7 @@ interface PipelineRunSummary {
 interface StageInfo {
   title: string;
   icon: string;
-  status: "idle" | "running" | "completed" | "failed";
+  status: "idle" | "running" | "completed" | "failed" | "queued" | "error";
   progress: number;
 }
 
@@ -130,29 +130,56 @@ export default function PipelinePage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const monoStyle: React.CSSProperties = { fontFamily: "var(--font-geist-mono, monospace)" };
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-10 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tighter uppercase italic text-white">
-            Studio <span className="text-blue-500">Pipeline</span> Hub
+          <h1
+            className="text-3xl uppercase tracking-tight"
+            style={{ fontFamily: "var(--font-anton, serif)", color: "var(--color-white, #F0F0F0)" }}
+          >
+            Studio{" "}
+            <span style={{ color: "var(--color-green, #00FF41)" }}>Pipeline</span>{" "}
+            Hub
           </h1>
-          <p className="mt-1 text-sm text-gray-400 font-medium">
+          <p
+            className="mt-1 text-[11px]"
+            style={{ ...monoStyle, color: "var(--color-muted, #707070)" }}
+          >
             End-to-end production orchestration & department monitoring
           </p>
         </div>
         <div className="flex flex-col items-end gap-1">
-          <div className="flex items-center gap-2 rounded-full border border-gray-800 bg-gray-900/50 px-3 py-1">
+          <div
+            className="flex items-center gap-2 px-3 py-1"
+            style={{
+              border: "1px solid var(--color-border, #1E1E1E)",
+              borderRadius: 2,
+            }}
+          >
             <span
-              className={`h-1.5 w-1.5 rounded-full ${
-                connected ? "bg-green-400 animate-pulse" : "bg-yellow-400"
-              }`}
+              style={{
+                display: "inline-block",
+                width: 6,
+                height: 6,
+                borderRadius: "50%",
+                background: connected ? "#00FF41" : "#F59E0B",
+                animation: connected ? "ms-pulse 1.4s ease-in-out infinite" : undefined,
+              }}
             />
-            <span className="text-[10px] uppercase font-bold tracking-widest text-gray-400">
+            <span
+              className="text-[10px] uppercase tracking-widest"
+              style={{ ...monoStyle, color: "var(--color-muted, #707070)" }}
+            >
               {connected ? "Live System Sync" : "Connection Lost"}
             </span>
           </div>
-          <span className="text-[9px] text-gray-600 font-mono">
+          <span
+            className="text-[9px]"
+            style={{ ...monoStyle, color: "var(--color-subtle, #505050)" }}
+          >
             {new Date().toISOString()}
           </span>
         </div>
@@ -160,11 +187,15 @@ export default function PipelinePage() {
 
       {/* Loading */}
       {loading && (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="animate-pulse rounded-xl border border-gray-800 bg-gray-900 p-5">
-              <div className="mb-3 h-5 w-1/3 rounded bg-gray-800" />
-              <div className="h-2 w-full rounded-full bg-gray-800" />
+            <div
+              key={i}
+              className="animate-pulse p-5"
+              style={{ border: "1px solid var(--color-border, #1E1E1E)", borderRadius: 2 }}
+            >
+              <div className="mb-3 h-4 w-1/3 rounded" style={{ background: "#1E1E1E" }} />
+              <div className="h-0.5 w-full rounded" style={{ background: "#1E1E1E" }} />
             </div>
           ))}
         </div>
@@ -172,19 +203,45 @@ export default function PipelinePage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-6 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div
+          className="mb-6 px-4 py-3 text-[11px]"
+          style={{
+            border: "1px solid rgba(192,57,43,0.4)",
+            borderRadius: 2,
+            background: "#1A0808",
+            color: "#C0392B",
+            fontFamily: "var(--font-geist-mono, monospace)",
+          }}
+        >
           Failed to load projects: {error}
         </div>
       )}
 
       {/* Empty state */}
       {!loading && !error && projects.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-          <p className="text-lg font-medium">No projects in pipeline</p>
-          <p className="mt-1 text-sm text-gray-500">Create a project to start production</p>
+        <div className="flex flex-col items-center justify-center py-20">
+          <p
+            className="text-[11px] uppercase tracking-widest"
+            style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-muted, #707070)" }}
+          >
+            No projects in pipeline
+          </p>
+          <p
+            className="mt-1 text-[10px]"
+            style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-subtle, #505050)" }}
+          >
+            Create a project to start production
+          </p>
           <Link
             href="/projects/new"
-            className="mt-4 rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+            className="mt-6 px-6 py-2 text-[11px] uppercase tracking-widest transition hover:brightness-110"
+            style={{
+              fontFamily: "var(--font-geist-mono, monospace)",
+              background: "var(--color-green, #00FF41)",
+              color: "#0A0A0A",
+              borderRadius: 2,
+              fontWeight: 600,
+            }}
           >
             Create Project
           </Link>
@@ -200,19 +257,29 @@ export default function PipelinePage() {
           return (
             <section key={project.id} className="relative">
               <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="h-4 w-4 rounded-sm bg-blue-500" />
-                  <h2 className="text-xl font-extrabold tracking-tight text-white uppercase italic">
+                <div className="flex items-center gap-3">
+                  <span
+                    style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#00FF41", flexShrink: 0 }}
+                  />
+                  <h2
+                    className="text-lg uppercase tracking-tight"
+                    style={{ fontFamily: "var(--font-anton, serif)", color: "var(--color-white, #F0F0F0)" }}
+                  >
                     {project.title}
                   </h2>
-                  <span className="text-xs text-gray-500 font-medium">{project.genre}</span>
-                  <div className="h-[1px] w-48 bg-gradient-to-r from-gray-700 to-transparent" />
+                  <span
+                    className="text-[10px] uppercase tracking-wider"
+                    style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-subtle, #505050)" }}
+                  >
+                    {project.genre}
+                  </span>
                 </div>
                 <Link
                   href={`/projects/${project.id}`}
-                  className="text-[10px] font-bold uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-colors"
+                  className="text-[10px] uppercase tracking-widest transition-colors hover:text-[#F0F0F0]"
+                  style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-green, #00FF41)" }}
                 >
-                  View Full Breakdown →
+                  View Breakdown →
                 </Link>
               </div>
 
@@ -232,69 +299,113 @@ export default function PipelinePage() {
           );
         })}
 
-        {/* Live Agent Log Monitor */}
-        <section className="mt-16 rounded-2xl border border-gray-800 bg-gray-950/50 p-6 backdrop-blur-xl">
-           <div className="mb-6 flex items-center justify-between">
-             <div className="flex items-center gap-3">
-               <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-500">
-                 Agentic <span className="text-white">Live Activity</span>
-               </h3>
-               <div className="h-1 w-1 bg-gray-700 rounded-full" />
-               <span className="text-[10px] text-gray-600 font-mono">
-                 {liveRuns.length} ACTIVE THREADS
-               </span>
-             </div>
-           </div>
+        {/* Live Agent Activity */}
+        <section
+          className="mt-16 p-6"
+          style={{ border: "1px solid var(--color-border, #1E1E1E)", borderRadius: 2 }}
+        >
+          <div className="mb-5 flex items-center gap-3">
+            <span
+              style={{ display: "inline-block", width: 6, height: 6, borderRadius: "50%", background: "#00FF41", animation: "ms-pulse 1.4s ease-in-out infinite" }}
+            />
+            <h3
+              className="text-[11px] uppercase tracking-widest"
+              style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-white, #F0F0F0)" }}
+            >
+              Live Activity
+            </h3>
+            <span
+              className="text-[10px]"
+              style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-subtle, #505050)" }}
+            >
+              {liveRuns.length} active threads
+            </span>
+          </div>
 
-           {wsLoading && (
-             <div className="py-12 text-center text-xs font-bold uppercase tracking-widest text-gray-700 animate-pulse">
-               Syncing with Backend Queue...
-             </div>
-           )}
+          {wsLoading && (
+            <div
+              className="py-10 text-center text-[10px] uppercase tracking-widest animate-pulse"
+              style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-subtle, #505050)" }}
+            >
+              Syncing with backend queue...
+            </div>
+          )}
 
-           {!wsLoading && liveRuns.length === 0 && (
-             <div className="py-12 text-center text-xs font-medium text-gray-600">
-               NO RECENT AI THREADS DETECTED
-             </div>
-           )}
+          {!wsLoading && liveRuns.length === 0 && (
+            <div
+              className="py-10 text-center text-[10px] uppercase tracking-widest"
+              style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-subtle, #505050)" }}
+            >
+              No active agent threads
+            </div>
+          )}
 
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-             {liveRuns.map((run) => (
-               <div
-                 key={run.id}
-                 className="group flex items-center justify-between rounded-lg border border-gray-800/50 bg-gray-900/30 p-3 transition-all hover:bg-gray-800/40"
-               >
-                 <div className="flex flex-col gap-1 min-w-0">
-                   <div className="flex items-center gap-2">
-                     <span className="text-[10px] font-bold text-white truncate max-w-[120px]">
-                       {run.projectTitle}
-                     </span>
-                     <span className="text-[9px] text-blue-400/80 font-mono uppercase tracking-tighter">
-                       [{run.currentStep}]
-                     </span>
-                   </div>
-                   <div className="flex items-center gap-2">
-                     <div className="h-1 w-16 bg-gray-800 rounded-full overflow-hidden">
-                       <div
-                         className="h-full bg-blue-500 transition-all duration-300"
-                         style={{ width: `${run.progress}%` }}
-                       />
-                     </div>
-                     <span className="text-[8px] text-gray-600 font-bold">{Math.round(run.progress)}%</span>
-                   </div>
-                 </div>
-                 <div className="flex items-center gap-3">
-                    <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded ${
-                      run.status === 'running' ? 'bg-blue-500/10 text-blue-400' :
-                      run.status === 'completed' ? 'bg-green-500/10 text-green-400' :
-                      'bg-gray-800 text-gray-500'
-                    }`}>
-                      {run.status}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            {liveRuns.map((run) => (
+              <div
+                key={run.id}
+                className="flex items-center justify-between p-3"
+                style={{ border: "1px solid var(--color-border, #1E1E1E)", borderRadius: 2 }}
+              >
+                <div className="flex flex-col gap-1.5 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="text-[10px] font-medium truncate max-w-[120px]"
+                      style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-white, #F0F0F0)" }}
+                    >
+                      {run.projectTitle}
                     </span>
-                 </div>
-               </div>
-             ))}
-           </div>
+                    <span
+                      className="text-[9px] uppercase tracking-tighter"
+                      style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-green, #00FF41)" }}
+                    >
+                      [{run.currentStep}]
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="w-16 overflow-hidden"
+                      style={{ height: 2, background: "var(--color-border, #1E1E1E)", borderRadius: 1 }}
+                    >
+                      <div
+                        style={{
+                          height: "100%",
+                          width: `${run.progress}%`,
+                          background: "#00FF41",
+                          transition: "width 0.3s ease",
+                        }}
+                      />
+                    </div>
+                    <span
+                      className="text-[9px]"
+                      style={{ fontFamily: "var(--font-geist-mono, monospace)", color: "var(--color-subtle, #505050)" }}
+                    >
+                      {Math.round(run.progress)}%
+                    </span>
+                  </div>
+                </div>
+                <span
+                  className="text-[9px] uppercase tracking-widest px-2 py-0.5"
+                  style={{
+                    fontFamily: "var(--font-geist-mono, monospace)",
+                    borderRadius: 2,
+                    background: run.status === "running" ? "rgba(0,255,65,0.08)" : run.status === "completed" ? "rgba(72,72,72,0.2)" : "transparent",
+                    color: run.status === "running" ? "#00FF41" : run.status === "completed" ? "#F0F0F0" : "var(--color-subtle, #505050)",
+                    border: `1px solid ${run.status === "running" ? "rgba(0,255,65,0.25)" : "var(--color-border, #1E1E1E)"}`,
+                  }}
+                >
+                  {run.status}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <style>{`
+            @keyframes ms-pulse {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.3; }
+            }
+          `}</style>
         </section>
       </div>
     </div>

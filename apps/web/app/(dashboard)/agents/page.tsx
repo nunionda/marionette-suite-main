@@ -18,10 +18,14 @@ const PHASE_LABELS: Record<string, string> = {
   POST: "Post-Production",
 }
 
-const PHASE_COLORS: Record<string, string> = {
-  PRE: "bg-blue-500/20 text-blue-400",
-  MAIN: "bg-green-500/20 text-green-400",
-  POST: "bg-purple-500/20 text-purple-400",
+const PHASE_ACCENT: Record<string, string> = {
+  PRE: "#00FF41",
+  MAIN: "#F59E0B",
+  POST: "#707070",
+}
+
+const monoStyle: React.CSSProperties = {
+  fontFamily: "var(--font-geist-mono, monospace)",
 }
 
 export default function AgentsPage() {
@@ -58,9 +62,12 @@ export default function AgentsPage() {
 
   if (loading) {
     return (
-      <div className="p-8">
-        <div className="mb-6 h-7 w-32 animate-pulse rounded bg-gray-800" />
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <div
+          className="mb-8 h-5 w-24 animate-pulse rounded"
+          style={{ background: "#1E1E1E" }}
+        />
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
         </div>
       </div>
@@ -68,51 +75,108 @@ export default function AgentsPage() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="mb-6 text-2xl font-bold text-white">AI Agents</h1>
+    <div>
+      <h1
+        className="mb-8 text-2xl uppercase tracking-tight"
+        style={{ fontFamily: "var(--font-anton, serif)", color: "var(--color-white, #F0F0F0)" }}
+      >
+        AI Agents
+      </h1>
 
-      {(["PRE", "MAIN", "POST"] as const).map((phase) => (
-        <div key={phase} className="mb-8">
-          <h2 className="mb-3 text-lg font-semibold text-gray-300">
-            {PHASE_LABELS[phase]}
-          </h2>
+      {(["PRE", "MAIN", "POST"] as const).map((phase) => {
+        const accent = PHASE_ACCENT[phase] ?? "#707070"
+        const phaseAgents = grouped[phase] ?? []
+        if (phaseAgents.length === 0) return null
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {(grouped[phase] ?? []).map((agent) => (
-              <div
-                key={agent.name}
-                className="rounded-lg border border-gray-800 bg-gray-900 p-4"
+        return (
+          <div key={phase} className="mb-10">
+            {/* Phase header */}
+            <div className="mb-4 flex items-center gap-3">
+              <span
+                style={{
+                  display: "inline-block",
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: accent,
+                  flexShrink: 0,
+                }}
+              />
+              <h2
+                className="text-[11px] uppercase tracking-widest"
+                style={{ ...monoStyle, color: accent }}
               >
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="font-medium text-white">{agent.name}</span>
-                  <button
-                    onClick={() => toggleAgent(agent.name, agent.enabled)}
-                    className={`rounded px-2 py-1 text-xs font-medium ${
-                      agent.enabled
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-gray-700 text-gray-500"
-                    }`}
-                  >
-                    {agent.enabled ? "Enabled" : "Disabled"}
-                  </button>
-                </div>
+                {PHASE_LABELS[phase]}
+              </h2>
+              <div
+                className="h-px flex-1"
+                style={{ background: "var(--color-border, #1E1E1E)" }}
+              />
+            </div>
 
-                <div className="flex flex-wrap gap-2 text-xs">
-                  <span className={`rounded px-2 py-0.5 ${PHASE_COLORS[phase] ?? "bg-gray-800 text-gray-400"}`}>
-                    {PHASE_LABELS[phase]}
-                  </span>
-                  <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-400">
-                    {agent.provider}
-                  </span>
-                  <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-400">
-                    {agent.model}
-                  </span>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {phaseAgents.map((agent) => (
+                <div
+                  key={agent.name}
+                  style={{
+                    border: `1px solid ${agent.enabled ? "rgba(0,255,65,0.15)" : "var(--color-border, #1E1E1E)"}`,
+                    borderRadius: 2,
+                    padding: 16,
+                    background: agent.enabled ? "rgba(0,255,65,0.03)" : "transparent",
+                  }}
+                >
+                  {/* Agent name + toggle */}
+                  <div className="mb-3 flex items-center justify-between">
+                    <span
+                      className="text-[11px] font-medium uppercase tracking-wider"
+                      style={{ ...monoStyle, color: "var(--color-white, #F0F0F0)" }}
+                    >
+                      {agent.name}
+                    </span>
+                    <button
+                      onClick={() => toggleAgent(agent.name, agent.enabled)}
+                      style={{
+                        borderRadius: 2,
+                        padding: "2px 8px",
+                        fontSize: 10,
+                        fontFamily: "var(--font-geist-mono, monospace)",
+                        letterSpacing: "0.08em",
+                        fontWeight: 500,
+                        border: `1px solid ${agent.enabled ? "rgba(0,255,65,0.3)" : "var(--color-border, #1E1E1E)"}`,
+                        background: agent.enabled ? "rgba(0,255,65,0.08)" : "transparent",
+                        color: agent.enabled ? "#00FF41" : "var(--color-subtle, #505050)",
+                        cursor: "pointer",
+                        transition: "all 0.12s",
+                      }}
+                    >
+                      {agent.enabled ? "ENABLED" : "DISABLED"}
+                    </button>
+                  </div>
+
+                  {/* Meta tags */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {[agent.provider, agent.model].map((tag) => (
+                      <span
+                        key={tag}
+                        style={{
+                          ...monoStyle,
+                          fontSize: 10,
+                          padding: "1px 6px",
+                          borderRadius: 2,
+                          border: "1px solid var(--color-border, #1E1E1E)",
+                          color: "var(--color-muted, #707070)",
+                        }}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

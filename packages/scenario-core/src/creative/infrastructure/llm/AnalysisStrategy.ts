@@ -2,7 +2,7 @@ export type AnalysisStrategyName = 'auto' | 'fast' | 'deep' | 'custom' | 'budget
 
 export type EngineName = 'beatSheet' | 'emotion' | 'rating' | 'roi' | 'coverage' | 'vfx' | 'trope';
 
-export type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'groq' | 'mock';
+export type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'ollama' | 'huggingface' | 'anthropic' | 'groq' | 'mock';
 
 export interface AnalysisStrategy {
   name: AnalysisStrategyName;
