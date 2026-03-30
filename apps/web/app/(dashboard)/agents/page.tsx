@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { fetchAPI } from "../../../lib/api"
+import { SkeletonCard } from "../../../components/ui/Skeleton"
 
 interface AgentConfig {
   name: string
@@ -41,7 +42,7 @@ export default function AgentsPage() {
         body: JSON.stringify({ enabled: !enabled }),
       })
       setAgents((prev) =>
-        prev.map((a) => (a.agentName === name ? { ...a, enabled: !enabled } : a)),
+        prev.map((a) => (a.name === name ? { ...a, enabled: !enabled } : a)),
       )
     } catch (err) {
       console.error("Failed to toggle agent:", err)
@@ -56,30 +57,37 @@ export default function AgentsPage() {
   }, {})
 
   if (loading) {
-    return <div className="p-8 text-gray-400">Loading agents...</div>
+    return (
+      <div className="p-8">
+        <div className="mb-6 h-7 w-32 animate-pulse rounded bg-gray-800" />
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => <SkeletonCard key={i} />)}
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-6">AI Agents</h1>
+      <h1 className="mb-6 text-2xl font-bold text-white">AI Agents</h1>
 
       {(["PRE", "MAIN", "POST"] as const).map((phase) => (
         <div key={phase} className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-300 mb-3">
+          <h2 className="mb-3 text-lg font-semibold text-gray-300">
             {PHASE_LABELS[phase]}
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {(grouped[phase] ?? []).map((agent) => (
               <div
                 key={agent.name}
-                className="bg-gray-900 rounded-lg p-4 border border-gray-800"
+                className="rounded-lg border border-gray-800 bg-gray-900 p-4"
               >
-                <div className="flex items-center justify-between mb-2">
+                <div className="mb-2 flex items-center justify-between">
                   <span className="font-medium text-white">{agent.name}</span>
                   <button
                     onClick={() => toggleAgent(agent.name, agent.enabled)}
-                    className={`px-2 py-1 rounded text-xs font-medium ${
+                    className={`rounded px-2 py-1 text-xs font-medium ${
                       agent.enabled
                         ? "bg-green-500/20 text-green-400"
                         : "bg-gray-700 text-gray-500"
@@ -89,14 +97,14 @@ export default function AgentsPage() {
                   </button>
                 </div>
 
-                <div className="flex gap-2 text-xs">
-                  <span className={`px-2 py-0.5 rounded ${PHASE_COLORS[agent.phase]}`}>
-                    {agent.phase}
+                <div className="flex flex-wrap gap-2 text-xs">
+                  <span className={`rounded px-2 py-0.5 ${PHASE_COLORS[phase] ?? "bg-gray-800 text-gray-400"}`}>
+                    {PHASE_LABELS[phase]}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-400">
+                  <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-400">
                     {agent.provider}
                   </span>
-                  <span className="px-2 py-0.5 rounded bg-gray-800 text-gray-400">
+                  <span className="rounded bg-gray-800 px-2 py-0.5 text-gray-400">
                     {agent.model}
                   </span>
                 </div>

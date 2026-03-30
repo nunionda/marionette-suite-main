@@ -50,16 +50,6 @@ export const IMAGE_MODELS = {
     maxPromptLength: 2000,
     available: true,
   },
-  dalle3: {
-    name: "DALL-E 3 (OpenAI)",
-    provider: "openai",
-    strengths: ["프롬프트 이해도 최고", "텍스트 렌더링 최강", "자연어 대화형"],
-    weaknesses: ["스타일 통제 제한", "콘텐츠 필터 엄격", "API 비용 높음"],
-    promptTips: "ChatGPT 대화체로 상세 설명. 내부적으로 프롬프트 리라이팅됨. 짧은 프롬프트도 효과적.",
-    aspectRatios: ["1:1", "16:9", "9:16"],
-    maxPromptLength: 4000,
-    available: false,
-  },
   sdxl: {
     name: "Stable Diffusion XL / SD3.5",
     provider: "huggingface",
@@ -160,7 +150,6 @@ Adapt the prompt style to the target model:
 - gemini: Natural language, detailed sentences, camera/lens specs
 - midjourney: Keyword-driven, --ar --style --v parameters, adjective-heavy
 - flux: Descriptive natural language, resolution/style explicit
-- dalle3: Conversational detailed description
 - sdxl: Weighted tokens (keyword:1.2), positive + negative prompt pair
 - leonardo: Genre preset hints, Alchemy mode markers
 

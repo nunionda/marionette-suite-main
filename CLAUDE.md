@@ -65,10 +65,12 @@ Self-contained LLM-based screenplay analysis sub-system within the monorepo.
 
 ### Structure
 - `packages/scenario-core` — Analysis engines (beat sheet, emotion, rating, ROI, coverage, VFX, trope)
+- `packages/gate-review` — Gate Review pipeline (4-gate quality checkpoints, revision loop, writer scorecard)
 - `packages/scenario-db` — Prisma client (separate DB: `SCENARIO_DATABASE_URL`)
 - `apps/scenario-api` — Elysia server (port 4005)
 - `apps/scenario-web` — Next.js dashboard (port 4000)
 - `docs/scenario/` — 22 plans + 38 session results + architecture docs
+- `scripts/gate-review/` — Pipeline runner CLI for gate reviews
 
 ### Running
 ```sh
@@ -77,7 +79,7 @@ bun run dev:scenario-web   # Web dashboard on :4000
 ```
 
 ### Provider chain (fallback order)
-Gemini Pro → Groq → DeepSeek → Anthropic → OpenAI → Mock
+Gemini Free → Groq → Anthropic → Mock
 
 ### Note on TypeScript
 Scenario packages have own tsconfig, excluded from root typecheck.
@@ -85,3 +87,27 @@ Scenario packages have own tsconfig, excluded from root typecheck.
 ## Compact instructions
 
 When compacting, preserve: current task context, file paths being modified, test/lint results, and architectural decisions. Discard: exploration output, verbose tool results, and intermediate search results.
+
+## LLM API 비용 정책 (2026-03-29~)
+- **유료 LLM API 사용 금지**: 유료 API 호출 코드 작성 금지 (단, Anthropic Claude API는 남은 크레딧 범위 내 사용 허용)
+- **무료 모델만 사용**: Ollama 로컬 모델, HuggingFace 무료 모델, Google Gemini 무료 티어
+- Provider fallback 체인: Gemini Free → Groq Free → Anthropic Claude (남은 크레딧 허용) → Mock
+
+## CTO 팀 에이전트 디스패치 — Vagrant 샌드박스
+
+팀 에이전트를 `--dangerously-skip-permissions`로 실행할 때는 반드시 Vagrant VM 안에서 실행한다.
+
+```bash
+# VM 시작 (최초 ~5분, suspend 재개 ~10초)
+vagrant up && vagrant ssh
+
+# VM 안에서 에이전트 디스패치
+cd /agent-workspace
+claude --dangerously-skip-permissions -p "You are the Backend Developer..."
+
+# 세션 종료
+exit && vagrant suspend
+```
+
+상세 템플릿 및 병렬 실행 가이드 → `docs/team-plans/cto-agent-dispatch-playbook.md`
+**안전 규칙:** 에이전트 세션 전 항상 `git commit` (체크포인트). VM 파일 삭제 = 호스트 파일 삭제.

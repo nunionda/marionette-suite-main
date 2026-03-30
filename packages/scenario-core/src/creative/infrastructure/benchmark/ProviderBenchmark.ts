@@ -53,8 +53,6 @@ export const PROVIDER_COSTS: Record<string, { input: number; output: number }> =
   'gemini-pro':   { input: 1.25,  output: 10.00 },
   'gemini-long':  { input: 1.25,  output: 5.00 },
   'groq':         { input: 0.00,  output: 0.00 },   // free tier
-  'deepseek':     { input: 0.14,  output: 0.28 },
   'anthropic':    { input: 3.00,  output: 15.00 },
-  'openai':       { input: 2.50,  output: 10.00 },
   'mock':         { input: 0.00,  output: 0.00 },
 };

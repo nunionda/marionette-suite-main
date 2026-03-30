@@ -55,7 +55,7 @@ const SCENARIOS: ScenarioConfig[] = [
 
 // Ordered by rate-limit friendliness (free/generous first)
 const ALL_PROVIDERS: ProviderChoice[] = [
-  'groq', 'deepseek', 'openai', 'anthropic', 'gemini', 'gemini-pro',
+  'groq', 'anthropic', 'gemini', 'gemini-pro',
 ];
 
 const COOLDOWN_SCENARIO_MS = 30_000;  // 30s between scenarios (rate limit buffer)

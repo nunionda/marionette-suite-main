@@ -56,7 +56,7 @@ export class AIGateway {
   /**
    * Register a provider under a name.
    *
-   * @param name     Unique provider name (e.g. "gemini", "openai")
+   * @param name     Unique provider name (e.g. "gemini", "replicate")
    * @param provider Provider instance implementing one or more capability interfaces
    * @param isDefault If true, this provider is used when no name is specified
    */

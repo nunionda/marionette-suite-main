@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react"
 import { fetchAPI } from "../lib/api"
+import { STATUS_ICONS, STATUS_LABELS } from "../lib/constants"
+import { SkeletonCard } from "./ui/Skeleton"
 
 // ─── Types ───
 
@@ -41,27 +43,11 @@ interface BatchRun {
 // ─── Status helpers ───
 
 function statusIcon(status: string): string {
-  switch (status) {
-    case "COMPLETED": return "✅"
-    case "FAILED": return "❌"
-    case "RUNNING": return "🔄"
-    case "QUEUED": return "⏳"
-    case "CANCELLED": return "⏹"
-    case "REGENERATING": return "🔁"
-    default: return "❓"
-  }
+  return STATUS_ICONS[status] ?? "❓"
 }
 
 function statusLabel(status: string): string {
-  switch (status) {
-    case "COMPLETED": return "완료"
-    case "FAILED": return "실패"
-    case "RUNNING": return "진행중"
-    case "QUEUED": return "대기"
-    case "CANCELLED": return "취소됨"
-    case "REGENERATING": return "재생성 대기"
-    default: return status
-  }
+  return STATUS_LABELS[status] ?? status
 }
 
 // ─── Component ───
@@ -111,7 +97,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
   }
 
   const cancelBatch = async () => {
-    if (!batchRun || !window.confirm("배치를 중단하시겠습니까?")) return
+    if (!batchRun || !window.confirm("Cancel the batch run?")) return
     try {
       await fetchAPI(`/batch/${batchRun.id}/cancel`, { method: "POST" })
       await fetchLatest()
@@ -121,7 +107,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
   }
 
   const regenerateScene = async (sceneNumber: number) => {
-    if (!batchRun || !window.confirm(`씬 ${sceneNumber}을 재생성하시겠습니까?`)) return
+    if (!batchRun || !window.confirm(`Regenerate scene ${sceneNumber}?`)) return
     try {
       await fetchAPI(`/batch/${batchRun.id}/scene/${sceneNumber}/regenerate`, { method: "POST" })
       await fetchLatest()
@@ -131,7 +117,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
   }
 
   const regenerateCut = async (sceneNumber: number, cutNumber: number) => {
-    if (!batchRun || !window.confirm(`씬 ${sceneNumber} 컷 ${cutNumber}을 재생성하시겠습니까?`)) return
+    if (!batchRun || !window.confirm(`Regenerate scene ${sceneNumber}, cut ${cutNumber}?`)) return
     try {
       await fetchAPI(`/batch/${batchRun.id}/scene/${sceneNumber}/cut/${cutNumber}/regenerate`, { method: "POST" })
       await fetchLatest()
@@ -141,7 +127,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
   }
 
   const rerunFrom = async (sceneNumber: number) => {
-    if (!batchRun || !window.confirm(`씬 ${sceneNumber}부터 재실행하시겠습니까?`)) return
+    if (!batchRun || !window.confirm(`Rerun from scene ${sceneNumber}?`)) return
     try {
       await fetchAPI(`/batch/${batchRun.id}/rerun-from/${sceneNumber}`, { method: "POST" })
       await fetchLatest()
@@ -162,28 +148,21 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
   const isRunning = batchRun?.status === "RUNNING"
 
   if (loading) {
-    return (
-      <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">
-        <div className="animate-pulse space-y-3">
-          <div className="h-6 w-48 rounded bg-gray-800" />
-          <div className="h-4 w-full rounded bg-gray-800" />
-        </div>
-      </div>
-    )
+    return <SkeletonCard />
   }
 
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900/50 p-6">
       {/* Header */}
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">배치 프로덕션</h2>
+        <h2 className="text-lg font-semibold">Batch Production</h2>
         <div className="flex gap-2">
           {!isRunning && (
             <button
               onClick={startBatch}
               className="rounded-lg bg-green-600 px-4 py-1.5 text-sm font-medium transition hover:bg-green-500"
             >
-              실행
+              Run
             </button>
           )}
           {isRunning && (
@@ -191,7 +170,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
               onClick={cancelBatch}
               className="rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium transition hover:bg-red-500"
             >
-              중단
+              Cancel
             </button>
           )}
         </div>
@@ -202,7 +181,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
         <div className="mb-4">
           <div className="mb-1 flex items-center justify-between text-sm text-gray-400">
             <span>{statusLabel(batchRun.status)}</span>
-            <span>{Math.round(batchRun.progress)}% (씬 {batchRun.completedScenes}/{batchRun.totalScenes})</span>
+            <span>{Math.round(batchRun.progress)}% ({batchRun.completedScenes}/{batchRun.totalScenes} scenes)</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
             <div
@@ -231,12 +210,12 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-xs text-gray-500">{expanded ? "▼" : "▶"}</span>
                     <span>{statusIcon(scene.status)}</span>
-                    <span className="font-medium">씬 {scene.sceneNumber}</span>
+                    <span className="font-medium">Scene {scene.sceneNumber}</span>
                     <span className="text-gray-500">
-                      ({completedCuts}/{totalCuts} 컷)
+                      ({completedCuts}/{totalCuts} cuts)
                     </span>
                     {scene.attempt > 1 && (
-                      <span className="text-xs text-yellow-500">({scene.attempt}회차)</span>
+                      <span className="text-xs text-yellow-500">(attempt {scene.attempt})</span>
                     )}
                     {scene.errorMessage && (
                       <span className="text-xs text-red-400">{scene.errorMessage}</span>
@@ -247,7 +226,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
                       onClick={(e) => { e.stopPropagation(); void regenerateScene(scene.sceneNumber) }}
                       className="rounded bg-gray-700 px-2 py-0.5 text-xs transition hover:bg-gray-600"
                     >
-                      재생성
+                      Regenerate
                     </button>
                   )}
                 </div>
@@ -259,12 +238,12 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
                       <div key={cut.id} className="flex items-center justify-between rounded px-2 py-1 text-sm">
                         <div className="flex items-center gap-2">
                           <span>{statusIcon(cut.status)}</span>
-                          <span className="text-gray-400">컷 {cut.cutNumber}</span>
+                          <span className="text-gray-400">Cut {cut.cutNumber}</span>
                           {cut.status === "RUNNING" && cut.currentStep && (
                             <span className="text-xs text-blue-400">{cut.currentStep}</span>
                           )}
                           {cut.attempt > 1 && (
-                            <span className="text-xs text-yellow-500">({cut.attempt}회차)</span>
+                            <span className="text-xs text-yellow-500">(attempt {cut.attempt})</span>
                           )}
                           {cut.errorMessage && (
                             <span className="text-xs text-red-400">{cut.errorMessage}</span>
@@ -275,7 +254,7 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
                             onClick={() => void regenerateCut(scene.sceneNumber, cut.cutNumber)}
                             className="rounded bg-gray-700 px-2 py-0.5 text-xs transition hover:bg-gray-600"
                           >
-                            재생성
+                            Regenerate
                           </button>
                         )}
                       </div>
@@ -301,14 +280,14 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
                 if (val) void rerunFrom(Number(val))
               }}
             >
-              <option value="" disabled>씬 선택...</option>
+              <option value="" disabled>Select scene...</option>
               {batchRun.sceneTasks.map((st) => (
                 <option key={st.sceneNumber} value={st.sceneNumber}>
-                  씬 {st.sceneNumber}
+                  Scene {st.sceneNumber}
                 </option>
               ))}
             </select>
-            <span className="text-sm text-gray-500">부터 재실행</span>
+            <span className="text-sm text-gray-500">rerun from here</span>
           </div>
         </div>
       )}
@@ -316,8 +295,8 @@ export function BatchMonitor({ projectId }: { projectId: string }) {
       {/* Empty state */}
       {!batchRun && (
         <div className="flex flex-col items-center py-8 text-gray-500">
-          <p>배치 실행 이력이 없습니다</p>
-          <p className="mt-1 text-xs">DirectionPlan이 있으면 실행 버튼을 눌러 시작하세요</p>
+          <p>No batch runs yet</p>
+          <p className="mt-1 text-xs">Press Run to start once a Direction Plan is available</p>
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchAPI } from "../../../lib/api";
+import { PHASE_AGENTS } from "../../../lib/constants";
 import { usePipelineWS } from "../../../hooks/use-pipeline-ws";
 import { StageCard } from "../../../components/pipeline/StageCard";
 
@@ -33,11 +34,11 @@ interface StageInfo {
   progress: number;
 }
 
-// ─── Agent → Phase mapping ───
+// ─── Agent → Phase mapping (sourced from lib/constants) ───
 
-const PRE_PROD_AGENTS = ["concept_artist", "casting_director", "location_scout", "previsualizer"];
-const MAIN_PROD_AGENTS = ["cinematographer", "generalist", "asset_designer"];
-const POST_PROD_AGENTS = ["vfx_compositor", "sound_designer", "composer", "master_editor", "colorist", "mixing_engineer"];
+const PRE_PROD_AGENTS = [...PHASE_AGENTS["pre-production"]];
+const MAIN_PROD_AGENTS = [...PHASE_AGENTS.production];
+const POST_PROD_AGENTS = [...PHASE_AGENTS["post-production"]];
 
 function computeStages(project: Project, runs: PipelineRunSummary[]): StageInfo[] {
   const hasPlan = !!project.direction_plan_json;
@@ -159,8 +160,13 @@ export default function PipelinePage() {
 
       {/* Loading */}
       {loading && (
-        <div className="flex items-center justify-center py-20 text-gray-400 animate-pulse">
-          Loading pipeline data...
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="animate-pulse rounded-xl border border-gray-800 bg-gray-900 p-5">
+              <div className="mb-3 h-5 w-1/3 rounded bg-gray-800" />
+              <div className="h-2 w-full rounded-full bg-gray-800" />
+            </div>
+          ))}
         </div>
       )}
 

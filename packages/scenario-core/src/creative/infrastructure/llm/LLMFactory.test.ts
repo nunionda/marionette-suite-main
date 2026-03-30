@@ -5,23 +5,15 @@ describe('LLMFactory Orchestrator', () => {
   const factory = new LLMFactory();
 
   test('should successfully retrieve registered providers', () => {
-    const openai = factory.getProvider('openai');
     const anthropic = factory.getProvider('anthropic');
     const gemini = factory.getProvider('gemini');
-    const deepseek = factory.getProvider('deepseek');
     const groq = factory.getProvider('groq');
-
-    expect(openai).toBeDefined();
-    expect(openai.name).toBe('openai');
 
     expect(anthropic).toBeDefined();
     expect(anthropic.name).toBe('anthropic');
 
     expect(gemini).toBeDefined();
     expect(gemini.name).toBe('gemini');
-
-    expect(deepseek).toBeDefined();
-    expect(deepseek.name).toBe('deepseek');
 
     expect(groq).toBeDefined();
     expect(groq.name).toBe('groq');
@@ -47,11 +39,11 @@ describe('LLMFactory Orchestrator', () => {
     const responses = await factory.runEnsemble("System prompt", "User prompt");
 
     expect(responses).toBeInstanceOf(Array);
-    expect(responses).toHaveLength(8); // openai, anthropic, gemini, gemini-pro, gemini-long, deepseek, groq, mock
+    expect(responses).toHaveLength(6); // anthropic, gemini, gemini-pro, gemini-long, groq, mock
 
     const providers = responses.map(r => r.provider).sort();
     expect(providers).toContain('mock');
-    expect(providers).toContain('openai');
+    expect(providers).toContain('groq');
     expect(providers).toContain('gemini');
   }, 120_000); // Gemini retry backoff can take time when rate-limited
 });

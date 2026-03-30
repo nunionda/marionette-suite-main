@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchAPI } from "../../../lib/api";
+import { STATUS_COLORS, STATUS_LABELS } from "../../../lib/constants";
+import { StatusBadge } from "../../../components/ui/StatusBadge";
+import { SkeletonCard } from "../../../components/ui/Skeleton";
 
 interface Project {
   id: string;
@@ -12,15 +15,6 @@ interface Project {
   progress: number;
   logline?: string;
 }
-
-const statusColors: Record<string, string> = {
-  completed: "bg-green-500/20 text-green-400",
-  running: "bg-blue-500/20 text-blue-400",
-  queued: "bg-yellow-500/20 text-yellow-400",
-  failed: "bg-red-500/20 text-red-400",
-  draft: "bg-gray-500/20 text-gray-400",
-  ready: "bg-purple-500/20 text-purple-400",
-};
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -48,20 +42,22 @@ export default function ProjectsPage() {
             href="/projects/brainstorm"
             className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-sm font-medium text-white transition hover:from-amber-600 hover:to-orange-600"
           >
-            💡 브레인스토밍
+            💡 Brainstorm
           </Link>
           <Link
             href="/projects/new"
-            className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition hover:text-white hover:border-gray-500"
+            className="rounded-lg border border-gray-700 px-4 py-2 text-sm font-medium text-gray-400 transition hover:border-gray-500 hover:text-white"
           >
-            + 직접 입력
+            + New Project
           </Link>
         </div>
       </div>
 
       {loading && (
-        <div className="flex items-center justify-center py-20 text-gray-400">
-          Loading projects...
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       )}
 
@@ -89,13 +85,12 @@ export default function ProjectsPage() {
               <h3 className="font-semibold group-hover:text-white">
                 {project.title}
               </h3>
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${statusColors[project.status] ?? statusColors.draft}`}
-              >
-                {project.status}
-              </span>
+              <StatusBadge status={project.status} />
             </div>
             <p className="mb-4 text-sm text-gray-400">{project.genre}</p>
+            {project.logline && (
+              <p className="mb-4 line-clamp-2 text-xs text-gray-500">{project.logline}</p>
+            )}
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
               <div
                 className="h-full rounded-full bg-blue-500 transition-all"

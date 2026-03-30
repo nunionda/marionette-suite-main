@@ -100,18 +100,22 @@ export function PhaseTracker({ currentPhase, onPhaseClick }: PhaseTrackerProps) 
               </button>
 
               {/* Connector line */}
-              {index < PHASES.length - 1 && (
-                <div className="mx-2 h-0.5 flex-1">
-                  <div
-                    className={`h-full rounded-full ${
-                      getPhaseStatus(PHASES[index + 1].key, currentPhase) === "completed" ||
-                      getPhaseStatus(PHASES[index + 1].key, currentPhase) === "active"
-                        ? "bg-green-500"
-                        : "bg-gray-700"
-                    }`}
-                  />
-                </div>
-              )}
+              {index < PHASES.length - 1 && (() => {
+                const nextPhase = PHASES[index + 1]
+                if (!nextPhase) return null
+                const nextStatus = getPhaseStatus(nextPhase.key, currentPhase)
+                return (
+                  <div className="mx-2 h-0.5 flex-1">
+                    <div
+                      className={`h-full rounded-full ${
+                        nextStatus === "completed" || nextStatus === "active"
+                          ? "bg-green-500"
+                          : "bg-gray-700"
+                      }`}
+                    />
+                  </div>
+                )
+              })()}
             </div>
           )
         })}

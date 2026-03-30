@@ -4,6 +4,13 @@ import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { fetchAPI, API_BASE } from "../../../../lib/api"
+import {
+  AGENT_DISPLAY_NAMES,
+  PHASE_AGENTS,
+  FULL_PIPELINE,
+  PHASE_GROUPS,
+  STATUS_COLORS,
+} from "../../../../lib/constants"
 import { AssetGallery } from "../../../../components/asset-gallery"
 import { VersionHistory } from "../../../../components/version-history"
 import { BatchMonitor } from "../../../../components/batch-monitor"
@@ -71,55 +78,8 @@ const PHASES: { key: Phase; label: string; icon: string }[] = [
   { key: "post-production", label: "Post-Production", icon: "🎬" },
 ]
 
-const STATUS_COLORS: Record<string, string> = {
-  COMPLETED: "bg-green-500/20 text-green-400",
-  completed: "bg-green-500/20 text-green-400",
-  RUNNING: "bg-blue-500/20 text-blue-400",
-  running: "bg-blue-500/20 text-blue-400",
-  QUEUED: "bg-yellow-500/20 text-yellow-400",
-  queued: "bg-yellow-500/20 text-yellow-400",
-  FAILED: "bg-red-500/20 text-red-400",
-  failed: "bg-red-500/20 text-red-400",
-  DRAFT: "bg-gray-500/20 text-gray-400",
-}
-
-const AGENT_DISPLAY_NAMES: Record<string, string> = {
-  script_writer: "Script Writer",
-  scripter: "Scripter",
-  concept_artist: "Concept Artist",
-  casting_director: "Casting Director",
-  location_scout: "Location Scout",
-  previsualizer: "Previsualizer",
-  cinematographer: "Cinematographer",
-  generalist: "Generalist",
-  asset_designer: "Asset Designer",
-  vfx_compositor: "VFX Compositor",
-  sound_designer: "Sound Designer",
-  composer: "Composer",
-  master_editor: "Master Editor",
-  colorist: "Colorist",
-  mixing_engineer: "Mixing Engineer",
-}
-
-const PHASE_PRESETS = {
-  "pre-production": ["concept_artist", "casting_director", "location_scout", "previsualizer"],
-  production: ["cinematographer", "generalist", "asset_designer"],
-  "post-production": ["vfx_compositor", "sound_designer", "composer", "master_editor", "colorist", "mixing_engineer"],
-} as const
-
-const FULL_PIPELINE = [
-  "script_writer", "scripter",
-  "concept_artist", "casting_director", "location_scout", "previsualizer",
-  "cinematographer", "generalist", "asset_designer",
-  "vfx_compositor", "sound_designer", "composer",
-  "master_editor", "colorist", "mixing_engineer",
-]
-
-const PHASE_GROUPS = [
-  { label: "Pre-Production", agents: ["script_writer", "scripter", "concept_artist", "casting_director", "location_scout", "previsualizer"] },
-  { label: "Production", agents: ["cinematographer", "generalist", "asset_designer"] },
-  { label: "Post-Production", agents: ["vfx_compositor", "sound_designer", "composer", "master_editor", "colorist", "mixing_engineer"] },
-]
+// PHASE_PRESETS maps to the shared PHASE_AGENTS from lib/constants
+const PHASE_PRESETS = PHASE_AGENTS
 
 function getPhaseFromStatus(status: string): Phase {
   switch (status) {
@@ -147,7 +107,7 @@ function AgentCard({
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
       <div className="mb-2 flex items-center gap-2">
-        <span className={`rounded px-2 py-0.5 text-xs font-bold ${buttonColor.replace("bg-", "bg-").split(" ")[0]}/20 ${buttonColor.replace("bg-", "text-").split(" ")[0].replace("text-", "text-")}`}>
+        <span className={`rounded px-2 py-0.5 text-xs font-bold ${(buttonColor.split(" ")[0] ?? "bg-gray-500")}/20 text-white`}>
           {step}
         </span>
         <h2 className="text-lg font-semibold">{label}</h2>
@@ -239,8 +199,8 @@ export default function ProjectDetailPage() {
   }
 
   const runFullPipeline = () => {
-    if (window.confirm("15개 에이전트를 순차 실행합니다. API 크레딧이 소모됩니다. 계속하시겠습니까?")) {
-      runPipeline(FULL_PIPELINE)
+    if (window.confirm("Run all 15 agents sequentially? This will consume API credits.")) {
+      runPipeline([...FULL_PIPELINE])
     }
   }
 
@@ -528,9 +488,9 @@ function DevelopmentTab({
         <div className="flex items-center gap-3">
           <span className="text-2xl">📖</span>
           <div>
-            <h2 className="text-lg font-semibold">시나리오 개발 (Screenplay Development)</h2>
+            <h2 className="text-lg font-semibold">Screenplay Development</h2>
             <p className="mt-1 text-sm text-gray-400">
-              6단계 워크플로우: 기획 → 인물설계 → 트리트먼트 → 집필 → 피드백 → 연출기획
+              6-stage workflow: Concept → Characters → Treatment → Draft → Feedback → Direction Plan
             </p>
           </div>
           <span className="ml-auto text-gray-500">→</span>
@@ -539,20 +499,20 @@ function DevelopmentTab({
 
       {/* Direction Plan Status */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
-        <h2 className="mb-2 text-lg font-semibold">연출기획안 (Direction Plan)</h2>
+        <h2 className="mb-2 text-lg font-semibold">Direction Plan</h2>
         {project.direction_plan_json ? (
           <div>
             <p className="mb-3 text-sm text-green-400">
-              ✅ Direction Plan 생성 완료 ({project.direction_plan_json.scenes?.length ?? 0}개 씬)
+              ✅ Direction Plan ready — {project.direction_plan_json.scenes?.length ?? 0} scenes
             </p>
-            <p className="text-xs text-gray-500">시나리오 개발 6단계(연출기획)에서 씬/컷별로 관리할 수 있습니다.</p>
+            <p className="text-xs text-gray-500">Manage scenes and cuts in the Screenplay Development stage 6 (Direction).</p>
           </div>
         ) : (
           <div>
             <p className="mb-3 text-sm text-gray-400">
-              시나리오 개발을 완료한 후, 6단계(연출기획)에서 시퀀스 → 씬 → 컷 단위로 연출기획안을 생성합니다.
+              Complete screenplay development, then generate the Direction Plan in stage 6 (sequence → scene → cut).
             </p>
-            <p className="text-xs text-gray-500">시나리오 개발 → 피드백 완료 → 연출기획 단계에서 생성하세요.</p>
+            <p className="text-xs text-gray-500">Screenplay → Feedback → Direction stage to generate.</p>
           </div>
         )}
       </div>
@@ -593,8 +553,8 @@ function PreProductionTab({
   if (!plan) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-gray-800 bg-gray-900 py-16">
-        <p className="text-lg text-gray-400">Direction Plan이 필요합니다</p>
-        <p className="mt-1 text-sm text-gray-500">Development 탭에서 먼저 Direction Plan을 생성하세요.</p>
+        <p className="text-lg text-gray-400">Direction Plan required</p>
+        <p className="mt-1 text-sm text-gray-500">Generate a Direction Plan in the Development tab first.</p>
       </div>
     )
   }
@@ -637,7 +597,7 @@ function PreProductionTab({
       <AgentCard
         step="Step 1"
         label="Storyboard Generation"
-        description="AI ConceptArtist가 각 씬의 image_prompt를 기반으로 스토리보드 이미지를 생성합니다. 스타일: Webtoon, Photorealistic, Anime, Noir, Concept Art"
+        description="ConceptArtist generates storyboard images for each scene from image_prompt. Styles: Webtoon, Photorealistic, Anime, Noir, Concept Art."
         buttonLabel="Generate Storyboards"
         buttonColor="bg-purple-600"
         onRun={() => onRunAgent("concept_artist")}
@@ -648,7 +608,7 @@ function PreProductionTab({
       <AgentCard
         step="Step 2"
         label="Casting Director"
-        description="AI CastingDirector가 캐릭터 설정을 분석하여 주요 캐릭터(최대 8명)의 레퍼런스 시트를 생성합니다. 정면/3/4각도/전신 3뷰 시트로 제작됩니다."
+        description="CastingDirector analyzes character descriptions to generate reference sheets for up to 8 characters — front, ¾, and full-body views."
         buttonLabel="Run Casting"
         buttonColor="bg-indigo-600"
         onRun={() => onRunAgent("casting_director")}
@@ -659,7 +619,7 @@ function PreProductionTab({
       <AgentCard
         step="Step 3"
         label="Location Scout"
-        description="AI LocationScout가 씬의 배경 설정에서 고유한 로케이션을 추출하고, 각 장소의 환경 컨셉 아트를 생성합니다. 캐릭터 없는 순수 환경 이미지입니다."
+        description="LocationScout extracts unique locations from scene settings and generates environment concept art — backgrounds only, no characters."
         buttonLabel="Scout Locations"
         buttonColor="bg-teal-600"
         onRun={() => onRunAgent("location_scout")}
@@ -670,7 +630,7 @@ function PreProductionTab({
       <AgentCard
         step="Step 4"
         label="Previsualizer"
-        description="AI Previsualizer가 각 씬의 카메라 블로킹과 움직임을 분석하여 저해상도 프리비즈 비디오(5-8초)를 생성합니다. 카메라 무빙 검증용입니다."
+        description="Previsualizer analyzes camera blocking and movement per scene to produce low-res previz clips (5-8s) for camera movement validation."
         buttonLabel="Generate Previz"
         buttonColor="bg-pink-600"
         onRun={() => onRunAgent("previsualizer")}
@@ -717,7 +677,7 @@ function ProductionTab({
       <AgentCard
         step="Step 1"
         label="Cinematography Enhancement"
-        description="AI Cinematographer가 각 씬의 video_prompt를 전문 촬영감독 관점에서 강화합니다. 렌즈 선택, 조명 설계, 카메라 무빙, 컬러 팔레트 디테일이 추가됩니다."
+        description="Cinematographer enhances each scene's video_prompt from a professional DP perspective — lens choice, lighting design, camera movement, and color palette details."
         buttonLabel="Enhance Video Prompts"
         buttonColor="bg-blue-600"
         onRun={() => onRunAgent("cinematographer")}
@@ -728,7 +688,7 @@ function ProductionTab({
       <AgentCard
         step="Step 2"
         label="AI Video Generation"
-        description="AI Generalist가 Veo 3.0을 통해 씬별 비디오 클립을 생성합니다. 각 씬의 video_prompt를 기반으로 8초 분량의 AI 영상이 제작됩니다."
+        description="Generalist generates 8-second AI video clips per scene via Veo 3.0 using each scene's video_prompt."
         buttonLabel="Generate Scene Videos"
         buttonColor="bg-green-600"
         onRun={() => onRunAgent("generalist")}
@@ -739,7 +699,7 @@ function ProductionTab({
       <AgentCard
         step="Step 3"
         label="Asset Design"
-        description="AI AssetDesigner가 프로젝트의 세계관과 씬을 분석하여 필요한 3D 에셋(소품, 차량, 가구, 건축물 등)의 컨셉 아트 턴어라운드 시트와 스펙 문서를 생성합니다."
+        description="AssetDesigner analyzes the worldview and scenes to generate concept art turnaround sheets and spec documents for 3D assets (props, vehicles, furniture, architecture)."
         buttonLabel="Design Assets"
         buttonColor="bg-amber-600"
         onRun={() => onRunAgent("asset_designer")}
@@ -769,7 +729,7 @@ function PostProductionTab({
   if (!plan) {
     return (
       <div className="flex flex-col items-center justify-center rounded-xl border border-gray-800 bg-gray-900 py-16">
-        <p className="text-lg text-gray-400">Production을 먼저 완료하세요</p>
+        <p className="text-lg text-gray-400">Complete Production first</p>
       </div>
     )
   }
@@ -784,7 +744,7 @@ function PostProductionTab({
       <AgentCard
         step="Step 1"
         label="VFX Compositing"
-        description="AI VFXCompositor가 씬 키워드를 분석하여 적절한 VFX 프리셋(홀로그램, 드림 블러, 비 효과, 폭발 흔들림, 감시 카메라)을 적용합니다. FFMPEG 필터 체인 기반입니다."
+        description="VFXCompositor analyzes scene keywords and applies VFX presets (hologram, dream blur, rain, explosion shake, surveillance camera) via FFMPEG filter chains."
         buttonLabel="Apply VFX"
         buttonColor="bg-cyan-600"
         onRun={() => onRunAgent("vfx_compositor")}
@@ -798,10 +758,10 @@ function PostProductionTab({
           <h2 className="text-lg font-semibold">Sound Design & TTS</h2>
         </div>
         <p className="mb-4 text-sm text-gray-400">
-          AI SoundDesigner가 각 씬의 대사를 Gemini TTS로 음성 생성합니다.
+          SoundDesigner generates dialogue audio for each scene via Gemini TTS.
           {dialogueScenes.length > 0
-            ? ` ${dialogueScenes.length}개 씬에 대사가 있습니다.`
-            : " (대사가 있는 씬이 없습니다)"}
+            ? ` ${dialogueScenes.length} scene${dialogueScenes.length > 1 ? "s" : ""} have dialogue.`
+            : " (No scenes with dialogue)"}
         </p>
         <button
           onClick={() => onRunAgent("sound_designer")}
@@ -816,7 +776,7 @@ function PostProductionTab({
       <AgentCard
         step="Step 3"
         label="Score Composition"
-        description="AI Composer가 씬들을 무드별로 그룹화(2-5씬씩)하고, 각 그룹에 맞는 배경 음악을 Suno API로 생성합니다. 장르, 분위기, 악기, 템포, 다이나믹이 자동 결정됩니다."
+        description="Composer groups scenes by mood (2-5 scenes) and generates background music via Suno API. Genre, atmosphere, instruments, tempo, and dynamics are determined automatically."
         buttonLabel="Compose Score"
         buttonColor="bg-pink-600"
         onRun={() => onRunAgent("composer")}
@@ -827,7 +787,7 @@ function PostProductionTab({
       <AgentCard
         step="Step 4"
         label="Master Edit"
-        description="AI MasterEditor가 FFMPEG를 이용하여 개별 씬 영상을 하나의 마스터 영상으로 병합합니다. libx264 인코딩으로 최종 마스터 MP4를 생성합니다."
+        description="MasterEditor merges individual scene clips into a single master video using FFMPEG libx264 encoding."
         buttonLabel="Merge Videos"
         buttonColor="bg-orange-600"
         onRun={() => onRunAgent("master_editor")}
@@ -838,7 +798,7 @@ function PostProductionTab({
       <AgentCard
         step="Step 5"
         label="Color Grading"
-        description="AI Colorist가 프로젝트의 장르와 무드를 분석하여 적절한 컬러 프리셋(Cinematic Warm, Noir Cold, Neon Cyberpunk, Natural, Vintage)을 적용합니다."
+        description="Colorist analyzes genre and mood to apply a color preset: Cinematic Warm, Noir Cold, Neon Cyberpunk, Natural, or Vintage."
         buttonLabel="Color Grade"
         buttonColor="bg-amber-600"
         onRun={() => onRunAgent("colorist")}
@@ -849,7 +809,7 @@ function PostProductionTab({
       <AgentCard
         step="Step 6"
         label="Final Audio Mix"
-        description="AI MixingEngineer가 대사, BGM, 비디오 원본 오디오를 최적 볼륨으로 믹싱합니다. 대사 0.5, BGM 0.15, 원본 0.08 비율로 3채널 오디오 믹스를 생성합니다."
+        description="MixingEngineer blends dialogue, score, and source audio at optimal levels (dialogue 0.5, BGM 0.15, source 0.08) to produce the final 3-channel mix."
         buttonLabel="Mix Audio"
         buttonColor="bg-emerald-600"
         onRun={() => onRunAgent("mixing_engineer")}

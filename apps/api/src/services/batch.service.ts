@@ -2,7 +2,6 @@ import { prisma } from "@marionette/db"
 import { AIGateway } from "@marionette/ai-gateway"
 import { GeminiProvider } from "@marionette/ai-gateway/providers/gemini.js"
 import { SunoProvider } from "@marionette/ai-gateway/providers/suno.js"
-import { OpenAIProvider } from "@marionette/ai-gateway/providers/openai.js"
 import { ReplicateProvider } from "@marionette/ai-gateway/providers/replicate.js"
 import { MusicGenProvider } from "@marionette/ai-gateway/providers/musicgen.js"
 import { EdgeTTSProvider } from "@marionette/ai-gateway/providers/edge-tts.js"
@@ -20,10 +19,6 @@ function getGateway(): AIGateway {
     gateway = new AIGateway()
     gateway.register("gemini", new GeminiProvider(), true)
     gateway.register("suno", new SunoProvider())
-    if (process.env["OPENAI_API_KEY"]) {
-      gateway.register("openai", new OpenAIProvider())
-      console.log("[BatchGateway] OpenAI provider registered")
-    }
     // Free fallback providers — always registered
     if (process.env["REPLICATE_API_TOKEN"]) {
       gateway.register("replicate", new ReplicateProvider())

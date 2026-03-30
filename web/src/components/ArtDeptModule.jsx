@@ -21,25 +21,71 @@ const ArtDeptModule = ({ project }) => {
   const [activeAgentIndex, setActiveAgentIndex] = useState(-1);
   const [completedAgents, setCompletedAgents] = useState(new Set());
   const [logs, setLogs] = useState([]);
-  const [useFreeModel, setUseFreeModel] = useState(false);
+  const [useFreeModel, setUseFreeModel] = useState(true);
+  const [scriptAnalysis, setScriptAnalysis] = useState(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [pdfFile, setPdfFile] = useState(null);
   const logEndRef = useRef(null);
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [logs]);
 
+  const handlePdfUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setPdfFile(file);
+    setIsAnalyzing(true);
+    setLogs([{ type: 'info', text: `[SYSTEM] Processing script: ${file.name}...` }]);
+
+    try {
+      // Step 1: Parse PDF
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const parseRes = await fetch('http://localhost:3001/api/pdf/parse', {
+        method: 'POST',
+        body: formData
+      });
+      if (!parseRes.ok) throw new Error('PDF parsing failed');
+      const { text } = await parseRes.json();
+      
+      setLogs(prev => [...prev, { type: 'info', text: '[SYSTEM] PDF extraction complete. Starting semantic analysis...' }]);
+
+      // Step 2: Semantic Analysis
+      const analyzeRes = await fetch('http://localhost:3001/api/pdf/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+      if (!analyzeRes.ok) throw new Error('Script analysis failed');
+      const analysis = await analyzeRes.json();
+      
+      setScriptAnalysis(analysis);
+      setLogs(prev => [...prev, { type: 'success', text: `[SUCCESS] Analysis complete. Detected ${analysis.locations.length} locations and ${analysis.characters.length} characters.` }]);
+    } catch (err) {
+      console.error(err);
+      setLogs(prev => [...prev, { type: 'error', text: err.message }]);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const runPipeline = async () => {
     setStatus('RUNNING');
     setCompletedAgents(new Set());
     setActiveAgentIndex(-1);
-    setLogs([]);
+    setLogs(prev => [...prev, { type: 'header', text: '// STARTING 12-AGENT PRODUCTION BIBLE...' }]);
 
     const payload = {
-      title: project.title,
-      genre: project.genre,
-      concept: project.logline,
+      title: scriptAnalysis?.title || project.title,
+      genre: scriptAnalysis?.genre || project.genre,
+      concept: scriptAnalysis?.summary || project.logline,
       vision: project.vision || '',
-      analysisId: project.id,
+      analysisData: {
+        ...project.analysisData,
+        scriptBrief: scriptAnalysis
+      },
       useFreeModel
     };
 
@@ -113,26 +159,65 @@ const ArtDeptModule = ({ project }) => {
       <div className="module-header">
         <div className="module-info">
           <h2 className="serif">Art Orchestrator</h2>
-          <p className="mono">12-AGENT PRODUCTION PIPELINE</p>
+          <p className="mono">PDF SCRIPT ANALYSIS & PRODUCTION</p>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          <label className="free-model-toggle mono">
-            <input 
-              type="checkbox" 
-              checked={useFreeModel} 
-              onChange={(e) => setUseFreeModel(e.target.checked)} 
-            />
-            FREE MODEL
-          </label>
+          <div className="step-badge mono">{scriptAnalysis ? 'STEP 2' : 'STEP 1'}</div>
+          {!scriptAnalysis ? (
+            <div className="upload-zone">
+              <input 
+                type="file" 
+                accept=".pdf" 
+                onChange={handlePdfUpload} 
+                id="pdf-upload" 
+                hidden 
+              />
+              <label htmlFor="pdf-upload" className={`tactical-btn ${isAnalyzing ? 'working' : ''}`}>
+                {isAnalyzing ? 'ANALYZING SCRIPT...' : 'IMPORT PDF SCRIPT'}
+              </label>
+            </div>
+          ) : (
+            <button 
+              className="tactical-btn secondary" 
+              onClick={() => { setScriptAnalysis(null); setPdfFile(null); }}
+            >
+              RESET
+            </button>
+          )}
+          
           <button 
             className={`tactical-btn ${status === 'RUNNING' ? 'working' : ''}`}
             onClick={runPipeline}
-            disabled={status === 'RUNNING'}
+            disabled={status === 'RUNNING' || !scriptAnalysis}
+            style={{ opacity: !scriptAnalysis ? 0.3 : 1 }}
           >
-            {status === 'RUNNING' ? 'EXECUTING...' : 'LAUNCH PIPELINE'}
+            {status === 'RUNNING' ? 'EXECUTING...' : 'LAUNCH BIBLE'}
           </button>
         </div>
       </div>
+
+      {scriptAnalysis && (
+        <div className="analysis-preview-native glass">
+          <div className="preview-grid">
+            <div className="preview-item">
+              <span className="label mono">GENRE</span>
+              <span className="value">{scriptAnalysis.genre}</span>
+            </div>
+            <div className="preview-item">
+              <span className="label mono">LOCATIONS</span>
+              <div className="tags">
+                {scriptAnalysis.locations.map((l, i) => <span key={i} className="tag">{l}</span>)}
+              </div>
+            </div>
+            <div className="preview-item">
+              <span className="label mono">CHARACTERS</span>
+              <div className="tags">
+                {scriptAnalysis.characters.map((c, i) => <span key={i} className="tag">{c}</span>)}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="pipeline-track-native">
         {AGENTS.map((agent, i) => (

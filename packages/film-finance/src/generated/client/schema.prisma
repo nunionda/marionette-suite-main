@@ -1,0 +1,397 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("FINANCE_DATABASE_URL")
+}
+
+// ─── INVESTOR DB ────────────────────────────────────────────────────────────
+
+/// 한국 영화 투자자 — VC, 투자조합, 기관, 개인천사, 공공기금
+model Investor {
+  id     String  @id @default(cuid())
+  name   String // 국문 이름
+  nameEn String? // 영문 이름
+
+  /// VC | 투자조합 | 기관투자자 | 개인천사투자자 | 공공기금 | 배급사
+  type   InvestorType
+  /// A(대형 10억+) | B(중형 1-10억) | C(소형 1억 미만) | D(잠재)
+  tier   InvestorTier   @default(C)
+  status InvestorStatus @default(PROSPECT)
+
+  country String  @default("KR")
+  region  String? // 서울, 부산 등
+
+  contactName  String?
+  contactEmail String?
+  contactPhone String?
+
+  /// 총 투자 가능 규모 (단위: 만원)
+  investmentCapacity Int?
+  /// 건당 최소 투자액 (만원)
+  minTicket          Int?
+  /// 건당 최대 투자액 (만원)
+  maxTicket          Int?
+
+  /// ["액션", "드라마", "SF", ...] — JSON 배열
+  preferredGenres      String @default("[]")
+  /// { "min": 5000, "max": 50000 } 만원 단위 — JSON
+  preferredBudgetRange String @default("{}")
+
+  /// 과거 투자 이력 — [{ title, year, amount, role }] JSON 배열
+  pastInvestments String @default("[]")
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  groupMemberships InvestorGroupMember[]
+  tranchePositions PFTrancheInvestor[]
+
+  @@index([type])
+  @@index([tier])
+  @@index([status])
+  @@map("investors")
+}
+
+model InvestorGroup {
+  id   String @id @default(cuid())
+  name String @unique
+
+  /// PEF | VCF | 공공기금 | 개인투자조합 | 배급펀드
+  type         InvestorGroupType
+  managingFirm String?
+
+  /// 총 약정 금액 (만원)
+  totalCommitment Int?
+  status          InvestorGroupStatus @default(ACTIVE)
+  notes           String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members InvestorGroupMember[]
+
+  @@map("investor_groups")
+}
+
+model InvestorGroupMember {
+  id String @id @default(cuid())
+
+  group      InvestorGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  groupId    String
+  investor   Investor      @relation(fields: [investorId], references: [id], onDelete: Cascade)
+  investorId String
+
+  /// 개인 약정액 (만원)
+  commitment Int?
+  /// LP | GP | 리드 | 공동투자
+  role       String   @default("LP")
+  joinedAt   DateTime @default(now())
+
+  @@unique([groupId, investorId])
+  @@map("investor_group_members")
+}
+
+// ─── FILM PROJECT ────────────────────────────────────────────────────────────
+
+/// 영화 프로젝트 — SPC의 대상이 되는 콘텐츠 IP
+model FilmProject {
+  id      String  @id @default(cuid())
+  title   String // 국문 제목
+  titleEn String? // 영문 제목
+  genre   String?
+  logline String?
+
+  /// 총 제작비 (만원)
+  totalBudget     Int?
+  /// 제작비 구성 JSON: { "pre": 5000, "main": 30000, "post": 10000, "marketing": 5000 }
+  budgetBreakdown String @default("{}")
+
+  status ProjectStatus @default(DEVELOPMENT)
+
+  /// ISO date string
+  targetReleaseDate String?
+
+  /// scenario-db의 스크립트 ID 연결 (optional cross-package reference)
+  scriptId String?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  spcs SPC[]
+
+  @@index([status])
+  @@map("film_projects")
+}
+
+// ─── SPC (특수목적법인) ───────────────────────────────────────────────────────
+
+/// 한국 영화 PF에 사용되는 특수목적법인
+model SPC {
+  id        String      @id @default(cuid())
+  project   FilmProject @relation(fields: [projectId], references: [id])
+  projectId String
+
+  name String @unique // "(주)비트세이버SPC"
+
+  /// 주식회사 | 유한회사 | 유한책임회사
+  legalType          SPCLegalType @default(주식회사)
+  registrationNumber String?
+  incorporationDate  String?
+
+  /// 자본금 (만원)
+  totalCapital Int?
+  /// 총 조달 목표액 (만원) — 자본금 + 대출
+  totalBudget  Int?
+  /// 현재 조달 완료액 (만원)
+  raisedAmount Int  @default(0)
+
+  status SPCStatus @default(PLANNING)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tranches       PFTranche[]
+  waterfallTiers WaterfallTier[]
+  revenueEvents  RevenueEvent[]
+
+  @@index([status])
+  @@map("spcs")
+}
+
+// ─── PF TRANCHES (투자 구조) ─────────────────────────────────────────────────
+
+/// PF 트란쉐 — 선순위 대출 / 메자닌 / 지분
+model PFTranche {
+  id    String @id @default(cuid())
+  spc   SPC    @relation(fields: [spcId], references: [id], onDelete: Cascade)
+  spcId String
+
+  name String // "선순위 은행 대출", "메자닌 투자조합", "제작사 지분"
+
+  /// senior | mezzanine | equity
+  type     TrancheType
+  /// 1이 최선순위 (상환 우선순위)
+  priority Int
+
+  /// 목표 조달액 (만원)
+  targetAmount Int
+  /// 실제 조달액 (만원)
+  raisedAmount Int @default(0)
+
+  /// 연이율 % — senior/mezzanine에 적용
+  interestRate Float?
+  /// 목표 수익률 % — equity에 적용
+  targetReturn Float?
+  /// 만기 (개월)
+  termMonths   Int?
+
+  status TrancheStatus @default(OPEN)
+  notes  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  investors      PFTrancheInvestor[]
+  waterfallTiers WaterfallTier[]
+
+  @@index([spcId, priority])
+  @@map("pf_tranches")
+}
+
+model PFTrancheInvestor {
+  id String @id @default(cuid())
+
+  tranche    PFTranche @relation(fields: [trancheId], references: [id], onDelete: Cascade)
+  trancheId  String
+  investor   Investor  @relation(fields: [investorId], references: [id])
+  investorId String
+
+  /// 투자액 (만원)
+  amount     Int
+  /// 지분율 % (자동 계산 or 수동 입력)
+  percentage Float?
+  joinedAt   DateTime @default(now())
+  notes      String?
+
+  @@unique([trancheId, investorId])
+  @@map("pf_tranche_investors")
+}
+
+// ─── WATERFALL MODEL (수익 분배 구조) ───────────────────────────────────────
+
+/// 수익 분배 계층 — 순위별 분배 규칙 정의
+model WaterfallTier {
+  id    String @id @default(cuid())
+  spc   SPC    @relation(fields: [spcId], references: [id], onDelete: Cascade)
+  spcId String
+
+  /// 우선순위 (1이 최우선)
+  priority Int
+  name     String // "선순위 원금 상환", "이자 지급", "메자닌 수익", "제작사 지분"
+
+  /// loan_repayment | preferred_return | equity_split | expense_recovery | revenue_share
+  type TierType
+
+  /// 분배 대상 트란쉐 (null이면 전체)
+  tranche   PFTranche? @relation(fields: [trancheId], references: [id])
+  trancheId String?
+
+  /// 이 티어의 분배 상한 (만원) — null이면 무제한
+  amountCap  Int?
+  /// 잔여 수익에서 이 티어가 가져가는 비율 % (equity_split 등에 사용)
+  percentage Float?
+  /// 적용 배율 (원금의 N배까지) — preferred_return에 활용
+  multiplier Float?
+
+  description String?
+
+  @@index([spcId, priority])
+  @@map("waterfall_tiers")
+}
+
+// ─── REVENUE EVENTS & DISTRIBUTIONS ─────────────────────────────────────────
+
+/// 수익 입금 이벤트 — 극장, 스트리밍, 해외판권 등
+model RevenueEvent {
+  id    String @id @default(cuid())
+  spc   SPC    @relation(fields: [spcId], references: [id], onDelete: Cascade)
+  spcId String
+
+  /// 수익액 (만원)
+  amount Int
+
+  /// theatrical | streaming | overseas | broadcast | merchandise | other
+  source    RevenueSource
+  eventDate String // ISO date string
+
+  notes String?
+
+  /// pending | distributed
+  distributionStatus String @default("pending")
+
+  createdAt DateTime @default(now())
+
+  distributions WaterfallDistribution[]
+
+  @@index([spcId])
+  @@map("revenue_events")
+}
+
+/// 워터폴 분배 계산 결과
+model WaterfallDistribution {
+  id String @id @default(cuid())
+
+  event   RevenueEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+
+  tierId           String // WaterfallTier.id
+  tierName         String // 스냅샷
+  tierPriority     Int
+  allocatedAmount  Int // 이 티어에 배분된 금액 (만원)
+  cumulativePaid   Int // 이 티어 누적 지급액 (만원)
+  isFullySatisfied Boolean @default(false)
+
+  calculatedAt DateTime @default(now())
+
+  @@index([eventId])
+  @@map("waterfall_distributions")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum InvestorType {
+  VC
+  투자조합
+  기관투자자
+  개인천사투자자
+  공공기금
+  배급사
+}
+
+enum InvestorTier {
+  A // 대형 10억+
+  B // 중형 1~10억
+  C // 소형 1억 미만
+  D // 잠재 투자자
+}
+
+enum InvestorStatus {
+  ACTIVE
+  INACTIVE
+  PROSPECT
+}
+
+enum InvestorGroupType {
+  PEF
+  VCF
+  공공기금
+  개인투자조합
+  배급펀드
+}
+
+enum InvestorGroupStatus {
+  ACTIVE
+  CLOSED
+  PLANNING
+}
+
+enum ProjectStatus {
+  DEVELOPMENT
+  PRE_PRODUCTION
+  PRODUCTION
+  POST_PRODUCTION
+  DISTRIBUTION
+  COMPLETED
+}
+
+enum SPCLegalType {
+  주식회사
+  유한회사
+  유한책임회사
+}
+
+enum SPCStatus {
+  PLANNING
+  FORMED
+  FUNDRAISING
+  ACTIVE
+  DISSOLVED
+}
+
+enum TrancheType {
+  senior
+  mezzanine
+  equity
+}
+
+enum TrancheStatus {
+  OPEN
+  CLOSED
+  REPAID
+}
+
+enum TierType {
+  loan_repayment
+  preferred_return
+  equity_split
+  expense_recovery
+  revenue_share
+}
+
+enum RevenueSource {
+  theatrical
+  streaming
+  overseas
+  broadcast
+  merchandise
+  other
+}

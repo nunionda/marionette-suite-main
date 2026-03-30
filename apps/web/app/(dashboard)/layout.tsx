@@ -7,11 +7,13 @@ import { useAuth } from "../../lib/auth-context";
 
 const navItems = [
   { href: "/projects", label: "Projects", icon: "🎬" },
+  { href: "http://localhost:5173", label: "CineScript Writer", icon: "✍️", external: true },
+  { href: "http://localhost:3001", label: "Art Department", icon: "🎨", external: true },
+  { href: "http://localhost:4000/dashboard", label: "Scenario Analysis", icon: "📊", external: true },
   { href: "/pipeline", label: "Pipeline", icon: "⚙️" },
   { href: "/agents", label: "Agents", icon: "🤖" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },
   { href: "/prompt-guide", label: "Prompt Guide", icon: "🎨" },
-  { href: "http://localhost:4000/dashboard", label: "Scenario Analysis", icon: "📊", external: true },
 ];
 
 export default function DashboardLayout({

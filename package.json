@@ -24,7 +24,11 @@
     "dev:scenario-api": "bun run --filter @marionette/scenario-api dev",
     "dev:scenario-web": "bun run --filter @marionette/scenario-web dev",
     "scenario:db:generate": "bun run --filter @marionette/scenario-db db:generate",
-    "scenario:db:push": "bun run --filter @marionette/scenario-db db:push"
+    "scenario:db:push": "bun run --filter @marionette/scenario-db db:push",
+    "dev:finance-api": "bun run --filter @marionette/finance-api dev",
+    "finance:db:generate": "bun run --filter @marionette/film-finance db:generate",
+    "finance:db:push": "bun run --filter @marionette/film-finance db:push",
+    "finance:db:seed": "bun run --filter @marionette/film-finance db:seed"
   },
   "type": "module",
   "workspaces": ["apps/*", "packages/*"],

@@ -2,12 +2,10 @@ import type { AnalysisStrategy, AnalysisStrategyName, CustomStrategyInput, Provi
 import { env } from '../../../shared/env';
 
 function getDefaultProvider(): ProviderChoice {
-  // Priority: Gemini Pro (paid) → Groq (free) → DeepSeek (cheap) → Anthropic → OpenAI → Mock
+  // Priority: Gemini Pro → Groq (free) → Anthropic → Mock
   if (env.GEMINI_API_KEY) return 'gemini-pro';
   if (env.GROQ_API_KEY) return 'groq';
-  if (env.DEEPSEEK_API_KEY) return 'deepseek';
   if (env.ANTHROPIC_API_KEY) return 'anthropic';
-  if (env.OPENAI_API_KEY) return 'openai';
   return 'mock';
 }
 
@@ -50,16 +48,15 @@ export function resolveStrategy(
     }
 
     case 'budget': {
-      // Zero/near-zero cost: Groq (free) + DeepSeek (cheapest paid)
+      // Zero/near-zero cost: Groq (free) + Gemini Flash (free tier)
       const freeProvider: ProviderChoice = env.GROQ_API_KEY ? 'groq' : defaultProvider;
-      const cheapProvider: ProviderChoice = env.DEEPSEEK_API_KEY ? 'deepseek' : freeProvider;
       return {
         name: 'budget',
         engineProviders: {
           beatSheet: freeProvider,
           emotion: freeProvider,
-          rating: cheapProvider,
-          roi: cheapProvider,
+          rating: freeProvider,
+          roi: freeProvider,
           coverage: freeProvider,
           vfx: freeProvider,
           trope: freeProvider,
@@ -89,7 +86,7 @@ export function resolveStrategy(
       // Ultra-long scripts: Gemini 1.5 Pro (2M context) for creative engines
       const longCtx: ProviderChoice = env.GEMINI_API_KEY ? 'gemini-long' : defaultProvider;
       const standard: ProviderChoice = env.GEMINI_API_KEY ? 'gemini' : defaultProvider;
-      const reasoning: ProviderChoice = env.DEEPSEEK_API_KEY ? 'deepseek' : standard;
+      const reasoning: ProviderChoice = standard;
       return {
         name: 'long-context',
         engineProviders: {

@@ -4,17 +4,16 @@ import React from 'react';
 import { Upload, FileText, Loader, Clock, AlertCircle, Square } from 'lucide-react';
 
 type Strategy = 'auto' | 'fast' | 'deep' | 'custom' | 'budget' | 'premium' | 'long-context';
-type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'openai' | 'deepseek' | 'groq' | 'mock';
+type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'groq' | 'mock';
 type MarketLocale = 'hollywood' | 'korean';
 type ViewMode = 'idle' | 'analyzing' | 'viewing';
 
 // Model-based selection (maps to strategy 'custom' with all engines = same provider)
-type ModelChoice = 'gemini-pro' | 'anthropic' | 'openai' | 'groq' | 'custom';
+type ModelChoice = 'gemini-pro' | 'anthropic' | 'groq' | 'custom';
 
 const MODEL_CHOICES: { id: ModelChoice; label: string; labelKo: string; desc: string; descKo: string; color: string; icon: string }[] = [
   { id: 'gemini-pro', label: 'Gemini', labelKo: '제미나이', desc: 'Gemini 2.5 Pro', descKo: 'Gemini 2.5 Pro', color: '#4285F4', icon: '◆' },
   { id: 'anthropic', label: 'Claude', labelKo: '클로드', desc: 'Claude Sonnet 4.6', descKo: 'Claude Sonnet 4.6', color: '#D97757', icon: '◈' },
-  { id: 'openai', label: 'OpenAI', labelKo: 'OpenAI', desc: 'GPT-4o', descKo: 'GPT-4o', color: '#10A37F', icon: '◇' },
   { id: 'groq', label: 'Groq', labelKo: 'Groq', desc: 'Llama 3.3 70B (무료)', descKo: 'Llama 3.3 70B (무료)', color: '#F97316', icon: '⚡' },
   { id: 'custom', label: 'Custom', labelKo: '사용자 지정', desc: 'Pick per engine', descKo: '엔진별 선택', color: '#8B5CF6', icon: '⚙' },
 ];
@@ -34,8 +33,6 @@ const PROVIDER_LABELS: Record<string, string> = {
   'gemini-pro': 'Gemini Pro',
   'gemini-long': 'Gemini 1.5 Pro (2M)',
   anthropic: 'Claude Sonnet 4.6',
-  openai: 'GPT-4o',
-  deepseek: 'DeepSeek V3',
   groq: 'Groq (Llama 3.3)',
   mock: 'Mock',
 };
@@ -175,7 +172,7 @@ export default function UploadPanel({
                       value={customProviders[engine]}
                       onChange={(e) => onCustomProviderChange(engine, e.target.value as ProviderChoice)}
                     >
-                      {(['gemini-pro', 'gemini', 'anthropic', 'openai', 'deepseek', 'groq', 'mock'] as const).map(p => (
+                      {(['gemini-pro', 'gemini', 'anthropic', 'groq', 'mock'] as const).map(p => (
                         <option key={p} value={p} disabled={p !== 'mock' && !availableProviders[p] && !availableProviders[p.split('-')[0]]}>
                           {PROVIDER_LABELS[p] || p}{p !== 'mock' && !availableProviders[p] && !availableProviders[p.split('-')[0]] ? ' (no key)' : ''}
                         </option>

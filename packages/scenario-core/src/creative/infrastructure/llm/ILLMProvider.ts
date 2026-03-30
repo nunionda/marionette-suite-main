@@ -7,7 +7,7 @@ export interface LLMResponse {
 }
 
 export interface ILLMProvider {
-  /** The unique name of the provider (e.g., 'openai', 'anthropic', 'gemini') */
+  /** The unique name of the provider (e.g., 'gemini', 'anthropic', 'groq') */
   name: string;
   
   /**

@@ -78,7 +78,7 @@ async function runFullAnalysis(opts: AnalysisPipelineOptions) {
 
   const mockProvider = factory.getProvider('mock');
 
-  const fallbackOrder: ProviderChoice[] = ['gemini-pro', 'gemini', 'groq', 'deepseek', 'anthropic', 'openai'];
+  const fallbackOrder: ProviderChoice[] = ['gemini-pro', 'gemini', 'groq', 'anthropic'];
   const availableFallbacks = fallbackOrder.filter(name => {
     try { factory.getProvider(name); return true; } catch { return false; }
   });
@@ -310,15 +310,13 @@ const app = new Elysia()
       'gemini-pro': !!env.GEMINI_API_KEY,
       'gemini-long': !!env.GEMINI_API_KEY,
       anthropic: !!env.ANTHROPIC_API_KEY,
-      openai: !!env.OPENAI_API_KEY,
-      deepseek: !!env.DEEPSEEK_API_KEY,
       groq: !!env.GROQ_API_KEY,
       mock: true,
     },
     strategies: [
       { name: 'auto', label: 'Auto', description: 'Best available provider with fallback' },
       { name: 'fast', label: 'Fast', description: 'Gemini Flash only (low cost)', requires: ['gemini'] },
-      { name: 'budget', label: 'Budget', description: 'Groq (free) + DeepSeek (cheapest)', requires: [] },
+      { name: 'budget', label: 'Budget', description: 'Groq (free) + Gemini Flash (free tier)', requires: [] },
       { name: 'deep', label: 'Deep Analysis', description: 'Claude for narrative, Gemini for metrics', requires: ['anthropic'] },
       { name: 'premium', label: 'Premium', description: 'Claude Sonnet 4.6 for highest quality', requires: ['anthropic'] },
       { name: 'long-context', label: 'Long Context', description: 'Gemini 1.5 Pro (2M context) for long scripts', requires: ['gemini'] },
@@ -369,13 +367,13 @@ const app = new Elysia()
       ])),
       noFallback: t.Optional(t.Boolean()),
       customProviders: t.Optional(t.Object({
-        beatSheet: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
-        emotion: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
-        rating: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
-        roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
-        coverage: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
-        vfx: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
-        trope: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('openai'), t.Literal('deepseek'), t.Literal('groq'), t.Literal('mock')])),
+        beatSheet: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('groq'), t.Literal('mock')])),
+        emotion: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('groq'), t.Literal('mock')])),
+        rating: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('groq'), t.Literal('mock')])),
+        roi: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('groq'), t.Literal('mock')])),
+        coverage: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('groq'), t.Literal('mock')])),
+        vfx: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('groq'), t.Literal('mock')])),
+        trope: t.Optional(t.Union([t.Literal('gemini'), t.Literal('gemini-pro'), t.Literal('gemini-long'), t.Literal('anthropic'), t.Literal('groq'), t.Literal('mock')])),
       })),
     })
   })
@@ -710,7 +708,7 @@ Rules:
     } catch {
       try {
         // Fallback chain
-        for (const name of ['gemini', 'anthropic', 'openai', 'deepseek', 'groq'] as const) {
+        for (const name of ['gemini', 'anthropic', 'groq'] as const) {
           try {
             provider = factory.getProvider(name);
             break;

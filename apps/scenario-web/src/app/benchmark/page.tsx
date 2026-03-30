@@ -11,15 +11,13 @@ import './benchmark.css';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
 
-type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'openai' | 'deepseek' | 'groq' | 'mock';
+type ProviderChoice = 'gemini' | 'gemini-pro' | 'gemini-long' | 'anthropic' | 'groq' | 'mock';
 
 const PROVIDER_META: Record<ProviderChoice, { label: string; color: string; accent: string }> = {
   'gemini-pro':  { label: 'Gemini 2.5 Pro',   color: '#4285F4', accent: '#1a73e8' },
   'gemini':      { label: 'Gemini Flash',      color: '#34A853', accent: '#1e8e3e' },
   'gemini-long': { label: 'Gemini 1.5 Pro',    color: '#FBBC04', accent: '#f29900' },
   'anthropic':   { label: 'Claude Sonnet',     color: '#D97757', accent: '#c45e3e' },
-  'openai':      { label: 'GPT-4o',            color: '#10A37F', accent: '#0d8c6d' },
-  'deepseek':    { label: 'DeepSeek Chat',     color: '#7C3AED', accent: '#6d28d9' },
   'groq':        { label: 'Groq Llama 70B',    color: '#F97316', accent: '#ea580c' },
   'mock':        { label: 'Mock (테스트)',      color: '#6B7280', accent: '#4b5563' },
 };

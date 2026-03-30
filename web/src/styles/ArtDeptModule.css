@@ -149,3 +149,100 @@
   background: rgba(255, 255, 255, 0.1);
   border-radius: 10px;
 }
+/* Tactical Buttons */
+.tactical-btn {
+  background: var(--accent-primary);
+  color: black;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: all 0.2s ease;
+}
+
+.tactical-btn:hover:not(:disabled) {
+  background: var(--accent-secondary);
+  box-shadow: 0 0 10px var(--accent-primary);
+}
+
+.tactical-btn.secondary {
+  background: transparent;
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.tactical-btn.working {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.step-badge {
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--accent-primary);
+  color: var(--accent-primary);
+  border-radius: 4px;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+}
+
+/* Analysis Preview */
+.analysis-preview-native {
+  background: rgba(0, 255, 255, 0.03);
+  padding: 20px;
+  border-radius: 8px;
+  border-left: 2px solid var(--accent-primary);
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 2fr;
+  gap: 24px;
+}
+
+.preview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.preview-item .label {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+}
+
+.preview-item .value {
+  font-size: 0.9rem;
+  color: var(--text-main);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tag {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--text-dim);
+}
+
+/* Log Entries */
+.log-entry.info {
+  color: #60a5fa; /* blue-400 */
+  border-left: 2px solid #60a5fa;
+  padding-left: 8px;
+}
+
+.log-entry.success {
+  color: #34d399; /* emerald-400 */
+}

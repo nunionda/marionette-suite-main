@@ -30,7 +30,9 @@
       "@marionette/scenario-core": ["./packages/scenario-core/src"],
       "@marionette/scenario-core/*": ["./packages/scenario-core/src/*"],
       "@marionette/scenario-db": ["./packages/scenario-db/src"],
-      "@marionette/scenario-db/*": ["./packages/scenario-db/src/*"]
+      "@marionette/scenario-db/*": ["./packages/scenario-db/src/*"],
+      "@marionette/gate-review": ["./packages/gate-review/src"],
+      "@marionette/gate-review/*": ["./packages/gate-review/src/*"]
     }
   },
   "include": [
