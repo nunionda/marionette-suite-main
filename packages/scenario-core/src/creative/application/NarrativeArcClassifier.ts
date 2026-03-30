@@ -152,11 +152,11 @@ export class NarrativeArcClassifier {
   private detectTurningPoints(scenes: SceneEmotion[]): TurningPoint[] {
     const points: TurningPoint[] = [];
     for (let i = 1; i < scenes.length; i++) {
-      const diff = scenes[i].score - scenes[i - 1].score;
+      const diff = scenes[i]!.score - scenes[i - 1]!.score;
       const absDiff = Math.abs(diff);
       if (absDiff >= 3) {
         points.push({
-          sceneNumber: scenes[i].sceneNumber,
+          sceneNumber: scenes[i]!.sceneNumber,
           type: diff > 0 ? 'rise' : 'fall',
           magnitude: Math.round(absDiff * 10) / 10,
         });
@@ -164,13 +164,13 @@ export class NarrativeArcClassifier {
     }
     // Also detect plateaus: 3+ scenes with change < 1
     for (let i = 2; i < scenes.length; i++) {
-      const d1 = Math.abs(scenes[i].score - scenes[i - 1].score);
-      const d2 = Math.abs(scenes[i - 1].score - scenes[i - 2].score);
+      const d1 = Math.abs(scenes[i]!.score - scenes[i - 1]!.score);
+      const d2 = Math.abs(scenes[i - 1]!.score - scenes[i - 2]!.score);
       if (d1 < 1 && d2 < 1) {
-        const exists = points.some(p => p.sceneNumber === scenes[i - 1].sceneNumber && p.type === 'plateau');
+        const exists = points.some(p => p.sceneNumber === scenes[i - 1]!.sceneNumber && p.type === 'plateau');
         if (!exists) {
           points.push({
-            sceneNumber: scenes[i - 1].sceneNumber,
+            sceneNumber: scenes[i - 1]!.sceneNumber,
             type: 'plateau',
             magnitude: 0,
           });
@@ -187,19 +187,19 @@ export class NarrativeArcClassifier {
     for (let i = 0; i <= scenes.length - 3; i++) {
       let flatCount = 0;
       for (let j = i + 1; j < scenes.length; j++) {
-        if (Math.abs(scenes[j].score - scenes[j - 1].score) < 1.0) {
+        if (Math.abs(scenes[j]!.score - scenes[j - 1]!.score) < 1.0) {
           flatCount++;
         } else break;
       }
       if (flatCount >= 2) {
         const endIdx = i + flatCount + 1;
         const overlap = issues.some(iss => iss.type === 'flat' &&
-          iss.startScene <= scenes[endIdx - 1].sceneNumber && iss.endScene >= scenes[i].sceneNumber);
+          iss.startScene <= scenes[endIdx - 1]!.sceneNumber && iss.endScene >= scenes[i]!.sceneNumber);
         if (!overlap) {
           issues.push({
             type: 'flat',
-            startScene: scenes[i].sceneNumber,
-            endScene: scenes[Math.min(endIdx, scenes.length - 1)].sceneNumber,
+            startScene: scenes[i]!.sceneNumber,
+            endScene: scenes[Math.min(endIdx, scenes.length - 1)]!.sceneNumber,
             description: `Emotional flatline across ${flatCount + 1} scenes`,
             severity: flatCount >= 4 ? 'high' : flatCount >= 3 ? 'medium' : 'low',
           });
@@ -213,14 +213,14 @@ export class NarrativeArcClassifier {
     if (act2.length >= 5) {
       let sagCount = 0;
       for (let i = 1; i < act2.length; i++) {
-        const slope = act2[i].score - act2[i - 1].score;
+        const slope = act2[i]!.score - act2[i - 1]!.score;
         if (slope < -0.5) sagCount++;
         else sagCount = 0;
         if (sagCount >= 4) {
           issues.push({
             type: 'sagging',
-            startScene: act2[i - sagCount].sceneNumber,
-            endScene: act2[i].sceneNumber,
+            startScene: act2[i - sagCount]!.sceneNumber,
+            endScene: act2[i]!.sceneNumber,
             description: 'Sustained emotional decline in Act 2 — audience engagement may drop',
             severity: 'high',
           });
@@ -231,13 +231,13 @@ export class NarrativeArcClassifier {
 
     // Rushed: 2+ consecutive large jumps (>6 points)
     for (let i = 1; i < scenes.length - 1; i++) {
-      const d1 = Math.abs(scenes[i].score - scenes[i - 1].score);
-      const d2 = Math.abs(scenes[i + 1].score - scenes[i].score);
+      const d1 = Math.abs(scenes[i]!.score - scenes[i - 1]!.score);
+      const d2 = Math.abs(scenes[i + 1]!.score - scenes[i]!.score);
       if (d1 > 6 && d2 > 6) {
         issues.push({
           type: 'rushed',
-          startScene: scenes[i - 1].sceneNumber,
-          endScene: scenes[i + 1].sceneNumber,
+          startScene: scenes[i - 1]!.sceneNumber,
+          endScene: scenes[i + 1]!.sceneNumber,
           description: 'Rapid emotional swings may feel jarring to the audience',
           severity: 'medium',
         });

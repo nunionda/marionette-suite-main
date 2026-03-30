@@ -49,7 +49,7 @@ function preprocessKoreanInlineDialogue(text: string): string {
     if (!trimmed) continue;
     const m = trimmed.match(candidateRe);
     if (!m) continue;
-    const name = m[1];
+    const name = m[1]!;
     if (name.length < 2) continue;
     if (excludedWords.has(name)) continue;
     if (verbEndingRe.test(name)) continue;
@@ -86,10 +86,10 @@ function preprocessKoreanInlineDialogue(text: string): string {
   for (const line of lines) {
     const trimmed = line.trim();
     const m = trimmed.match(candidateRe);
-    if (m && confirmedNames.has(m[1])) {
+    if (m && confirmedNames.has(m[1]!)) {
       // Split into character line + dialogue line
-      result.push(m[1]);
-      result.push(m[2]);
+      result.push(m[1]!);
+      result.push(m[2]!);
     } else {
       result.push(line);
     }

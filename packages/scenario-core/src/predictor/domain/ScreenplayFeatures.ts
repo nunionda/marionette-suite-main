@@ -1,7 +1,7 @@
-import { BoxOfficeData } from "../../market/domain/BoxOfficeData";
-import { BeatSheet } from "../../creative/domain/BeatSheet";
-import { EmotionGraph } from "../../creative/domain/EmotionGraph";
-import { CharacterNetwork } from "../../creative/domain/CharacterNetwork";
+import type { BoxOfficeData } from "../../market/domain/BoxOfficeData";
+import type { BeatSheet } from "../../creative/domain/BeatSheet";
+import type { EmotionGraph } from "../../creative/domain/EmotionGraph";
+import type { CharacterNetwork } from "../../creative/domain/CharacterNetwork";
 
 export interface ScreenplayFeatures {
   scriptId: string;

@@ -53,7 +53,7 @@ Only output the JSON array, nothing else.`;
               // Exact match, or LLM trope matches the primary name (before parenthetical Korean)
               return dLower === lower
                 || dLower.startsWith(lower)
-                || lower.startsWith(dLower.split("(")[0].trim());
+                || lower.startsWith(dLower.split("(")[0]!.trim());
             });
           },
         );
@@ -64,7 +64,7 @@ Only output the JSON array, nothing else.`;
             const dLower = d.toLowerCase();
             return dLower === lower
               || dLower.startsWith(lower)
-              || lower.startsWith(dLower.split("(")[0].trim());
+              || lower.startsWith(dLower.split("(")[0]!.trim());
           });
           return match || t;
         });

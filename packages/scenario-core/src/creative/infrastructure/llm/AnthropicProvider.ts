@@ -40,7 +40,7 @@ export class AnthropicProvider implements ILLMProvider {
       });
 
       const contentBlock = response.content[0];
-      const content = contentBlock.type === 'text' ? contentBlock.text : "";
+      const content = contentBlock?.type === 'text' ? contentBlock.text : "";
 
       return {
         provider: this.name,

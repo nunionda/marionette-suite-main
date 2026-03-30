@@ -1,6 +1,6 @@
-import { ScriptElement } from '../../script/infrastructure/parser';
-import { CharacterNode } from '../../creative/domain/CharacterNetwork';
-import { LocationBreakdown, CastBreakdown } from '../domain/ProductionBreakdown';
+import type { ScriptElement } from '../../script/infrastructure/parser';
+import type { CharacterNode } from '../../creative/domain/CharacterNetwork';
+import type { LocationBreakdown, CastBreakdown } from '../domain/ProductionBreakdown';
 
 export class ProductionAnalyzer {
   analyzeLocations(elements: ScriptElement[]): LocationBreakdown[] {
@@ -112,6 +112,6 @@ export class ProductionAnalyzer {
 
   private parseTime(text: string): string {
     const match = text.match(/[-–—]\s*(DAY|NIGHT|MORNING|EVENING|DAWN|DUSK|LATER|CONTINUOUS)/i);
-    return match ? match[1].toUpperCase() : '';
+    return match ? match[1]!.toUpperCase() : '';
   }
 }

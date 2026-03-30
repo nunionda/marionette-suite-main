@@ -215,7 +215,7 @@ screenplayRoutes.post("/:projectId/characters", async (c) => {
     const updated = await prisma.screenplay.update({
       where: { id: screenplay.id },
       data: {
-        characters: characters as Record<string, unknown> | Record<string, unknown>[],
+        characters: characters as unknown as import("@prisma/client").Prisma.InputJsonValue,
         currentStep: Math.max(screenplay.currentStep, 2),
       },
     })
@@ -241,7 +241,7 @@ screenplayRoutes.put("/:projectId/characters", async (c) => {
     const screenplay = await getOrCreateScreenplay(projectId)
     const updated = await prisma.screenplay.update({
       where: { id: screenplay.id },
-      data: { characters: body.characters as Record<string, unknown> | Record<string, unknown>[] },
+      data: { characters: body.characters as unknown as import("@prisma/client").Prisma.InputJsonValue },
     })
 
     return c.json(updated)
@@ -710,7 +710,7 @@ Extract all scenes belonging to Sequence ${seq}.`,
     await createSnapshot(projectId, "DIRECTION_PLAN", project.directionPlan)
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
-      data: { directionPlan: directionPlan as Record<string, unknown> },
+      data: { directionPlan: directionPlan as unknown as import("@prisma/client").Prisma.InputJsonValue },
     })
 
     return c.json({ directionPlan: updatedProject.directionPlan })
@@ -788,7 +788,7 @@ Dialogue: ${(scene as { dialogue?: string | null }).dialogue ?? "None"}`,
     await createSnapshot(projectId, "DIRECTION_PLAN", project.directionPlan)
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
-      data: { directionPlan: directionPlan as Record<string, unknown> },
+      data: { directionPlan: directionPlan as unknown as import("@prisma/client").Prisma.InputJsonValue },
     })
 
     return c.json({ directionPlan: updatedProject.directionPlan })
@@ -885,7 +885,7 @@ Action: ${(cut as { action?: string }).action ?? ""}`,
     await createSnapshot(projectId, "DIRECTION_PLAN", project.directionPlan)
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
-      data: { directionPlan: directionPlan as Record<string, unknown> },
+      data: { directionPlan: directionPlan as unknown as import("@prisma/client").Prisma.InputJsonValue },
     })
 
     return c.json({ directionPlan: updatedProject.directionPlan })
@@ -999,7 +999,7 @@ Action: ${(cut as { action?: string }).action ?? ""}`,
 
     const updatedProject = await prisma.project.update({
       where: { id: projectId },
-      data: { directionPlan: directionPlan as Record<string, unknown> },
+      data: { directionPlan: directionPlan as unknown as import("@prisma/client").Prisma.InputJsonValue },
     })
 
     return c.json({ directionPlan: updatedProject.directionPlan })
@@ -1256,7 +1256,7 @@ screenplayRoutes.post("/:projectId/scene/:sceneNumber/generate-video", async (c)
             cutNumber: cut.cut_number,
             duration: result.duration,
             prompt: cut.video_prompt,
-          } as Record<string, unknown>,
+          } as unknown as import("@prisma/client").Prisma.InputJsonValue,
         },
       })
 
@@ -1325,7 +1325,7 @@ screenplayRoutes.post("/:projectId/scene/:sceneNumber/generate-audio", async (c)
           metadata: {
             cutNumber: cut.cut_number,
             audioType: "dialogue",
-          } as Record<string, unknown>,
+          } as unknown as import("@prisma/client").Prisma.InputJsonValue,
         },
       })
 

@@ -50,10 +50,13 @@ CRITICAL INSTRUCTION: Output ONLY raw JSON matching this schema exactly:
       return {
         scriptId,
         scenes: (parsed.scenes || []).map((s: Record<string, unknown>) => ({
-          ...s,
+          sceneNumber: (s.sceneNumber as number) ?? 0,
+          score: (s.score as number) ?? 0,
+          dominantEmotion: (s.dominantEmotion as string) ?? '',
+          explanation: (s.explanation as string) ?? '',
           tension: typeof s.tension === 'number' ? s.tension : 0,
           humor: typeof s.humor === 'number' ? s.humor : 0,
-          engagement: ['high', 'medium', 'low'].includes(s.engagement as string) ? s.engagement : 'medium',
+          engagement: (['high', 'medium', 'low'].includes(s.engagement as string) ? s.engagement : 'medium') as 'high' | 'medium' | 'low',
         }))
       };
     } catch (e) {

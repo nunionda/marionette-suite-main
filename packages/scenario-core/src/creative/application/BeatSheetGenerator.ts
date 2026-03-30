@@ -94,9 +94,13 @@ Rules for the output:
       return {
         scriptId,
         beats: (parsed.beats || []).map((b: Record<string, unknown>) => ({
-          ...b,
+          act: (b.act as number) ?? 1,
+          name: (b.name as string) ?? '',
+          sceneStart: (b.sceneStart as number) ?? 0,
+          sceneEnd: (b.sceneEnd as number) ?? 0,
+          description: (b.description as string) ?? '',
           pagePercentage: typeof b.pagePercentage === 'number' ? b.pagePercentage : 0,
-          pacingNote: b.pacingNote ?? null,
+          pacingNote: (b.pacingNote as string) ?? null,
         }))
       };
     } catch (e) {

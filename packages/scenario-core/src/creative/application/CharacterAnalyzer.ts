@@ -31,7 +31,7 @@ export class CharacterAnalyzer {
         let match;
         inlineNameRe.lastIndex = 0;
         while ((match = inlineNameRe.exec(el.text)) !== null) {
-          const name = match[1];
+          const name = match[1]!;
           if (!inlineChars.has(name)) {
             inlineChars.set(name, new Set());
           }
@@ -323,7 +323,7 @@ export class CharacterAnalyzer {
       const arr = Array.from(chars);
       for (let i = 0; i < arr.length; i++) {
         for (let j = i + 1; j < arr.length; j++) {
-          const key = edgeKey(arr[i], arr[j]);
+          const key = edgeKey(arr[i]!, arr[j]!);
           const edge = edgeMap.get(key) || { weight: 0, exchanges: 0 };
           edge.weight++;
           edgeMap.set(key, edge);
