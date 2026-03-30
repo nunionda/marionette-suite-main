@@ -52,6 +52,17 @@ gstack skills are invoked as Claude Code slash commands:
 /retro        # Weekly retrospective
 ```
 
+## Relevant Skills for This Project
+
+| Skill | Purpose in Production Pipeline |
+|-------|-------------------------------|
+| /qa | QA test the scenario web dashboard and API |
+| /review | Pre-landing PR review for pipeline changes |
+| /ship | Full ship workflow (test, review, bump, push, PR) |
+| /canary | Post-deploy monitoring after shipping |
+| /cso | Security audit for API keys, provider secrets |
+| /benchmark | Performance regression detection for API endpoints |
+
 ## Notes
 
 - gstack is not a standalone CLI binary — it operates as a Claude Code skill pack
