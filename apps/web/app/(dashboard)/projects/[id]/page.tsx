@@ -14,6 +14,9 @@ import {
 import { AssetGallery } from "../../../../components/asset-gallery"
 import { VersionHistory } from "../../../../components/version-history"
 import { BatchMonitor } from "../../../../components/batch-monitor"
+import { CharacterSheetPanel } from "../../../../components/pipeline/CharacterSheetPanel"
+import { LocationGallery } from "../../../../components/pipeline/LocationGallery"
+import { PromptPreview } from "../../../../components/pipeline/PromptPreview"
 
 // ─── Types ───
 
@@ -637,6 +640,12 @@ function PreProductionTab({
         disabled={runningPipeline}
       />
 
+      {/* Character Sheets */}
+      <CharacterSheetPanel projectId={projectId} />
+
+      {/* Location Scout */}
+      <LocationGallery projectId={projectId} />
+
       {/* Storyboard Gallery */}
       <div className="rounded-xl border border-gray-800 bg-gray-900 p-6">
         <h2 className="mb-4 text-lg font-semibold">Pre-Production Gallery</h2>
@@ -683,6 +692,9 @@ function ProductionTab({
         onRun={() => onRunAgent("cinematographer")}
         disabled={runningPipeline}
       />
+
+      {/* Cinematography Prompt Preview */}
+      <PromptPreview projectId={projectId} />
 
       {/* Generalist */}
       <AgentCard

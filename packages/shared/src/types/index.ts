@@ -27,3 +27,11 @@ export { AssetType, type Asset } from "./asset.js";
 export { type PipelineWSEvent, type PipelineRunSnapshot, type BatchRunSnapshot } from "./ws-events.js"
 export { type StepResults, type BatchAgentInput } from "./batch.js"
 export type { AuthUser, LoginRequest, SignupRequest, AuthResponse } from "./auth.js"
+export type {
+  CastingCharacter,
+  CastingDirectorOutput,
+  LocationEntry,
+  LocationScoutOutput,
+  CinematographerScene,
+  CinematographerOutput,
+} from "./agent-outputs.js"

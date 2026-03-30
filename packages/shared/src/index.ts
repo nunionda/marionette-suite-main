@@ -21,6 +21,12 @@ export {
   type LoginRequest,
   type SignupRequest,
   type AuthResponse,
+  type CastingCharacter,
+  type CastingDirectorOutput,
+  type LocationEntry,
+  type LocationScoutOutput,
+  type CinematographerScene,
+  type CinematographerOutput,
 } from "./types/index.js";
 
 export { createLogger, type Logger, type LogLevel } from "./utils/logger.js";

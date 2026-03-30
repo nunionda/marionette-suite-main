@@ -10,6 +10,7 @@ import { screenplayRoutes } from "./routes/screenplay.ts"
 import { brainstormRoutes } from "./routes/brainstorm.ts"
 import { loglineRoutes } from "./routes/logline.ts"
 import { promptGuideRoutes } from "./routes/prompt-guide.ts"
+import { agentOutputRoutes } from "./routes/agent-outputs.ts"
 import { exportRoutes } from "./routes/export.ts"
 import { snapshotRoutes } from "./routes/snapshots.ts"
 import { batchRoutes } from "./routes/batch.ts"
@@ -56,6 +57,7 @@ app.route("/api/screenplay", screenplayRoutes)
 app.route("/api/brainstorm", brainstormRoutes)
 app.route("/api/logline", loglineRoutes)
 app.route("/api/prompt-guide", promptGuideRoutes)
+app.route("/api/projects/:projectId/agents", agentOutputRoutes)
 app.route("/api/export", exportRoutes)
 app.route("/api/snapshots", snapshotRoutes)
 app.route("/api/batch", batchRoutes)
