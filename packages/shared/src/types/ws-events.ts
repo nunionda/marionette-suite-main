@@ -19,6 +19,16 @@ export interface BatchRunSnapshot {
   currentScene?: number
 }
 
+export interface AgentProgressEvent {
+  type: "agent_progress"
+  runId: string
+  agent: string
+  status: "running" | "complete" | "error"
+  progress: number
+  message?: string
+  timestamp: string
+}
+
 export type PipelineWSEvent =
   | { type: "run:snapshot"; runs: PipelineRunSnapshot[] }
   | { type: "run:started"; runId: string; projectId: string; projectTitle: string; steps: string[] }
@@ -26,6 +36,7 @@ export type PipelineWSEvent =
   | { type: "step:completed"; runId: string; step: string; success: boolean; message?: string }
   | { type: "progress"; runId: string; progress: number; currentStep: string }
   | { type: "run:completed"; runId: string; status: "completed" | "failed"; error?: string }
+  | AgentProgressEvent
   | { type: "batch:started"; batchRunId: string; projectId: string; totalScenes: number }
   | { type: "batch:scene:started"; batchRunId: string; sceneNumber: number }
   | { type: "batch:scene:completed"; batchRunId: string; sceneNumber: number; success: boolean }

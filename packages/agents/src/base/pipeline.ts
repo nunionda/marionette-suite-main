@@ -98,11 +98,29 @@ export class PipelineOrchestrator {
         }
 
         this.emit({ type: "step:started", runId, step, stepIndex: steps.indexOf(step) })
+        this.emit({
+          type: "agent_progress",
+          runId,
+          agent: step,
+          status: "running",
+          progress: (completedWeight / totalWeight) * 100,
+          message: `Starting ${step}`,
+          timestamp: new Date().toISOString(),
+        })
         const output = await agent.execute(input)
 
         if (!output.success) {
           stepResults[step] = { status: "failed", error: output.message }
           this.emit({ type: "step:completed", runId, step, success: false, message: output.message })
+          this.emit({
+            type: "agent_progress",
+            runId,
+            agent: step,
+            status: "error",
+            progress: (completedWeight / totalWeight) * 100,
+            message: output.message,
+            timestamp: new Date().toISOString(),
+          })
           await this.markFailed(runId, stepResults, `${step}: ${output.message}`)
           return
         }
@@ -129,12 +147,30 @@ export class PipelineOrchestrator {
 
         this.emit({ type: "step:completed", runId, step, success: true, message: output.message })
         this.emit({ type: "progress", runId, progress, currentStep: step })
+        this.emit({
+          type: "agent_progress",
+          runId,
+          agent: step,
+          status: "complete",
+          progress,
+          message: output.message,
+          timestamp: new Date().toISOString(),
+        })
 
         previousOutput = output
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : String(err)
         stepResults[step] = { status: "failed", error: errorMessage }
         this.emit({ type: "step:completed", runId, step, success: false, message: errorMessage })
+        this.emit({
+          type: "agent_progress",
+          runId,
+          agent: step,
+          status: "error",
+          progress: (completedWeight / totalWeight) * 100,
+          message: errorMessage,
+          timestamp: new Date().toISOString(),
+        })
         await this.markFailed(runId, stepResults, `${step} threw: ${errorMessage}`)
         return
       }

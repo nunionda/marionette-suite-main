@@ -86,7 +86,7 @@ export async function createRun(projectId: string, steps: string[], idea?: strin
 
   // Determine phase from first step
   const preSteps = ["script_writer", "scripter", "concept_artist", "previsualizer", "casting_director", "location_scout"]
-  const mainSteps = ["cinematographer", "generalist", "asset_designer"]
+  const mainSteps = ["cinematographer", "generalist", "asset_designer", "colorist"]
   // Post steps: sound_designer, composer, master_editor, colorist, mixing_engineer
   const firstStep = steps[0] ?? ""
   const phase = preSteps.includes(firstStep) ? "PRE" : mainSteps.includes(firstStep) ? "MAIN" : "POST"
