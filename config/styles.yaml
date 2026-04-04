@@ -1,0 +1,217 @@
+# ============================================================
+# Storyboard Concept Maker — 10 Masters + Format Styles
+# ============================================================
+
+artists:
+  # === 01. Akira Kurosawa ===
+  kurosawa:
+    name: "Akira Kurosawa"
+    medium: "watercolor, gouache, crayon"
+    color_mode: "full_color"
+    line_type: "expressive, loose brushstrokes"
+    line_weight: "varied, flowing"
+    composition: "painterly, atmospheric"
+    detail_level: "atmospheric"
+    prompt_keywords: "hand-painted watercolor storyboard, impressionistic, expressive brushwork, rich color palette, Van Gogh-inspired intensity, atmospheric lighting, painterly textures, cinematic composition"
+    post_processing:
+      - watercolor_filter
+      - brush_texture_overlay
+      - saturation_adjust
+    aspect_ratio: "2.35:1"
+
+  # === 02. Ridley Scott ===
+  ridley_scott:
+    name: "Ridley Scott"
+    medium: "ink and pencil on paper"
+    color_mode: "grayscale_with_highlights"
+    line_type: "contour rendering, technical"
+    line_weight: "precise, layered"
+    composition: "cinematic depth, atmospheric perspective"
+    detail_level: "high"
+    prompt_keywords: "Ridleygram storyboard, detailed ink and pencil drawing, comic book style, contour line rendering, Heavy Metal magazine aesthetic, Moebius-inspired, atmospheric haze, volumetric lighting, cinematic depth"
+    post_processing:
+      - ink_line_enhance
+      - grayscale_convert
+      - denoise
+    aspect_ratio: "2.35:1"
+
+  # === 03. Bong Joon-ho ===
+  bong:
+    name: "Bong Joon-ho"
+    medium: "pen on paper"
+    color_mode: "black_and_white"
+    line_type: "clean pen line, graphic novel"
+    line_weight: "consistent, precise"
+    composition: "cinematic framing, camera movement arrows"
+    detail_level: "detailed"
+    prompt_keywords: "clean pen line storyboard, graphic novel style, precise camera angle notation, cinematic composition, detailed character expressions, movement direction arrows, dialogue notes, manga-influenced panel layout"
+    post_processing:
+      - ink_line_enhance
+      - high_contrast
+      - denoise
+    aspect_ratio: "1.85:1"
+
+  # === 04. Saul Bass ===
+  saul_bass:
+    name: "Saul Bass"
+    medium: "ink on paper"
+    color_mode: "black_and_white"
+    line_type: "geometric, structured"
+    line_weight: "bold, high contrast"
+    composition: "minimal, Bauhaus-influenced"
+    detail_level: "conceptual"
+    prompt_keywords: "stark black-and-white storyboard, geometric abstraction, Bauhaus composition, high contrast ink drawing, negative space, graphic design aesthetic, minimalist film storyboard, silhouette-based"
+    post_processing:
+      - high_contrast
+      - threshold_binarize
+      - denoise
+    aspect_ratio: "16:9"
+
+  # === 05. Hayao Miyazaki ===
+  miyazaki:
+    name: "Hayao Miyazaki"
+    medium: "pencil on storyboard paper"
+    color_mode: "monochrome"
+    line_type: "delicate pencil, information-dense"
+    line_weight: "light to medium, expressive"
+    composition: "ekonte format, timing codes"
+    detail_level: "high_density"
+    prompt_keywords: "Japanese anime ekonte storyboard, detailed pencil sketch, Studio Ghibli style, information-dense layout with timing codes, camera movement notation, delicate character expressions, whimsical yet precise drawing, naturalistic backgrounds"
+    post_processing:
+      - grayscale_convert
+      - ink_line_enhance
+      - denoise
+    aspect_ratio: "16:9"
+
+  # === 06. Martin Scorsese ===
+  scorsese:
+    name: "Martin Scorsese"
+    medium: "pencil and red pen on paper"
+    color_mode: "monochrome_with_red"
+    line_type: "rough sketch, stick figure"
+    line_weight: "loose, energetic"
+    composition: "open, collaborative, camera-centric"
+    detail_level: "minimal"
+    prompt_keywords: "rough pencil sketch storyboard, minimalist stick figure drawing, loose energetic lines, precise camera angle notation, red ink accents for emphasis, raw and immediate drawing style, directorial sketch, essential composition focus"
+    post_processing:
+      - grayscale_convert
+      - high_contrast
+      - denoise
+    aspect_ratio: "1.85:1"
+
+  # === 07. Mark Sexton (Mad Max) ===
+  mad_max:
+    name: "Mark Sexton"
+    medium: "ink and marker, digital color"
+    color_mode: "full_color"
+    line_type: "action comic, dynamic"
+    line_weight: "bold, varied impact lines"
+    composition: "extreme action, motion-driven"
+    detail_level: "high"
+    prompt_keywords: "action comic book storyboard, dynamic motion lines, bold ink drawing with vibrant color, vehicle chase choreography, explosion effects, extreme camera angles, impact frames, VFX layer notation, full coverage panel sequence"
+    post_processing:
+      - saturation_adjust
+      - ink_line_enhance
+      - comic_hatching
+    aspect_ratio: "2.35:1"
+
+  # === 08. J. Todd Anderson ===
+  anderson_jt:
+    name: "J. Todd Anderson"
+    medium: "Sharpie marker, ink on bond paper"
+    color_mode: "grayscale"
+    line_type: "comic book, dynamic"
+    line_weight: "clean with variation"
+    composition: "dynamic poses, movement notation"
+    detail_level: "mixed"
+    prompt_keywords: "comic book style storyboard, Sharpie marker ink drawing, caricature style characters, dynamic poses, clean line work, graphic novel aesthetic, movement arrows and notation, strong shadow work"
+    post_processing:
+      - ink_line_enhance
+      - grayscale_convert
+      - comic_hatching
+    aspect_ratio: "16:9"
+
+  # === 09. David Lowery (Jurassic Park) ===
+  lowery:
+    name: "David Lowery"
+    medium: "pencil and ink on paper"
+    color_mode: "grayscale"
+    line_type: "cinematic realism, suspense-oriented"
+    line_weight: "precise, shadow-focused"
+    composition: "suspense framing, lighting-driven"
+    detail_level: "high"
+    prompt_keywords: "cinematic realism storyboard, detailed pencil and ink drawing, precise lighting and shadow rendering, suspense-driven framing, Spielberg-style composition, dramatic contrast, creature and character interaction, tense atmosphere"
+    post_processing:
+      - grayscale_convert
+      - high_contrast
+      - ink_line_enhance
+    aspect_ratio: "1.85:1"
+
+  # === 10. Wes Anderson ===
+  anderson_wes:
+    name: "Wes Anderson"
+    medium: "pencil and fine liner"
+    color_mode: "monochrome"
+    line_type: "simple line, symmetrical"
+    line_weight: "thin, consistent"
+    composition: "perfect symmetry, centered"
+    detail_level: "clean"
+    prompt_keywords: "simple line drawing storyboard, perfect bilateral symmetry, centered composition, storybook illustration style, whimsical yet precise, flat perspective, dollhouse framing, pastel color palette hints, geometric set design"
+    post_processing:
+      - grayscale_convert
+      - denoise
+      - ink_line_enhance
+    aspect_ratio: "1.85:1"
+
+
+# ============================================================
+# Format Styles — 광고/영화/드라마 등 형식별 프롬프트 모디파이어
+# ============================================================
+formats:
+  commercial:
+    name: "Commercial / Ad Film"
+    prompt_prefix: "High-end commercial advertisement storyboard, brand-focused cinematic frame, polished production value, product-centric composition."
+    prompt_suffix: "Clean professional finish, advertising campaign quality, hero shot emphasis."
+    aspect_ratio_override: "16:9"
+    tags: ["광고", "commercial", "brandfilm"]
+
+  music_video:
+    name: "Music Video"
+    prompt_prefix: "Music video storyboard frame, stylized visual storytelling, rhythm-driven editing cues, bold creative direction."
+    prompt_suffix: "Artistic and experimental, performance-focused, strong visual identity."
+    aspect_ratio_override: "16:9"
+    tags: ["뮤직비디오", "MV"]
+
+  drama_series:
+    name: "Drama Series"
+    prompt_prefix: "Television drama storyboard, intimate character framing, dialogue-driven scene composition, episodic visual continuity."
+    prompt_suffix: "Naturalistic lighting, emotional depth, character-centered staging."
+    aspect_ratio_override: "16:9"
+    tags: ["드라마", "시리즈"]
+
+  feature_film:
+    name: "Feature Film"
+    prompt_prefix: "Feature film storyboard, cinematic widescreen composition, studio-quality pre-production art, epic visual storytelling."
+    prompt_suffix: "Theatrical composition, master shot coverage, production-ready detail."
+    aspect_ratio_override: "2.35:1"
+    tags: ["장편", "영화"]
+
+  short_film:
+    name: "Short Film"
+    prompt_prefix: "Short film storyboard, concise visual narrative, every frame essential, indie film aesthetic."
+    prompt_suffix: "Economical storytelling, single-location focus, intimate framing."
+    aspect_ratio_override: "1.85:1"
+    tags: ["단편"]
+
+  animation:
+    name: "Animation"
+    prompt_prefix: "Animation storyboard, exaggerated poses and expressions, key frame emphasis, squash and stretch principles."
+    prompt_suffix: "Animated motion planning, timing breakdown, clean animation-ready poses."
+    aspect_ratio_override: "16:9"
+    tags: ["애니메이션", "animation"]
+
+
+defaults:
+  output_width: 1024
+  grid_columns: 3
+  grid_rows: 2
