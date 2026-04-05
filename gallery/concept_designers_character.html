@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Design — 10 Masters</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --gold: #e8c872;
+    --gold-dim: #b89a4a;
+    --accent: #d06858;
+    --bg: #0b0b12;
+    --bg-deep: #06060a;
+    --card-bg: #111119;
+    --bg-elevated: #16161f;
+    --border: #1e1e2a;
+    --border-hover: #2e2e3e;
+    --text: #d8d4cf;
+    --text-bright: #f0ece6;
+    --text-muted: #706c66;
+    --text-dim: #4a4844;
+    --font-display: 'DM Serif Display', 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Libre Franklin', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --radius-sm: 6px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 9999;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* GALLERY NAV */
+  .gallery-nav {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 24px; height: 42px;
+    background: var(--bg-deep); border-bottom: 1px solid var(--border);
+    z-index: 101; position: relative;
+  }
+  .gallery-nav .logo {
+    color: var(--gold); font-family: var(--font-display);
+    font-size: 0.85em; text-decoration: none; margin-right: 10px;
+    font-weight: 400; letter-spacing: 0.5px;
+  }
+  .gallery-nav .sep { color: var(--border); margin: 0 4px; user-select: none; }
+  .gallery-nav .tab {
+    padding: 4px 12px; border-radius: var(--radius-sm);
+    font-size: 0.72em; font-weight: 500; letter-spacing: 0.3px;
+    color: var(--text-muted); border: 1px solid transparent;
+    text-decoration: none; transition: all 0.25s var(--ease-out);
+  }
+  .gallery-nav .tab:hover { color: var(--text); background: var(--bg-elevated); border-color: var(--border); }
+  .gallery-nav .tab.active {
+    color: var(--accent); background: var(--card-bg);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  /* === TOP BAR === */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #111118;
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+  }
+  .topbar h1 {
+    font-family: var(--font-display);
+    font-size: 1em;
+    color: var(--accent);
+    letter-spacing: 1px;
+    font-weight: 400;
+  }
+  .topbar .subtitle {
+    color: var(--text-muted);
+    font-size: 0.75em;
+  }
+  .topbar .right-info {
+    color: #555;
+    font-size: 0.75em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* === LAYOUT === */
+  .layout {
+    display: flex;
+    height: calc(100vh - 56px - 42px);
+  }
+
+  /* === LEFT PANEL: ARTIST LIST === */
+  .artist-panel {
+    width: 260px;
+    min-width: 260px;
+    background: #0e0e16;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+  .artist-panel::-webkit-scrollbar { width: 4px; }
+  .artist-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .artist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .artist-item:hover { background: #1a1a28; }
+  .artist-item.active {
+    background: #1a1a2e;
+    border-left-color: var(--accent);
+  }
+  .artist-rank {
+    font-size: 0.7em;
+    color: var(--accent);
+    opacity: 0.6;
+    min-width: 20px;
+    text-align: right;
+    font-weight: bold;
+  }
+  .artist-item .name {
+    font-size: 0.88em;
+    color: #ddd;
+    font-weight: 500;
+  }
+  .artist-item .role {
+    font-size: 0.7em;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .artist-item.active .name { color: var(--accent); }
+
+  /* === MAIN AREA === */
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* === IMAGE VIEWER (TOP) === */
+  .viewer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #080810;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .viewer img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    transition: opacity 0.3s;
+  }
+  .viewer .placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; color: #555;
+    overflow: hidden;
+  }
+  .viewer .placeholder .hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; opacity: 0.35;
+    filter: blur(1px) saturate(0.8);
+    transition: opacity 0.6s;
+  }
+  .viewer .placeholder:hover .hero-img { opacity: 0.5; }
+  .viewer .placeholder .hero-overlay {
+    position: relative; z-index: 2;
+    background: rgba(11,11,18,0.6);
+    backdrop-filter: blur(8px);
+    padding: 32px 48px; border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .viewer .placeholder .hero-overlay h2 {
+    font-family: var(--font-display);
+    color: var(--accent); font-size: 1.6em;
+    font-weight: 400; margin-bottom: 8px;
+  }
+  .viewer .placeholder .hero-overlay p { font-size: 0.9em; color: var(--text-muted); }
+  .viewer .placeholder .hero-overlay kbd {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 3px; font-size: 0.85em;
+  }
+
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(20,20,32,0.8);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .nav-arrow:hover { background: rgba(40,40,60,0.9); border-color: var(--accent); }
+  .nav-arrow.left { left: 16px; }
+  .nav-arrow.right { right: 16px; }
+
+  .image-counter {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    background: rgba(20,20,32,0.8);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    color: var(--text-muted);
+  }
+
+  .artist-badge {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    background: rgba(20,20,32,0.85);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8em;
+  }
+  .artist-badge .badge-name { color: var(--accent); font-weight: 600; }
+  .artist-badge .badge-style { color: var(--text-muted); font-size: 0.85em; margin-top: 2px; }
+
+  /* === FILMSTRIP (BOTTOM) === */
+  .filmstrip-wrapper {
+    background: #111118;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+  .filmstrip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .filmstrip::-webkit-scrollbar { height: 4px; }
+  .filmstrip::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .thumb {
+    min-width: 120px;
+    height: 72px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+    background: #1a1a28;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: #555; transform: translateY(-2px); }
+  .thumb.active { border-color: var(--accent); }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .thumb .thumb-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 2px 6px 4px;
+    font-size: 0.6em;
+    color: #ccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .thumb .no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #555;
+    font-size: 0.7em;
+    text-align: center;
+    padding: 4px;
+  }
+
+  /* === RIGHT PANEL: INFO === */
+  .info-panel {
+    width: 300px;
+    min-width: 300px;
+    background: #0e0e16;
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .info-panel::-webkit-scrollbar { width: 4px; }
+  .info-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .info-panel h3 {
+    color: var(--accent);
+    font-size: 1.1em;
+    margin-bottom: 8px;
+  }
+  .info-panel .meta {
+    color: var(--text-muted);
+    font-size: 0.8em;
+    margin-bottom: 16px;
+  }
+  .info-panel .desc {
+    color: #bbb;
+    font-size: 0.85em;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .info-section {
+    margin-bottom: 16px;
+  }
+  .info-section h4 {
+    font-size: 0.75em;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .info-section p {
+    color: #aaa;
+    font-size: 0.82em;
+    line-height: 1.5;
+  }
+  .film-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .film-tag {
+    background: #1e1e30;
+    color: #d0c0a0;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    border: 1px solid #333;
+  }
+  .char-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 16px;
+  }
+  .char-tag {
+    background: rgba(208,104,88,0.12);
+    color: var(--accent);
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    border: 1px solid rgba(208,104,88,0.3);
+  }
+  .link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .link-list a {
+    color: #7090c0;
+    text-decoration: none;
+    font-size: 0.78em;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .link-list a:hover { color: #90b0e0; }
+
+  .style-indicator {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.72em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .style-indicator.pencil { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
+  .style-indicator.biomech { background: #1a1a2a; color: #8080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.zbrush { background: #1a2a2a; color: #80c0c0; border: 1px solid #2a3a3a; }
+  .style-indicator.oil { background: #2a1a1a; color: #c09080; border: 1px solid #3a2a2a; }
+  .style-indicator.gouache { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
+  .style-indicator.digital { background: #1a1a2a; color: #8090c0; border: 1px solid #2a2a3a; }
+
+  .prompt-box {
+    background: #0a0a14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 0.78em;
+    color: #999;
+    line-height: 1.5;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .prompt-box:hover { border-color: var(--accent); }
+  .prompt-box .copy-hint {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 0.8em;
+    color: #555;
+  }
+  .prompt-box.copied .copy-hint { color: var(--accent); }
+
+  /* === STATUS BAR === */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 28px;
+    background: #0c0c14;
+    border-top: 1px solid #1a1a2a;
+    font-size: 0.7em;
+    color: var(--text-muted);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4a4a4a;
+  }
+  .status-dot.ready { background: #70b070; }
+
+  .gen-btn {
+    background: linear-gradient(135deg, #c8a050, #a07830);
+    color: #111;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(240,208,144,0.3); }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* === GENERATION MODAL === */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    width: 440px;
+    max-width: 90vw;
+  }
+  .modal h3 { color: var(--accent); margin-bottom: 16px; }
+  .modal label { display: block; color: #aaa; font-size: 0.82em; margin-bottom: 4px; margin-top: 12px; }
+  .modal input, .modal select, .modal textarea {
+    width: 100%;
+    background: #1a1a28;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.88em;
+  }
+  .modal textarea { height: 80px; resize: vertical; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+  .modal-actions button {
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85em;
+  }
+  .btn-cancel { background: #2a2a3a; color: #aaa; }
+  .btn-generate { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; font-weight: 600; }
+
+  /* Keyboard hints */
+  kbd {
+    background: #1a1a28;
+    border: 1px solid #333;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab active">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>CHARACTER DESIGN</h1>
+    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Character</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle"></div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/85/04/0a/85040aba075488a1dc160c37ecb5cd6c.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Character Design Gallery</h2>
+          <p>10명의 캐릭터 디자인 거장 — McCaig, Giger, McCreery, Barlowe 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 character designers loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128396;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Character Concept</h3>
+    <label>Character Description</label>
+    <textarea id="modalScene" placeholder="e.g. 어둠의 기사, 갑옷 아래 문신이 드러나는 전사"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+    </select>
+    <label>Pose / Action</label>
+    <input id="modalCamera" type="text" placeholder="e.g. standing pose, action stance, portrait" />
+    <label>Mood</label>
+    <input id="modalMood" type="text" placeholder="e.g. menacing, heroic, mysterious" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DESIGNERS = [
+  {
+    id: 'iain_mccaig', rank: '01', name: 'Iain McCaig',
+    subtitle: 'Character & Creature Designer \u00b7 \ubbf8\uad6d \u00b7 1957-',
+    styleType: 'pencil', styleLabel: 'Pencil / Ink / Watercolor',
+    desc: '\uc2a4\ud0c0\uc6cc\uc988 \ud504\ub9ac\ud014\uc758 \uc544\uc774\ucf54\ub2c9 \uce90\ub9ad\ud130\ub4e4\uc744 \ud0c4\uc0dd\uc2dc\ud0a8 \uc804\uc124. \uc870\uc9c0 \ub8e8\uce74\uc2a4\ub85c\ubd80\ud130 "\ub2e4\uc2a4 \ubab0\uc774\ub77c\ub294 \uc0c8 \uc2dc\uc2a4 \ub85c\ub4dc\uac00 \uc788\ub2e4"\ub294 \ud55c \ub9c8\ub514\ub9cc \ub4e3\uace0 \uc601\ud654\uc0ac\uc5d0 \ub0a8\uc744 \ube4c\ub7f0\uc744 \ub514\uc790\uc778\ud588\ub2e4. \uacf5\ud3ec\uc640 \uc544\ub984\ub2e4\uc6c0\uc758 \uade0\ud615, \ub0b4\uba74\uc758 \uc774\uc57c\uae30\uac00 \uc678\ud615\uc5d0 \ub4dc\ub7ec\ub098\ub294 \uce90\ub9ad\ud130 \ub514\uc790\uc778 \ucca0\ud559\uc758 \uad50\uacfc\uc11c.',
+    styleDesc: '\uc5f0\ud544\uacfc \uc789\ud06c \uae30\ubc18\uc758 \uc804\ud1b5\uc801 \uc77c\ub7ec\uc2a4\ud2b8\ub808\uc774\uc158. \uce90\ub9ad\ud130\uc758 \ub0b4\uba74 \uc2ec\ub9ac\uac00 \uc678\ud615\uc5d0 \ubc18\uc601\ub418\ub294 "\uc601\ud63c\uc758 \uc2a4\ucf00\uce58\ubd81" \uc811\uadfc\ubc95. \ub2e4\uc2a4 \ubab0\uc758 \uacbd\uc6b0 \ubc97\uaca8\uc9c4 \uc0b4\uacfc \uadfc\uc721 \ud328\ud134\uc744 \uae30\ubc18\uc73c\ub85c \uc804\uc2e0 \ud0c0\ud22c\ub97c \ub514\uc790\uc778\ud558\uc5ec "\uc5b4\ub460\uc758 \uc720\ud639"\uc744 \uc2dc\uac01\uc801\uc73c\ub85c \ud45c\ud604.',
+    technique: 'Fear as Foundation: "\ucd5c\uc545\uc758 \uc545\ubab5"\uc5d0\uc11c \uc2dc\uc791\ud558\uc5ec \uce90\ub9ad\ud130\uc758 \uacf5\ud3ec \uc694\uc18c\ub97c \uc815\uc758\ud55c \ud6c4, \uc544\ub984\ub2e4\uc6c0\uacfc \uc720\ud639\uc758 \uc694\uc18c\ub97c \ud63c\ud569.\nHelmet-Off Method: \ub2e4\uc2a4 \ubca0\uc774\ub354\uc758 \ud5ec\uba5b\uc744 \ub2a5\uac00\ud558\ub824\ub2e4 \ud3ec\uae30\ud558\uace0, \ud5ec\uba5b\uc744 \ubc97\uae30\uace0 "\uadf8 \uc544\ub798\uc758 \uc5bc\uad74"\uc5d0\uc11c \uacf5\ud3ec\ub97c \ucc3e\ub294 \uc5ed\ubc1c\uc0c1.\nNarrative Design: \ubaa8\ub4e0 \ub514\uc790\uc778 \uc694\uc18c\uc5d0 \uc11c\uc0ac\uc801 \uc774\uc720\uac00 \uc788\uc5b4\uc57c \ud55c\ub2e4.',
+    aiPrompt: 'Iain McCaig style character concept, pencil and ink illustration, narrative-driven design, psychological depth in visual appearance, fear and beauty balance, detailed facial tattoo patterns inspired by muscle anatomy, dramatic lighting on character portrait, film-quality character sheet',
+    films: ['Star Wars Ep I-III, VII', 'Terminator 2', 'Guardians of the Galaxy', 'The Avengers'],
+    characters: ['Darth Maul', 'Queen Amidala/Padme'],
+    links: [
+      { text: 'StarWars.com: McCaig on Darth Maul', url: 'https://www.starwars.com/news/iain-mccaig-the-phantom-menace' },
+      { text: 'Gnomon Workshop Tutorials', url: 'https://www.thegnomonworkshop.com/instructors/iain-mccaig' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/b8/af/cc/b8afccbcf68c368b75ebc78404ee9385.jpg', label: 'McCaig — Ki-Adi-Mundi concept sketch' },
+      { src: 'https://i.pinimg.com/736x/65/8c/6c/658c6cad991f58c4a89a29062348eac7.jpg', label: 'McCaig — character portrait study' },
+      { src: 'https://i.pinimg.com/736x/85/04/0a/85040aba075488a1dc160c37ecb5cd6c.jpg', label: 'McCaig — Darth Maul concept painting' },
+      { src: 'https://i.pinimg.com/736x/b7/38/b6/b738b61ba9b135079529bd976e60fa73.jpg', label: 'McCaig — Star Wars creature concepts' },
+    ],
+  },
+  {
+    id: 'hr_giger', rank: '02', name: 'H.R. Giger',
+    subtitle: 'Biomechanical Creature Designer \u00b7 \uc2a4\uc704\uc2a4 \u00b7 1940-2014',
+    styleType: 'biomech', styleLabel: 'Airbrush / Ink / Sculpture',
+    desc: '\ubc14\uc774\uc624\uba54\uce74\ub2c8\uceec \uc544\ud2b8\uc758 \ucc3d\uc2dc\uc790. 1976\ub144 \uadf8\uc758 \uadf8\ub9bc "Necronom IV"\ub97c \ubcf8 \ub9ac\ub4e4\ub9ac \uc2a4\ucf67\uc774 \uc5d0\uc774\ub9ac\uc5b8\uc758 \ud06c\ub9ac\ucc98 \ub514\uc790\uc778\uc744 \uc758\ub8b0\ud588\ub2e4. \uc720\uae30\uccb4\uc640 \uae30\uacc4\uc758 \uc735\ud569, \ub208 \uc5c6\ub294 \uacf5\ud3ec, \uc131\uc801 \uacf5\ud3ec\uc640 \uc8fd\uc74c\uc758 \ubbf8\ud559\uc774 \uacb0\ud569\ub41c \uc81c\ub178\ubaa8\ud504\ub294 \uc601\ud654\uc0ac\uc0c1 \uac00\uc7a5 \uc704\ub300\ud55c \ud06c\ub9ac\ucc98 \ub514\uc790\uc778\uc73c\ub85c \ud3c9\uac00\ubc1b\ub294\ub2e4.',
+    styleDesc: '\ubc14\uc774\uc624\uba54\uce74\ub2c8\uceec(Biomechanical) \u2014 \uc720\uae30\uc801 \uc0dd\uccb4 \uc870\uc9c1\uacfc \uae30\uacc4 \ubd80\ud488\uc774 \ud558\ub098\ub85c \uc735\ud569\ub41c \ud615\ud0dc. \uc5d0\uc5b4\ube0c\ub7ec\uc2dc\ub85c \uadf8\ub9b0 \ucd08\ud604\uc2e4\uc801\uc774\uace0 \uc545\ubab5\uc801\uc778 \uc774\ubbf8\uc9c0.',
+    technique: 'Eyeless Horror: \uc758\ub3c4\uc801\uc73c\ub85c \ub208\uc744 \uc81c\uac70\ud558\uc5ec \ud06c\ub9ac\ucc98\ub97c "\uc54c \uc218 \uc5c6\ub294 \uc874\uc7ac"\ub85c \ub9cc\ub4e6.\nSexual Morphology: \uc0dd\uc2dd\uacfc \uae30\uc0dd\uc758 \uc774\ubbf8\uc9c0\ub97c \ud06c\ub9ac\ucc98 \uc0dd\uc560\uc8fc\uae30\uc5d0 \ub0b4\uc7a5.\nTexture Layering: \ubf08, \ud30c\uc774\ud504, \ud29c\ube0c, \uadfc\uc721 \uc12c\uc720\uc758 \ubc18\ubcf5\uc801 \ub808\uc774\uc5b4\ub9c1.',
+    aiPrompt: 'H.R. Giger biomechanical style, dark surreal creature concept, airbrush technique, organic-mechanical fusion, elongated skull, eyeless alien, ribbed exoskeleton, industrial bone texture, monochrome nightmare aesthetic',
+    films: ['Alien (1979)', 'Species (1995)', 'Poltergeist II'],
+    characters: ['Xenomorph', 'Facehugger / Chestburster', 'Space Jockey'],
+    links: [
+      { text: 'Artsy: Giger\'s Nightmarish Works', url: 'https://www.artsy.net/article/artsy-editorial-nightmarish-works-hr-giger-artist-alien' },
+      { text: 'Science Museum: Designing Fear', url: 'https://blog.scienceandmediamuseum.org.uk/designing-fear-in-alien-the-art-of-gigers-xenomorph/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/55/ac/9f/55ac9f338dbfe29ecdeee4f5de1b15fc.jpg', label: 'Giger — Alien lifecycle concept sketches' },
+      { src: 'https://i.pinimg.com/736x/e3/2a/37/e32a377316280f8b4257c57521c1f5a4.jpg', label: 'Giger — Xenomorph concept drawing' },
+      { src: 'https://i.pinimg.com/736x/49/bf/be/49bfbebb0cb726d85740eec55940992e.jpg', label: 'Giger — Xenomorph close-up design' },
+      { src: 'https://i.pinimg.com/736x/70/01/3e/70013e675bd39a5c408d30df26af34ab.jpg', label: 'Giger — biomechanical creature full body' },
+    ],
+  },
+  {
+    id: 'crash_mccreery', rank: '03', name: 'Mark "Crash" McCreery',
+    subtitle: 'Creature & Character Designer \u00b7 \ubbf8\uad6d',
+    styleType: 'pencil', styleLabel: 'Pencil / Graphite / Sculpture',
+    desc: '\uc2a4\ud0c4 \uc708\uc2a4\ud134 \uc2a4\ud29c\ub514\uc624\uc758 \ub9ac\ub4dc \uc544\ud2f0\uc2a4\ud2b8\ub85c 35\ub144\uac04 \ud65c\ub3d9. \uc950\ub77c\uae30 \uacf5\uc6d0\uc758 T-Rex\ub97c "\uc628\ud608 \uc870\ub958\ud615 \ud3ec\uc2dd\uc790"\ub85c \uc7ac\ud574\uc11d\ud558\uc5ec \uacf5\ub8e1 \uc774\ubbf8\uc9c0\ub97c \uc601\uc6d0\ud788 \ubc14\uafc8\ub2e4.',
+    styleDesc: '\uc815\ubc00 \uc5f0\ud544 \ub4dc\ub85c\uc789 \uae30\ubc18. \ube5b, \uadf8\ub9bc\uc790, \ud615\ud0dc\uc758 \uc21c\uc218\ud55c \ud45c\ud604. \uacfc\ud559\uc801 \uc815\ud655\uc131\uacfc \uc601\ud654\uc801 \ub4dc\ub77c\ub9c8\uc758 \uade0\ud615.',
+    technique: 'Motion Study First: \uc815\uc801 \ud3ec\uc988\uac00 \uc544\ub2cc \uc6b4\ub3d9 \uc5f0\uad6c\uc5d0\uc11c \uc2dc\uc791.\nBird-of-Prey Stance: \uacf5\ub8e1\uc744 \ub9f9\uae08\ub958\uc758 \uacf5\uaca9 \uc790\uc138\ub85c \uc7ac\ud574\uc11d.\nLuminous Pencil Work: \uc5f0\ud544\ub9cc\uc73c\ub85c \ube5b\uc758 \ubc29\ud5a5, \ud53c\ubd80 \uc9c8\uac10, \uadfc\uc721 \uad6c\uc870\ub97c \uc815\ubc00 \ub80c\ub354\ub9c1.',
+    aiPrompt: 'Crash McCreery style creature concept, detailed pencil rendering, anatomical accuracy, luminous graphite work, dynamic motion study pose, bird-of-prey stance, warm-blooded dinosaur interpretation, cinematic lighting on creature',
+    films: ['Jurassic Park (1993)', 'Pirates of the Caribbean', 'Terminator 2', 'Edward Scissorhands'],
+    characters: ['T-Rex / Velociraptors', 'Davy Jones'],
+    links: [
+      { text: 'Concept Art Association: McCreery', url: 'https://www.conceptartassociation.com/2022-judges/2wcng-0-aaz4d-we94c' },
+      { text: 'Playgrounds: Crash McCreery', url: 'https://weareplaygrounds.nl/artist/crash-mccreery/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/74/6b/d9/746bd9f79628a136da21cf30c8d86a8c.jpg', label: 'McCreery — creature graphite sketch' },
+      { src: 'https://i.pinimg.com/736x/7d/63/50/7d6350c1d8672a32d7c19f5418e64e76.jpg', label: 'McCreery — Parasaurolophus concept' },
+      { src: 'https://i.pinimg.com/736x/53/41/15/53411517072d3e2b77d51618ac94c52e.jpg', label: 'McCreery — creature expression studies' },
+      { src: 'https://i.pinimg.com/736x/d1/dc/50/d1dc50edcba9ba29628a0527626eb074.jpg', label: 'McCreery — dinosaur anatomy study' },
+    ],
+  },
+  {
+    id: 'neville_page', rank: '04', name: 'Neville Page',
+    subtitle: 'Creature & Character Designer \u00b7 \uc601\uad6d/\ubbf8\uad6d \u00b7 1964-',
+    styleType: 'zbrush', styleLabel: 'ZBrush / Digital / Pencil',
+    desc: '\uc544\ubc14\ud0c0\uc758 \ubc34\uc2dc, \ud504\ub85c\uba54\ud14c\uc6b0\uc2a4\uc758 \uc5d4\uc9c0\ub2c8\uc5b4, \ud074\ub85c\ubc84\ud544\ub4dc\uc758 \ubaac\uc2a4\ud130\ub97c \ub514\uc790\uc778\ud55c \ud604\ub300 \ud560\ub9ac\uc6b0\ub4dc \ucd5c\uace0\uc758 \ud06c\ub9ac\ucc98 \ub514\uc790\uc774\ub108. \ubaa8\ub4e0 \ud06c\ub9ac\ucc98\uc5d0 "\uc0dd\ubb3c\ud559\uc801, \uc9c4\ud654\uc801 \uadfc\uac70"\ub97c \ubd80\uc5ec\ud558\ub294 \uacfc\ud559\uc801 \uc811\uadfc\ubc95.',
+    styleDesc: '\uacfc\ud559 \uae30\ubc18 \ud06c\ub9ac\ucc98 \ub514\uc790\uc778. \uc0b0\uc5c5 \ub514\uc790\uc778\uc758 \uae30\ub2a5\uc8fc\uc758\ub97c \uc0dd\ubb3c\uc5d0 \uc801\uc6a9. ZBrush \ub514\uc9c0\ud138 \uc2a4\ucef0\ud504\ud305\uacfc \uc804\ud1b5 \ub4dc\ub85c\uc789 \ubcd1\ud589.',
+    technique: 'Biological Basis: \ubaa8\ub4e0 \ud06c\ub9ac\ucc98\uc5d0 \uc9c4\ud654\uc801 \uadfc\uac70\ub97c \ubd80\uc5ec.\nBiomechanical Research: \uc2e4\uc81c \ub3d9\ubb3c \ud574\ubd80, \ub450\uac1c\uace8 \uc218\uc9d1, \ube44\ud589 \uc5ed\ud559 \uc5f0\uad6c.\nIndustrial Design Thinking: \uae30\ub2a5\uc774 \ud615\ud0dc\ub97c \uacb0\uc815.',
+    aiPrompt: 'Neville Page style creature concept, biologically plausible alien design, evolutionary design basis, ZBrush digital sculpture render, detailed anatomical study, functional creature anatomy, bioluminescent skin texture',
+    films: ['Avatar (2009)', 'Prometheus (2012)', 'Cloverfield (2008)', 'Star Trek (2009-2016)', 'TRON: Legacy'],
+    characters: ['Banshee (Avatar)', 'Engineer / Trilobite', 'Cloverfield Monster'],
+    links: [
+      { text: 'Blue Screen: Neville Page', url: 'https://bluescreenreveals.com/neville-page-designing-sci-fi-creatures-characters/' },
+      { text: 'ArtCenter: Page Interview', url: 'https://www.artcenter.edu/connect/dot-magazine/articles/concept-designer-neville-page-on-critiques-directors-and-gaboon-vipers.html' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/69/ee/b2/69eeb21188127e411e5afec5b38065ce.jpg', label: 'Page — Avatar Banshee creature sketch' },
+      { src: 'https://i.pinimg.com/736x/27/c1/64/27c164e3e6b8350cfb7758044f522e87.jpg', label: 'Page — Cloverfield monster concept' },
+      { src: 'https://i.pinimg.com/736x/f9/f3/7c/f9f37cfffb936029de27f41053c9690f.jpg', label: 'Page — Prometheus Deacon sculpture' },
+      { src: 'https://i.pinimg.com/736x/66/75/45/66754570a2e39e0f9db74734c16190fd.jpg', label: 'Page — alien creature concept design' },
+    ],
+  },
+  {
+    id: 'wayne_barlowe', rank: '05', name: 'Wayne Barlowe',
+    subtitle: 'Creature & Environment Designer \u00b7 \ubbf8\uad6d',
+    styleType: 'oil', styleLabel: 'Oil Painting / Digital',
+    desc: '\uc81c\uc784\uc2a4 \uce74\uba54\ub860\uc774 "\uac00\uc7a5 \ud658\uac01\uc801\uc778 \uc678\uacc4 \uc0dd\ubb3c\uc744 \ub514\uc790\uc778\ud558\ub294 \uc0ac\ub78c"\uc774\ub77c \ud3c9\ud55c \uc791\uac00. \uc544\ubc14\ud0c0\uc758 \ud310\ub3c4\ub77c \uc0dd\ud0dc\uacc4 \ud575\uc2ec \uc0dd\ubb3c\uc744 \ub514\uc790\uc778\ud588\ub2e4.',
+    styleDesc: '\uc720\ud654 \uae30\ubc18\uc758 \uc0ac\uc2e4\uc801 \ud658\uc0c1 \uc0dd\ubb3c\ud654. \uc804\uccb4 \uc0dd\ud0dc\uacc4\ub97c \uad6c\uc0c1\ud55c \ub4a4 \uac1c\ubcc4 \ud06c\ub9ac\ucc98\ub97c \ub514\uc790\uc778\ud558\ub294 "\ud558\ud5a5\uc2dd \uc138\uacc4\uad00 \uc811\uadfc\ubc95".',
+    technique: 'Ecosystem-First Design: \uc804\uccb4 \uc0dd\ud0dc\uacc4\ub97c \uba3c\uc800 \uad6c\ucd95.\nConvergent Evolution: \uc218\ub834 \uc9c4\ud654\uc801 \uc720\uc0ac\uc131\uc744 \ubd80\uc5ec.\nFine Art Quality: \ubbf8\uc220\uad00\uc5d0 \uac78\ub9b4 \uc218 \uc788\ub294 \uc720\ud654 \uc218\uc900\uc758 \uc644\uc131\ub3c4.',
+    aiPrompt: 'Wayne Barlowe style creature concept, oil painting quality alien wildlife, ecosystem-driven design, rich color palette, detailed texture rendering, convergent evolution alien biology, exotic bioluminescent creature',
+    films: ['Avatar (2009)', 'Hellboy 1 & 2', 'Pacific Rim', 'Harry Potter 3 & 4', 'Blade II'],
+    characters: ['Great Leonopteryx', 'Direhorse / Stingbat'],
+    links: [
+      { text: 'Wayne Barlowe Official: Film Art', url: 'https://waynebarlowe.com/artwork/film-tv-game/' },
+      { text: 'Avatar Wiki: Barlowe', url: 'https://james-camerons-avatar.fandom.com/wiki/Wayne_Douglas_Barlowe' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/39/8e/84/398e84134c349b92b540cedab1fc620d.jpg', label: 'Barlowe — Expedition creature rider' },
+      { src: 'https://i.pinimg.com/736x/59/8f/35/598f359ab350ef0214e4ad2d940e76b6.jpg', label: 'Barlowe — Hell demon painting' },
+      { src: 'https://i.pinimg.com/736x/df/2f/46/df2f46edc45ba4fa20b16b1dbc6cfde9.jpg', label: 'Barlowe — Hell creature design' },
+      { src: 'https://i.pinimg.com/736x/04/b6/84/04b684eb9f2f164d28c51688a8b63d1d.jpg', label: 'Barlowe — Inferno landscape' },
+      { src: 'https://i.pinimg.com/736x/3d/5d/f2/3d5df25a7eb426540de439b3ba727a76.jpg', label: 'Barlowe — fantasy creature art' },
+    ],
+  },
+  {
+    id: 'ralph_mcquarrie', rank: '06', name: 'Ralph McQuarrie',
+    subtitle: 'Character / Environment / Vehicle Designer \u00b7 \ubbf8\uad6d \u00b7 1929-2012',
+    styleType: 'gouache', styleLabel: 'Gouache / Acrylic / Oil',
+    desc: '\uc2a4\ud0c0\uc6cc\uc988 \ube44\uc8fc\uc5bc \uc720\ub2c8\ubc84\uc2a4\uc758 \uc544\ubc84\uc9c0. \ub2e4\uc2a4 \ubca0\uc774\ub354\uc758 \ud5ec\uba5b, C-3PO, \ubc00\ub808\ub2c8\uc5c4 \ud314\ucf58 \u2014 \ud604\ub300 SF\uc758 \uc2dc\uac01\uc801 \uc5b4\ud718 \uc790\uccb4\ub97c \ucc3d\uc870\ud55c \uc778\ubb3c.',
+    styleDesc: '\uad6c\uc544\uc288\uc640 \uc544\ud06c\ub9b4 \ud68c\ud654 \uae30\ubc18\uc758 \uc2dc\ub124\ub9c8\ud2f1 \uc77c\ub7ec\uc2a4\ud2b8\ub808\uc774\uc158. \uc2e4\ub8e8\uc5ff\uc774 \uc989\uc2dc \uc778\uc2dd \uac00\ub2a5\ud55c \uc544\uc774\ucf54\ub2c9 \ud615\ud0dc \uc5b8\uc5b4.',
+    technique: 'Iconic Silhouette: \uba40\ub9ac\uc11c\ub3c4 \uc989\uc2dc \uc778\uc2dd \uac00\ub2a5\ud55c \uc2e4\ub8e8\uc5ff \ub514\uc790\uc778.\nCharacter-in-World: \uce90\ub9ad\ud130\ub97c \ud56d\uc0c1 \ubc30\uacbd\uacfc \ud568\uaed8.\nEmotional Lighting: \uc870\uba85\uc73c\ub85c \uce90\ub9ad\ud130\uc758 \uc131\uaca9\uacfc \uc815\uc11c\ub97c \uc804\ub2ec.',
+    aiPrompt: 'Ralph McQuarrie style concept art, gouache painting, iconic character silhouette, character in cinematic environment, atmospheric lighting, sci-fi retro-futurism, Star Wars aesthetic',
+    films: ['Star Wars OT (1977-1983)', 'E.T. (1982)', 'Battlestar Galactica', 'Cocoon'],
+    characters: ['Darth Vader', 'C-3PO / R2-D2', 'Chewbacca'],
+    links: [
+      { text: 'Academy of Art: Visual Dev Masters', url: 'https://blog.academyart.edu/know-your-visual-development-famous-concept-artists/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/87/9c/e3/879ce3a726b0136a6c69325cea4e04e9.jpg', label: 'McQuarrie — Star Wars Cantina scene' },
+      { src: 'https://i.pinimg.com/736x/76/4a/e6/764ae6dcd64eedea819b93ade60423f9.jpg', label: 'McQuarrie — Hoth AT-AT battle' },
+      { src: 'https://i.pinimg.com/736x/0b/03/fb/0b03fb07ca40cb06a2058970a33792d9.jpg', label: 'McQuarrie — Robot Dreams cover art' },
+      { src: 'https://i.pinimg.com/736x/70/61/bf/7061bf582d7a265cc0d37ed6659b2c73.jpg', label: 'McQuarrie — Mos Eisley spaceport' },
+      { src: 'https://i.pinimg.com/736x/f0/15/d8/f015d84f40913a2b775a35da586b368a.jpg', label: 'McQuarrie — early Star Wars concept (1975)' },
+    ],
+  },
+  {
+    id: 'moebius', rank: '07', name: 'Moebius (Jean Giraud)',
+    subtitle: 'Character / Environment / Costume Designer \u00b7 \ud504\ub791\uc2a4 \u00b7 1938-2012',
+    styleType: 'pencil', styleLabel: 'Pen & Ink / Watercolor',
+    desc: '\ud604\ub300 SF \ube44\uc8fc\uc5bc\uc758 \uc6d0\ud615\uc744 \ub9cc\ub4e0 \ud504\ub791\uc2a4 \uc544\ud2f0\uc2a4\ud2b8. \uc5d0\uc774\ub9ac\uc5b8\uc5d0\uc11c \ub178\uc2a4\ud2b8\ub85c\ubaa8 \uc2b9\ubb34\uc6d0\uc758 \ubcf5\uc7a5\uacfc \uc6b0\uc8fc\ubcf5\uc744 \ub514\uc790\uc778. "\ub0a1\uace0 \uc0ac\ub78c \uc0ac\ub294 \ub0c4\uc0c8\ub098\ub294 \ubbf8\ub798"\ub77c\ub294 \uc0c8\ub85c\uc6b4 SF \ubbf8\ud559\uc744 \uc815\ub9bd.',
+    styleDesc: '\uc815\uad50\ud55c \ud39c \ub77c\uc778\uc6cc\ud06c\uc5d0 \ucd08\ud604\uc2e4\uc801 \uc0c1\uc0c1\ub825\uc774 \uacb0\ud569. "\uc0b4\uc544 \uc788\ub294, \ub0a1\uc740 \ubbf8\ub798"\uc758 \uce90\ub9ad\ud130\ub4e4.',
+    technique: 'Lived-In Future: \uce90\ub9ad\ud130 \uc758\uc0c1\uacfc \uc7a5\ube44\uc5d0 \uc0ac\uc6a9\uac10, \uc218\ub9ac \ud754\uc801\uc744 \ubd80\uc5ec.\nIntricate Line Work: \ud39c\uc73c\ub85c \uadf9\ub3c4\ub85c \uc815\uad50\ud55c \ub77c\uc778\uc6cc\ud06c.\nCulture Through Costume: \uc758\uc0c1\uc774 \uacf3 \uc138\uacc4\uad00.',
+    aiPrompt: 'Moebius Jean Giraud style character concept, intricate pen and ink line work, surreal science fiction, lived-in futuristic costume design, retro-futuristic fashion, French bande dessinee aesthetic',
+    films: ['Alien (1979)', 'The Fifth Element (1997)', 'Tron (1982)', 'The Abyss (1989)'],
+    characters: ['Nostromo Crew Attire', 'Fifth Element Characters'],
+    links: [
+      { text: 'Smithsonian: How Sci-Fi Looks', url: 'https://www.smithsonianmag.com/smart-news/meet-the-man-who-helped-define-how-science-fiction-looks-180959080/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/b8/84/82/b88482e2382661f9722d945b3a306688.jpg', label: 'Moebius — Galactic Resonance' },
+      { src: 'https://i.pinimg.com/736x/66/3e/96/663e96815589be5a3e9d61fa918c7c68.jpg', label: 'Moebius — Arzach flying scene' },
+      { src: 'https://i.pinimg.com/736x/26/8d/6d/268d6dcd6b4da5a90ae234cf2a96444c.jpg', label: 'Moebius — sci-fi cockpit illustration' },
+      { src: 'https://i.pinimg.com/736x/da/cb/c8/dacbc8a460a3e5f935ae42afaac1b497.jpg', label: 'Moebius — space explorer character' },
+    ],
+  },
+  {
+    id: 'doug_chiang', rank: '08', name: 'Doug Chiang',
+    subtitle: 'Production Design / Character / Vehicle \u00b7 \ub300\ub9cc\uacc4 \ubbf8\uad6d \u00b7 1962-',
+    styleType: 'digital', styleLabel: 'Digital Painting / Gouache',
+    desc: '\ub8e8\uce74\uc2a4\ud544\ub984 \ubd80\uc0ac\uc7a5\uc774\uc790 \ud06c\ub9ac\uc5d0\uc774\ud2f0\ube0c \ub514\ub809\ud130. \uc2a4\ud0c0\uc6cc\uc988 \ud504\ub9ac\ud014 \uc804\uccb4\uc758 \ube44\uc8fc\uc5bc \uc6d4\ub4dc\ub97c \uc124\uacc4\ud588\uc73c\uba70, "3\ucd08 \uaddc\uce59"\uacfc \ud329\uc158\ubcc4 \ucef4\ub7ec \ucf54\ub529\uc774\ub77c\ub294 \uccb4\uacc4\uc801 \ub514\uc790\uc778 \uc5b8\uc5b4\ub97c \ud655\ub9bd.',
+    styleDesc: '\uccb4\uacc4\uc801 \ub514\uc790\uc778 \uc5b8\uc5b4 \uae30\ubc18. \uc2e4\uc81c \ubb38\ud654\uc801 \uc624\ube0c\uc81c\uc5d0\uc11c \ud615\ud0dc \uc5b8\uc5b4\ub97c \ucd94\ucd9c\ud558\uc5ec SF\ub85c \ubcc0\ud658.',
+    technique: 'Three-Second Rule: \ub514\uc790\uc778\uc740 3\ucd08 \uc548\uc5d0 \uc774\ud574 \uac00\ub2a5\ud574\uc57c.\nFaction Color Coding: \uc81c\uad6d=\uac80\uc815+\ube68\uac15, \ubc18\ub780\uad70=\uac08\uc0c9+\ucd08\ub85d.\nCultural Fusion: \uc2e4\uc138\uacc4 \ubb38\ud654 \uc720\uc0b0\uc5d0\uc11c \ud615\ud0dc\ub97c \ucc28\uc6a9\ud558\ub418 SF\uc801\uc73c\ub85c \ubcc0\ud658.',
+    aiPrompt: 'Doug Chiang style concept design, systematic design language, strong silhouette character, faction color coding, cultural reference fusion in sci-fi, three-second recognizable shape, Star Wars prequel aesthetic',
+    films: ['Star Wars Ep I-II', 'Rogue One / Solo', 'The Mandalorian', 'Forrest Gump (VFX)'],
+    characters: ['Battle Droids', 'General Grievous'],
+    links: [
+      { text: 'StarWars.com: Doug Chiang', url: 'https://www.starwars.com/news/we-set-the-bar-so-high-doug-chiang-on-designing-rogue-one' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/c8/f7/9c/c8f79ce1875c07e22900c15d18ada1a2.jpg', label: 'Chiang — Star Wars vehicle concept sketch' },
+      { src: 'https://i.pinimg.com/736x/5a/64/b3/5a64b39a9d4df6df4aa7bb991498b812.jpg', label: 'Chiang — walker creature design' },
+      { src: 'https://i.pinimg.com/736x/89/06/ad/8906adb36444cda01884dcea4aed9247.jpg', label: 'Chiang — droid/robot concept art' },
+      { src: 'https://i.pinimg.com/736x/81/fe/8a/81fe8a635b79002060b2b69eb6eec835.jpg', label: 'Chiang — floating city concept' },
+    ],
+  },
+  {
+    id: 'syd_mead', rank: '09', name: 'Syd Mead',
+    subtitle: 'Visual Futurist / Industrial Designer \u00b7 \ubbf8\uad6d \u00b7 1933-2019',
+    styleType: 'gouache', styleLabel: 'Gouache / Prismacolor / Ink',
+    desc: '"\ube44\uc8fc\uc5bc \ud4e8\ucc98\ub9ac\uc2a4\ud2b8". \ube14\ub808\uc774\ub4dc \ub7ec\ub108\uc758 \uc138\uacc4\ub97c \uc2dc\uac01\ud654\ud588\uace0, \uc5d0\uc774\ub9ac\uc5b8\uc988\uc758 \ud30c\uc6cc \ub85c\ub354 \uac19\uc740 "\uc778\uac04\uc774 \ucc29\uc6a9/\ud0d1\uc2b9\ud558\ub294 \uae30\uacc4" \ub514\uc790\uc778\uc5d0\uc11c \uce90\ub9ad\ud130\uc640 \uc7a5\ube44\uc758 \uacbd\uacc4\ub97c \ud5c8\ubb3c\uc5c8\ub2e4.',
+    styleDesc: '\uce90\ub9ad\ud130\uc640 \uc7a5\ube44\uc758 \uacbd\uacc4\ub97c \ud5c8\ubb34\ub294 \ub514\uc790\uc778. \uc0b0\uc5c5 \ub514\uc790\uc778\uc758 \uae30\ub2a5\uc8fc\uc758\uac00 \uce90\ub9ad\ud130 \uc758\uc0c1/\uc7a5\ube44\uc5d0 \uc801\uc6a9.',
+    technique: '',
+    aiPrompt: 'Syd Mead visual futurist style, industrial design character concept, human-machine interface design, gouache painting, functional futuristic costume, chrome and neon aesthetic',
+    films: ['Blade Runner (1982)', 'Aliens (1986)', 'Tron (1982)', 'Elysium (2013)'],
+    characters: ['Power Loader (Aliens)', 'Tron Characters'],
+    links: [
+      { text: 'Bold Entrance: Visual Futurist Legacy', url: 'https://boldentrance.com/syd-mead-visual-futurist-dead-legacy/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/e9/8a/e4/e98ae4e18696f050c51afd5abbdee9ba.jpg', label: 'Mead — futuristic vehicle concept' },
+      { src: 'https://i.pinimg.com/736x/95/81/d0/9581d0eb830f19e8548d7ca579afc541.jpg', label: 'Mead — Blade Runner interior design' },
+      { src: 'https://i.pinimg.com/736x/96/d1/9f/96d19fed567034c5eeab04cb66836d58.jpg', label: 'Mead — Blade Runner street scene' },
+      { src: 'https://i.pinimg.com/736x/62/8b/2c/628b2cf332c0bffbe47451f276438ef2.jpg', label: 'Mead — urban futurism painting' },
+      { src: 'https://i.pinimg.com/736x/c9/b8/e4/c9b8e4ffac9350cb4b3054477470adad.jpg', label: 'Mead — Blade Runner cityscape concept' },
+    ],
+  },
+  {
+    id: 'ron_cobb', rank: '10', name: 'Ron Cobb',
+    subtitle: 'Environment / Vehicle / Prop Designer \u00b7 \ubbf8\uad6d/\ud638\uc8fc \u00b7 1937-2020',
+    styleType: 'pencil', styleLabel: 'Pen & Ink / Technical Drawing',
+    desc: '\uc5d0\uc774\ub9ac\uc5b8\uc5d0\uc11c \uc778\uac04 \uce21\uc744 \ub2f4\ub2f9. \uae54\ub054\ud55c \uc120\uacfc \ud22c\ubc15\ud558\uace0 \uc0ac\uc6a9\uac10 \uc788\ub294 \ubbf8\ud559\uc73c\ub85c \uc6b0\uc8fc\uc120\uacfc \ub85c\ubd07\uc774 \uc9c4\uc9dc\ucc98\ub7fc \ub290\uaef4\uc9c0\uac8c \ub9cc\ub4e0\ub2e4.',
+    styleDesc: '\uae30\ub2a5\uc801\uc774\uace0 \uc0ac\uc2e4\uc801\uc778 \uc811\uadfc. \uc778\uac04 \uce90\ub9ad\ud130\uc758 \uacbd\uc6b0 \ud658\uacbd\uacfc \uc7a5\ube44\ub97c \ud1b5\ud574 \uce90\ub9ad\ud130\ub97c \uac04\uc811\uc801\uc73c\ub85c \ud45c\ud604.',
+    technique: '',
+    aiPrompt: 'Ron Cobb style concept design, clean technical line drawing, bulky lived-in industrial aesthetic, functional alien creature design, utilitarian sci-fi character equipment, believable mechanical detail',
+    films: ['Alien (1979)', 'Star Wars (1977)', 'Back to the Future (1985)', 'Conan the Barbarian'],
+    characters: ['Cantina Aliens (Star Wars)', 'Nostromo Crew Environment'],
+    links: [
+      { text: 'Screen Rant: Ron Cobb Art', url: 'https://screenrant.com/ron-cobbs-best-pieces-of-movie-concept-art/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/9e/2a/a8/9e2aa8f1fd615c88ff7db2e66328f0f2.jpg', label: 'Cobb — DeLorean schematic design' },
+      { src: 'https://i.pinimg.com/736x/73/c8/14/73c8148e6b58651d86609f836d2d3ebf.jpg', label: 'Cobb — Nostromo lifeboat hangar' },
+      { src: 'https://i.pinimg.com/736x/be/91/c1/be91c1a710436cb4945fd36d770eff0d.jpg', label: 'Cobb — Alien (1979) spacecraft concept' },
+      { src: 'https://i.pinimg.com/736x/c2/05/b4/c205b4d9d4a0d3ba96ce4639daafd4d3.jpg', label: 'Cobb — sci-fi vehicle concept art' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+// Build left panel
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = DESIGNERS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+
+  // Update active state
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+}
+
+function updateInfoPanel(a) {
+  let techniqueSec = '';
+  if (a.technique) {
+    techniqueSec = `
+      <div class="info-section">
+        <h4>Technique</h4>
+        <p>${a.technique.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    ${techniqueSec}
+    <div class="info-section">
+      <h4>AI Prompt</h4>
+      <div class="prompt-box" onclick="copyPrompt(this, '${a.id}')">
+        <span class="copy-hint">click to copy</span>
+        ${a.aiPrompt}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function copyPrompt(el, id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  navigator.clipboard.writeText(artist.aiPrompt).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.copy-hint').textContent = 'copied!';
+    setTimeout(() => {
+      el.classList.remove('copied');
+      el.querySelector('.copy-hint').textContent = 'click to copy';
+    }, 1500);
+  });
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 4}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image available</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.parentElement.querySelector('.no-image')||this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.onerror = function() {
+      this.style.display = 'none';
+      ph.style.display = 'block';
+      ph.innerHTML = `
+        <div class="icon">&#128247;</div>
+        <p style="color:var(--accent)">${a.images[currentImageIdx].label}</p>
+        <p style="margin-top:8px;font-size:0.8em;color:#666;">Image could not be loaded. Check the reference links below.</p>
+      `;
+    };
+    img.src = a.images[currentImageIdx].src;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#127912;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available for this designer.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+// Modal
+function openModal() {
+  const sel = document.getElementById('modalStyle');
+  if (sel.options.length <= 1) {
+    DESIGNERS.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const pose = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+
+  if (!scene.trim()) { alert('Character description is required.'); return; }
+
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+
+  const cmd = style === 'all'
+    ? `python3 main.py compare --type character --scene "${scene}"`
+    : `python3 main.py generate --type character --scene "${scene}" --style ${style}`;
+
+  console.log('Run:', cmd);
+
+  setTimeout(() => {
+    setStatus('ready', `Generation complete. Run in terminal: ${cmd}`);
+  }, 2000);
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  // Number keys 1-9, 0 to select artist
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id);
+  }
+});
+
+// Click outside modal to close
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Init
+buildArtistPanel();
+</script>
+</body>
+</html>

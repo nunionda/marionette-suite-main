@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prop Design — Hollywood Concept Designers 10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --gold: #e8c872;
+    --gold-dim: #b89a4a;
+    --accent: #58a870;
+    --bg: #0b0b12;
+    --bg-deep: #06060a;
+    --card-bg: #111119;
+    --bg-elevated: #16161f;
+    --border: #1e1e2a;
+    --border-hover: #2e2e3e;
+    --text: #d8d4cf;
+    --text-bright: #f0ece6;
+    --text-muted: #706c66;
+    --text-dim: #4a4844;
+    --font-display: 'DM Serif Display', 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Libre Franklin', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --radius-sm: 6px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 9999;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* GALLERY NAV */
+  .gallery-nav {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 24px; height: 42px;
+    background: var(--bg-deep); border-bottom: 1px solid var(--border);
+    z-index: 101; position: relative;
+  }
+  .gallery-nav .logo {
+    color: var(--gold); font-family: var(--font-display);
+    font-size: 0.85em; text-decoration: none; margin-right: 10px;
+    font-weight: 400; letter-spacing: 0.5px;
+  }
+  .gallery-nav .sep { color: var(--border); margin: 0 4px; user-select: none; }
+  .gallery-nav .tab {
+    padding: 4px 12px; border-radius: var(--radius-sm);
+    font-size: 0.72em; font-weight: 500; letter-spacing: 0.3px;
+    color: var(--text-muted); border: 1px solid transparent;
+    text-decoration: none; transition: all 0.25s var(--ease-out);
+  }
+  .gallery-nav .tab:hover { color: var(--text); background: var(--bg-elevated); border-color: var(--border); }
+  .gallery-nav .tab.active {
+    color: var(--accent); background: var(--card-bg);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  /* === TOP BAR === */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #111118;
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+  }
+  .topbar h1 {
+    font-family: var(--font-display);
+    font-size: 1em;
+    color: var(--accent);
+    letter-spacing: 1px;
+    font-weight: 400;
+  }
+  .topbar .subtitle {
+    color: var(--text-muted);
+    font-size: 0.75em;
+  }
+  .topbar .right-info {
+    color: #555;
+    font-size: 0.75em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* === LAYOUT === */
+  .layout {
+    display: flex;
+    height: calc(100vh - 56px - 42px);
+  }
+
+  /* === LEFT PANEL: ARTIST LIST === */
+  .artist-panel {
+    width: 260px;
+    min-width: 260px;
+    background: #0e0e16;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+  .artist-panel::-webkit-scrollbar { width: 4px; }
+  .artist-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .artist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .artist-item:hover { background: #1a1a28; }
+  .artist-item.active {
+    background: #1a1a2e;
+    border-left-color: var(--accent);
+  }
+  .artist-rank {
+    font-size: 0.7em;
+    color: var(--accent);
+    opacity: 0.6;
+    min-width: 20px;
+    text-align: right;
+    font-weight: bold;
+  }
+  .artist-item .name {
+    font-size: 0.88em;
+    color: #ddd;
+    font-weight: 500;
+  }
+  .artist-item .role {
+    font-size: 0.7em;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .artist-item.active .name { color: var(--accent); }
+
+  /* === MAIN AREA === */
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* === IMAGE VIEWER (TOP) === */
+  .viewer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #080810;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .viewer img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    transition: opacity 0.3s;
+  }
+  .viewer .placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; color: #555;
+    overflow: hidden;
+  }
+  .viewer .placeholder .hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; opacity: 0.35;
+    filter: blur(1px) saturate(0.8);
+    transition: opacity 0.6s;
+  }
+  .viewer .placeholder:hover .hero-img { opacity: 0.5; }
+  .viewer .placeholder .hero-overlay {
+    position: relative; z-index: 2;
+    background: rgba(11,11,18,0.6);
+    backdrop-filter: blur(8px);
+    padding: 32px 48px; border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .viewer .placeholder .hero-overlay h2 {
+    font-family: var(--font-display);
+    color: var(--accent); font-size: 1.6em;
+    font-weight: 400; margin-bottom: 8px;
+  }
+  .viewer .placeholder .hero-overlay p { font-size: 0.9em; color: var(--text-muted); }
+  .viewer .placeholder .hero-overlay kbd {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 3px; font-size: 0.85em;
+  }
+
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(20,20,32,0.8);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .nav-arrow:hover { background: rgba(40,40,60,0.9); border-color: var(--accent); }
+  .nav-arrow.left { left: 16px; }
+  .nav-arrow.right { right: 16px; }
+
+  .image-counter {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    background: rgba(20,20,32,0.8);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    color: var(--text-muted);
+  }
+
+  .artist-badge {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    background: rgba(20,20,32,0.85);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8em;
+  }
+  .artist-badge .badge-name { color: var(--accent); font-weight: 600; }
+  .artist-badge .badge-style { color: var(--text-muted); font-size: 0.85em; margin-top: 2px; }
+
+  /* === FILMSTRIP (BOTTOM) === */
+  .filmstrip-wrapper {
+    background: #111118;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+  .filmstrip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .filmstrip::-webkit-scrollbar { height: 4px; }
+  .filmstrip::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .thumb {
+    min-width: 120px;
+    height: 72px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+    background: #1a1a28;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: #555; transform: translateY(-2px); }
+  .thumb.active { border-color: var(--accent); }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .thumb .thumb-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 2px 6px 4px;
+    font-size: 0.6em;
+    color: #ccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .thumb .no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #555;
+    font-size: 0.7em;
+    text-align: center;
+    padding: 4px;
+  }
+
+  /* === RIGHT PANEL: INFO === */
+  .info-panel {
+    width: 300px;
+    min-width: 300px;
+    background: #0e0e16;
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .info-panel::-webkit-scrollbar { width: 4px; }
+  .info-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .info-panel h3 {
+    color: var(--accent);
+    font-size: 1.1em;
+    margin-bottom: 8px;
+  }
+  .info-panel .meta {
+    color: var(--text-muted);
+    font-size: 0.8em;
+    margin-bottom: 16px;
+  }
+  .info-panel .desc {
+    color: #bbb;
+    font-size: 0.85em;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .info-section {
+    margin-bottom: 16px;
+  }
+  .info-section h4 {
+    font-size: 0.75em;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .info-section p {
+    color: #aaa;
+    font-size: 0.82em;
+    line-height: 1.5;
+  }
+  .film-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .film-tag {
+    background: #1e1e30;
+    color: #d0c0a0;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    border: 1px solid #333;
+  }
+  .char-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 16px;
+  }
+  .char-tag {
+    background: rgba(88,168,112,0.12);
+    color: var(--accent);
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    border: 1px solid rgba(88,168,112,0.3);
+  }
+  .link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .link-list a {
+    color: #7090c0;
+    text-decoration: none;
+    font-size: 0.78em;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .link-list a:hover { color: #90b0e0; }
+
+  .style-indicator {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.72em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .style-indicator.pencil { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
+  .style-indicator.pen { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
+  .style-indicator.biomech { background: #1a1a2a; color: #8080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.airbrush { background: #1a1a2a; color: #8080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.zbrush { background: #1a2a2a; color: #80c0c0; border: 1px solid #2a3a3a; }
+  .style-indicator.oil { background: #2a1a1a; color: #c09080; border: 1px solid #3a2a2a; }
+  .style-indicator.gouache { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
+  .style-indicator.digital { background: #1a1a2a; color: #8090c0; border: 1px solid #2a2a3a; }
+
+  .prompt-box {
+    background: #0a0a14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 0.78em;
+    color: #999;
+    line-height: 1.5;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .prompt-box:hover { border-color: var(--accent); }
+  .prompt-box .copy-hint {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 0.8em;
+    color: #555;
+  }
+  .prompt-box.copied .copy-hint { color: var(--accent); }
+
+  /* === STATUS BAR === */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 28px;
+    background: #0c0c14;
+    border-top: 1px solid #1a1a2a;
+    font-size: 0.7em;
+    color: var(--text-muted);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4a4a4a;
+  }
+  .status-dot.ready { background: #70b070; }
+
+  .gen-btn {
+    background: linear-gradient(135deg, #c8a050, #a07830);
+    color: #111;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(240,208,144,0.3); }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* === GENERATION MODAL === */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    width: 440px;
+    max-width: 90vw;
+  }
+  .modal h3 { color: var(--accent); margin-bottom: 16px; }
+  .modal label { display: block; color: #aaa; font-size: 0.82em; margin-bottom: 4px; margin-top: 12px; }
+  .modal input, .modal select, .modal textarea {
+    width: 100%;
+    background: #1a1a28;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.88em;
+  }
+  .modal textarea { height: 80px; resize: vertical; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+  .modal-actions button {
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85em;
+  }
+  .btn-cancel { background: #2a2a3a; color: #aaa; }
+  .btn-generate { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; font-weight: 600; }
+
+  /* Keyboard hints */
+  kbd {
+    background: #1a1a28;
+    border: 1px solid #333;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab active">Prop</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>PROP DESIGN</h1>
+    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Prop</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle"></div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/8b/ae/32/8bae32b3b381d063cf52bdd28f4bfca6.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Prop Design Gallery</h2>
+          <p>10명의 프랍 디자인 거장 — Syd Mead, Ron Cobb, McQuarrie 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 prop designers loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128295;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Prop Concept</h3>
+    <label>Prop Description</label>
+    <textarea id="modalScene" placeholder="e.g. 미래형 비행 경찰차, 홀로그램 대시보드 장착"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+    </select>
+    <label>View / Angle</label>
+    <input id="modalCamera" type="text" placeholder="e.g. 3/4 view, orthographic, exploded view" />
+    <label>Mood / Context</label>
+    <input id="modalMood" type="text" placeholder="e.g. worn/battle-damaged, pristine, prototype" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DESIGNERS = [
+  {
+    id: 'syd_mead', rank: '01', name: 'Syd Mead',
+    subtitle: 'Vehicle & Industrial Prop Master \u00b7 \ubbf8\uad6d \u00b7 1933-2019',
+    styleType: 'gouache', styleLabel: 'Gouache / Prismacolor / Ink',
+    desc: '\ube14\ub808\uc774\ub4dc \ub7ec\ub108\uc758 \uc2a4\ud53c\ub108(\ube44\ud589 \uacbd\ucc30\ucc28), \ubcf4\uc774\ud2b8-\uce84\ud504 \uae30\uacc4, \uc5d0\uc774\ub9ac\uc5b8\uc988\uc758 \ud30c\uc6cc \ub85c\ub354, \ud2b8\ub860\uc758 \ub77c\uc774\ud2b8 \uc0ac\uc774\ud074 \u2014 \uc601\ud654\uc0ac\uc5d0\uc11c \uac00\uc7a5 \uc544\uc774\ucf54\ub2c9\ud55c \ud504\ub7cd \uc911 \uc0c1\ub2f9\uc218\uac00 \uc2dc\ub4dc \ubbf8\ub4dc\uc758 \uc791\ud488\uc774\ub2e4.',
+    styleDesc: '\uc0b0\uc5c5 \ub514\uc790\uc778 \uae30\ubc18\uc758 \uae30\ub2a5\uc801 \ubbf8\ub798 \ud504\ub7cd. \ubaa8\ub4e0 \ubc84\ud2bc, \ub2e4\uc774\uc5bc, \ud78c\uc9c0\uc5d0 \uae30\ub2a5\uc801 \uc774\uc720\uac00 \uc874\uc7ac. \uad6c\uc544\uc288 \ud578\ub4dc \ub80c\ub354\ub9c1\uc73c\ub85c \uba54\ud0c8\ub9ad \ubc18\uc0ac, \uc720\ub9ac \ud22c\uacfc, \uace0\ubb34 \uc9c8\uac10\uc744 \uc815\ubc00\ud558\uac8c \ud45c\ud604.',
+    technique: 'Industrial Design Rigor: \uc2e4\uc81c \uc0b0\uc5c5 \ub514\uc790\uc778 \ud504\ub85c\uc138\uc2a4\ub97c SF \ud504\ub7cd\uc5d0 \uc801\uc6a9.\nMaterial Rendering: \uad6c\uc544\uc288\ub85c \ud06c\ub86c, \uc720\ub9ac, \uace0\ubb34, \ud50c\ub77c\uc2a4\ud2f1\uc758 \uc9c8\uac10\uacfc \ubc18\uc0ac\ub97c \uad6c\ubd84\ud558\uc5ec \ub80c\ub354\ub9c1.\nExploded View Thinking: \ub0b4\ubd80 \uad6c\uc870\ub97c \uc0c1\uc0c1\ud558\uace0 \uc678\ubd80 \ud615\ud0dc\ub97c \uacb0\uc815.',
+    aiPrompt: 'Syd Mead style prop design, industrial design rendering, gouache hand-painted, functional futuristic vehicle, chrome and glass material rendering, detailed mechanical prop, retro-futuristic gadget',
+    films: ['Blade Runner (1982)', 'Aliens (1986)', 'Tron (1982)', 'Elysium (2013)'],
+    characters: ['Spinner (\ube44\ud589 \ucc28\ub7c9)', 'Voight-Kampff Machine', 'Power Loader', 'Light Cycle'],
+    links: [
+      { text: 'Bold Entrance: Visual Futurist Legacy', url: 'https://boldentrance.com/syd-mead-visual-futurist-dead-legacy/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/d0/3f/37/d03f37cf00a3e0fc343b42f3500203c3.jpg', label: 'Mead — Blade Runner vehicle concept' },
+      { src: 'https://i.pinimg.com/736x/98/16/7c/98167c5bee1d192c37fd9174dc71afed.jpg', label: 'Mead — futuristic vehicle design' },
+      { src: 'https://i.pinimg.com/736x/6e/d7/87/6ed78724cc2f62abf9b04218ed509e63.jpg', label: 'Mead — sci-fi prop concept art' },
+      { src: 'https://i.pinimg.com/736x/8b/ae/32/8bae32b3b381d063cf52bdd28f4bfca6.jpg', label: 'Mead — Spinner police vehicle concept' },
+    ],
+  },
+  {
+    id: 'ron_cobb', rank: '02', name: 'Ron Cobb',
+    subtitle: 'Vehicle & Gadget Designer \u00b7 \ubbf8\uad6d/\ud638\uc8fc \u00b7 1937-2020',
+    styleType: 'pen', styleLabel: 'Technical Pen & Ink',
+    desc: '\ubc31 \ud22c \ub354 \ud4e8\ucc98\uc758 \ub4dc\ub85c\ub9ac\uc548 \ud0c0\uc784\uba38\uc2e0 \u2014 "\ud06c\ub9ac\uc2a4\ud1a0\ud37c \ub85c\uc774\ub4dc\uc758 \ub2e5 \ube0c\ub77c\uc6b4\uc774 \ub77c\ub514\uc624 \uc26c\uc5d0\uc11c \ubd80\ud488\uc744 \uc0ac\ub2e4 \uc218\uc81c\ub85c \uc870\ub9bd\ud55c \uac83\ucc98\ub7fc \ubcf4\uc774\uac8c"\ub77c\uace0 \ub2f5\ud588\ub2e4.',
+    styleDesc: '"\uae54\ub054\ud55c \uc120\uacfc \ud22c\ubc15\ud558\uace0 \uc0ac\uc6a9\uac10 \uc788\ub294 \ubbf8\ud559." \ud504\ub7cd\uc774 \uc9c4\uc9dc\ucc98\ub7fc \ub290\uaef4\uc9c0\ub294 \uc774\uc720\ub294 "\ub204\uad70\uac00 \ub9cc\ub4e4\uc5c8\uace0, \uc218\ub9ac\ud588\uace0, \uc0ac\uc6a9\ud558\uace0 \uc788\ub2e4"\ub294 \uc774\uc57c\uae30\uac00 \ub514\uc790\uc778\uc5d0 \ub0b4\uc7a5.',
+    technique: 'Homemade Aesthetic: "\ucc9c\uc7ac\uac00 \uc218\uc81c\ub85c \ub9cc\ub4e0" \ub290\ub08c. \ub178\ucd9c\ub41c \ubc30\uc120, \ud14c\uc774\ud504, \uc989\uc11d \uc218\ub9ac \ud754\uc801.\nFunctional Blueprint: \ud504\ub7cd\uc744 \uc2e4\uc81c\ub85c \uc81c\uc791\ud560 \uc218 \uc788\ub294 \uc218\uc900\uc758 \uae30\uc220 \ub3c4\uba74.\nNarrative Wear: \ud504\ub7cd\uc758 \uae41\ud798, \ub179, \uc218\ub9ac \ud754\uc801\uc774 \uce90\ub9ad\ud130\uc758 \uc5ed\uc0ac\ub97c \uc804\ub2ec.',
+    aiPrompt: 'Ron Cobb style prop concept, technical pen and ink drawing, homemade sci-fi gadget, exposed wiring and components, lived-in industrial prop, functional blueprint quality, weathered mechanical device',
+    films: ['Back to the Future (1985)', 'Alien (1979)', 'Conan the Barbarian (1982)', 'The Last Starfighter (1984)'],
+    characters: ['DeLorean Time Machine', 'Nostromo (exterior)', 'Conan Weaponry'],
+    links: [
+      { text: 'Hagerty: DeLorean Designer', url: 'https://www.hagerty.com/media/news/ron-cobb-creator-of-the-back-to-the-future-delorean-dies-at-83/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/45/95/08/459508bab63f5b23082f42bf5b0fd5af.jpg', label: 'Cobb — DeLorean concept sketch' },
+      { src: 'https://i.pinimg.com/736x/d2/9f/56/d29f56a2caec2d771ec08e55e2cd6235.jpg', label: 'Cobb — sci-fi prop technical drawing' },
+      { src: 'https://i.pinimg.com/736x/00/9f/75/009f757f799244fb0b172da0d992dd52.jpg', label: 'Cobb — Alien prop concept art' },
+      { src: 'https://i.pinimg.com/736x/a2/1a/89/a21a89348014f6ca89bcbe71f5e24fa7.jpg', label: 'Cobb — vehicle/weapon design' },
+    ],
+  },
+  {
+    id: 'ralph_mcquarrie', rank: '03', name: 'Ralph McQuarrie',
+    subtitle: 'Vehicle & Iconic Prop Designer \u00b7 \ubbf8\uad6d \u00b7 1929-2012',
+    styleType: 'gouache', styleLabel: 'Gouache / Acrylic',
+    desc: '\ubc00\ub808\ub2c8\uc5c4 \ud314\ucf58, X-Wing, TIE \ud30c\uc774\ud130, AT-AT \uc6cc\ucee4, \ub77c\uc774\ud2b8\uc138\uc774\ubc84 \u2014 SF \uc5ed\uc0ac\uc0c1 \uac00\uc7a5 \uc778\uc2dd\uc131 \ub192\uc740 \ucc28\ub7c9\uacfc \ubb34\uae30 \ub300\ubd80\ubd84\uc774 \ub9e5\ucffc\ub9ac\uc758 \uc791\ud488.',
+    styleDesc: '\uc544\uc774\ucf54\ub2c9 \uc2e4\ub8e8\uc5ff \uae30\ubc18\uc758 \ucc28\ub7c9/\ubb34\uae30 \ub514\uc790\uc778. \uae30\ub2a5\uc801 \ub514\ud14c\uc77c\uacfc \ubbf8\uc801 \uade0\ud615. \uace0\ubb3c\uc0c1 \ubbf8\ud559(junker aesthetic).',
+    technique: 'Silhouette Recognition: \uc5b4\ub450\uc6b4 \uc2e4\ub8e8\uc5ff\ub9cc\uc73c\ub85c \uc989\uc2dc \uc2dd\ubcc4 \uac00\ub2a5.\nKitbash Aesthetic: \ub2e4\uc591\ud55c \ubaa8\ub378 \ud0a4\ud2b8 \ubd80\ud488\uc744 \uc870\ud569\ud55c \ub4ef\ud55c \ub514\ud14c\uc77c.\nFaction Visual DNA: \uc81c\uad6d \ucc28\ub7c9(\ub0a0\uce74\ub86d\uace0 \ub300\uce6d\uc801) vs \ubc18\ub780\uad70 \ucc28\ub7c9(\uc720\uae30\uc801\uc774\uace0 \ube44\ub300\uce6d\uc801).',
+    aiPrompt: 'Ralph McQuarrie style vehicle prop, iconic silhouette design, gouache painting, Star Wars aesthetic spacecraft, kitbash detail accumulation, faction-coded vehicle design',
+    films: ['Star Wars (1977-1983)', 'Battlestar Galactica'],
+    characters: ['Millennium Falcon', 'X-Wing / TIE Fighter', 'AT-AT Walker', 'Lightsaber'],
+    links: [
+      { text: 'Academy of Art: McQuarrie', url: 'https://blog.academyart.edu/know-your-visual-development-famous-concept-artists/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/52/db/7e/52db7eb282a7e8f277e1a1249b516486.jpg', label: 'McQuarrie — X-Wing concept art' },
+      { src: 'https://i.pinimg.com/736x/4f/19/cd/4f19cd7f636b2016d7a2c051ce6712cc.jpg', label: 'McQuarrie — Star Wars vehicle design' },
+      { src: 'https://i.pinimg.com/736x/85/aa/76/85aa76d5d7c12be8de5f6a4993dafa6b.jpg', label: 'McQuarrie — spacecraft concept painting' },
+      { src: 'https://i.pinimg.com/736x/28/ef/cd/28efcd031c43ff0c56043f3a34ad1d70.jpg', label: 'McQuarrie — prop/vehicle concept art' },
+    ],
+  },
+  {
+    id: 'doug_chiang', rank: '04', name: 'Doug Chiang',
+    subtitle: 'Systematic Vehicle & Prop Designer \u00b7 \ubbf8\uad6d \u00b7 1962-',
+    styleType: 'digital', styleLabel: 'Digital / Gouache',
+    desc: '\uc2a4\ud0c0\uc6cc\uc988 \ud504\ub9ac\ud004\uc758 \ubaa8\ub4e0 \ucc28\ub7c9, \ub4dc\ub85c\uc774\ub4dc, \ubb34\uae30\ub97c \uccb4\uacc4\uc801 \ub514\uc790\uc778 \uc5b8\uc5b4\ub85c \ud1b5\uc77c. \ubaa8\ub4e0 \ud504\ub7cd\uc5d0 \ubb38\ud654\uc801 \ub808\ud37c\ub7f0\uc2a4\uc640 \ud329\uc158 \uc815\uccb4\uc131\uc774 \ub0b4\uc7a5.',
+    styleDesc: '\uccb4\uacc4\uc801 \ub514\uc790\uc778 \uc5b8\uc5b4. \ud329\uc158\ubcc4 \uc7ac\uc9c8/\uc0c9\uc0c1/\ud615\ud0dc \uaddc\uce59.',
+    technique: 'Three-Second Rule: \ud504\ub7cd\ub3c4 3\ucd08 \uc548\uc5d0 \uc778\uc2dd \uac00\ub2a5\ud574\uc57c.\nCultural Extraction: \uc2e4\uc138\uacc4 \ubb38\ud654 \uc624\ube0c\uc81c\uc5d0\uc11c \ud615\ud0dc \uc5b8\uc5b4\ub97c \ucd94\ucd9c.\nPersonality in Objects: \ubb34\uc0dd\ubb3c \ud504\ub7cd\uc5d0 "\uc131\uaca9" \ubd80\uc5ec.',
+    aiPrompt: 'Doug Chiang style vehicle prop design, systematic design language, cultural reference fusion, Art Deco sci-fi vehicle, faction color-coded equipment, three-second recognizable shape',
+    films: ['Star Wars Ep I-II', 'Rogue One', 'The Mandalorian'],
+    characters: ['Naboo Starfighter', 'Podracers', 'Battle Droids'],
+    links: [
+      { text: 'VFX Blog: 4 Principles of Design', url: 'https://vfxblog.com/2016/09/24/doug-chiangs-4-principles-of-star-wars-design/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/7a/1b/6b/7a1b6b2513c4c74cad4af3dcf8d2891e.jpg', label: 'Chiang — Star Wars vehicle concept' },
+      { src: 'https://i.pinimg.com/736x/89/06/ad/8906adb36444cda01884dcea4aed9247.jpg', label: 'Chiang — droid/robot design concept' },
+      { src: 'https://i.pinimg.com/736x/e2/20/a4/e220a4487549b03e034e535b7dd755b4.jpg', label: 'Chiang — spacecraft prop art' },
+      { src: 'https://i.pinimg.com/736x/80/dc/05/80dc05db85c2b6da94261bbcdbfced3e.jpg', label: 'Chiang — Star Wars prop concept' },
+    ],
+  },
+  {
+    id: 'hr_giger', rank: '05', name: 'H.R. Giger',
+    subtitle: 'Biomechanical Prop Designer \u00b7 \uc2a4\uc704\uc2a4 \u00b7 1940-2014',
+    styleType: 'airbrush', styleLabel: 'Airbrush / Sculpture',
+    desc: '\uc5d0\uc774\ub9ac\uc5b8\uc758 \uc5d0\uadf8, \ud398\uc774\uc2a4\ud5c8\uac70, \uc2a4\ud398\uc774\uc2a4 \uc870\ud0a4 \uc758\uc790 \u2014 \ud06c\ub9ac\ucc98\uc778 \ub3d9\uc2dc\uc5d0 \ud504\ub7cd. \uae30\uac70\uc758 \ud504\ub7cd\uc740 \uc720\uae30\uccb4\uc640 \uae30\uacc4\uc758 \uacbd\uacc4\ub97c \ud5c8\ubb38\ub2e4.',
+    styleDesc: '\ubc14\uc774\uc624\uba54\uce74\ub2c8\uceec \ud504\ub7cd. \ud504\ub7cd\uacfc \ud06c\ub9ac\ucc98, \ud504\ub7cd\uacfc \ud658\uacbd\uc758 \uacbd\uacc4\uac00 \ubaa8\ud638.',
+    technique: '',
+    aiPrompt: 'H.R. Giger biomechanical prop, organic-mechanical fusion object, bone and pipe texture, ambiguous living prop, dark surreal equipment, airbrush rendered device, alien technology prop',
+    films: ['Alien (1979)'],
+    characters: ['Alien Egg', 'Space Jockey Chair', 'Facehugger (as prop)'],
+    links: [
+      { text: 'Science Museum: Designing Fear', url: 'https://blog.scienceandmediamuseum.org.uk/designing-fear-in-alien-the-art-of-gigers-xenomorph/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/a7/aa/27/a7aa2737d1cef3a2d91c345b2f8904f3.jpg', label: 'Giger — Alien prop concept art' },
+      { src: 'https://i.pinimg.com/736x/90/ef/b5/90efb514b2bc85cef2a16541ffc8d60c.jpg', label: 'Giger — biomechanical sculpture' },
+      { src: 'https://i.pinimg.com/736x/36/05/ae/3605ae3195029c1ae1e20df2c2206fdb.jpg', label: 'Giger — Facehugger/Xenomorph design' },
+      { src: 'https://i.pinimg.com/736x/7f/11/a2/7f11a28571a3121ffc9fdc3eb4fc4f09.jpg', label: 'Giger — Alien egg chamber prop' },
+    ],
+  },
+  {
+    id: 'chris_foss', rank: '06', name: 'Chris Foss',
+    subtitle: 'Spaceship & Vehicle Designer \u00b7 \uc601\uad6d \u00b7 1946-',
+    styleType: 'airbrush', styleLabel: 'Airbrush / Acrylic',
+    desc: 'SF \uc6b0\uc8fc\uc120 \ub514\uc790\uc778\uc758 \uc544\uc774\ucf58. \uccb4\ucee4\ubcf4\ub4dc \ud328\ud134\uc758 \ube44\ub300\uce6d \uac70\ub300 \uc6b0\uc8fc\uc120.',
+    styleDesc: '\ube44\ub300\uce6d, \ud3ec\uc2a4\ud2b8\ubaa8\ub358, \uac70\ub300 \uc2a4\ucf00\uc77c\uc758 \uc6b0\uc8fc\uc120. \uc6d0\uc0c9\uc758 \ud654\ub824\ud55c \uc0c9\ucc44.',
+    technique: 'Pattern as Identity: \ub3c4\uc0c9 \ud328\ud134 = \uce90\ub9ad\ud130.\nScale Through Asymmetry: \ube44\ub300\uce6d \ud615\ud0dc\uac00 \uc2a4\ucf00\uc77c\uac10\uc744 \uc99d\ud3ed.\nColor Boldness: \uc6b0\uc8fc\uc758 \uac80\uc815 \ubc30\uacbd\uc5d0 \uc6d0\uc0c9\uc758 \uc6b0\uc8fc\uc120.',
+    aiPrompt: 'Chris Foss style spaceship design, bold checkered pattern, asymmetric massive spacecraft, vivid primary colors against space, airbrush metallic rendering, postmodern sci-fi vehicle',
+    films: ['Alien (pre-production)', 'Guardians of the Galaxy', 'Superman (1978)'],
+    characters: ['Leviathan Spaceship', 'Checkered Starships'],
+    links: [
+      { text: 'Chris Foss Art Official', url: 'https://chrisfossart.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/74/d2/89/74d2894c930175fb00fd5cbeb5606c5c.jpg', label: 'Foss — spaceship concept art' },
+      { src: 'https://i.pinimg.com/736x/a7/cd/40/a7cd40d06736398cb81ade33ae3ddce3.jpg', label: 'Foss — sci-fi vehicle painting' },
+      { src: 'https://i.pinimg.com/736x/f0/ee/68/f0ee68ca1dbe001868c4695e88e1ced2.jpg', label: 'Foss — Dune/Alien ship design' },
+      { src: 'https://i.pinimg.com/736x/bc/77/54/bc7754710f8ea6ff83db8b49538ec848.jpg', label: 'Foss — colorful spacecraft prop' },
+    ],
+  },
+  {
+    id: 'ryan_church', rank: '07', name: 'Ryan Church',
+    subtitle: 'Vehicle & Mech Designer \u00b7 \ubbf8\uad6d',
+    styleType: 'digital', styleLabel: 'Digital Painting',
+    desc: '\uad50\ud1b5 \ub514\uc790\uc778 \uc804\uacf5\uc758 \ubc30\uacbd\uc73c\ub85c "\uc2e4\uc81c\ub85c \uc791\ub3d9\ud558\ub294" \ucc28\ub7c9 \ub514\uc790\uc778\uc5d0 \ud2b9\ud654. \uc6b0\uc8fc \uc804\uc7c1\uc758 \ud2b8\ub77c\uc774\ud3ec\ub4dc, \uc2a4\ud0c0\uc6cc\uc988\uc758 ARC-170 \ud30c\uc774\ud130.',
+    styleDesc: '\uad50\ud1b5 \ub514\uc790\uc778 \uae30\ubc18\uc758 \uae30\ub2a5\uc801 \ucc28\ub7c9/\uba54\uce74. \ub514\uc9c0\ud138 \ud398\uc778\ud305\uc758 \ud3ec\ud1a0\ub9ac\uc5bc\ub9ac\uc2a4\ud2f1\ud55c \ub80c\ub354\ub9c1.',
+    technique: '',
+    aiPrompt: 'Ryan Church style vehicle concept, transportation design quality, photorealistic digital rendering, functional mech design, aerodynamic sci-fi vehicle, Star Wars starfighter aesthetic',
+    films: ['Star Wars Ep II-III', 'War of the Worlds', 'Transformers'],
+    characters: ['Tripod (War of the Worlds)', 'ARC-170 Starfighter'],
+    links: [
+      { text: 'Ryan Church Official', url: 'http://ryanchurch.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/73/7a/f1/737af1e2a387751402151a435d338979.jpg', label: 'Church — spacecraft concept art' },
+      { src: 'https://i.pinimg.com/736x/c3/92/78/c39278b2055df39f9eb26dad2fd75c31.jpg', label: 'Church — Star Wars vehicle design' },
+      { src: 'https://i.pinimg.com/736x/57/ee/d2/57eed2073a3e03abf6219140627618d1.jpg', label: 'Church — sci-fi prop painting' },
+      { src: 'https://i.pinimg.com/736x/b2/74/e7/b274e7d60599888e2e921633a2844ae1.jpg', label: 'Church — vehicle concept art' },
+    ],
+  },
+  {
+    id: 'moebius', rank: '08', name: 'Moebius (Jean Giraud)',
+    subtitle: 'Costume & Equipment Prop Designer \u00b7 \ud504\ub791\uc2a4 \u00b7 1938-2012',
+    styleType: 'pen', styleLabel: 'Pen & Ink',
+    desc: '\uc5d0\uc774\ub9ac\uc5b8\uc758 \uc6b0\uc8fc\ubcf5\uacfc \uc7a5\ube44, \uc81c5\uc6d0\uc18c\uc758 \ubbf8\ub798 \ubb34\uae30\uc640 \ub3c4\uad6c\ub4e4. \ubda4\ube44\uc6b0\uc2a4\uc758 \ud504\ub7cd\uc740 "\ub204\uad70\uac00\uac00 \ub9cc\ub4e4\uace0, \uc0ac\uc6a9\ud558\uace0, \uc218\ub9ac\ud55c" \uc5ed\uc0ac\uac00 \ub290\uaef4\uc9c0\ub294 \ub514\uc790\uc778.',
+    styleDesc: '\uc758\uc0c1 \ud504\ub7cd\uacfc \ud578\ub4dc \ud504\ub7cd\uc758 \ud1b5\ud569 \ub514\uc790\uc778. \ud39c\uacfc \uc789\ud06c\uc758 \uc815\uad50\ud55c \ub77c\uc778\uc73c\ub85c \uc18c\uc7ac\uc758 \uc9c8\uac10\uc744 \uad6c\ubd84\ud558\uc5ec \ud45c\ud604.',
+    technique: '',
+    aiPrompt: 'Moebius style prop design, detailed pen and ink equipment, worn futuristic spacesuit, intricate line work on fabric and metal, lived-in tool design, French comic aesthetic prop',
+    films: ['Alien (1979)', 'The Fifth Element'],
+    characters: ['Nostromo Spacesuits', 'Fifth Element Weapons', 'Crew Equipment'],
+    links: [
+      { text: 'CTN: Moebius in Fifth Element', url: 'https://tv.creativetalentnetwork.com/jean-giraud-moebius-and-jean-claude-mezieres-art-concept-in-fifth-element' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/10/f3/91/10f391f72a8b1cd3b678187e08584b6e.jpg', label: 'Moebius — sci-fi vehicle concept' },
+      { src: 'https://i.pinimg.com/736x/f1/ac/a4/f1aca4840f216d4e5cd27cbbd80ac1f1.jpg', label: 'Moebius — weapon/object design' },
+      { src: 'https://i.pinimg.com/736x/5a/bb/02/5abb02520df83eddd3b5d39281f41efc.jpg', label: 'Moebius — prop illustration' },
+      { src: 'https://i.pinimg.com/736x/e5/da/05/e5da055eba2f59d4b66e02fd466d0fd4.jpg', label: 'Moebius — sci-fi object concept art' },
+    ],
+  },
+  {
+    id: 'iain_mccaig', rank: '09', name: 'Iain McCaig',
+    subtitle: 'Character-Integrated Prop Designer \u00b7 \ubbf8\uad6d \u00b7 1957-',
+    styleType: 'pencil', styleLabel: 'Pencil / Ink',
+    desc: '\ub2e4\uc2a4 \ubab0\uc758 \ub354\ube14 \ube14\ub808\uc774\ub4dc \ub77c\uc774\ud2b8\uc138\uc774\ubc84, \uc544\ubbf8\ub2ec\ub77c\uc758 \uc815\uad50\ud55c \ud5e4\ub4dc\ud53c\uc2a4\uc640 \uc7a5\uc2e0\uad6c. McCaig\uc758 \ud504\ub7cd\uc740 \ud56d\uc0c1 \uce90\ub9ad\ud130\uc758 \uc5f0\uc7a5\uc120\uc0c1\uc5d0 \uc788\ub2e4.',
+    styleDesc: '\uce90\ub9ad\ud130 \ud1b5\ud569\ud615 \ud504\ub7cd. \ubb34\uae30/\uc7a5\uc2e0\uad6c\uac00 \uce90\ub9ad\ud130\uc758 \uc131\uaca9, \uc804\ud22c \uc2a4\ud0c0\uc77c, \ubb38\ud654\ub97c \ubc18\uc601.',
+    technique: '',
+    aiPrompt: 'Iain McCaig style weapon prop, character-integrated design, narrative weapon concept, ornate ceremonial prop, pencil and ink detailed prop sheet, cultural symbolism in weapon design',
+    films: ['Star Wars Ep I-III'],
+    characters: ['Double-bladed Lightsaber', 'Amidala Headdresses', 'Sith & Jedi Weapons'],
+    links: [
+      { text: 'StarWars.com: McCaig', url: 'https://www.starwars.com/news/iain-mccaig-the-phantom-menace' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/8a/cb/5b/8acb5b51798c594e620c1cf65c62369e.jpg', label: 'McCaig — lightsaber design concept' },
+      { src: 'https://i.pinimg.com/736x/00/9c/4d/009c4d70a85b478201a0d4f6ca53fb29.jpg', label: 'McCaig — Obi-Wan saber concept' },
+      { src: 'https://i.pinimg.com/736x/33/a2/7d/33a27d6dd0af4a20f6931640b07a04c4.jpg', label: 'McCaig — lightsaber internal design' },
+      { src: 'https://i.pinimg.com/736x/2f/5f/e5/2f5fe5d2bb5d7862d3a12f10ded02832.jpg', label: 'McCaig — Star Wars weapon concept' },
+    ],
+  },
+  {
+    id: 'crash_and_page', rank: '10', name: 'Crash McCreery & Neville Page',
+    subtitle: 'Creature Prop & Practical Effect Designers',
+    styleType: 'pencil', styleLabel: 'Pencil / ZBrush / Maquette',
+    desc: '\ud06c\ub9ac\ucc98 \ub514\uc790\uc778\uacfc \ud504\ub7cd\uc758 \uad50\ucc28\uc810. "\uc81c\uc791 \uac00\ub2a5\ud55c \ud06c\ub9ac\ucc98 \ud504\ub7cd"\uc744 \ub514\uc790\uc778\ud558\ub294 \ub2a5\ub825\uc774 \ud575\uc2ec.',
+    styleDesc: '\uc81c\uc791 \uac00\ub2a5\uc131(buildability)\uc744 \uace0\ub824\ud55c \ud06c\ub9ac\ucc98 \ub514\uc790\uc778. \uc560\ub2c8\ub9c8\ud2b8\ub85c\ub2c9 \ub85c\ubd07\uc758 \uad00\uc808 \ubc94\uc704, CG \ub9ac\uae45\uc758 \ubcc0\ud615 \ud55c\uacc4 \ub4f1 \uae30\uc220\uc801 \uc81c\uc57d\uc744 \ub514\uc790\uc778\uc5d0 \ub0b4\uc7a5.',
+    technique: '',
+    aiPrompt: 'creature prop design, buildable animatronic concept, production-ready creature maquette, ZBrush sculpt turnaround, anatomical detail for rigging, practical effects creature design, Stan Winston Studio quality',
+    films: ['Jurassic Park', 'Avatar', 'Cloverfield'],
+    characters: ['Animatronic T-Rex', 'VFX Creature Assets'],
+    links: [
+      { text: 'Playgrounds: Crash McCreery', url: 'https://weareplaygrounds.nl/artist/crash-mccreery/' },
+      { text: 'Blue Screen: Neville Page', url: 'https://bluescreenreveals.com/neville-page-designing-sci-fi-creatures-characters/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/c6/66/c5/c666c5db8c4c1abc1633ed2953da5fcb.jpg', label: 'McCreery/Page — creature prop concept' },
+      { src: 'https://i.pinimg.com/736x/8a/92/98/8a9298c61ccce77078cdb017cd84f133.jpg', label: 'McCreery/Page — Jurassic Park design' },
+      { src: 'https://i.pinimg.com/736x/87/6c/4a/876c4acc4c5758a1662134c4a44fee05.jpg', label: 'McCreery/Page — creature maquette' },
+      { src: 'https://i.pinimg.com/736x/33/1e/31/331e3128bbe159882630aa10cd859ba6.jpg', label: 'McCreery/Page — Predator concept art' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+// Build left panel
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = DESIGNERS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+
+  // Update active state
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+}
+
+function updateInfoPanel(a) {
+  let techniqueSec = '';
+  if (a.technique) {
+    techniqueSec = `
+      <div class="info-section">
+        <h4>Technique</h4>
+        <p>${a.technique.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    ${techniqueSec}
+    <div class="info-section">
+      <h4>AI Prompt</h4>
+      <div class="prompt-box" onclick="copyPrompt(this, '${a.id}')">
+        <span class="copy-hint">click to copy</span>
+        ${a.aiPrompt}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function copyPrompt(el, id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  navigator.clipboard.writeText(artist.aiPrompt).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.copy-hint').textContent = 'copied!';
+    setTimeout(() => {
+      el.classList.remove('copied');
+      el.querySelector('.copy-hint').textContent = 'click to copy';
+    }, 1500);
+  });
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 4}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image available</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.parentElement.querySelector('.no-image')||this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.onerror = function() {
+      this.style.display = 'none';
+      ph.style.display = 'block';
+      ph.innerHTML = `
+        <div class="icon">&#128247;</div>
+        <p style="color:var(--accent)">${a.images[currentImageIdx].label}</p>
+        <p style="margin-top:8px;font-size:0.8em;color:#666;">Image could not be loaded. Check the reference links below.</p>
+      `;
+    };
+    img.src = a.images[currentImageIdx].src;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#128295;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available for this designer.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+// Modal
+function openModal() {
+  const sel = document.getElementById('modalStyle');
+  if (sel.options.length <= 1) {
+    DESIGNERS.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const view = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+
+  if (!scene.trim()) { alert('Prop description is required.'); return; }
+
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+
+  const cmd = style === 'all'
+    ? `python3 main.py compare --type prop --scene "${scene}"`
+    : `python3 main.py generate --type prop --scene "${scene}" --style ${style}`;
+
+  console.log('Run:', cmd);
+
+  setTimeout(() => {
+    setStatus('ready', `Generation complete. Run in terminal: ${cmd}`);
+  }, 2000);
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  // Number keys 1-9, 0 to select artist
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id);
+  }
+});
+
+// Click outside modal to close
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Init
+buildArtistPanel();
+</script>
+</body>
+</html>

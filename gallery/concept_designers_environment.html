@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Environment Design — Hollywood Concept Designers 10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --gold: #e8c872;
+    --gold-dim: #b89a4a;
+    --accent: #5890c8;
+    --bg: #0b0b12;
+    --bg-deep: #06060a;
+    --card-bg: #111119;
+    --bg-elevated: #16161f;
+    --border: #1e1e2a;
+    --border-hover: #2e2e3e;
+    --text: #d8d4cf;
+    --text-bright: #f0ece6;
+    --text-muted: #706c66;
+    --text-dim: #4a4844;
+    --font-display: 'DM Serif Display', 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Libre Franklin', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --radius-sm: 6px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    pointer-events: none;
+    opacity: 0.03;
+    z-index: 9999;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* GALLERY NAV */
+  .gallery-nav {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 24px; height: 42px;
+    background: var(--bg-deep); border-bottom: 1px solid var(--border);
+    z-index: 101; position: relative;
+  }
+  .gallery-nav .logo {
+    color: var(--gold); font-family: var(--font-display);
+    font-size: 0.85em; text-decoration: none; margin-right: 10px;
+    font-weight: 400; letter-spacing: 0.5px;
+  }
+  .gallery-nav .sep { color: var(--border); margin: 0 4px; user-select: none; }
+  .gallery-nav .tab {
+    padding: 4px 12px; border-radius: var(--radius-sm);
+    font-size: 0.72em; font-weight: 500; letter-spacing: 0.3px;
+    color: var(--text-muted); border: 1px solid transparent;
+    text-decoration: none; transition: all 0.25s var(--ease-out);
+  }
+  .gallery-nav .tab:hover { color: var(--text); background: var(--bg-elevated); border-color: var(--border); }
+  .gallery-nav .tab.active {
+    color: var(--accent); background: var(--card-bg);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+
+  /* === TOP BAR === */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    background: #111118;
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+  }
+  .topbar h1 {
+    font-family: var(--font-display);
+    font-size: 1em;
+    color: var(--accent);
+    letter-spacing: 1px;
+    font-weight: 400;
+  }
+  .topbar .subtitle {
+    color: var(--text-muted);
+    font-size: 0.75em;
+  }
+  .topbar .right-info {
+    color: #555;
+    font-size: 0.75em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  /* === LAYOUT === */
+  .layout {
+    display: flex;
+    height: calc(100vh - 56px - 42px);
+  }
+
+  /* === LEFT PANEL: ARTIST LIST === */
+  .artist-panel {
+    width: 260px;
+    min-width: 260px;
+    background: #0e0e16;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 12px 0;
+  }
+  .artist-panel::-webkit-scrollbar { width: 4px; }
+  .artist-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .artist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .artist-item:hover { background: #1a1a28; }
+  .artist-item.active {
+    background: #1a1a2e;
+    border-left-color: var(--accent);
+  }
+  .artist-rank {
+    font-size: 0.7em;
+    color: var(--accent);
+    opacity: 0.6;
+    min-width: 20px;
+    text-align: right;
+    font-weight: bold;
+  }
+  .artist-item .name {
+    font-size: 0.88em;
+    color: #ddd;
+    font-weight: 500;
+  }
+  .artist-item .role {
+    font-size: 0.7em;
+    color: var(--text-muted);
+    margin-top: 1px;
+  }
+  .artist-item.active .name { color: var(--accent); }
+
+  /* === MAIN AREA === */
+  .main-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* === IMAGE VIEWER (TOP) === */
+  .viewer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #080810;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+  }
+  .viewer img {
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+    transition: opacity 0.3s;
+  }
+  .viewer .placeholder {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; color: #555;
+    overflow: hidden;
+  }
+  .viewer .placeholder .hero-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; opacity: 0.35;
+    filter: blur(1px) saturate(0.8);
+    transition: opacity 0.6s;
+  }
+  .viewer .placeholder:hover .hero-img { opacity: 0.5; }
+  .viewer .placeholder .hero-overlay {
+    position: relative; z-index: 2;
+    background: rgba(11,11,18,0.6);
+    backdrop-filter: blur(8px);
+    padding: 32px 48px; border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .viewer .placeholder .hero-overlay h2 {
+    font-family: var(--font-display);
+    color: var(--accent); font-size: 1.6em;
+    font-weight: 400; margin-bottom: 8px;
+  }
+  .viewer .placeholder .hero-overlay p { font-size: 0.9em; color: var(--text-muted); }
+  .viewer .placeholder .hero-overlay kbd {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    padding: 2px 6px; border-radius: 3px; font-size: 0.85em;
+  }
+
+  .nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(20,20,32,0.8);
+    border: 1px solid var(--border);
+    color: var(--accent);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2em;
+    transition: all 0.2s;
+    z-index: 10;
+  }
+  .nav-arrow:hover { background: rgba(40,40,60,0.9); border-color: var(--accent); }
+  .nav-arrow.left { left: 16px; }
+  .nav-arrow.right { right: 16px; }
+
+  .image-counter {
+    position: absolute;
+    bottom: 12px;
+    right: 16px;
+    background: rgba(20,20,32,0.8);
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75em;
+    color: var(--text-muted);
+  }
+
+  .artist-badge {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    background: rgba(20,20,32,0.85);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 0.8em;
+  }
+  .artist-badge .badge-name { color: var(--accent); font-weight: 600; }
+  .artist-badge .badge-style { color: var(--text-muted); font-size: 0.85em; margin-top: 2px; }
+
+  /* === FILMSTRIP (BOTTOM) === */
+  .filmstrip-wrapper {
+    background: #111118;
+    border-top: 1px solid var(--border);
+    padding: 12px 16px;
+  }
+  .filmstrip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .filmstrip::-webkit-scrollbar { height: 4px; }
+  .filmstrip::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .thumb {
+    min-width: 120px;
+    height: 72px;
+    border-radius: 6px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+    position: relative;
+    background: #1a1a28;
+    flex-shrink: 0;
+  }
+  .thumb:hover { border-color: #555; transform: translateY(-2px); }
+  .thumb.active { border-color: var(--accent); }
+  .thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .thumb .thumb-label {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    padding: 2px 6px 4px;
+    font-size: 0.6em;
+    color: #ccc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .thumb .no-image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #555;
+    font-size: 0.7em;
+    text-align: center;
+    padding: 4px;
+  }
+
+  /* === RIGHT PANEL: INFO === */
+  .info-panel {
+    width: 300px;
+    min-width: 300px;
+    background: #0e0e16;
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .info-panel::-webkit-scrollbar { width: 4px; }
+  .info-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+  .info-panel h3 {
+    color: var(--accent);
+    font-size: 1.1em;
+    margin-bottom: 8px;
+  }
+  .info-panel .meta {
+    color: var(--text-muted);
+    font-size: 0.8em;
+    margin-bottom: 16px;
+  }
+  .info-panel .desc {
+    color: #bbb;
+    font-size: 0.85em;
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+  .info-section {
+    margin-bottom: 16px;
+  }
+  .info-section h4 {
+    font-size: 0.75em;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .info-section p {
+    color: #aaa;
+    font-size: 0.82em;
+    line-height: 1.5;
+  }
+  .film-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 8px;
+  }
+  .film-tag {
+    background: #1e1e30;
+    color: #d0c0a0;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    border: 1px solid #333;
+  }
+  .char-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-bottom: 16px;
+  }
+  .char-tag {
+    background: rgba(88,144,200,0.12);
+    color: var(--accent);
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: 0.72em;
+    border: 1px solid rgba(88,144,200,0.3);
+  }
+  .link-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .link-list a {
+    color: #7090c0;
+    text-decoration: none;
+    font-size: 0.78em;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .link-list a:hover { color: #90b0e0; }
+
+  .style-indicator {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.72em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .style-indicator.pencil { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
+  .style-indicator.biomech { background: #1a1a2a; color: #8080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.zbrush { background: #1a2a2a; color: #80c0c0; border: 1px solid #2a3a3a; }
+  .style-indicator.oil { background: #2a1a1a; color: #c09080; border: 1px solid #3a2a2a; }
+  .style-indicator.gouache { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
+  .style-indicator.digital { background: #1a1a2a; color: #8090c0; border: 1px solid #2a2a3a; }
+  .style-indicator.airbrush { background: #1a1a2a; color: #9080c0; border: 1px solid #2a2a3a; }
+
+  .prompt-box {
+    background: #0a0a14;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 0.78em;
+    color: #999;
+    line-height: 1.5;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .prompt-box:hover { border-color: var(--accent); }
+  .prompt-box .copy-hint {
+    position: absolute;
+    top: 4px;
+    right: 8px;
+    font-size: 0.8em;
+    color: #555;
+  }
+  .prompt-box.copied .copy-hint { color: var(--accent); }
+
+  /* === STATUS BAR === */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    height: 28px;
+    background: #0c0c14;
+    border-top: 1px solid #1a1a2a;
+    font-size: 0.7em;
+    color: var(--text-muted);
+  }
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #4a4a4a;
+  }
+  .status-dot.ready { background: #70b070; }
+
+  .gen-btn {
+    background: linear-gradient(135deg, #c8a050, #a07830);
+    color: #111;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(240,208,144,0.3); }
+  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* === GENERATION MODAL === */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+    width: 440px;
+    max-width: 90vw;
+  }
+  .modal h3 { color: var(--accent); margin-bottom: 16px; }
+  .modal label { display: block; color: #aaa; font-size: 0.82em; margin-bottom: 4px; margin-top: 12px; }
+  .modal input, .modal select, .modal textarea {
+    width: 100%;
+    background: #1a1a28;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.88em;
+  }
+  .modal textarea { height: 80px; resize: vertical; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+  .modal-actions button {
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85em;
+  }
+  .btn-cancel { background: #2a2a3a; color: #aaa; }
+  .btn-generate { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; font-weight: 600; }
+
+  /* Keyboard hints */
+  kbd {
+    background: #1a1a28;
+    border: 1px solid #333;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab active">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>ENVIRONMENT DESIGN</h1>
+    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Environment</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">ENVIRONMENT DESIGN</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/c9/b8/e4/c9b8e4ffac9350cb4b3054477470adad.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Environment Design Gallery</h2>
+          <p>10명의 환경 디자인 거장 — Syd Mead, McQuarrie, Moebius 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 environment designers loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128396;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Environment Concept</h3>
+    <label>Environment Description</label>
+    <textarea id="modalScene" placeholder="e.g. 네온 불빛이 비에 반사되는 미래 도시의 뒷골목"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+    </select>
+    <label>Camera Angle</label>
+    <input id="modalCamera" type="text" placeholder="e.g. wide establishing shot, aerial view, street level" />
+    <label>Mood / Atmosphere</label>
+    <input id="modalMood" type="text" placeholder="e.g. dystopian, serene, ominous" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DESIGNERS = [
+  {
+    id: 'syd_mead', rank: '01', name: 'Syd Mead',
+    subtitle: 'Visual Futurist \u00b7 \ubbf8\uad6d \u00b7 1933-2019',
+    styleType: 'gouache', styleLabel: 'Gouache / Crow-quill Ink / Prismacolor',
+    desc: '"SF\ub294 \uc77c\uc815\ubcf4\ub2e4 \uc55e\uc120 \ud604\uc2e4\uc774\ub2e4." \ube14\ub808\uc774\ub4dc \ub7ec\ub108\uc758 \ucc28\ub7c9\ub9cc \ub514\uc790\uc778\ud558\ub77c\ub294 \uc758\ub8b0\ub97c \ubc1b\uc558\uc73c\ub098, \ucc28\ub7c9\uc774 \ub2ec\ub9ac\ub294 \uac70\ub9ac\ub97c \uc2a4\ucf00\uce58\ud558\uae30 \uc2dc\uc791\ud558\uba74\uc11c \uc601\ud654 \uc804\uccb4\uc758 \uc2dc\uac01\uc801 \uc138\uacc4\ub97c \uad6c\ucd95\ud558\uac8c \ub418\uc5c8\ub2e4. \ub124\uc628 \ubd88\ube5b\uc774 \ube44\uc5d0 \ubc18\uc0ac\ub418\ub294 \ub514\uc2a4\ud1a0\ud53c\uc544 LA \u2014 \uc0ac\uc774\ubc84\ud380\ud06c \ubbf8\ud559 \uc790\uccb4\ub97c \ucc3d\uc870\ud55c \uc778\ubb3c.',
+    styleDesc: '\uc0b0\uc5c5 \ub514\uc790\uc778 \uc6d0\ub9ac\ub97c \ub3c4\uc2dc \uc2a4\ucf00\uc77c\uc5d0 \uc801\uc6a9\ud55c "\uae30\ub2a5\uc801 \ubbf8\ub798 \ub3c4\uc2dc". \ubaa8\ub4e0 \uac74\ubb3c, \ub3c4\ub85c, \uac04\ud310\uc5d0 \uae30\ub2a5\uc801 \uc774\uc720\uac00 \uc874\uc7ac. \uad6c\uc544\uc288 \ud578\ub4dc \ud398\uc778\ud305\uc73c\ub85c \uc2b5\uae30, \ubc18\uc0ac, \ub300\uae30 \ud6a8\uacfc\ub97c \ud45c\ud604.',
+    technique: 'Vehicle-to-World: \ucc28\ub7c9 \ub514\uc790\uc778\uc5d0\uc11c \uc2dc\uc791\ud558\uc5ec \ub3c4\uc2dc \uc804\uccb4\ub85c \ud655\uc7a5.\nWet Surface Reflections: \ube44, \uc548\uac1c, \uc99d\uae30\ub97c \ud1b5\ud574 \ubaa8\ub4e0 \ud45c\uba74\uc744 \ubc18\uc0ac\uba74\uc73c\ub85c \uc804\ud658.\nLayered Urbanism: \uc218\uc9c1\uc801 \ub3c4\uc2dc \ub808\uc774\uc5b4 \u2014 \uc9c0\uc0c1\uc758 \ud63c\ub3c8, \uc911\uac04\uc758 \uad50\ud1b5, \uc0c1\ubd80\uc758 \uad8c\ub825.',
+    aiPrompt: 'Syd Mead visual futurist environment, dystopian cyberpunk cityscape, gouache painting style, neon-lit rain-slicked streets, layered vertical urbanism, industrial design architecture, wet reflective surfaces, atmospheric fog and steam, Blade Runner aesthetic',
+    films: ['Blade Runner (1982)', 'Blade Runner 2049', 'Aliens (1986)', 'Tron (1982)', 'Elysium (2013)'],
+    characters: ['Dystopian LA 2019', 'Tyrell Corporation HQ', 'Las Vegas 2049'],
+    links: [
+      { text: 'Fast Company: Mead\'s Las Vegas 2049', url: 'https://www.fastcompany.com/90149520/how-blade-runner-artist-syd-mead-envisioned-the-city-of-2049' },
+      { text: 'ASC: Blade Runner Set Design', url: 'https://theasc.com/articles/blade-runner-set-design' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/62/8b/2c/628b2cf332c0bffbe47451f276438ef2.jpg', label: 'Mead — Blade Runner futuristic cityscape' },
+      { src: 'https://i.pinimg.com/736x/c9/b8/e4/c9b8e4ffac9350cb4b3054477470adad.jpg', label: 'Mead — Blade Runner neon city streets' },
+      { src: 'https://i.pinimg.com/736x/7a/02/18/7a021821dd9e3d21c9a658113190f255.jpg', label: 'Mead — sci-fi urban environment concept' },
+      { src: 'https://i.pinimg.com/736x/50/8a/dc/508adc18602c4038bbae1ffa2a9e2151.jpg', label: 'Mead — futuristic architecture painting' },
+    ],
+  },
+  {
+    id: 'ralph_mcquarrie', rank: '02', name: 'Ralph McQuarrie',
+    subtitle: 'Conceptual Illustrator \u00b7 \ubbf8\uad6d \u00b7 1929-2012',
+    styleType: 'gouache', styleLabel: 'Gouache / Acrylic',
+    desc: '\ud0c0\ud22c\uc778\uc758 \uc30d\ub465\uc774 \uc11d\uc591, \ud638\uc2a4\uc758 \uc5bc\uc5b4\ubd99\uc740 \ud669\uc57c, \ud074\ub77c\uc6b0\ub4dc \uc2dc\ud2f0 \u2014 \uc2a4\ud0c0\uc6cc\uc988\uc758 \ubaa8\ub4e0 \ud589\uc131\uacfc \ud658\uacbd\uc740 \ub9e5\ucffc\ub9ac\uc758 \ubd93\uc5d0\uc11c \uc2dc\uc791\ub418\uc5c8\ub2e4. \uadf8\uc758 \ud658\uacbd \ud398\uc778\ud305\uc740 \uac10\uc815\uacfc \uc11c\uc0ac\ub97c \ub2f4\uc740 "\uc7a5\uc18c\uc758 \ucd08\uc0c1\ud654"\ub2e4.',
+    styleDesc: '\uc11c\uc0ac\uc801 \ud48d\uacbd\ud654. \ud658\uacbd\uc774 \uce90\ub9ad\ud130\uc758 \uac10\uc815 \uc0c1\ud0dc\ub97c \ubc18\uc601\ud558\uac70\ub098 \ub300\ube44\uc2dc\ud0b4. \uad11\ud65c\ud55c \uc2a4\ucf00\uc77c\uac10 \u2014 \uc791\uc740 \uc778\ubb3c \uc2e4\ub8e8\uc5ff\uc73c\ub85c \ud658\uacbd\uc758 \uac70\ub300\ud568\uc744 \uac15\uc870.',
+    technique: 'Emotional Landscape: \ud658\uacbd = \uac10\uc815. \ud0c0\ud22c\uc778 \uc11d\uc591 = \ud5a5\uc218\uc640 \uac00\ub2a5\uc131.\nScale Through Figure: \uac70\ub300\ud55c \ud658\uacbd \uc18d \uc791\uc740 \uc778\ubb3c \uc2e4\ub8e8\uc5ff.\nAtmospheric Perspective: \uc548\uac1c, \uba3c\uc9c0, \ube5b \uc0b0\ub780\uc73c\ub85c \uc6d0\uadfc\uac10\uacfc \uae4a\uc774.',
+    aiPrompt: 'Ralph McQuarrie style environment painting, epic sci-fi landscape, gouache on board, atmospheric perspective, small figure silhouette for scale, warm-cool temperature contrast, emotional narrative landscape, Star Wars planet aesthetic',
+    films: ['Star Wars (1977-1983)', 'E.T. (1982)', 'Cocoon (1985)'],
+    characters: ['Tatooine Twin Suns', 'Cloud City Bespin', 'Death Star Interior', 'Hoth Ice Planet'],
+    links: [
+      { text: 'Academy of Art: Famous Concept Artists', url: 'https://blog.academyart.edu/know-your-visual-development-famous-concept-artists/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/6a/8d/46/6a8d46fb7a47b07581402f9cfe2d853a.jpg', label: 'McQuarrie — Star Wars landscape concept' },
+      { src: 'https://i.pinimg.com/736x/b4/46/db/b446db4165384d1e394698974c6920d2.jpg', label: 'McQuarrie — Hoth environment painting' },
+      { src: 'https://i.pinimg.com/736x/c2/c4/74/c2c474c9902be4e9dedce370cd184e87.jpg', label: 'McQuarrie — Cloud City concept art' },
+      { src: 'https://i.pinimg.com/736x/27/0f/cb/270fcb6e63982ad737030c49bb091052.jpg', label: 'McQuarrie — Star Wars environment painting' },
+    ],
+  },
+  {
+    id: 'ryan_church', rank: '03', name: 'Ryan Church',
+    subtitle: 'Environment & Vehicle Concept Designer \u00b7 \ubbf8\uad6d',
+    styleType: 'digital', styleLabel: 'Digital Painting / Photobash',
+    desc: 'ILM \uc544\ud2b8 \ub514\ud30c\ud2b8\uba3c\ud2b8\uc5d0\uc11c \uc2dc\uc791\ud558\uc5ec \uc2a4\uce74\uc774\uc6cc\ucee4 \ub79c\uce58\uc758 \ucee8\uc149 \ub514\uc790\uc778 \uc218\ud37c\ubc14\uc774\uc800\ub85c \ud65c\ub3d9. \uc2a4\ud0c0\uc6cc\uc988 \uc5d0\ud53c\uc18c\ub4dc 3\uc744 \uc704\ud574 \uc57d 900\uc810\uc758 \ud658\uacbd \ud398\uc778\ud305\uc744 \uc81c\uc791\ud588\ub2e4.',
+    styleDesc: '\ub514\uc9c0\ud138 \ud398\uc778\ud305\uacfc \ud3ec\ud1a0\ubc30\uc2f1\uc744 \uacb0\ud569\ud55c \ud604\ub300\uc801 \ucee8\uc149 \uc544\ud2b8. \ud589\uc131 \ub2e8\uc704\uc758 \uac70\ub300 \uc2a4\ucf00\uc77c \ud658\uacbd\uc5d0 \ud2b9\ud654.',
+    technique: 'Transportation-Integrated World: \ud658\uacbd \uc548\uc5d0 \uad50\ud1b5 \uccb4\uacc4, \uc774\ub3d9 \uacbd\ub85c, \uc778\ud504\ub77c\ub97c \ub0b4\uc7a5.\n900-Painting Iteration: \ub300\ub7c9\uc758 \ubc18\ubcf5\uc801 \ubcc0\ud615\uc744 \ud1b5\ud574 \ucd5c\uc801\uc758 \ud658\uacbd \ub514\uc790\uc778\uc5d0 \ub3c4\ub2ec.\nGeological Logic: \ud589\uc131 \ud658\uacbd\uc5d0 \uc9c0\uc9c8\ud559\uc801 \ub17c\ub9ac \ubd80\uc5ec.',
+    aiPrompt: 'Ryan Church style environment concept, epic planetary landscape, digital painting with photobash elements, transportation-integrated cityscape, geological logic alien world, massive scale architecture',
+    films: ['Star Wars Ep II-III', 'War of the Worlds (2005)', 'Avatar', 'Transformers'],
+    characters: ['Coruscant Cityscape', 'Mustafar Volcanic Planet', 'Utapau Sinkhole City'],
+    links: [
+      { text: 'AWN: Otherworldly Designs', url: 'https://awn.com/vfxworld/otherworldly-concept-designs-ryan-church' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/3f/86/51/3f8651fb293a311a020236b00e931699.jpg', label: 'Church — sci-fi environment concept' },
+      { src: 'https://i.pinimg.com/736x/f8/f1/20/f8f12025bb8f670b8a19bfef390ad3e5.jpg', label: 'Church — Star Wars planetary landscape' },
+      { src: 'https://i.pinimg.com/736x/e2/25/4c/e2254cd7d98916329a798c534e40088d.jpg', label: 'Church — epic scale environment painting' },
+      { src: 'https://i.pinimg.com/736x/ee/34/6d/ee346d3848cbbfc1572d68b618a320b4.jpg', label: 'Church — alien world concept art' },
+    ],
+  },
+  {
+    id: 'chris_foss', rank: '04', name: 'Chris Foss',
+    subtitle: 'Spaceship & Environment Illustrator \u00b7 \uc601\uad6d \u00b7 1946-',
+    styleType: 'airbrush', styleLabel: 'Airbrush / Acrylic on Board',
+    desc: 'SF \uc77c\ub7ec\uc2a4\ud2b8\ub808\uc774\uc158\uc758 \uac70\uc7a5. \uccb4\ucee4\ubcf4\ub4dc \ud328\ud134\uacfc \ube44\ub300\uce6d \ud615\ud0dc\uc758 \uac70\ub300\ud55c \uc6b0\uc8fc\uc120\uc740 \ud55c\ub208\uc5d0 "\ud06c\ub9ac\uc2a4 \ud3ec\uc2a4"\uc784\uc744 \uc54c \uc218 \uc788\ub2e4.',
+    styleDesc: '\ub300\ub2f4\ud55c \uc6d0\uc0c9\uacfc \uccb4\ucee4\ubcf4\ub4dc \ud328\ud134. \ube44\ub300\uce6d\uc801\uc774\uace0 \ud3ec\uc2a4\ud2b8\ubaa8\ub358\ud55c \uac70\ub300 \uad6c\uc870\ubb3c.',
+    technique: 'Color as Identity: \uccb4\ucee4, \uc2a4\ud2b8\ub77c\uc774\ud504 \ub4f1 \ub300\ub2f4\ud55c \ud328\ud134\uc73c\ub85c \uac1c\uc131 \ubd80\uc5ec.\nAsymmetric Gigantism: \ube44\ub300\uce6d \ud615\ud0dc\uac00 \uc2a4\ucf00\uc77c\uac10\uc744 \uc99d\ud3ed.\nAirbrush Atmosphere: \uc5d0\uc5b4\ube0c\ub7ec\uc2dc\uc758 \ubd80\ub4dc\ub7ec\uc6b4 \uadf8\ub77c\ub514\uc5b8\ud2b8\ub85c \uc6b0\uc8fc\uc801 \uc2a4\ucf00\uc77c \ud45c\ud604.',
+    aiPrompt: 'Chris Foss style sci-fi environment, bold vivid colors, checkered pattern spacecraft, airbrush technique, asymmetric massive structures, postmodern science fiction, cosmic landscape with giant ships',
+    films: ['Alien (1979) pre-production', 'Guardians of the Galaxy (2014)', 'Superman (1978)'],
+    characters: ['Cosmic Landscapes', 'Massive Starship Environments'],
+    links: [
+      { text: 'Chris Foss Art: Spaceship Portfolio', url: 'https://chrisfossart.com/category/portfolio/spaceship/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/c5/52/4e/c5524e95e26c7cba512a1c35eb0a97ca.jpg', label: 'Foss — cosmic spaceship environment' },
+      { src: 'https://i.pinimg.com/736x/6e/18/54/6e185405c7f4fbeda9a199173bc6c177.jpg', label: 'Foss — sci-fi landscape painting' },
+      { src: 'https://i.pinimg.com/736x/fb/2c/2b/fb2c2b4d9941249f8bd9f4b6c610d7b2.jpg', label: 'Foss — alien environment concept' },
+      { src: 'https://i.pinimg.com/736x/0c/9f/e2/0c9fe29c27583c4cb718f84225601834.jpg', label: 'Foss — spaceship in planetary landscape' },
+    ],
+  },
+  {
+    id: 'moebius', rank: '05', name: 'Moebius (Jean Giraud)',
+    subtitle: 'Environment / World Builder \u00b7 \ud504\ub791\uc2a4 \u00b7 1938-2012',
+    styleType: 'pencil', styleLabel: 'Pen & Ink / Watercolor',
+    desc: '"\uae68\ub057\ud55c \ud06c\ub864 \ubbf8\ub798" \ub300\uc2e0 "\uc0ac\ub78c\uc774 \uc0ac\ub294 \ubbf8\ub798"\ub97c \ucc3d\uc870\ud55c \uc544\ud2f0\uc2a4\ud2b8. \ub9ac\ub4e4\ub9ac \uc2a4\ucf67\uc758 "\uc0ac\uc6a9\uac10 \uc788\ub294 \ubbf8\ub798(used future)" \ubbf8\ud559\uc744 \uc2dc\uac01\uc801\uc73c\ub85c \uc815\ub9bd\ud55c \uc7a5\ubcf8\uc778.',
+    styleDesc: '"\uc0ac\uc6a9\uac10 \uc788\ub294 \ubbf8\ub798(Used Future)." \uc0ac\ub78c\uc774 \uc2e4\uc81c\ub85c \uc0b4\uace0, \uc77c\ud558\uace0, \uba39\uace0, \uc7a0\uc790\ub294 \uacf5\uac04.',
+    technique: 'Lived-In Futurism: \ubaa8\ub4e0 \ud658\uacbd\uc5d0 \uc0ac\uc6a9 \ud754\uc801.\nDensity of Information: \ud55c \uc7a5\uba74\uc5d0 \uc555\ub3c4\uc801\uc778 \uc591\uc758 \uc2dc\uac01 \uc815\ubcf4.\nCultural Archaeology: \ud658\uacbd\uc5d0 \uc2dc\uac04\uc758 \ud754\uc801\uc744 \uc0c8\uae40.',
+    aiPrompt: 'Moebius style environment concept, lived-in futuristic city, intricate pen and ink detail, dense visual information layers, used future aesthetic, multicultural sci-fi urbanism',
+    films: ['Alien (1979)', 'The Fifth Element (1997)', 'Tron (1982)'],
+    characters: ['Nostromo Interior', '23rd Century New York', 'Digital World (Tron)'],
+    links: [
+      { text: 'Smithsonian: How Sci-Fi Looks', url: 'https://www.smithsonianmag.com/smart-news/meet-the-man-who-helped-define-how-science-fiction-looks-180959080/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/f6/04/56/f6045675b28ae82ed7445c38c8bd4a18.jpg', label: 'Moebius — desert landscape illustration' },
+      { src: 'https://i.pinimg.com/736x/a8/00/34/a8003416adc64014ee3af61b929ddd33.jpg', label: 'Moebius — alien city environment' },
+      { src: 'https://i.pinimg.com/736x/0d/cf/f4/0dcff40f819da3b34a0edb5a8e02fbcc.jpg', label: 'Moebius — futuristic cityscape concept' },
+      { src: 'https://i.pinimg.com/736x/26/77/bd/2677bd354a458ad83afa957554744aa1.jpg', label: 'Moebius — Palace of Fire environment' },
+    ],
+  },
+  {
+    id: 'doug_chiang', rank: '06', name: 'Doug Chiang',
+    subtitle: 'Production Designer / VP Lucasfilm \u00b7 \ubbf8\uad6d \u00b7 1962-',
+    styleType: 'digital', styleLabel: 'Digital / Gouache',
+    desc: '\uc2a4\ud0c0\uc6cc\uc988 \ud504\ub9ac\ud014\uc758 \ub098\ubd80, \ucf54\ub7ec\uc0b0\ud2b8, \uc9c0\uc624\ub178\uc2dc\uc2a4 \ub4f1 \uc804\uccb4 \ud589\uc131 \ud658\uacbd\uc744 \uc124\uacc4. \uac01 \ud589\uc131\uc5d0 \uace0\uc720\ud55c \uac74\ucd95 \uc591\uc2dd\uacfc \ubb38\ud654\uc801 \ub808\ud37c\ub7f0\uc2a4\ub97c \ubd80\uc5ec.',
+    styleDesc: '\ubb38\ud654\uc801 \ub808\ud37c\ub7f0\uc2a4 \uae30\ubc18 \ud589\uc131 \uac74\ucd95. \ud329\uc158\ubcc4 \ud658\uacbd \ub514\uc790\uc778 \uc5b8\uc5b4.',
+    technique: 'Cultural DNA in Architecture: \uc2e4\uc138\uacc4 \uac74\ucd95 \uc591\uc2dd\uc744 SF\ub85c \ubcc0\ud658.\nFaction Architecture: \uac74\ubb3c \ud615\ud0dc\ub9cc\uc73c\ub85c \uc18c\uc18d \uc138\ub825\uc744 \uc54c \uc218 \uc788\uc74c.\nEnvironmental Storytelling: \ud658\uacbd\uc758 \uc0c1\ud0dc\uac00 \uc11c\uc0ac\ub97c \uc804\ub2ec.',
+    aiPrompt: 'Doug Chiang style environment design, cultural reference architecture, faction-based building language, Star Wars prequel aesthetic, planetary civilization design, environmental storytelling through architecture',
+    films: ['Star Wars Ep I-II', 'Rogue One', 'The Mandalorian'],
+    characters: ['Naboo Palace (\uc544\ub974\ub204\ubcf4)', 'Coruscant (\uc218\uc9c1 \uba54\uac00\uc2dc\ud2f0)', 'Geonosis (\uace4\ucda9 \uac74\ucd95)'],
+    links: [
+      { text: 'IAMAG: Evolution of Star Wars Design', url: 'https://www.iamag.co/the-evolution-of-star-wars-design-with-doug-chiang/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/80/93/89/8093899ed49c35eaaae2ac008fd17a0d.jpg', label: 'Chiang — Theed street concept design' },
+      { src: 'https://i.pinimg.com/736x/61/2a/31/612a3170129832c01319a0c2becbb0f6.jpg', label: 'Chiang — Star Wars architecture concept' },
+      { src: 'https://i.pinimg.com/736x/c4/db/15/c4db15fae4391203f28e337bedb0ee92.jpg', label: 'Chiang — Naboo palace environment' },
+      { src: 'https://i.pinimg.com/736x/a6/9d/7d/a69d7d88c4263f0396b7d39184cdacd4.jpg', label: 'Chiang — sci-fi world concept art' },
+    ],
+  },
+  {
+    id: 'ron_cobb', rank: '07', name: 'Ron Cobb',
+    subtitle: 'Industrial Environment Designer \u00b7 \ubbf8\uad6d/\ud638\uc8fc \u00b7 1937-2020',
+    styleType: 'pencil', styleLabel: 'Technical Pen & Ink',
+    desc: '\uc5d0\uc774\ub9ac\uc5b8 \ub178\uc2a4\ud2b8\ub85c\ubaa8\uc758 \uc778\uac04 \uac70\uc8fc \uacf5\uac04, \uc5d0\uc774\ub9ac\uc5b8\uc988\uc758 \uc9c0\uad6c \uc2dd\ubbfc\uc9c0 \ub2e8\uc9c0\uae4c\uc9c0 \u2014 "\uc778\uac04\uc774 \uc2e4\uc81c\ub85c \uc77c\ud558\ub294 SF \uacf5\uac04"\uc744 \ub514\uc790\uc778\ud558\ub294 \ub9c8\uc2a4\ud130.',
+    styleDesc: '\uc0b0\uc5c5\uc801 \uae30\ub2a5\uc8fc\uc758. \ubaa8\ub4e0 \ubc30\uad00, \ubc38\ube0c, \ucf58\uc194\uc5d0 \uae30\ub2a5\uc801 \uc774\uc720\uac00 \uc874\uc7ac.',
+    technique: 'Functional Layout: \ud658\uacbd\uc758 \ubaa8\ub4e0 \uc694\uc18c\uc5d0 \uae30\ub2a5\uc801 \uc774\uc720\ub97c \ubd80\uc5ec.\nIndustrial Mundanity: SF\ub97c \uc77c\uc0c1\ud654 \u2014 \uc6b0\uc8fc\uc120 = \ud654\ubb3c\uc120.\nTechnical Drawing Precision: \uae30\uc220 \ub3c4\uba74 \uc218\uc900\uc758 \uc815\ud655\ud55c \ud22c\uc2dc\ub3c4.',
+    aiPrompt: 'Ron Cobb style environment, industrial sci-fi interior, functional utilitarian space, technical pen drawing, narrow corridors with exposed pipes, fluorescent lighting, blue-collar space station, Alien Nostromo interior style',
+    films: ['Alien (1979)', 'Close Encounters (1977)', 'Aliens (1986)', 'Conan the Barbarian (1982)'],
+    characters: ['Nostromo Interior', "Hadley's Hope Colony", 'Mothership Interior'],
+    links: [
+      { text: 'Screen Rant: Ron Cobb Art', url: 'https://screenrant.com/ron-cobbs-best-pieces-of-movie-concept-art/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/79/85/50/7985509d1fdbf62bd6f0f63caf17c6b5.jpg', label: 'Cobb — Semiotic Standards for Alien' },
+      { src: 'https://i.pinimg.com/736x/3d/76/df/3d76df3bc2d106410faffc442640aab5.jpg', label: 'Cobb — Nostromo interior concept' },
+      { src: 'https://i.pinimg.com/736x/dc/73/46/dc73464013ef22818861c1f2e796d7db.jpg', label: 'Cobb — Alien (1979) environment art' },
+      { src: 'https://i.pinimg.com/736x/f8/1c/e0/f81ce0f60b3b9e49c6c4456f213dd819.jpg', label: 'Cobb — sci-fi interior concept art' },
+    ],
+  },
+  {
+    id: 'hr_giger', rank: '08', name: 'H.R. Giger',
+    subtitle: 'Biomechanical Environment Designer \u00b7 \uc2a4\uc704\uc2a4 \u00b7 1940-2014',
+    styleType: 'airbrush', styleLabel: 'Airbrush / Sculpture',
+    desc: '\uc5d0\uc774\ub9ac\uc5b8\uc758 \uc678\uacc4 \uce21 \ud658\uacbd \uc804\uccb4\ub97c \ub514\uc790\uc778. \uacf5\uac04 \uc790\uccb4\uac00 \ud06c\ub9ac\ucc98\uc758 \uc5f0\uc7a5\uc774\uba70, \ubcbd\uc774 \uc228 \uc26c\uace0 \ubc14\ub2e5\uc774 \ub9e5\ubc15 \uce58\ub294 \ub4ef\ud55c \uacf5\ud3ec\uc758 \ud658\uacbd.',
+    styleDesc: '\ubc14\uc774\uc624\uba54\uce74\ub2c8\ucee8 \uac74\ucd95. \ubf08, \ud30c\uc774\ud504, \uc0b4, \uae30\uacc4\uac00 \uad6c\ubd84 \ubd88\uac00\ub2a5\ud558\uac8c \uc735\ud569\ub41c \uacf5\uac04.',
+    technique: '',
+    aiPrompt: 'H.R. Giger biomechanical environment, organic-mechanical architecture, bone and pipe fusion interior, dark alien chamber, ribbed cathedral-like space, airbrush monochrome, living architecture, Alien derelict ship aesthetic',
+    films: ['Alien (1979)'],
+    characters: ['Egg Chamber', 'Derelict Ship Interior', 'Space Jockey Chamber'],
+    links: [
+      { text: 'Artsy: Giger\'s Nightmarish Works', url: 'https://www.artsy.net/article/artsy-editorial-nightmarish-works-hr-giger-artist-alien' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/a1/f4/a0/a1f4a02ff11257589423619e6685febd.jpg', label: 'Giger — biomechanical environment art' },
+      { src: 'https://i.pinimg.com/736x/68/2b/98/682b986d090f795148b594350e278db4.jpg', label: 'Giger — alien interior concept' },
+      { src: 'https://i.pinimg.com/736x/65/33/a1/6533a12e951ef56cf49e1a56cd2a9db1.jpg', label: 'Giger — biomechanical landscape' },
+      { src: 'https://i.pinimg.com/736x/5f/87/f3/5f87f35337548ffc254e3ed7de7c3c59.jpg', label: 'Giger — Scorn-style environment design' },
+    ],
+  },
+  {
+    id: 'wayne_barlowe', rank: '09', name: 'Wayne Barlowe',
+    subtitle: 'Alien Ecosystem Designer \u00b7 \ubbf8\uad6d',
+    styleType: 'oil', styleLabel: 'Oil Painting / Digital',
+    desc: '\uc544\ubc14\ud0c0 \ud310\ub3c4\ub77c\uc758 \uc0dd\ud0dc\uacc4\ub97c \uc2dc\uac01\ud654\ud55c \ud575\uc2ec \uc544\ud2f0\uc2a4\ud2b8. \uc0dd\ubb3c \ubc1c\uad11 \uc232, \ub5a0\ub2e4\ub2c8\ub294 \ud560\ub810\ub8e8\uc57c \ub9c8\uc6b4\ud2f4\uc758 \uc2dd\uc0dd.',
+    styleDesc: '\uc0dd\ud0dc\ud559\uc801 \uc138\uacc4\uad00 \uad6c\ucd95. \uc2dd\ubb3c, \ub3d9\ubb3c, \uc9c0\ud615, \uae30\ud6c4\uac00 \uc0c1\ud638 \uc758\uc874\ud558\ub294 \uc644\uc804\ud55c \uc678\uacc4 \uc0dd\ud0dc\uacc4.',
+    technique: '',
+    aiPrompt: 'Wayne Barlowe alien ecosystem environment, bioluminescent alien forest, rich oil painting palette, exotic alien flora and fauna, Pandora-style natural environment, ecological world-building',
+    films: ['Avatar (2009)', 'Pacific Rim'],
+    characters: ['Pandora Bioluminescent Forest', 'Alien Ecosystem'],
+    links: [
+      { text: 'Wayne Barlowe: Film Art', url: 'https://waynebarlowe.com/artwork/film-tv-game/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/6e/79/ff/6e79ff7739dca2a272510420f5b92bb8.jpg', label: 'Barlowe — Hell landscape painting' },
+      { src: 'https://i.pinimg.com/736x/14/2b/19/142b19c77441a532f99afb831474ad99.jpg', label: 'Barlowe — Inferno environment concept' },
+      { src: 'https://i.pinimg.com/736x/19/12/2d/19122dc7c9c124745963fca773b4fa5b.jpg', label: 'Barlowe — dark fantasy landscape' },
+      { src: 'https://i.pinimg.com/736x/b3/e3/67/b3e367a62c788958a9d074f5408a6247.jpg', label: 'Barlowe — Inferno architecture painting' },
+    ],
+  },
+  {
+    id: 'neville_page', rank: '10', name: 'Neville Page',
+    subtitle: 'Creature Environment Integration \u00b7 \uc601\uad6d/\ubbf8\uad6d \u00b7 1964-',
+    styleType: 'digital', styleLabel: 'ZBrush / Digital',
+    desc: '\uc544\ubc14\ud0c0\uc5d0\uc11c \ud06c\ub9ac\ucc98\ub97c \ub514\uc790\uc778\ud560 \ub54c \ud310\ub3c4\ub77c\uc758 \ud658\uacbd\uacfc \ud06c\ub9ac\ucc98\ub97c \ub3d9\uc2dc\uc5d0 \uace0\ub824. \ud658\uacbd\uacfc \uc0dd\ubb3c\uc774 \ubd84\ub9ac \ubd88\uac00\ub2a5\ud55c \ud1b5\ud569 \ub514\uc790\uc778.',
+    styleDesc: '',
+    technique: '',
+    aiPrompt: 'Neville Page creature-environment integration, ecological niche design, alien habitat concept, biological environment interaction, Pandora ecosystem detail, creature in natural habitat',
+    films: ['Avatar', 'Prometheus'],
+    characters: ['Creature-Environment Integration', 'Ecological Niche Design'],
+    links: [
+      { text: 'Blue Screen: Neville Page', url: 'https://bluescreenreveals.com/neville-page-designing-sci-fi-creatures-characters/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/a8/58/86/a858861f9da66254cc2087787a4e5666.jpg', label: 'Page — Avatar Pandora environment' },
+      { src: 'https://i.pinimg.com/736x/46/53/96/4653963b75af5261a3b0708ab73bddca.jpg', label: 'Page — alien world concept art' },
+      { src: 'https://i.pinimg.com/736x/8a/65/b7/8a65b7d834dacb3be17c83019cedd7cd.jpg', label: 'Page — bioluminescent forest concept' },
+      { src: 'https://i.pinimg.com/736x/42/89/ba/4289ba4895bba08cd46a1135c6a4c26a.jpg', label: 'Page — Pandora landscape painting' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+// Build left panel
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = DESIGNERS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+
+  // Update active state
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+}
+
+function updateInfoPanel(a) {
+  let techniqueSec = '';
+  if (a.technique) {
+    techniqueSec = `
+      <div class="info-section">
+        <h4>Technique</h4>
+        <p>${a.technique.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    ${techniqueSec}
+    <div class="info-section">
+      <h4>AI Prompt</h4>
+      <div class="prompt-box" onclick="copyPrompt(this, '${a.id}')">
+        <span class="copy-hint">click to copy</span>
+        ${a.aiPrompt}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function copyPrompt(el, id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  navigator.clipboard.writeText(artist.aiPrompt).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.copy-hint').textContent = 'copied!';
+    setTimeout(() => {
+      el.classList.remove('copied');
+      el.querySelector('.copy-hint').textContent = 'click to copy';
+    }, 1500);
+  });
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 4}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image available</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.parentElement.querySelector('.no-image')||this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.onerror = function() {
+      this.style.display = 'none';
+      ph.style.display = 'block';
+      ph.innerHTML = `
+        <div class="icon">&#128247;</div>
+        <p style="color:var(--accent)">${a.images[currentImageIdx].label}</p>
+        <p style="margin-top:8px;font-size:0.8em;color:#666;">Image could not be loaded. Check the reference links below.</p>
+      `;
+    };
+    img.src = a.images[currentImageIdx].src;
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#127912;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available for this designer.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+// Modal
+function openModal() {
+  const sel = document.getElementById('modalStyle');
+  if (sel.options.length <= 1) {
+    DESIGNERS.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const camera = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+
+  if (!scene.trim()) { alert('Environment description is required.'); return; }
+
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+
+  const cmd = style === 'all'
+    ? `python3 main.py compare --type environment --scene "${scene}"`
+    : `python3 main.py generate --type environment --scene "${scene}" --style ${style}`;
+
+  console.log('Run:', cmd);
+
+  setTimeout(() => {
+    setStatus('ready', `Generation complete. Run in terminal: ${cmd}`);
+  }, 2000);
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  // Number keys 1-9, 0 to select artist
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id);
+  }
+});
+
+// Click outside modal to close
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// Init
+buildArtistPanel();
+</script>
+</body>
+</html>
