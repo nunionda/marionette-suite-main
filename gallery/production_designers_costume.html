@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costume Design — Hollywood Costume Designers 10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --gold: #e8c872;
+    --gold-dim: #b89a4a;
+    --accent: #b868a8;
+    --bg: #0b0b12;
+    --bg-deep: #06060a;
+    --card-bg: #111119;
+    --bg-elevated: #16161f;
+    --border: #1e1e2a;
+    --border-hover: #2e2e3e;
+    --text: #d8d4cf;
+    --text-bright: #f0ece6;
+    --text-muted: #706c66;
+    --text-dim: #4a4844;
+    --font-display: 'DM Serif Display', 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Libre Franklin', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --radius-sm: 6px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; }
+  body::after { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; opacity: 0.03; z-index: 9999; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .gallery-nav { display: flex; align-items: center; gap: 6px; padding: 0 24px; height: 42px; background: var(--bg-deep); border-bottom: 1px solid var(--border); z-index: 101; position: relative; }
+  .gallery-nav .logo { color: var(--gold); font-family: var(--font-display); font-size: 0.85em; text-decoration: none; margin-right: 10px; font-weight: 400; letter-spacing: 0.5px; }
+  .gallery-nav .sep { color: var(--border); margin: 0 4px; user-select: none; }
+  .gallery-nav .tab { padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.72em; font-weight: 500; letter-spacing: 0.3px; color: var(--text-muted); border: 1px solid transparent; text-decoration: none; transition: all 0.25s var(--ease-out); }
+  .gallery-nav .tab:hover { color: var(--text); background: var(--bg-elevated); border-color: var(--border); }
+  .gallery-nav .tab.active { color: var(--accent); background: var(--card-bg); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: #111118; border-bottom: 1px solid var(--border); height: 56px; }
+  .topbar h1 { font-family: var(--font-display); font-size: 1em; color: var(--accent); letter-spacing: 1px; font-weight: 400; }
+  .topbar .subtitle { color: var(--text-muted); font-size: 0.75em; }
+  .layout { display: flex; height: calc(100vh - 56px - 42px); }
+  .artist-panel { width: 260px; min-width: 260px; background: #0e0e16; border-right: 1px solid var(--border); overflow-y: auto; padding: 12px 0; }
+  .artist-panel::-webkit-scrollbar { width: 4px; }
+  .artist-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .artist-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+  .artist-item:hover { background: #1a1a28; }
+  .artist-item.active { background: #1a1a2e; border-left-color: var(--accent); }
+  .artist-rank { font-size: 0.7em; color: var(--accent); opacity: 0.6; min-width: 20px; text-align: right; font-weight: bold; }
+  .artist-item .name { font-size: 0.88em; color: #ddd; font-weight: 500; }
+  .artist-item .role { font-size: 0.7em; color: var(--text-muted); margin-top: 1px; }
+  .artist-item.active .name { color: var(--accent); }
+  .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .viewer { flex: 1; display: flex; align-items: center; justify-content: center; background: #080810; position: relative; overflow: hidden; min-height: 0; }
+  .viewer img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 4px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); transition: opacity 0.3s; }
+  .viewer .placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #555; overflow: hidden; }
+  .viewer .placeholder .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; filter: blur(1px) saturate(0.8); transition: opacity 0.6s; }
+  .viewer .placeholder:hover .hero-img { opacity: 0.5; }
+  .viewer .placeholder .hero-overlay { position: relative; z-index: 2; background: rgba(11,11,18,0.6); backdrop-filter: blur(8px); padding: 32px 48px; border-radius: 12px; border: 1px solid var(--border); }
+  .viewer .placeholder .hero-overlay h2 { font-family: var(--font-display); color: var(--accent); font-size: 1.6em; font-weight: 400; margin-bottom: 8px; }
+  .viewer .placeholder .hero-overlay p { font-size: 0.9em; color: var(--text-muted); }
+  .viewer .placeholder .hero-overlay kbd { background: var(--bg-elevated); border: 1px solid var(--border); padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+  .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(20,20,32,0.8); border: 1px solid var(--border); color: var(--accent); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2em; transition: all 0.2s; z-index: 10; }
+  .nav-arrow:hover { background: rgba(40,40,60,0.9); border-color: var(--accent); }
+  .nav-arrow.left { left: 16px; }
+  .nav-arrow.right { right: 16px; }
+  .image-counter { position: absolute; bottom: 12px; right: 16px; background: rgba(20,20,32,0.8); padding: 4px 12px; border-radius: 12px; font-size: 0.75em; color: var(--text-muted); }
+  .artist-badge { position: absolute; top: 12px; left: 16px; background: rgba(20,20,32,0.85); border: 1px solid var(--border); padding: 6px 14px; border-radius: 8px; font-size: 0.8em; }
+  .artist-badge .badge-name { color: var(--accent); font-weight: 600; }
+  .artist-badge .badge-style { color: var(--text-muted); font-size: 0.85em; margin-top: 2px; }
+  .filmstrip-wrapper { background: #111118; border-top: 1px solid var(--border); padding: 12px 16px; }
+  .filmstrip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .filmstrip::-webkit-scrollbar { height: 4px; }
+  .filmstrip::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .thumb { min-width: 120px; height: 72px; border-radius: 6px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; background: #1a1a28; flex-shrink: 0; }
+  .thumb:hover { border-color: #555; transform: translateY(-2px); }
+  .thumb.active { border-color: var(--accent); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .thumb-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: 2px 6px 4px; font-size: 0.6em; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .thumb .no-image { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #555; font-size: 0.7em; text-align: center; padding: 4px; }
+  .info-panel { width: 300px; min-width: 300px; background: #0e0e16; border-left: 1px solid var(--border); overflow-y: auto; padding: 20px; }
+  .info-panel::-webkit-scrollbar { width: 4px; }
+  .info-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .info-panel h3 { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+  .info-panel .meta { color: var(--text-muted); font-size: 0.8em; margin-bottom: 16px; }
+  .info-panel .desc { color: #bbb; font-size: 0.85em; line-height: 1.6; margin-bottom: 16px; }
+  .info-section { margin-bottom: 16px; }
+  .info-section h4 { font-size: 0.75em; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .info-section p { color: #aaa; font-size: 0.82em; line-height: 1.5; }
+  .film-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+  .film-tag { background: #1e1e30; color: #d0c0a0; padding: 3px 9px; border-radius: 12px; font-size: 0.72em; border: 1px solid #333; }
+  .char-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+  .char-tag { background: rgba(184,104,168,0.12); color: var(--accent); padding: 3px 9px; border-radius: 12px; font-size: 0.72em; border: 1px solid rgba(184,104,168,0.3); }
+  .link-list { display: flex; flex-direction: column; gap: 4px; }
+  .link-list a { color: #b080a0; text-decoration: none; font-size: 0.78em; padding: 4px 0; transition: color 0.2s; }
+  .link-list a:hover { color: #d0a0c0; }
+  .style-indicator { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.72em; font-weight: 600; margin-bottom: 12px; }
+  .style-indicator.glamour { background: #2a1a2a; color: #c080c0; border: 1px solid #3a2a3a; }
+  .style-indicator.fantasy { background: #1a1a2a; color: #9080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.period { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
+  .style-indicator.auteur { background: #1a2a2a; color: #80c0c0; border: 1px solid #2a3a3a; }
+  .style-indicator.afrofuturist { background: #2a1a1a; color: #c09080; border: 1px solid #3a2a2a; }
+  .style-indicator.romantic { background: #2a1a2a; color: #c080a0; border: 1px solid #3a2a3a; }
+  .style-indicator.punk { background: #2a2a1a; color: #c0a080; border: 1px solid #3a3a2a; }
+  .style-indicator.scifi { background: #1a1a2a; color: #8090c0; border: 1px solid #2a2a3a; }
+  .style-indicator.avantgarde { background: #2a1a1a; color: #c08080; border: 1px solid #3a2a2a; }
+  .style-indicator.action { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
+  .prompt-box { background: #0a0a14; border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.78em; color: #999; line-height: 1.5; cursor: pointer; position: relative; transition: border-color 0.2s; }
+  .prompt-box:hover { border-color: var(--accent); }
+  .prompt-box .copy-hint { position: absolute; top: 4px; right: 8px; font-size: 0.8em; color: #555; }
+  .prompt-box.copied .copy-hint { color: var(--accent); }
+  .status-bar { display: flex; align-items: center; gap: 8px; padding: 0 16px; height: 28px; background: #0c0c14; border-top: 1px solid #1a1a2a; font-size: 0.7em; color: var(--text-muted); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4a4a4a; }
+  .status-dot.ready { background: #70b070; }
+  .gen-btn { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; border: none; padding: 8px 20px; border-radius: 6px; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(240,208,144,0.3); }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 440px; max-width: 90vw; }
+  .modal h3 { color: var(--accent); margin-bottom: 16px; }
+  .modal label { display: block; color: #aaa; font-size: 0.82em; margin-bottom: 4px; margin-top: 12px; }
+  .modal input, .modal select, .modal textarea { width: 100%; background: #1a1a28; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 0.88em; }
+  .modal textarea { height: 80px; resize: vertical; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+  .modal-actions button { padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85em; }
+  .btn-cancel { background: #2a2a3a; color: #aaa; }
+  .btn-generate { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; font-weight: 600; }
+  kbd { background: #1a1a28; border: 1px solid #333; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab active">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+</nav>
+<div class="topbar">
+  <div>
+    <h1>COSTUME DESIGN</h1>
+    <div class="subtitle">10 Costume Design Masters &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Costume</button>
+  </div>
+</div>
+<div class="layout">
+  <div class="artist-panel" id="artistPanel"></div>
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">COSTUME DESIGN</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/50/9c/1f/509c1fc2a40a10cbad7399939e839077.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Costume Design Gallery</h2>
+          <p>10명의 코스튬 디자인 거장 — Edith Head, Colleen Atwood, Eiko Ishioka 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+    <div class="filmstrip-wrapper"><div class="filmstrip" id="filmstrip"></div></div>
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 costume designers loaded</span>
+    </div>
+  </div>
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128087;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Costume Concept</h3>
+    <label>Character / Scene Description</label>
+    <textarea id="modalScene" placeholder="e.g. 1920년대 재즈 시대 여성 가수, 화려한 플래퍼 드레스"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle"><option value="all">All Styles (Compare)</option></select>
+    <label>Era / Period</label>
+    <input id="modalCamera" type="text" placeholder="e.g. Victorian, Art Deco, Futuristic, Medieval" />
+    <label>Mood / Character</label>
+    <input id="modalMood" type="text" placeholder="e.g. regal, rebellious, elegant, battle-worn" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+<script>
+const DESIGNERS = [
+  {
+    id: 'edith_head', rank: '01', name: 'Edith Head (에디스 헤드)',
+    subtitle: 'Costume Designer · 미국 · 1897-1981',
+    styleType: 'glamour', styleLabel: 'Hollywood Glamour',
+    desc: '아카데미상 8회 수상, 영화 역사상 가장 많은 오스카를 받은 의상 디자이너. 파라마운트와 유니버설에서 50년간 활동하며 오드리 헵번, 그레이스 켈리, 엘리자베스 테일러의 아이코닉한 룩을 창조했다.',
+    styleDesc: '할리우드 황금기의 글래머 정의. 배우의 체형과 성격을 완벽히 분석한 맞춤형 디자인. 우아함과 실용성의 완벽한 균형.',
+    technique: 'Star Tailoring: 배우 개인의 체형과 매력을 극대화하는 맞춤 설계.\nNarrative Costume: 의상으로 캐릭터의 성장과 변화를 표현.\nTimeless Elegance: 시대를 초월하는 우아한 실루엣.',
+    aiPrompt: 'Edith Head costume design, classic Hollywood glamour, elegant tailored gown, Audrey Hepburn style, Grace Kelly sophistication, golden age fashion, black and white era couture',
+    films: ['로마의 휴일 (1953)', '사브리나 (1954)', '이창 (1954)', '스팅 (1973)'],
+    characters: ['앤 공주 (오드리 헵번)', '사브리나 드레스', '리사 프리몬트', '1930년대 사기꾼 슈트'],
+    links: [{ text: 'Academy Museum: Edith Head', url: 'https://www.academymuseum.org/en/collection/edith-head' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/ba/d5/aa/bad5aa96b74118fc2b555b9a7e47fe8c.jpg', label: 'Head — Hollywood glamour costume' },
+      { src: 'https://i.pinimg.com/736x/9b/1d/4a/9b1d4a69d127a9ae41fd4afe02f10871.jpg', label: 'Head — golden age fashion' },
+      { src: 'https://i.pinimg.com/736x/2f/df/0e/2fdf0ead257dc1d8cf1baf4ce0d0e113.jpg', label: 'Head — classic tailored design' },
+      { src: 'https://i.pinimg.com/736x/fd/09/47/fd0947040cdffa53d571d481ef98a00a.jpg', label: 'Head — iconic film costume' },
+    ],
+  },
+  {
+    id: 'colleen_atwood', rank: '02', name: 'Colleen Atwood (콜린 앳우드)',
+    subtitle: 'Costume Designer · 미국 · 1948-',
+    styleType: 'fantasy', styleLabel: 'Dark Fantasy Couture',
+    desc: '아카데미상 4회 수상. 팀 버튼의 오랜 협력자로서 가위손, 이상한 나라의 앨리스, 시카고 등의 의상을 디자인. 판타지와 고딕의 세계를 패브릭으로 구현하는 마법사.',
+    styleDesc: '어두운 판타지와 고딕 로맨스를 의상으로 표현. 역사적 시대복의 정확성 위에 초현실적 디테일을 더하는 독특한 스타일.',
+    technique: 'Gothic Romanticism: 고딕 실루엣에 로맨틱한 디테일 결합.\nTexture Layering: 다양한 소재와 질감의 층위적 구성.\nCharacter Embodiment: 캐릭터의 내면을 외형으로 완벽히 표현.',
+    aiPrompt: 'Colleen Atwood costume design, dark fantasy Gothic couture, Tim Burton collaboration, elaborate period costume with surreal details, Alice in Wonderland, theatrical fashion',
+    films: ['시카고 (2002)', '이상한 나라의 앨리스 (2010)', '위대한 쇼맨 (2017)', '가위손 (1990)'],
+    characters: ['벨마 켈리 (시카고)', '붉은 여왕', '쇼맨 서커스 의상', '에드워드 가죽 슈트'],
+    links: [{ text: 'Vogue: Colleen Atwood', url: 'https://www.vogue.com/article/colleen-atwood-costume-designer' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/78/ce/70/78ce7067637852ae466f1b5c38d75703.jpg', label: 'Atwood — dark fantasy costume' },
+      { src: 'https://i.pinimg.com/736x/f0/8a/98/f08a98150ec084ed0a5efff5b537afea.jpg', label: 'Atwood — Tim Burton collaboration' },
+      { src: 'https://i.pinimg.com/736x/29/0c/71/290c71dcced872438b7372c2eeb6699d.jpg', label: 'Atwood — elaborate period dress' },
+      { src: 'https://i.pinimg.com/736x/70/44/04/7044047c85ee0ac67ba4d9d77af1e93f.jpg', label: 'Atwood — theatrical couture' },
+    ],
+  },
+  {
+    id: 'sandy_powell', rank: '03', name: 'Sandy Powell (샌디 파웰)',
+    subtitle: 'Costume Designer · 영국 · 1960-',
+    styleType: 'period', styleLabel: 'Period Reinvention',
+    desc: '아카데미상 3회 수상. 스코세이지, 토드 헤인즈와의 협업으로 유명. 셰익스피어 인 러브, 에비에이터, 신데렐라의 의상을 디자인. 역사적 의상에 현대적 감각을 결합.',
+    styleDesc: '시대극 의상의 혁신적 재해석. 역사적 정확성을 유지하면서도 현대적 감각과 팝적 색채를 주입하는 대담한 접근.',
+    technique: 'Period Subversion: 시대복의 규칙을 알면서도 의도적으로 비트는 기법.\nColor Storytelling: 색상의 변화로 캐릭터 아크를 시각화.\nModern Anachronism: 의도적 시대착오를 통한 현대성 부여.',
+    aiPrompt: 'Sandy Powell costume design, reinvented period costume, Shakespeare in Love Renaissance fashion, bold color palette, Cinderella ball gown, Martin Scorsese period film',
+    films: ['셰익스피어 인 러브 (1998)', '에비에이터 (2004)', '신데렐라 (2015)', '아이리시맨 (2019)'],
+    characters: ['바이올라 남장 의상', '캐서린 헵번 바지 슈트', '신데렐라 블루 가운', '1950년대 마피아 슈트'],
+    links: [{ text: 'BAFTA: Sandy Powell', url: 'https://www.bafta.org/person/sandy-powell' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/74/7d/8c/747d8cf7532edaee7b10e770b89cbb6d.jpg', label: 'Powell — period reinvention' },
+      { src: 'https://i.pinimg.com/736x/d2/0d/1a/d20d1af996b2838adec7ddb68ef252c3.jpg', label: 'Powell — bold color costume' },
+      { src: 'https://i.pinimg.com/736x/c7/ea/e1/c7eae1f843add823982ee4ccc72320b4.jpg', label: 'Powell — Cinderella design' },
+      { src: 'https://i.pinimg.com/736x/18/3e/9c/183e9cb7bbf06dc82825c44ff0c2911b.jpg', label: 'Powell — Scorsese collaboration' },
+    ],
+  },
+  {
+    id: 'milena_canonero', rank: '04', name: 'Milena Canonero (밀레나 카노네로)',
+    subtitle: 'Costume Designer · 이탈리아 · 1946-',
+    styleType: 'auteur', styleLabel: 'Auteur Collaboration',
+    desc: '아카데미상 4회 수상. 스탠리 큐브릭의 배리 린든, 시계태엽 오렌지의 의상을 설계한 거장. 웨스 앤더슨의 그랜드 부다페스트 호텔도 그녀의 작품.',
+    styleDesc: '감독의 비전을 완벽히 이해하고 의상으로 구현하는 오뜨르 협업의 정수. 시대적 정확성과 영화적 과장의 균형.',
+    technique: 'Director Symbiosis: 감독의 시각적 비전과 완벽히 동기화.\nPeriod Accuracy: 직물, 염색, 재단 기법까지 시대적 정확성 추구.\nSymbolic Costume: 의상에 서사적 상징성을 내장.',
+    aiPrompt: 'Milena Canonero costume design, Stanley Kubrick collaboration, Barry Lyndon 18th century fashion, A Clockwork Orange dystopian outfit, Grand Budapest Hotel uniform, auteur film costume',
+    films: ['배리 린든 (1975)', '시계태엽 오렌지 (1971)', '그랜드 부다페스트 호텔 (2014)', '마리 앙투아네트 (2006)'],
+    characters: ['배리 린든 18세기 복식', '알렉스의 흰 슈트', '로비 컨시어지 유니폼', '마리 앙투아네트 드레스'],
+    links: [{ text: 'Academy: Milena Canonero', url: 'https://www.oscars.org/collection-highlights/milena-canonero' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/7c/35/98/7c35987a244d4db973d5fccc734dac4c.jpg', label: 'Canonero — Kubrick period costume' },
+      { src: 'https://i.pinimg.com/736x/2c/bd/dc/2cbddcb10b958c4c394b2b08ea9377da.jpg', label: 'Canonero — auteur collaboration' },
+      { src: 'https://i.pinimg.com/736x/ca/e5/11/cae511d94d85cc961286cb8caba6d547.jpg', label: 'Canonero — Grand Budapest' },
+      { src: 'https://i.pinimg.com/736x/6d/ef/ab/6defab445c233dfcd807bd6e74d3f16d.jpg', label: 'Canonero — period fashion detail' },
+    ],
+  },
+  {
+    id: 'ruth_carter', rank: '05', name: 'Ruth E. Carter (루스 E. 카터)',
+    subtitle: 'Costume Designer · 미국 · 1960-',
+    styleType: 'afrofuturist', styleLabel: 'Afrofuturist Fashion',
+    desc: '아카데미상 2회 수상 (블랙 팬서, 와칸다 포에버). 아프리카 전통 직물과 미래 기술을 결합한 와칸다 의상을 창조. 말콤 X, 아미스타드 등 스파이크 리·스필버그와도 협업.',
+    styleDesc: '아프로퓨처리즘 패션의 선구자. 아프리카 각 부족의 전통 문양, 직물, 비딩 기법을 리서치하여 미래적 패션으로 재탄생시키는 문화적 디자인.',
+    technique: 'Cultural Research: 아프리카 54개국의 전통 의상 심층 연구.\nTech Integration: 3D 프린팅과 전통 비딩의 결합.\nTribal Identity: 부족별 정체성을 의상 색상과 패턴으로 구분.',
+    aiPrompt: 'Ruth E. Carter costume design, Black Panther Wakanda fashion, Afrofuturist costume, African tribal pattern meets future technology, vibranium armor suit, Dora Milaje warrior outfit',
+    films: ['블랙 팬서 (2018)', '와칸다 포에버 (2022)', '말콤 X (1992)', '아미스타드 (1997)'],
+    characters: ['트찰라 의식 복장', '도라 밀라제 전투복', '와칸다 왕실 의상', '말콤 X 슈트'],
+    links: [{ text: 'Vogue: Ruth Carter Wakanda', url: 'https://www.vogue.com/article/ruth-carter-black-panther-costumes' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/93/46/26/93462667ea471419011bb025dcf4a065.jpg', label: 'Carter — Wakanda costume' },
+      { src: 'https://i.pinimg.com/736x/02/98/b0/0298b0db40757c84360980429f793219.jpg', label: 'Carter — Afrofuturist design' },
+      { src: 'https://i.pinimg.com/736x/14/3a/32/143a324f59c81767960587b126f9b84a.jpg', label: 'Carter — Black Panther fashion' },
+      { src: 'https://i.pinimg.com/736x/49/c7/be/49c7be443fef601f488e39ef45b27345.jpg', label: 'Carter — tribal pattern design' },
+    ],
+  },
+  {
+    id: 'jacqueline_durran', rank: '06', name: 'Jacqueline Durran (재클린 듀란)',
+    subtitle: 'Costume Designer · 영국 · 1966-',
+    styleType: 'romantic', styleLabel: 'Romantic Period Design',
+    desc: '아카데미상 2회 수상. 조 라이트 감독과의 안나 카레니나, 프라이드 앤 프레쥬디스, 그레타 거윅의 작은 아씨들의 의상을 디자인. 로맨틱한 시대극 의상의 현대적 거장.',
+    styleDesc: '로맨틱 시대극의 정수. 역사적 정확성을 기반으로 하되, 현대 관객의 감성에 호소하는 부드럽고 따뜻한 색감과 질감을 구사.',
+    technique: 'Lived-In Costume: 새 옷이 아닌 "살아온" 느낌의 자연스러운 질감.\nEmotional Palette: 캐릭터 감정에 따라 변화하는 색상 팔레트.\nPractical Beauty: 실제로 입을 수 있는 아름다움 추구.',
+    aiPrompt: 'Jacqueline Durran costume design, romantic period film fashion, Anna Karenina Russian aristocracy dress, Little Women 1860s New England costume, Joe Wright collaboration, warm natural fabrics',
+    films: ['안나 카레니나 (2012)', '작은 아씨들 (2019)', '어톤먼트 (2007)', '1917 (2019)'],
+    characters: ['안나 카레니나 무도회 드레스', '조 마치 일상복', '세실리아 그린 드레스', '1차 대전 군복'],
+    links: [{ text: 'British Vogue: Jacqueline Durran', url: 'https://www.vogue.co.uk/article/jacqueline-durran-costume-designer' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/2a/8f/0a/2a8f0a4cf05cfda63cd4bdfadfd441e7.jpg', label: 'Durran — romantic period costume' },
+      { src: 'https://i.pinimg.com/736x/ab/10/6f/ab106f2f4e35833b4f56e86d7cb3b1eb.jpg', label: 'Durran — Anna Karenina dress' },
+      { src: 'https://i.pinimg.com/736x/bc/d0/36/bcd0364f6f3f17b587c396aa1c6381d3.jpg', label: 'Durran — Little Women fashion' },
+      { src: 'https://i.pinimg.com/736x/34/83/7e/34837e43d220e6a2012bd13dbed15b15.jpg', label: 'Durran — period detail' },
+    ],
+  },
+  {
+    id: 'jenny_beavan', rank: '07', name: 'Jenny Beavan (제니 비번)',
+    subtitle: 'Costume Designer · 영국 · 1950-',
+    styleType: 'punk', styleLabel: 'Post-Apocalyptic Punk',
+    desc: '아카데미상 2회 수상. 전통적 시대극(전망 좋은 방)에서 매드 맥스: 분노의 도로, 크루엘라까지 장르를 넘나드는 놀라운 범위의 디자이너.',
+    styleDesc: '포스트 아포칼립스 펑크에서 빅토리안 엘레강스까지. 장르의 경계를 무시하는 범용적 디자인 능력. 매드 맥스의 전사 의상은 패션 역사를 새로 썼다.',
+    technique: 'Found Material: 폐자재와 재활용 소재로 세계관 구축.\nGenre Fusion: 전혀 다른 장르를 넘나드는 적응력.\nPractical Stunt Wear: 액션 촬영에서도 기능하는 의상 설계.',
+    aiPrompt: 'Jenny Beavan costume design, Mad Max Fury Road post-apocalyptic punk fashion, Cruella punk couture, wasteland warrior outfit, distressed leather and metal accessories, functional action costume',
+    films: ['매드 맥스: 분노의 도로 (2015)', '크루엘라 (2021)', '전망 좋은 방 (1985)', '킹스 스피치 (2010)'],
+    characters: ['임모탄 조 갑옷', '퓨리오사 전투복', '크루엘라 펑크 패션', '빅토리안 드레스'],
+    links: [{ text: 'Guardian: Jenny Beavan Mad Max', url: 'https://www.theguardian.com/film/jenny-beavan' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/3e/78/aa/3e78aab78dd33a72307560548df41d51.jpg', label: 'Beavan — Mad Max warrior costume' },
+      { src: 'https://i.pinimg.com/736x/14/74/9f/14749f637f5ac4e35564932597114713.jpg', label: 'Beavan — post-apocalyptic fashion' },
+      { src: 'https://i.pinimg.com/736x/e4/71/d4/e471d490294a0aa6390309d5104214d7.jpg', label: 'Beavan — Cruella punk design' },
+      { src: 'https://i.pinimg.com/736x/12/70/0a/12700ad39e124b068a574999fa354564.jpg', label: 'Beavan — wasteland couture' },
+    ],
+  },
+  {
+    id: 'michael_kaplan', rank: '08', name: 'Michael Kaplan (마이클 카플란)',
+    subtitle: 'Costume Designer · 미국 · 1954-',
+    styleType: 'scifi', styleLabel: 'Sci-Fi / Urban Fashion',
+    desc: '블레이드 러너, 파이트 클럽, 스타워즈: 깨어난 포스의 의상을 디자인. SF 미래 패션과 현대 도시 스타일의 대가. 리들리 스콧, 데이비드 핀처, J.J. 에이브럼스와 협업.',
+    styleDesc: 'SF 세계관의 의상 설계. 미래적이면서도 기능적인 디자인. 블레이드 러너의 레이첼 트렌치코트는 SF 패션의 아이콘이 되었다.',
+    technique: 'Future Realism: 미래지만 실제로 입을 수 있는 의상.\nUrban Edge: 도시적 엣지와 스트리트 패션의 결합.\nCharacter Psychology: 의상으로 캐릭터의 심리 상태를 표현.',
+    aiPrompt: 'Michael Kaplan costume design, Blade Runner futuristic noir fashion, Fight Club urban grunge style, Star Wars Force Awakens costume, sci-fi realistic clothing, noir trench coat',
+    films: ['블레이드 러너 (1982)', '파이트 클럽 (1999)', '스타워즈: 깨어난 포스 (2015)', '미션 임파서블 (2018)'],
+    characters: ['레이첼 트렌치코트', '타일러 더든 재킷', '레이 사막 의상', '이단 헌트 택티컬'],
+    links: [{ text: 'Fashionista: Michael Kaplan', url: 'https://fashionista.com/michael-kaplan' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/9a/17/7f/9a177fe46db49b062d29ef8871548f7e.jpg', label: 'Kaplan — Blade Runner fashion' },
+      { src: 'https://i.pinimg.com/736x/7e/30/d0/7e30d003efe19c297bf2cbc03642bf6d.jpg', label: 'Kaplan — sci-fi costume' },
+      { src: 'https://i.pinimg.com/736x/1c/61/b3/1c61b3db39ad7f988573aab1bf79b1df.jpg', label: 'Kaplan — Star Wars design' },
+      { src: 'https://i.pinimg.com/736x/c5/4c/d2/c54cd21c68142a7b6f4201684b725de8.jpg', label: 'Kaplan — urban fashion' },
+    ],
+  },
+  {
+    id: 'eiko_ishioka', rank: '09', name: 'Eiko Ishioka (石岡 瑛子)',
+    subtitle: 'Costume & Visual Designer · 일본 · 1938-2012',
+    styleType: 'avantgarde', styleLabel: 'Avant-Garde Sculpture',
+    desc: '아카데미상 수상 (브람 스토커의 드라큘라). 의상을 넘어 조각적 아트피스로 승화시킨 전위적 디자이너. 더 셀, 태양의 서커스, 올림픽 의상까지 장르를 초월.',
+    styleDesc: '의상을 입는 조각으로 변환. 신체와 직물의 관계를 근본적으로 재정의. 동양과 서양, 전통과 아방가르드의 충돌에서 탄생하는 초현실적 비주얼.',
+    technique: 'Sculptural Fabric: 직물을 3차원 조각처럼 다루는 기법.\nCultural Fusion: 동서양 미학의 전위적 결합.\nSymbolic Excess: 과장과 상징을 통한 감정의 시각적 폭발.',
+    aiPrompt: 'Eiko Ishioka costume design, Bram Stoker Dracula avant-garde red armor, The Cell surreal sculptural costume, Japanese avant-garde fashion, theatrical sculptural wearable art',
+    films: ['브람 스토커의 드라큘라 (1992)', '더 셀 (2000)', '더 폴 (2006)', '백설공주 (2012)'],
+    characters: ['드라큘라 붉은 갑옷', '더 셀 초현실 드레스', '알렉산드리아 판타지 의상', '사악한 여왕 가운'],
+    links: [{ text: 'MoMA: Eiko Ishioka', url: 'https://www.moma.org/artists/2916' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/50/9c/1f/509c1fc2a40a10cbad7399939e839077.jpg', label: 'Ishioka — Dracula red armor' },
+      { src: 'https://i.pinimg.com/736x/2a/62/f9/2a62f91369948244b3824bacd115a91e.jpg', label: 'Ishioka — avant-garde sculpture' },
+      { src: 'https://i.pinimg.com/736x/17/f9/a7/17f9a7570f30558f46e1297eb37f72fc.jpg', label: 'Ishioka — The Cell costume' },
+      { src: 'https://i.pinimg.com/736x/5f/73/fc/5f73fc1535eb194a329f1dd72befb663.jpg', label: 'Ishioka — surreal wearable art' },
+    ],
+  },
+  {
+    id: 'lindy_hemming', rank: '10', name: 'Lindy Hemming (린디 헤밍)',
+    subtitle: 'Costume Designer · 영국 · 1948-',
+    styleType: 'action', styleLabel: 'Action Hero Wardrobe',
+    desc: '아카데미상 수상 (토파지). 다크 나이트 트릴로지의 배트맨 슈트, 제임스 본드 시리즈의 의상을 디자인. 액션 히어로의 기능적이면서 상징적인 의상의 대가.',
+    styleDesc: '액션 히어로 워드로브의 정의. 슈퍼히어로 슈트의 기능성과 미학을 동시에 해결. 007의 세비로 룩부터 배트맨의 전투복까지.',
+    technique: 'Functional Design: 스턴트와 액션에서 실제로 작동하는 의상.\nIconic Silhouette: 한눈에 캐릭터를 알아볼 수 있는 실루엣.\nMaterial Innovation: 새로운 소재와 제작 기법의 도입.',
+    aiPrompt: 'Lindy Hemming costume design, Dark Knight Batman tactical suit, James Bond tailored tuxedo, action hero functional wardrobe, superhero practical costume, British spy elegant fashion',
+    films: ['다크 나이트 (2008)', '카지노 로얄 (2006)', '토파지 (1999)', '원더우먼 (2017)'],
+    characters: ['배트맨 전투 슈트', '007 턱시도', '조커 퍼플 슈트', '원더우먼 전투복'],
+    links: [{ text: 'ADG: Lindy Hemming', url: 'https://adg.org/article/lindy-hemming' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/28/7f/51/287f519851ecb049579b107f5f3f2768.jpg', label: 'Hemming — Batman suit design' },
+      { src: 'https://i.pinimg.com/736x/76/bd/31/76bd31b0f10c3d1d35ca5f1a91113e26.jpg', label: 'Hemming — Bond tuxedo' },
+      { src: 'https://i.pinimg.com/736x/e8/7d/00/e87d00d23fbb765525aa45973723c813.jpg', label: 'Hemming — action hero wardrobe' },
+      { src: 'https://i.pinimg.com/736x/31/c5/de/31c5de1748c0062148ef3c633f70c6f2.jpg', label: 'Hemming — functional costume' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+function buildArtistPanel() { document.getElementById('artistPanel').innerHTML = DESIGNERS.map(a => `<div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')"><span class="artist-rank">${a.rank}</span><div><div class="name">${a.name}</div><div class="role">${a.styleLabel}</div></div></div>`).join(''); }
+function selectArtist(id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; currentArtist = artist; currentImageIdx = 0; document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active')); document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active'); updateInfoPanel(artist); updateFilmstrip(artist); updateViewer(artist); }
+function updateInfoPanel(a) { let techniqueSec = ''; if (a.technique) { techniqueSec = `<div class="info-section"><h4>Technique</h4><p>${a.technique.replace(/\n/g, '<br>')}</p></div>`; } document.getElementById('infoPanel').innerHTML = `<h3>${a.name}</h3><div class="meta">${a.subtitle}</div><span class="style-indicator ${a.styleType}">${a.styleLabel}</span><div class="desc">${a.desc}</div><div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div><div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div><div class="info-section"><h4>Style</h4><p>${a.styleDesc}</p></div>${techniqueSec}<div class="info-section"><h4>AI Prompt</h4><div class="prompt-box" onclick="copyPrompt(this, '${a.id}')"><span class="copy-hint">click to copy</span>${a.aiPrompt}</div></div><div class="info-section"><h4>References</h4><div class="link-list">${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}</div></div>`; }
+function copyPrompt(el, id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; navigator.clipboard.writeText(artist.aiPrompt).then(() => { el.classList.add('copied'); el.querySelector('.copy-hint').textContent = 'copied!'; setTimeout(() => { el.classList.remove('copied'); el.querySelector('.copy-hint').textContent = 'click to copy'; }, 1500); }); }
+function updateFilmstrip(a) { const strip = document.getElementById('filmstrip'); strip.innerHTML = a.images.length === 0 ? Array.from({length: 4}, (_, i) => `<div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}"><div class="no-image">No image</div></div>`).join('') : a.images.map((img, i) => `<div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})"><img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" /><div class="thumb-label">${img.label}</div></div>`).join(''); }
+function updateViewer(a) { const img = document.getElementById('mainImage'); const ph = document.getElementById('viewerPlaceholder'); const counter = document.getElementById('imageCounter'); const badge = document.getElementById('artistBadge'); badge.style.display = 'block'; document.getElementById('badgeName').textContent = a.name; document.getElementById('badgeStyle').textContent = a.styleLabel; if (a.images.length > 0 && a.images[currentImageIdx]) { img.onerror = function() { this.style.display = 'none'; ph.style.display = 'block'; ph.innerHTML = `<p style="color:var(--accent)">${a.images[currentImageIdx].label}</p><p style="margin-top:8px;font-size:0.8em;color:#666;">Image could not be loaded.</p>`; }; img.src = a.images[currentImageIdx].src; img.style.display = 'block'; ph.style.display = 'none'; counter.style.display = 'block'; counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`; } else { img.style.display = 'none'; ph.style.display = 'block'; counter.style.display = 'none'; } }
+function selectImage(idx) { if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return; currentImageIdx = idx; updateViewer(currentArtist); document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx)); }
+function prevImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length; selectImage(currentImageIdx); }
+function nextImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length; selectImage(currentImageIdx); }
+function openModal() { const sel = document.getElementById('modalStyle'); if (sel.options.length <= 1) { DESIGNERS.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`; sel.appendChild(opt); }); } document.getElementById('modalOverlay').classList.add('show'); document.getElementById('modalScene').focus(); if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function handleGenerate() { const scene = document.getElementById('modalScene').value; const style = document.getElementById('modalStyle').value; if (!scene.trim()) { alert('Description is required.'); return; } closeModal(); setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`); setTimeout(() => { setStatus('ready', 'Generation complete.'); }, 2000); }
+function setStatus(state, text) { document.getElementById('statusDot').className = 'status-dot ' + state; document.getElementById('statusText').textContent = text; }
+document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return; if (e.key === 'ArrowLeft') prevImage(); if (e.key === 'ArrowRight') nextImage(); if (e.key === 'g' || e.key === 'G') openModal(); if (e.key === 'Escape') closeModal(); const num = parseInt(e.key); if (!isNaN(num)) { const idx = num === 0 ? 9 : num - 1; if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id); } });
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+buildArtistPanel();
+</script>
+</body>
+</html>

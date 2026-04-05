@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Environment Design — Hollywood Concept Designers 10</title>
+<title>Set Design — Hollywood Production Designers 10</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
 <style>
   :root {
     --gold: #e8c872;
     --gold-dim: #b89a4a;
-    --accent: #5890c8;
+    --accent: #c87858;
     --bg: #0b0b12;
     --bg-deep: #06060a;
     --card-bg: #111119;
@@ -89,13 +89,6 @@
     color: var(--text-muted);
     font-size: 0.75em;
   }
-  .topbar .right-info {
-    color: #555;
-    font-size: 0.75em;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
 
   /* === LAYOUT === */
   .layout {
@@ -157,7 +150,7 @@
     overflow: hidden;
   }
 
-  /* === IMAGE VIEWER (TOP) === */
+  /* === IMAGE VIEWER === */
   .viewer {
     flex: 1;
     display: flex;
@@ -255,7 +248,7 @@
   .artist-badge .badge-name { color: var(--accent); font-weight: 600; }
   .artist-badge .badge-style { color: var(--text-muted); font-size: 0.85em; margin-top: 2px; }
 
-  /* === FILMSTRIP (BOTTOM) === */
+  /* === FILMSTRIP === */
   .filmstrip-wrapper {
     background: #111118;
     border-top: 1px solid var(--border);
@@ -378,12 +371,12 @@
     margin-bottom: 16px;
   }
   .char-tag {
-    background: rgba(88,144,200,0.12);
+    background: rgba(200,120,88,0.12);
     color: var(--accent);
     padding: 3px 9px;
     border-radius: 12px;
     font-size: 0.72em;
-    border: 1px solid rgba(88,144,200,0.3);
+    border: 1px solid rgba(200,120,88,0.3);
   }
   .link-list {
     display: flex;
@@ -391,13 +384,13 @@
     gap: 4px;
   }
   .link-list a {
-    color: #7090c0;
+    color: #c09070;
     text-decoration: none;
     font-size: 0.78em;
     padding: 4px 0;
     transition: color 0.2s;
   }
-  .link-list a:hover { color: #90b0e0; }
+  .link-list a:hover { color: #e0b090; }
 
   .style-indicator {
     display: inline-block;
@@ -407,13 +400,16 @@
     font-weight: 600;
     margin-bottom: 12px;
   }
-  .style-indicator.pencil { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
-  .style-indicator.biomech { background: #1a1a2a; color: #8080c0; border: 1px solid #2a2a3a; }
-  .style-indicator.zbrush { background: #1a2a2a; color: #80c0c0; border: 1px solid #2a3a3a; }
-  .style-indicator.oil { background: #2a1a1a; color: #c09080; border: 1px solid #3a2a2a; }
-  .style-indicator.gouache { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
-  .style-indicator.digital { background: #1a1a2a; color: #8090c0; border: 1px solid #2a2a3a; }
-  .style-indicator.airbrush { background: #1a1a2a; color: #9080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.expressionist { background: #2a1a2a; color: #c080c0; border: 1px solid #3a2a3a; }
+  .style-indicator.theatrical { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
+  .style-indicator.immersive { background: #1a2a2a; color: #80c0c0; border: 1px solid #2a3a3a; }
+  .style-indicator.architectural { background: #1a1a2a; color: #8090c0; border: 1px solid #2a2a3a; }
+  .style-indicator.afrofuturist { background: #2a1a1a; color: #c09080; border: 1px solid #3a2a2a; }
+  .style-indicator.maximalist { background: #2a2a1a; color: #c0a080; border: 1px solid #3a3a2a; }
+  .style-indicator.realist { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
+  .style-indicator.fantastical { background: #1a1a2a; color: #9080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.naturalist { background: #1a2a1a; color: #80b080; border: 1px solid #2a3a2a; }
+  .style-indicator.practical { background: #2a2a2a; color: #b0b0b0; border: 1px solid #3a3a3a; }
 
   .prompt-box {
     background: #0a0a14;
@@ -512,7 +508,6 @@
   .btn-cancel { background: #2a2a3a; color: #aaa; }
   .btn-generate { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; font-weight: 600; }
 
-  /* Keyboard hints */
   kbd {
     background: #1a1a28;
     border: 1px solid #333;
@@ -531,9 +526,9 @@
   <span class="sep">/</span>
   <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
   <a href="concept_designers_character.html" class="tab">Character</a>
-  <a href="concept_designers_environment.html" class="tab active">Environment</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
   <a href="concept_designers_props.html" class="tab">Prop</a>
-  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_set.html" class="tab active">Set Design</a>
   <a href="production_designers_costume.html" class="tab">Costume</a>
   <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
 </nav>
@@ -541,12 +536,12 @@
 <!-- TOP BAR -->
 <div class="topbar">
   <div>
-    <h1>ENVIRONMENT DESIGN</h1>
-    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+    <h1>SET DESIGN</h1>
+    <div class="subtitle">10 Production Design Masters &mdash; Marionette Studios</div>
   </div>
   <div style="display:flex;gap:8px;align-items:center;">
     <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
-    <button class="gen-btn" onclick="openModal()">Generate Environment</button>
+    <button class="gen-btn" onclick="openModal()">Generate Set Design</button>
   </div>
 </div>
 
@@ -561,15 +556,15 @@
     <div class="viewer" id="viewer">
       <div class="artist-badge" id="artistBadge" style="display:none;">
         <div class="badge-name" id="badgeName"></div>
-        <div class="badge-style" id="badgeStyle">ENVIRONMENT DESIGN</div>
+        <div class="badge-style" id="badgeStyle">SET DESIGN</div>
       </div>
       <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
       <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
       <div class="placeholder" id="viewerPlaceholder">
-        <img class="hero-img" src="https://i.pinimg.com/736x/3b/54/f6/3b54f61e3fdd02a82db5f1e837b05021.jpg" alt="">
+        <img class="hero-img" src="https://i.pinimg.com/736x/e0/80/5c/e0805cabdcf9e87d30249728df51d242.jpg" alt="">
         <div class="hero-overlay">
-          <h2>Environment Design Gallery</h2>
-          <p>10명의 환경 디자인 전문가 — Kazuo Oga, Eyvind Earle, Dylan Cole 등</p>
+          <h2>Set Design Gallery</h2>
+          <p>10명의 프로덕션 디자인 거장 — Ken Adam, Dante Ferretti, Rick Carter 등</p>
           <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
         </div>
       </div>
@@ -583,14 +578,14 @@
 
     <div class="status-bar">
       <div class="status-dot ready" id="statusDot"></div>
-      <span id="statusText">Ready &mdash; 10 environment designers loaded</span>
+      <span id="statusText">Ready &mdash; 10 production designers loaded</span>
     </div>
   </div>
 
   <!-- RIGHT: INFO PANEL -->
   <div class="info-panel" id="infoPanel">
     <div style="color:#555;text-align:center;margin-top:40px;">
-      <p style="font-size:2em;margin-bottom:8px;">&#128396;</p>
+      <p style="font-size:2em;margin-bottom:8px;">&#127916;</p>
       <p style="font-size:0.85em;">Select a designer from the left panel</p>
     </div>
   </div>
@@ -600,17 +595,17 @@
 <!-- GENERATION MODAL -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <h3>Generate Environment Concept</h3>
-    <label>Environment Description</label>
-    <textarea id="modalScene" placeholder="e.g. 네온 불빛이 비에 반사되는 미래 도시의 뒷골목"></textarea>
+    <h3>Generate Set Design Concept</h3>
+    <label>Set Description</label>
+    <textarea id="modalScene" placeholder="e.g. 1920년대 갱스터 아지트의 지하 술집, 아르데코 인테리어"></textarea>
     <label>Designer Style</label>
     <select id="modalStyle">
       <option value="all">All Styles (Compare)</option>
     </select>
     <label>Camera Angle</label>
-    <input id="modalCamera" type="text" placeholder="e.g. wide establishing shot, aerial view, street level" />
+    <input id="modalCamera" type="text" placeholder="e.g. wide establishing shot, overhead plan view, eye-level walkthrough" />
     <label>Mood / Atmosphere</label>
-    <input id="modalMood" type="text" placeholder="e.g. dystopian, serene, ominous" />
+    <input id="modalMood" type="text" placeholder="e.g. opulent, gritty, surreal, intimate" />
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
       <button class="btn-generate" onclick="handleGenerate()">Generate</button>
@@ -621,203 +616,203 @@
 <script>
 const DESIGNERS = [
   {
-    id: 'kazuo_oga', rank: '01', name: '男鹿和雄 (Kazuo Oga)',
-    subtitle: 'Background Art Director · 일본 · 1952-',
-    styleType: 'poster_color', styleLabel: 'Poster Color on Paper',
-    desc: '"토토로의 숲을 그린 남자." 스튜디오 지브리의 배경 미술을 정의한 거장. 미야자키 하야오, 다카하타 이사오와 협업하며 이웃집 토토로, 모노노케 히메, 센과 치히로 등의 자연 풍경을 창조했다.',
-    styleDesc: '닉카 포스터 컬러를 사용한 전통 회화 기법. 울창한 자연 풍경과 대기 깊이감이 특징. 베이스코트를 30-60분 내에 완성하는 엄격한 작업 방식.',
-    technique: 'Atmospheric Depth: 안개, 빛, 습기를 통한 깊이감 표현.\nOrganic Detail: 나무, 풀, 이끼의 초정밀 묘사.\nEmotional Landscape: 자연이 캐릭터의 감정을 반영하는 배경.',
-    aiPrompt: 'Kazuo Oga style background art, lush green forest landscape, Studio Ghibli aesthetic, poster color painting, atmospheric depth, detailed natural foliage, warm nostalgic Japanese countryside, Totoro forest',
-    films: ['이웃집 토토로 (1988)', '모노노케 히메 (1997)', '센과 치히로의 행방불명 (2001)', '하울의 움직이는 성 (2004)'],
-    characters: ['토토로의 숲', '시시가미의 숲', '유바바의 온천마을'],
+    id: 'ken_adam', rank: '01', name: 'Ken Adam (켄 아담)',
+    subtitle: 'Production Designer · 독일/영국 · 1921-2016',
+    styleType: 'expressionist', styleLabel: 'Expressionist Set Design',
+    desc: '제임스 본드 시리즈의 악당 소굴과 닥터 스트레인지러브의 전쟁 상황실을 설계한 전설. 거대한 스케일, 기하학적 대담함, 표현주의적 과장이 그의 트레이드마크다. 냉전 시대의 불안과 스펙터클을 건축으로 시각화한 거장.',
+    styleDesc: '표현주의적 대형 세트 디자인. 과장된 스케일, 날카로운 기하학적 형태, 그리고 시각적 대비를 통해 서사를 건축적으로 전달하는 방식.',
+    technique: 'Monumental Scale: 인간을 압도하는 거대한 공간 설계.\nGeometric Boldness: 삼각형, 원, 사선 등 극적 형태 활용.\nDramatic Contrast: 빛과 그림자의 극적 대비를 통한 분위기 창조.',
+    aiPrompt: 'Ken Adam production design style, massive underground villain lair, bold geometric architecture, expressionist set design, dramatic lighting, Cold War era aesthetic, James Bond war room, monumental scale interior',
+    films: ['닥터 스트레인지러브 (1964)', '골드핑거 (1964)', '나를 사랑한 스파이 (1977)', '배리 린든 (1975)'],
+    characters: ['전쟁 상황실 (War Room)', '골드핑거 레이저실', '아틀란티스 기지', '배리 린든 저택'],
     links: [
-      { text: 'Animation Obsessive: Kazuo Oga', url: 'https://animationobsessive.substack.com/p/what-kazuo-oga-thinks-about-when' },
+      { text: 'BAFTA: Ken Adam Tribute', url: 'https://www.bafta.org/heritage/in-memoriam/sir-ken-adam' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/3b/54/f6/3b54f61e3fdd02a82db5f1e837b05021.jpg', label: 'Oga — Ghibli forest background' },
-      { src: 'https://i.pinimg.com/736x/6b/96/e5/6b96e510a01abb2b15f3527d29ab557d.jpg', label: 'Oga — Totoro trees and forest' },
-      { src: 'https://i.pinimg.com/736x/24/39/0a/24390a0ffc6a582a121348efd748df35.jpg', label: 'Oga — atmospheric nature painting' },
-      { src: 'https://i.pinimg.com/736x/79/89/eb/7989eb96866dc31372c504db748e2555.jpg', label: 'Oga — Japanese countryside landscape' },
+      { src: 'https://i.pinimg.com/736x/e0/80/5c/e0805cabdcf9e87d30249728df51d242.jpg', label: 'Adam — Bond villain set design' },
+      { src: 'https://i.pinimg.com/736x/07/24/45/072445940ab40c98371fa5ef2315dcba.jpg', label: 'Adam — Dr. Strangelove War Room' },
+      { src: 'https://i.pinimg.com/736x/c4/1a/6d/c41a6d64a63197c04099522337edb550.jpg', label: 'Adam — expressionist interior' },
+      { src: 'https://i.pinimg.com/736x/7a/03/b4/7a03b440d86c8505268d6d7736311432.jpg', label: 'Adam — monumental set piece' },
     ],
   },
   {
-    id: 'eyvind_earle', rank: '02', name: 'Eyvind Earle',
-    subtitle: 'Background & Styling Artist · 미국 · 1916-2000',
-    styleType: 'gouache', styleLabel: 'Gouache / Oil on Board',
-    desc: '월트 디즈니가 잠자는 숲속의 공주 전체의 시각적 스타일링을 맡긴 유일한 아티스트. 배경이 캐릭터 애니메이션보다 시각적으로 지배적인 혁명적 접근을 시도했다.',
-    styleDesc: '프리 르네상스 유럽 미술, 페르시아 세밀화, 일본 판화에서 영감받은 양식화된 구성. 단일 배경에 10일까지 투자한 극도의 디테일.',
-    technique: 'Stylized Flat Composition: 평면적이면서도 극도로 디테일한 구도.\nDark-to-Light Build: 어두운 블록에서 밝은 하이라이트로 쌓아가는 기법.\nPanoramic Widescreen: 와이드스크린을 활용한 파노라마 환경.',
-    aiPrompt: 'Eyvind Earle style background, stylized medieval forest, Disney Sleeping Beauty aesthetic, flattened composition with extreme detail, pre-Renaissance inspired, gothic trees, rich jewel colors',
-    films: ['잠자는 숲속의 공주 (1959)', '아가씨와 건달들 (1955)', '피터 팬 (1953)'],
-    characters: ['마법의 숲', '말레피센트의 성', '오로라의 왕국'],
+    id: 'dante_ferretti', rank: '02', name: 'Dante Ferretti (단테 페레티)',
+    subtitle: 'Production Designer · 이탈리아 · 1943-',
+    styleType: 'theatrical', styleLabel: 'Theatrical Period Design',
+    desc: '아카데미상 3회 수상. 스코세이지의 오랜 협력자이자 이전에는 펠리니와 작업한 거장. 호화롭고 역사적으로 정교한 시대극 세트에 연극적 질감을 부여하는 것이 특징이다.',
+    styleDesc: '오페라적 스케일의 시대극 세트. 극도로 정밀한 역사 고증과 연극적 화려함을 동시에 구현. 각 세트가 하나의 무대 공연처럼 완성된다.',
+    technique: 'Historical Precision: 시대별 건축, 가구, 소품의 완벽한 고증.\nTheatrical Scale: 연극적 과장과 규모감 있는 공간 설계.\nTextural Richness: 벽, 바닥, 천장의 질감과 패티나 디테일.',
+    aiPrompt: 'Dante Ferretti production design, lavish period film set, operatic theatrical interior, Scorsese collaboration, meticulous historical detail, rich textures and patina, Hugo train station, Gangs of New York Five Points',
+    films: ['휴고 (2011)', '스위니 토드 (2007)', '갱스 오브 뉴욕 (2002)', '에비에이터 (2004)'],
+    characters: ['파리 기차역 (휴고)', '플릿 스트리트 이발소', '파이브 포인츠', '코코넛 그로브 나이트클럽'],
     links: [
-      { text: 'Walt Disney Family Museum: Eyvind Earle', url: 'https://www.waltdisney.org/blog/eyvind-earle-artistic-devotion-distinction-sleeping-beauty' },
+      { text: 'Academy Museum: Dante Ferretti', url: 'https://www.academymuseum.org/en/programs/dante-ferretti' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/63/b6/2b/63b62b98bb5d253ac573236e0906d986.jpg', label: 'Earle — Sleeping Beauty forest' },
-      { src: 'https://i.pinimg.com/736x/9a/ed/ab/9aedabda9e86bd94be31bd43c2f0047e.jpg', label: 'Earle — stylized medieval landscape' },
-      { src: 'https://i.pinimg.com/736x/89/12/41/891241e8ce8878590d1b6ba62edd8f0d.jpg', label: 'Earle — panoramic Disney background' },
-      { src: 'https://i.pinimg.com/736x/62/8b/0f/628b0f8456ca05c41d1daf1fcd48064d.jpg', label: 'Earle — gothic castle environment' },
+      { src: 'https://i.pinimg.com/736x/94/02/83/94028340ad323a2b494f939ff499b735.jpg', label: 'Ferretti — theatrical period set' },
+      { src: 'https://i.pinimg.com/736x/77/3e/29/773e29d277df073b73fcbaa861588e3b.jpg', label: 'Ferretti — Hugo train station' },
+      { src: 'https://i.pinimg.com/736x/dd/d3/31/ddd33172e1ee5cfc47d089b466f450f5.jpg', label: 'Ferretti — Scorsese collaboration' },
+      { src: 'https://i.pinimg.com/736x/96/d4/78/96d478c4beff68ff760abf2f8f16aad2.jpg', label: 'Ferretti — lavish interior design' },
     ],
   },
   {
-    id: 'peter_ellenshaw', rank: '03', name: 'Peter Ellenshaw',
-    subtitle: 'Matte Painter · 영국/미국 · 1913-2007',
-    styleType: 'oil', styleLabel: 'Oil on Glass / Matte Painting',
-    desc: '디즈니의 전설적인 매트 페인터. 메리 포핀스에서 102개의 개별 매트 페인팅을 제작하여 아카데미상을 수상. 30년간 디즈니의 불가능한 환경들을 실현시켰다.',
-    styleDesc: '유리 위 유화를 사용한 전통적 매트 페인팅. 인상주의적 접근으로 실사 촬영과 자연스럽게 합성되는 환경을 창조.',
-    technique: 'Glass Matte Integration: 유리 위 그림을 실사와 합성.\nImpressionistic Realism: 사실적이면서도 회화적인 표현.\nScale Extension: 세트의 물리적 한계를 넘어선 환경 확장.',
-    aiPrompt: 'Peter Ellenshaw matte painting style, Edwardian London rooftops, Disney classic environment, oil on glass technique, impressionistic realism, seamless live-action integration, Mary Poppins skyline',
-    films: ['메리 포핀스 (1964)', '보물섬 (1950)', '해저 2만리 (1954)', '블랙홀 (1979)'],
-    characters: ['에드워드 시대 런던', '보물섬', '해저 세계'],
+    id: 'rick_carter', rank: '03', name: 'Rick Carter (릭 카터)',
+    subtitle: 'Production Designer · 미국 · 1953-',
+    styleType: 'immersive', styleLabel: 'Immersive World Building',
+    desc: '아카데미상 2회 수상. 스필버그, 제메키스와의 오랜 협업을 통해 쥬라기 공원의 공룡 세계부터 포레스트 검프의 미국 역사까지 몰입감 있는 세계를 구축한 거장.',
+    styleDesc: '과학적 사실성과 영화적 판타지를 결합한 몰입형 세트. 관객이 실제로 그 공간에 들어간 듯한 믿을 수 있는 세계를 만드는 것이 핵심.',
+    technique: 'Believable Fantasy: 판타지 세계에 사실적 논리와 물리 적용.\nEnvironmental Storytelling: 세트 디테일로 서사를 전달.\nScale Integration: 실제 세트와 디지털 확장의 자연스러운 통합.',
+    aiPrompt: 'Rick Carter production design, immersive film environment, Jurassic Park visitor center interior, Spielberg collaboration, believable fantasy world, practical set with digital extension, cinematic scale',
+    films: ['쥬라기 공원 (1993)', '포레스트 검프 (1994)', '아바타 (2009)', '웨스트 사이드 스토리 (2021)'],
+    characters: ['쥬라기 공원 비지터 센터', '포레스트 검프의 집', '판도라 연구소', '웨스트사이드 거리'],
     links: [
-      { text: 'D23: Peter Ellenshaw Disney Legend', url: 'https://d23.com/walt-disney-legend/peter-ellenshaw/' },
+      { text: 'ADG: Rick Carter Interview', url: 'https://adg.org/article/rick-carter-interview' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/08/0b/b4/080bb492c1cd444003a2b3fb59dd5b35.jpg', label: 'Ellenshaw — Disney matte painting' },
-      { src: 'https://i.pinimg.com/736x/32/73/80/3273805412d1ffd858ff78b09cc76d77.jpg', label: 'Ellenshaw — Mary Poppins London skyline' },
-      { src: 'https://i.pinimg.com/736x/65/aa/65/65aa655e9fb8e34400667fe71f55ea3a.jpg', label: 'Ellenshaw — classic matte painting' },
-      { src: 'https://i.pinimg.com/736x/7e/09/d6/7e09d61475de762444ff764be0020df7.jpg', label: 'Ellenshaw — environment extension art' },
+      { src: 'https://i.pinimg.com/736x/d1/99/e0/d199e00288ae8f8835cd495f6609ae43.jpg', label: 'Carter — Jurassic Park set design' },
+      { src: 'https://i.pinimg.com/736x/e0/4a/d2/e04ad2f91b8907ba4a6abc2609a88d19.jpg', label: 'Carter — immersive world building' },
+      { src: 'https://i.pinimg.com/736x/ba/0f/b9/ba0fb92075e6002ce687b23818e39520.jpg', label: 'Carter — Spielberg collaboration' },
+      { src: 'https://i.pinimg.com/736x/93/02/16/930216257fb9fb8fd19bcc55bfc40534.jpg', label: 'Carter — cinematic environment' },
     ],
   },
   {
-    id: 'albert_whitlock', rank: '04', name: 'Albert Whitlock',
-    subtitle: 'Matte Painter · 영국/미국 · 1915-1999',
-    styleType: 'oil', styleLabel: 'Oil on Glass',
-    desc: '히치콕의 시각적 파트너이자 유니버설 스튜디오 매트 부서를 24년간 이끈 거장. Earthquake에서만 70개 이상의 매트 페인팅을 제작. 아카데미상 2회 수상.',
-    styleDesc: '유리 위 유화 매트 페인팅의 달인. 인상주의적이면서도 회화적인 품질로 실사 영상과 완벽히 통합되는 환경을 창조.',
-    technique: 'Invisible Integration: 관객이 그림인지 모를 정도의 자연스러운 합성.\nMass Production: 단일 영화에 수십 개의 매트 페인팅 제작.\nAtmospheric Painting: 대기 효과와 빛의 흐름을 통한 현실감.',
-    aiPrompt: 'Albert Whitlock matte painting, Hitchcock film environment, oil on glass technique, photorealistic landscape extension, atmospheric perspective, classic Hollywood golden age environment',
-    films: ['새 (1963)', '어스퀘이크 (1974)', '힌덴부르크 (1975)', '마니 (1964)'],
-    characters: ['보데가 베이', '지진 파괴 도시', '역사적 건축물'],
+    id: 'stuart_craig', rank: '04', name: 'Stuart Craig (스튜어트 크레이그)',
+    subtitle: 'Production Designer · 영국 · 1942-',
+    styleType: 'architectural', styleLabel: 'Architectural Fantasy',
+    desc: '아카데미상 3회 수상. 해리 포터 시리즈 전 8편의 프로덕션 디자이너로서 호그와트를 10년간 건축해낸 거장. 간디, 잉글리시 페이션트 등의 정교한 시대극도 설계했다.',
+    styleDesc: '건축적 웅장함과 정밀한 디테일의 결합. 대규모 물리적 세트가 그 자체로 캐릭터가 되는 설계 철학. 역사적 정확성 위에 판타지적 상상력을 쌓는 방식.',
+    technique: 'Living Architecture: 세트 자체가 캐릭터처럼 존재감을 가짐.\nDecade-Long Continuity: 시리즈 전체의 시각적 일관성 유지.\nScale & Detail: 거대한 규모와 미세한 디테일의 동시 구현.',
+    aiPrompt: 'Stuart Craig production design, Hogwarts Great Hall interior, Harry Potter magical school architecture, grand gothic fantasy set, detailed practical construction, British period architecture, monumental interior space',
+    films: ['해리 포터 시리즈 (2001-2011)', '잉글리시 페이션트 (1996)', '간디 (1982)', '신비한 동물사전 시리즈'],
+    characters: ['호그와트 대연회장', '다이애건 앨리', '마법부', '덤블도어의 사무실'],
     links: [
-      { text: 'Wikipedia: Albert Whitlock', url: 'https://en.wikipedia.org/wiki/Albert_Whitlock' },
+      { text: 'BAFTA: Stuart Craig', url: 'https://www.bafta.org/person/stuart-craig' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/45/b2/df/45b2df0dbba54863884e69a0f15a1692.jpg', label: 'Whitlock — Hitchcock matte painting' },
-      { src: 'https://i.pinimg.com/736x/65/98/5a/65985a357630881341086d6f7892640a.jpg', label: 'Whitlock — classic film environment' },
-      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'Whitlock — oil on glass landscape' },
-      { src: 'https://i.pinimg.com/736x/64/d2/16/64d216482ddb45826518681d5a2fef01.jpg', label: 'Whitlock — environment matte art' },
+      { src: 'https://i.pinimg.com/736x/03/b8/00/03b800a959dd76dfb80b736fa72b24e0.jpg', label: 'Craig — Hogwarts set design' },
+      { src: 'https://i.pinimg.com/736x/bb/70/10/bb7010520ec1304eb1b47fe54829d93a.jpg', label: 'Craig — Harry Potter interior' },
+      { src: 'https://i.pinimg.com/736x/f9/5f/58/f95f58e784f3e0351db8f2a255bd45f2.jpg', label: 'Craig — architectural fantasy set' },
+      { src: 'https://i.pinimg.com/736x/bb/e2/14/bbe214c94985bd1903eb4d4633523c83.jpg', label: 'Craig — grand scale production' },
     ],
   },
   {
-    id: 'tyrus_wong', rank: '05', name: 'Tyrus Wong',
-    subtitle: 'Production Illustrator · 중국/미국 · 1910-2016',
-    styleType: 'watercolor', styleLabel: 'Watercolor / Pastel',
-    desc: '밤비의 시각적 스타일을 단독으로 변혁시킨 아티스트. 송나라 산수화에서 영감받아 디즈니 표준의 정밀한 배경 대신 인상주의적이고 절제된 수채화 배경을 창조했다.',
-    styleDesc: '부드러운 수채화와 파스텔. 디테일을 정의하기보다 암시하는 최소한의 붓질. 에테리얼한 색상 워시로 분위기를 표현.',
-    technique: 'Song Dynasty Influence: 중국 산수화의 여백과 안개 활용.\nSuggestive Minimalism: 최소한의 디테일로 최대의 분위기.\nEmotional Abstraction: 환경이 추상을 통해 감정적 무게를 전달.',
-    aiPrompt: 'Tyrus Wong style background art, Bambi forest aesthetic, Song dynasty Chinese landscape influence, soft watercolor pastel, misty atmospheric forest, minimalistic suggestive brushstrokes, ethereal color washes',
-    films: ['밤비 (1942)'],
-    characters: ['밤비의 숲', '사계절 풍경', '봄의 초원'],
+    id: 'hannah_beachler', rank: '05', name: 'Hannah Beachler (한나 비클러)',
+    subtitle: 'Production Designer · 미국 · 1970s-',
+    styleType: 'afrofuturist', styleLabel: 'Afrofuturist Design',
+    desc: '아카데미 프로덕션 디자인상을 수상한 최초의 아프리카계 미국인 여성. 블랙 팬서의 와칸다를 아프리카 전통 건축과 미래 기술을 결합하여 창조. 문라이트의 섬세한 환경도 설계했다.',
+    styleDesc: '아프로퓨처리즘 디자인. 아프리카 전통 건축 양식과 미래 기술을 결합한 문화적으로 뿌리 깊은 세계관. 철저한 리서치를 기반으로 한 역사적 스펙큘러티브 디자인.',
+    technique: 'Cultural Rootedness: 아프리카 건축·문양·소재의 깊은 리서치.\nSpeculative Architecture: 전통과 미래 기술의 유기적 결합.\nEmotional Geography: 캐릭터의 감정과 문화를 반영하는 공간 설계.',
+    aiPrompt: 'Hannah Beachler production design, Wakanda throne room, Afrofuturist architecture, Black Panther set design, African traditional meets future technology, culturally rooted speculative design, vibranium aesthetic',
+    films: ['블랙 팬서 (2018)', '문라이트 (2016)', '크리드 (2015)', '블랙 팬서: 와칸다 포에버 (2022)'],
+    characters: ['와칸다 왕좌실', '골든 시티', '자비리 영토', '마이애미 프로젝트 (문라이트)'],
     links: [
-      { text: 'Walt Disney Family Museum: Tyrus Wong', url: 'https://www.waltdisney.org/blog/tyrus-wong-and-art-bambi' },
+      { text: 'Architectural Digest: Hannah Beachler', url: 'https://www.architecturaldigest.com/story/black-panther-production-designer-hannah-beachler' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/8c/58/ef/8c58ef43a47d54d596dca2013a51f839.jpg', label: 'Wong — Bambi forest watercolor' },
-      { src: 'https://i.pinimg.com/736x/ed/8e/af/ed8eaf4bde010c3f87696a10cd47c6f3.jpg', label: 'Wong — atmospheric pastel landscape' },
-      { src: 'https://i.pinimg.com/736x/f3/58/9d/f3589d0fbc67b76556701e3c13f17415.jpg', label: 'Wong — misty forest background' },
-      { src: 'https://i.pinimg.com/736x/9c/ba/5d/9cba5dcaa56350932d68e89c0c244f04.jpg', label: 'Wong — Song dynasty inspired art' },
+      { src: 'https://i.pinimg.com/736x/f9/e2/64/f9e2648f8a8ed63d374e1a3cded8baba.jpg', label: 'Beachler — Wakanda set design' },
+      { src: 'https://i.pinimg.com/736x/72/ca/67/72ca6759781520a9e2a99c382162f2d6.jpg', label: 'Beachler — Afrofuturist architecture' },
+      { src: 'https://i.pinimg.com/736x/10/99/0f/10990f91d580130642779e7f3caf83fb.jpg', label: 'Beachler — Black Panther interior' },
+      { src: 'https://i.pinimg.com/736x/30/50/80/305080edf86bc80b3b76546386dbe636.jpg', label: 'Beachler — cultural design detail' },
     ],
   },
   {
-    id: 'maurice_noble', rank: '06', name: 'Maurice Noble',
-    subtitle: 'Layout & Background Designer · 미국 · 1911-2001',
-    styleType: 'gouache', styleLabel: 'Gouache / Mixed Media',
-    desc: '척 존스의 오른팔로 60년 이상 워너 브라더스 애니메이션의 배경을 디자인. What\'s Opera, Doc?, Duck Dodgers, Road Runner 시리즈의 배경을 창조했다.',
-    styleDesc: '대담하고 그래픽적인 추상 배경. 사실주의가 아닌 형태와 색상으로 공간을 정의. 영화마다 극적으로 다른 스타일을 적용.',
-    technique: 'Expressive Abstraction: 배경이 캐릭터만큼의 개성을 가짐.\nMood-Driven Style: 무드에 따라 완전히 다른 시각 언어 사용.\nGraphic Geometry: 기하학적 형태로 공간을 구축.',
-    aiPrompt: 'Maurice Noble background art style, bold graphic abstract animation background, Chuck Jones Warner Bros aesthetic, expressionist landscape, geometric desert, What\'s Opera Doc operatic backdrop',
-    films: ['What\'s Opera, Doc? (1957)', 'Duck Dodgers (1953)', 'Road Runner 시리즈', 'How the Grinch Stole Christmas (1966)'],
-    characters: ['사막 풍경', '오페라 무대', '우주 배경'],
+    id: 'catherine_martin', rank: '06', name: 'Catherine Martin (캐서린 마틴)',
+    subtitle: 'Production & Costume Designer · 호주 · 1965-',
+    styleType: 'maximalist', styleLabel: 'Maximalist Spectacle',
+    desc: '아카데미상 4회 수상 (프로덕션 디자인 + 의상). 바즈 루어만의 평생 파트너이자 협력자. 물랑 루즈, 위대한 개츠비의 극도로 화려하고 색채가 넘치는 세트로 유명.',
+    styleDesc: '맥시멀리즘의 정수. 과장된 화려함, 풍부한 색채, 연극적 스펙터클을 통해 감정적 과잉의 세계를 창조. 매 프레임이 시각적 축제가 되는 설계.',
+    technique: 'Color Saturation: 극도로 풍부하고 과감한 색채 구성.\nOpulent Detail: 화려한 장식과 소재의 층위적 구성.\nTheatrical Excess: 의도적 과잉을 통한 감정적 몰입.',
+    aiPrompt: 'Catherine Martin production design, Moulin Rouge nightclub interior, maximalist opulent set, Baz Luhrmann collaboration, saturated colors, Art Deco Great Gatsby party, theatrical extravagance, gilded ornate decoration',
+    films: ['물랑 루즈! (2001)', '위대한 개츠비 (2013)', '오스트레일리아 (2008)', '엘비스 (2022)'],
+    characters: ['물랑 루즈 극장', '개츠비 저택', '엘비스의 그레이스랜드', '댄스 홀'],
     links: [
-      { text: '99% Invisible: Noble Effort', url: 'https://99percentinvisible.org/episode/episode-85-noble-effort/' },
+      { text: 'Vogue: Catherine Martin Design', url: 'https://www.vogue.com/article/catherine-martin-great-gatsby-set-design' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/8a/aa/b2/8aaab218c14b40e322ff9b73e7f8d0b4.jpg', label: 'Noble — Warner Bros background art' },
-      { src: 'https://i.pinimg.com/736x/89/12/41/891241e8ce8878590d1b6ba62edd8f0d.jpg', label: 'Noble — graphic abstract landscape' },
-      { src: 'https://i.pinimg.com/736x/3f/b5/c9/3fb5c947fd28f586dae3954db771789a.jpg', label: 'Noble — Chuck Jones animation background' },
-      { src: 'https://i.pinimg.com/736x/b6/cf/31/b6cf31fa72350c1ef84e039fe7572d6c.jpg', label: 'Noble — expressionist environment' },
+      { src: 'https://i.pinimg.com/736x/7f/35/55/7f3555983904f763b13f51d7fdf1f6f5.jpg', label: 'Martin — Moulin Rouge set' },
+      { src: 'https://i.pinimg.com/736x/fd/ed/e8/fdede89bb7649315a99dc60a082f63fc.jpg', label: 'Martin — Great Gatsby opulence' },
+      { src: 'https://i.pinimg.com/736x/b5/79/df/b579df7d2fb171c741da5c5f19334936.jpg', label: 'Martin — maximalist spectacle' },
+      { src: 'https://i.pinimg.com/736x/57/31/86/573186cd1bf3d03ff4549f7b1fe5c699.jpg', label: 'Martin — theatrical interior' },
     ],
   },
   {
-    id: 'dylan_cole', rank: '07', name: 'Dylan Cole',
-    subtitle: 'Co-Production Designer · 미국',
-    styleType: 'digital', styleLabel: 'Digital Matte Painting / Concept Art',
-    desc: '아바타 프랜차이즈 전체의 환경을 디자인한 공동 프로덕션 디자이너. 23세에 반지의 제왕에 참여한 이후 현대 블록버스터 환경 디자인의 정점에 선 인물.',
-    styleDesc: '디지털 매트 페인팅과 컨셉 아트. 포토리얼리스틱하면서도 환상적인 세계관 구축. 그의 "Riding Through the Reef" 그림이 아바타 수중 세계의 스타일 가이드가 되었다.',
-    technique: 'Ecosystem Design: 생태계 전체를 디자인하는 접근.\nPhotorealistic Fantasy: 실사와 환상의 경계를 허무는 기법.\nWorld-Scale Thinking: 행성 단위의 환경을 체계적으로 설계.',
-    aiPrompt: 'Dylan Cole environment concept art, Avatar Pandora bioluminescent landscape, digital matte painting, photorealistic alien ecosystem, floating mountains, lush alien jungle, epic scale fantasy world',
-    films: ['아바타 (2009)', '아바타: 물의 길 (2022)', '반지의 제왕: 왕의 귀환 (2003)', '트론: 레거시 (2010)'],
-    characters: ['판도라 정글', '판도라 해양 세계', '미나스 티리스'],
+    id: 'dean_tavoularis', rank: '07', name: 'Dean Tavoularis (딘 타불라리스)',
+    subtitle: 'Production Designer · 미국 · 1932-',
+    styleType: 'realist', styleLabel: 'Atmospheric Realism',
+    desc: '프란시스 포드 코폴라의 핵심 협력자. 대부 2편의 정교한 시대 재현과 지옥의 묵시록의 필리핀 커츠 요새를 실제로 건설한 거장. 사실적이면서도 대기감 넘치는 환경 구축의 달인.',
+    styleDesc: '그릿한 대기적 리얼리즘. 완벽한 시대 고증 위에 분위기와 감정을 입히는 방식. 조명과 공간 구성으로 서사적 긴장감을 만들어낸다.',
+    technique: 'Period Authenticity: 시대별 소재, 질감, 노후화의 완벽한 재현.\nAtmospheric Tension: 공간의 밀도와 조명으로 긴장감 조성.\nPractical Construction: 대규모 물리적 세트의 현장 건설.',
+    aiPrompt: 'Dean Tavoularis production design, Godfather Corleone mansion interior, atmospheric period set, Coppola collaboration, gritty realistic 1940s environment, Apocalypse Now jungle compound, moody dramatic lighting',
+    films: ['대부 Part II (1974)', '지옥의 묵시록 (1979)', '대화 (1974)', '원 프롬 더 하트 (1982)'],
+    characters: ['코를레오네 저택', '커츠의 요새', '감시 아파트', '라스베이거스 거리'],
     links: [
-      { text: 'School of Motion: Dylan Cole', url: 'https://www.schoolofmotion.com/blog/dylan-cole-world-creator' },
+      { text: 'ADG Hall of Fame: Dean Tavoularis', url: 'https://adg.org/hall-of-fame/dean-tavoularis' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/ac/d9/de/acd9ded1f8b97b8d5fda0042dd2c792e.jpg', label: 'Cole — Avatar Pandora environment' },
-      { src: 'https://i.pinimg.com/736x/9d/79/38/9d7938291a4d264b14e7a84d5ba18401.jpg', label: 'Cole — bioluminescent landscape' },
-      { src: 'https://i.pinimg.com/736x/99/fe/80/99fe803458b3901a65ccdff83f91864e.jpg', label: 'Cole — alien jungle concept' },
-      { src: 'https://i.pinimg.com/736x/e2/78/35/e27835e78ea6f80cd1f6c2229e89d36b.jpg', label: 'Cole — epic fantasy environment' },
+      { src: 'https://i.pinimg.com/736x/cb/5a/ad/cb5aad3541cb5b4db9427ba51cdddc19.jpg', label: 'Tavoularis — Godfather set design' },
+      { src: 'https://i.pinimg.com/736x/40/f6/b5/40f6b5218cfdd07c13cc93bc4d177e17.jpg', label: 'Tavoularis — Apocalypse Now set' },
+      { src: 'https://i.pinimg.com/736x/f6/47/0c/f6470c89ba5b207c4cab5f45f88b67a5.jpg', label: 'Tavoularis — period atmospheric' },
+      { src: 'https://i.pinimg.com/736x/7c/a6/50/7ca6506aff3b6d375b957b0198d7da19.jpg', label: 'Tavoularis — Coppola collaboration' },
     ],
   },
   {
-    id: 'craig_mullins', rank: '08', name: 'Craig Mullins',
-    subtitle: 'Digital Matte Painter · 미국',
-    styleType: 'digital', styleLabel: 'Digital Painting',
-    desc: '"디지털 페인팅의 대부." 1994년 포토샵을 도입해 디지털 매트 페인팅 워크플로우를 사실상 발명한 인물. 쥬라기 공원, 포레스트 검프, 아폴로 13의 환경을 창조했다.',
-    styleDesc: '전통 유화의 풍부함을 디지털로 구현한 선구자. 태블릿 이전 10년간 마우스만으로 디지털 페인팅을 제작. 회화적이면서도 대기감 넘치는 작업.',
-    technique: 'Digital Plein Air: 디지털 도구로 전통 회화의 감성을 재현.\nAtmospheric Mastery: 빛과 대기의 표현에서 타의 추종을 불허.\nEfficiency Through Abstraction: 최소한의 붓질로 최대의 정보 전달.',
-    aiPrompt: 'Craig Mullins digital painting style, atmospheric environment concept art, painterly digital landscape, cinematic lighting, matte painting for film, traditional art quality in digital medium',
-    films: ['쥬라기 공원 (1993)', '포레스트 검프 (1994)', '아폴로 13 (1995)', '매트릭스 레볼루션 (2003)'],
-    characters: ['공룡 시대 풍경', '역사적 미국 환경', '우주 환경'],
+    id: 'bo_welch', rank: '08', name: 'Bo Welch (보 웰치)',
+    subtitle: 'Production Designer · 미국 · 1951-',
+    styleType: 'fantastical', styleLabel: 'Fantastical Suburbia',
+    desc: '팀 버튼의 핵심 디자이너. 가위손의 파스텔 교외와 배트맨 리턴즈의 고딕 고담 시티를 창조. 일상적 공간을 기묘하고 초현실적으로 비트는 독특한 스타일의 세트 디자이너.',
+    styleDesc: '양식화된 판타지 세트. 일상적인 미국 교외를 왜곡하고 과장하여 어둡고 기묘한 동화적 세계를 만드는 것이 특징. 고딕과 팝아트의 결합.',
+    technique: 'Suburban Distortion: 평범한 교외 풍경의 초현실적 변형.\nGothic Whimsy: 고딕 건축과 유쾌한 기이함의 결합.\nColor as Narrative: 색상을 통한 세계관과 감정 전달.',
+    aiPrompt: 'Bo Welch production design, Edward Scissorhands pastel suburbia, Tim Burton collaboration, stylized gothic fantasy set, distorted American neighborhood, Batman Returns Gotham City, whimsical dark fairy tale architecture',
+    films: ['가위손 (1990)', '배트맨 리턴즈 (1992)', '맨 인 블랙 (1997)', '레모니 스니켓 (2004)'],
+    characters: ['에드워드의 성', '파스텔 교외 마을', '고담 시티', 'MiB 본부'],
     links: [
-      { text: 'Sessions College: Craig Mullins', url: 'https://www.sessions.edu/notes-on-design/why-they-work-craig-mullins/' },
+      { text: 'Art Directors Guild: Bo Welch', url: 'https://adg.org/article/bo-welch' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/8c/11/5f/8c115ffd8714260b88001a84cb86ecfa.jpg', label: 'Mullins — digital environment painting' },
-      { src: 'https://i.pinimg.com/736x/0d/b7/0d/0db70df6cc3e4948936f25436969e2e2.jpg', label: 'Mullins — atmospheric landscape' },
-      { src: 'https://i.pinimg.com/736x/44/84/4b/44844bb36cc57d82cae0ff5d03a2f671.jpg', label: 'Mullins — cinematic concept art' },
-      { src: 'https://i.pinimg.com/736x/89/12/41/891241e8ce8878590d1b6ba62edd8f0d.jpg', label: 'Mullins — painterly digital art' },
+      { src: 'https://i.pinimg.com/736x/3a/9a/7d/3a9a7db2f1214d9ab0276cec38968ff6.jpg', label: 'Welch — Edward Scissorhands set' },
+      { src: 'https://i.pinimg.com/736x/7d/43/64/7d4364b0b44f0e1b67c31f6931cdf74e.jpg', label: 'Welch — Tim Burton collaboration' },
+      { src: 'https://i.pinimg.com/736x/8a/7b/9a/8a7b9a33c1be73bf7282e3c23e7c85f4.jpg', label: 'Welch — fantastical suburbia' },
+      { src: 'https://i.pinimg.com/736x/d9/65/c4/d965c4b348098c63204f113c39bfaf26.jpg', label: 'Welch — gothic fantasy set' },
     ],
   },
   {
-    id: 'yanick_dusseault', rank: '09', name: 'Yanick Dusseault',
-    subtitle: 'Senior Art Director · 캐나다',
-    styleType: 'digital', styleLabel: 'Digital Matte Painting',
-    desc: 'ILM에서 10년 이상 시니어 아트 디렉터로 활동. 반지의 제왕 트릴로지의 시니어 매트 페인터, 스타워즈: 깨어난 포스에서 자쿠 행성을 디자인했다.',
-    styleDesc: '포토리얼리스틱 디지털 매트 페인팅과 환경 아트 디렉션. VFX 블록버스터에서 믿을 수 있으면서도 환상적인 세계를 대규모로 구축.',
-    technique: 'VFX Integration: CG, 실사, 페인팅 요소의 완벽한 통합.\nPlanetary Scale: 행성 단위 환경을 체계적으로 설계.\nNarrative Environment: 스토리를 지원하는 환경 디자인.',
-    aiPrompt: 'Yanick Dusseault matte painting style, epic photorealistic environment, Lord of the Rings landscape, Star Wars desert planet, ILM quality digital matte painting, massive scale fantasy world',
-    films: ['반지의 제왕 트릴로지 (2001-03)', '스타워즈: 깨어난 포스 (2015)', '캐리비안의 해적', '듄: 파트 2 (2024)'],
-    characters: ['미나스 티리스', '자쿠 행성', '중간계 풍경'],
+    id: 'jack_fisk', rank: '09', name: 'Jack Fisk (잭 피스크)',
+    subtitle: 'Production Designer · 미국 · 1945-',
+    styleType: 'naturalist', styleLabel: 'Naturalist Location Design',
+    desc: '테렌스 맬릭의 전 작품 프로덕션 디자이너. 데어 윌 비 블러드의 석유 타운, 레버넌트의 황야를 설계. 세트가 "발견된" 것처럼 느껴지는 극도의 자연주의를 추구한다.',
+    styleDesc: '자연주의적 로케이션 디자인. 인공적 느낌을 최소화하고, 실제 장소에서 발견한 듯한 환경을 구축. 지리적, 역사적 정확성에 대한 깊은 집착.',
+    technique: 'Found Environment: 세트가 "만들어진" 것이 아니라 "발견된" 느낌.\nGeographic Authenticity: 지리와 기후에 맞는 소재와 건축.\nMinimal Intervention: 자연 환경에 최소한의 인공 개입.',
+    aiPrompt: 'Jack Fisk production design, There Will Be Blood oil derrick town, Terrence Malick collaboration, naturalistic frontier set, authentic period American landscape, The Revenant wilderness camp, raw organic environment',
+    films: ['데어 윌 비 블러드 (2007)', '트리 오브 라이프 (2011)', '레버넌트 (2015)', '배드랜즈 (1973)'],
+    characters: ['리틀 보스턴 유전', '1950년대 텍사스 집', '프론티어 캠프', '다코타 황야'],
     links: [
-      { text: 'Dusso.com', url: 'https://www.dusso.com/' },
+      { text: 'IndieWire: Jack Fisk Interview', url: 'https://www.indiewire.com/features/general/jack-fisk-production-designer-interview-1201936258/' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/cf/d0/6d/cfd06dfb89f6d0754a00b762de3fdb05.jpg', label: 'Dusseault — LOTR matte painting' },
-      { src: 'https://i.pinimg.com/736x/ce/1e/7b/ce1e7bd7d2bc2a76a8fb41ea36c24063.jpg', label: 'Dusseault — epic landscape concept' },
-      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'Dusseault — Star Wars environment' },
-      { src: 'https://i.pinimg.com/736x/64/d2/16/64d216482ddb45826518681d5a2fef01.jpg', label: 'Dusseault — digital matte art' },
+      { src: 'https://i.pinimg.com/736x/bd/f6/81/bdf681008f186190d72b4c835037bd8b.jpg', label: 'Fisk — There Will Be Blood set' },
+      { src: 'https://i.pinimg.com/736x/9f/b0/ef/9fb0eff464178c7173ac62c02c518e18.jpg', label: 'Fisk — naturalist environment' },
+      { src: 'https://i.pinimg.com/736x/cb/ef/36/cbef36403ba73757e81d25c634330891.jpg', label: 'Fisk — Malick collaboration' },
+      { src: 'https://i.pinimg.com/736x/f2/80/2d/f2802d9b5ea73147c9e5c6922c34755b.jpg', label: 'Fisk — frontier period design' },
     ],
   },
   {
-    id: 'ralph_eggleston', rank: '10', name: 'Ralph Eggleston',
-    subtitle: 'Production Designer · 미국 · 1965-2022',
-    styleType: 'digital', styleLabel: 'Digital & Traditional Concept Art',
-    desc: '픽사의 프리미어 프로덕션 디자이너. 토이 스토리(최초의 CG 장편), 니모를 찾아서, 인사이드 아웃의 아트 디렉터를 맡았다. 컬러 스크립트를 업계 표준으로 확립시킨 인물.',
-    styleDesc: 'CG 애니메이션을 위한 디지털 및 전통 컨셉 아트. 색상, 빛, 대기를 통해 감정적으로 공명하는 공간을 창조. 영화 전체의 감정 흐름을 환경 팔레트로 설계하는 컬러 스크립트의 개척자.',
-    technique: 'Color Script: 영화 전체의 감정 아크를 환경 색상으로 매핑.\nEmotional Space: 따뜻하고 살아있는 느낌의 CG 환경.\nLight as Storytelling: 빛을 서사 도구로 활용.',
-    aiPrompt: 'Ralph Eggleston Pixar production design style, warm emotionally resonant CG environment, color script concept art, Finding Nemo underwater world, Inside Out mind landscape, masterful use of light and atmosphere',
-    films: ['토이 스토리 (1995)', '니모를 찾아서 (2003)', '인사이드 아웃 (2015)', '월-E (2008)'],
-    characters: ['앤디의 방', '산호초 바다', '감정의 세계', '버려진 지구'],
+    id: 'nathan_crowley', rank: '10', name: 'Nathan Crowley (네이선 크롤리)',
+    subtitle: 'Production Designer · 영국 · 1966-',
+    styleType: 'practical', styleLabel: 'Practical Large-Scale Build',
+    desc: '크리스토퍼 놀란의 핵심 프로덕션 디자이너. 다크 나이트의 배트케이브, 인터스텔라의 엔듀런스 우주선, 덩케르크 해변을 실물 크기로 건설. 디지털보다 실물 세트를 선호하는 장인.',
+    styleDesc: '대규모 실물 세트 건설. 디지털 확장을 최소화하고 물리적으로 실제 크기의 세트를 짓는 것을 원칙으로 삼는다. 과학적, 공학적 정확성에 기반한 사실적 설계.',
+    technique: 'Full-Scale Practical Build: 실물 크기 세트의 물리적 건설.\nEngineering Accuracy: 과학·공학적으로 타당한 설계.\nMinimal Digital Extension: 디지털 보완을 최소화한 촬영.',
+    aiPrompt: 'Nathan Crowley production design, Dark Knight Batcave practical set, Christopher Nolan collaboration, Interstellar Endurance spacecraft interior, large-scale physical construction, Dunkirk beach military set, engineering-accurate design',
+    films: ['다크 나이트 (2008)', '인터스텔라 (2014)', '덩케르크 (2017)', '테넷 (2020)'],
+    characters: ['배트케이브', '엔듀런스 우주선', '덩케르크 해변', '오슬로 프리포트'],
     links: [
-      { text: 'Wikipedia: Ralph Eggleston', url: 'https://en.wikipedia.org/wiki/Ralph_Eggleston' },
+      { text: 'Dezeen: Nathan Crowley Nolan Sets', url: 'https://www.dezeen.com/tag/nathan-crowley/' },
     ],
     images: [
-      { src: 'https://i.pinimg.com/736x/ea/61/2d/ea612dbdf949bdb68bc1051b8941d027.jpg', label: 'Eggleston — Pixar environment concept' },
-      { src: 'https://i.pinimg.com/736x/ec/5e/70/ec5e708dae5e729ef48bf4de1b338bda.jpg', label: 'Eggleston — color script art' },
-      { src: 'https://i.pinimg.com/736x/88/50/4b/88504b2c8837722ea873e98a387dcb04.jpg', label: 'Eggleston — Finding Nemo concept' },
-      { src: 'https://i.pinimg.com/736x/a4/fc/24/a4fc2498811a430c9c5e7fad0b18ac41.jpg', label: 'Eggleston — animated film environment' },
+      { src: 'https://i.pinimg.com/736x/a7/1d/f0/a71df0b4b5fe3150bdb3a09f15ac72c6.jpg', label: 'Crowley — Dark Knight set' },
+      { src: 'https://i.pinimg.com/736x/99/c7/69/99c7691f316bd393d3f60697f549026b.jpg', label: 'Crowley — Nolan collaboration' },
+      { src: 'https://i.pinimg.com/736x/b4/8e/b5/b48eb52eaa5d862f3a3491c6d1597258.jpg', label: 'Crowley — practical scale build' },
+      { src: 'https://i.pinimg.com/736x/1f/6b/e5/1f6be53a8de5425728ac93cedeb6f8b4.jpg', label: 'Crowley — Interstellar set design' },
     ],
   },
 ];
@@ -825,7 +820,6 @@ const DESIGNERS = [
 let currentArtist = null;
 let currentImageIdx = 0;
 
-// Build left panel
 function buildArtistPanel() {
   const panel = document.getElementById('artistPanel');
   panel.innerHTML = DESIGNERS.map(a => `
@@ -844,11 +838,8 @@ function selectArtist(id) {
   if (!artist) return;
   currentArtist = artist;
   currentImageIdx = 0;
-
-  // Update active state
   document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
   document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
-
   updateInfoPanel(artist);
   updateFilmstrip(artist);
   updateViewer(artist);
@@ -864,7 +855,6 @@ function updateInfoPanel(a) {
       </div>
     `;
   }
-
   document.getElementById('infoPanel').innerHTML = `
     <h3>${a.name}</h3>
     <div class="meta">${a.subtitle}</div>
@@ -930,11 +920,9 @@ function updateViewer(a) {
   const ph = document.getElementById('viewerPlaceholder');
   const counter = document.getElementById('imageCounter');
   const badge = document.getElementById('artistBadge');
-
   badge.style.display = 'block';
   document.getElementById('badgeName').textContent = a.name;
   document.getElementById('badgeStyle').textContent = a.styleLabel;
-
   if (a.images.length > 0 && a.images[currentImageIdx]) {
     img.onerror = function() {
       this.style.display = 'none';
@@ -942,7 +930,7 @@ function updateViewer(a) {
       ph.innerHTML = `
         <div class="icon">&#128247;</div>
         <p style="color:var(--accent)">${a.images[currentImageIdx].label}</p>
-        <p style="margin-top:8px;font-size:0.8em;color:#666;">Image could not be loaded. Check the reference links below.</p>
+        <p style="margin-top:8px;font-size:0.8em;color:#666;">Image could not be loaded.</p>
       `;
     };
     img.src = a.images[currentImageIdx].src;
@@ -956,7 +944,7 @@ function updateViewer(a) {
     ph.innerHTML = `
       <div class="icon">&#127912;</div>
       <p>${a.name}</p>
-      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available for this designer.</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available.</p>
     `;
     counter.style.display = 'none';
   }
@@ -981,7 +969,6 @@ function nextImage() {
   selectImage(currentImageIdx);
 }
 
-// Modal
 function openModal() {
   const sel = document.getElementById('modalStyle');
   if (sel.options.length <= 1) {
@@ -1005,18 +992,13 @@ function handleGenerate() {
   const style = document.getElementById('modalStyle').value;
   const camera = document.getElementById('modalCamera').value;
   const mood = document.getElementById('modalMood').value;
-
-  if (!scene.trim()) { alert('Environment description is required.'); return; }
-
+  if (!scene.trim()) { alert('Set description is required.'); return; }
   closeModal();
   setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
-
   const cmd = style === 'all'
-    ? `python3 main.py compare --type environment --scene "${scene}"`
-    : `python3 main.py generate --type environment --scene "${scene}" --style ${style}`;
-
+    ? `python3 main.py compare --type set --scene "${scene}"`
+    : `python3 main.py generate --type set --scene "${scene}" --style ${style}`;
   console.log('Run:', cmd);
-
   setTimeout(() => {
     setStatus('ready', `Generation complete. Run in terminal: ${cmd}`);
   }, 2000);
@@ -1029,14 +1011,12 @@ function setStatus(state, text) {
   txt.textContent = text;
 }
 
-// Keyboard shortcuts
 document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
   if (e.key === 'ArrowLeft') prevImage();
   if (e.key === 'ArrowRight') nextImage();
   if (e.key === 'g' || e.key === 'G') openModal();
   if (e.key === 'Escape') closeModal();
-  // Number keys 1-9, 0 to select artist
   const num = parseInt(e.key);
   if (!isNaN(num)) {
     const idx = num === 0 ? 9 : num - 1;
@@ -1044,12 +1024,10 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// Click outside modal to close
 document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
-// Init
 buildArtistPanel();
 </script>
 </body>

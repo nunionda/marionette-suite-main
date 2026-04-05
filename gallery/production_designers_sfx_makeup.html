@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFX Makeup — Hollywood Makeup Effects Artists 10</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --gold: #e8c872;
+    --gold-dim: #b89a4a;
+    --accent: #8b9dc3;
+    --bg: #0b0b12;
+    --bg-deep: #06060a;
+    --card-bg: #111119;
+    --bg-elevated: #16161f;
+    --border: #1e1e2a;
+    --border-hover: #2e2e3e;
+    --text: #d8d4cf;
+    --text-bright: #f0ece6;
+    --text-muted: #706c66;
+    --text-dim: #4a4844;
+    --font-display: 'DM Serif Display', 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Libre Franklin', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+    --radius-sm: 6px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: var(--font-body); background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; }
+  body::after { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; opacity: 0.03; z-index: 9999; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .gallery-nav { display: flex; align-items: center; gap: 6px; padding: 0 24px; height: 42px; background: var(--bg-deep); border-bottom: 1px solid var(--border); z-index: 101; position: relative; }
+  .gallery-nav .logo { color: var(--gold); font-family: var(--font-display); font-size: 0.85em; text-decoration: none; margin-right: 10px; font-weight: 400; letter-spacing: 0.5px; }
+  .gallery-nav .sep { color: var(--border); margin: 0 4px; user-select: none; }
+  .gallery-nav .tab { padding: 4px 12px; border-radius: var(--radius-sm); font-size: 0.72em; font-weight: 500; letter-spacing: 0.3px; color: var(--text-muted); border: 1px solid transparent; text-decoration: none; transition: all 0.25s var(--ease-out); }
+  .gallery-nav .tab:hover { color: var(--text); background: var(--bg-elevated); border-color: var(--border); }
+  .gallery-nav .tab.active { color: var(--accent); background: var(--card-bg); border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 12px 24px; background: #111118; border-bottom: 1px solid var(--border); height: 56px; }
+  .topbar h1 { font-family: var(--font-display); font-size: 1em; color: var(--accent); letter-spacing: 1px; font-weight: 400; }
+  .topbar .subtitle { color: var(--text-muted); font-size: 0.75em; }
+  .layout { display: flex; height: calc(100vh - 56px - 42px); }
+  .artist-panel { width: 260px; min-width: 260px; background: #0e0e16; border-right: 1px solid var(--border); overflow-y: auto; padding: 12px 0; }
+  .artist-panel::-webkit-scrollbar { width: 4px; }
+  .artist-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .artist-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px; cursor: pointer; transition: all 0.15s; border-left: 3px solid transparent; }
+  .artist-item:hover { background: #1a1a28; }
+  .artist-item.active { background: #1a1a2e; border-left-color: var(--accent); }
+  .artist-rank { font-size: 0.7em; color: var(--accent); opacity: 0.6; min-width: 20px; text-align: right; font-weight: bold; }
+  .artist-item .name { font-size: 0.88em; color: #ddd; font-weight: 500; }
+  .artist-item .role { font-size: 0.7em; color: var(--text-muted); margin-top: 1px; }
+  .artist-item.active .name { color: var(--accent); }
+  .main-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .viewer { flex: 1; display: flex; align-items: center; justify-content: center; background: #080810; position: relative; overflow: hidden; min-height: 0; }
+  .viewer img { max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 4px; box-shadow: 0 8px 40px rgba(0,0,0,0.6); transition: opacity 0.3s; }
+  .viewer .placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #555; overflow: hidden; }
+  .viewer .placeholder .hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.35; filter: blur(1px) saturate(0.8); transition: opacity 0.6s; }
+  .viewer .placeholder:hover .hero-img { opacity: 0.5; }
+  .viewer .placeholder .hero-overlay { position: relative; z-index: 2; background: rgba(11,11,18,0.6); backdrop-filter: blur(8px); padding: 32px 48px; border-radius: 12px; border: 1px solid var(--border); }
+  .viewer .placeholder .hero-overlay h2 { font-family: var(--font-display); color: var(--accent); font-size: 1.6em; font-weight: 400; margin-bottom: 8px; }
+  .viewer .placeholder .hero-overlay p { font-size: 0.9em; color: var(--text-muted); }
+  .viewer .placeholder .hero-overlay kbd { background: var(--bg-elevated); border: 1px solid var(--border); padding: 2px 6px; border-radius: 3px; font-size: 0.85em; }
+  .nav-arrow { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(20,20,32,0.8); border: 1px solid var(--border); color: var(--accent); width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2em; transition: all 0.2s; z-index: 10; }
+  .nav-arrow:hover { background: rgba(40,40,60,0.9); border-color: var(--accent); }
+  .nav-arrow.left { left: 16px; }
+  .nav-arrow.right { right: 16px; }
+  .image-counter { position: absolute; bottom: 12px; right: 16px; background: rgba(20,20,32,0.8); padding: 4px 12px; border-radius: 12px; font-size: 0.75em; color: var(--text-muted); }
+  .artist-badge { position: absolute; top: 12px; left: 16px; background: rgba(20,20,32,0.85); border: 1px solid var(--border); padding: 6px 14px; border-radius: 8px; font-size: 0.8em; }
+  .artist-badge .badge-name { color: var(--accent); font-weight: 600; }
+  .artist-badge .badge-style { color: var(--text-muted); font-size: 0.85em; margin-top: 2px; }
+  .filmstrip-wrapper { background: #111118; border-top: 1px solid var(--border); padding: 12px 16px; }
+  .filmstrip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+  .filmstrip::-webkit-scrollbar { height: 4px; }
+  .filmstrip::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .thumb { min-width: 120px; height: 72px; border-radius: 6px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; position: relative; background: #1a1a28; flex-shrink: 0; }
+  .thumb:hover { border-color: #555; transform: translateY(-2px); }
+  .thumb.active { border-color: var(--accent); }
+  .thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .thumb .thumb-label { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: 2px 6px 4px; font-size: 0.6em; color: #ccc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .thumb .no-image { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; color: #555; font-size: 0.7em; text-align: center; padding: 4px; }
+  .info-panel { width: 300px; min-width: 300px; background: #0e0e16; border-left: 1px solid var(--border); overflow-y: auto; padding: 20px; }
+  .info-panel::-webkit-scrollbar { width: 4px; }
+  .info-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+  .info-panel h3 { color: var(--accent); font-size: 1.1em; margin-bottom: 8px; }
+  .info-panel .meta { color: var(--text-muted); font-size: 0.8em; margin-bottom: 16px; }
+  .info-panel .desc { color: #bbb; font-size: 0.85em; line-height: 1.6; margin-bottom: 16px; }
+  .info-section { margin-bottom: 16px; }
+  .info-section h4 { font-size: 0.75em; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .info-section p { color: #aaa; font-size: 0.82em; line-height: 1.5; }
+  .film-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+  .film-tag { background: #1e1e30; color: #d0c0a0; padding: 3px 9px; border-radius: 12px; font-size: 0.72em; border: 1px solid #333; }
+  .char-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+  .char-tag { background: rgba(139,157,195,0.12); color: var(--accent); padding: 3px 9px; border-radius: 12px; font-size: 0.72em; border: 1px solid rgba(139,157,195,0.3); }
+  .link-list { display: flex; flex-direction: column; gap: 4px; }
+  .link-list a { color: #8090b0; text-decoration: none; font-size: 0.78em; padding: 4px 0; transition: color 0.2s; }
+  .link-list a:hover { color: #a0b0d0; }
+  .style-indicator { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 0.72em; font-weight: 600; margin-bottom: 12px; }
+  .style-indicator.transformation { background: #2a1a2a; color: #c080c0; border: 1px solid #3a2a3a; }
+  .style-indicator.creature { background: #1a2a2a; color: #80c0c0; border: 1px solid #2a3a3a; }
+  .style-indicator.aging { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
+  .style-indicator.gore { background: #2a1a1a; color: #c08080; border: 1px solid #3a2a2a; }
+  .style-indicator.character_sfx { background: #1a1a2a; color: #9080c0; border: 1px solid #2a2a3a; }
+  .style-indicator.bodyhorror { background: #2a1a1a; color: #c09080; border: 1px solid #3a2a2a; }
+  .style-indicator.hyperreal { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
+  .style-indicator.classic { background: #2a2a2a; color: #b0b0b0; border: 1px solid #3a3a3a; }
+  .style-indicator.puppet { background: #2a2a1a; color: #c0a080; border: 1px solid #3a3a2a; }
+  .style-indicator.alien { background: #1a1a2a; color: #8090c0; border: 1px solid #2a2a3a; }
+  .prompt-box { background: #0a0a14; border: 1px solid var(--border); border-radius: 6px; padding: 10px; font-size: 0.78em; color: #999; line-height: 1.5; cursor: pointer; position: relative; transition: border-color 0.2s; }
+  .prompt-box:hover { border-color: var(--accent); }
+  .prompt-box .copy-hint { position: absolute; top: 4px; right: 8px; font-size: 0.8em; color: #555; }
+  .prompt-box.copied .copy-hint { color: var(--accent); }
+  .status-bar { display: flex; align-items: center; gap: 8px; padding: 0 16px; height: 28px; background: #0c0c14; border-top: 1px solid #1a1a2a; font-size: 0.7em; color: var(--text-muted); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #4a4a4a; }
+  .status-dot.ready { background: #70b070; }
+  .gen-btn { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; border: none; padding: 8px 20px; border-radius: 6px; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(240,208,144,0.3); }
+  .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 100; align-items: center; justify-content: center; }
+  .modal-overlay.show { display: flex; }
+  .modal { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 28px; width: 440px; max-width: 90vw; }
+  .modal h3 { color: var(--accent); margin-bottom: 16px; }
+  .modal label { display: block; color: #aaa; font-size: 0.82em; margin-bottom: 4px; margin-top: 12px; }
+  .modal input, .modal select, .modal textarea { width: 100%; background: #1a1a28; border: 1px solid var(--border); color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 0.88em; }
+  .modal textarea { height: 80px; resize: vertical; }
+  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
+  .modal-actions button { padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85em; }
+  .btn-cancel { background: #2a2a3a; color: #aaa; }
+  .btn-generate { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; font-weight: 600; }
+  kbd { background: #1a1a28; border: 1px solid #333; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab active">SFX Makeup</a>
+</nav>
+<div class="topbar">
+  <div>
+    <h1>SFX MAKEUP DESIGN</h1>
+    <div class="subtitle">10 Special Effects Makeup Masters &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate SFX Makeup</button>
+  </div>
+</div>
+<div class="layout">
+  <div class="artist-panel" id="artistPanel"></div>
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">SFX MAKEUP</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/2f/4b/74/2f4b741e286790c0ad8d8c6768318837.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>SFX Makeup Gallery</h2>
+          <p>10명의 특수분장 거장 — Rick Baker, Stan Winston, Dick Smith 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 아티스트를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+    <div class="filmstrip-wrapper"><div class="filmstrip" id="filmstrip"></div></div>
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 SFX makeup artists loaded</span>
+    </div>
+  </div>
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#127917;</p>
+      <p style="font-size:0.85em;">Select an artist from the left panel</p>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate SFX Makeup Concept</h3>
+    <label>Creature / Character Description</label>
+    <textarea id="modalScene" placeholder="e.g. 늑대인간 변신 중간 단계, 달빛 아래 고통스러운 변형"></textarea>
+    <label>Artist Style</label>
+    <select id="modalStyle"><option value="all">All Styles (Compare)</option></select>
+    <label>Technique</label>
+    <input id="modalCamera" type="text" placeholder="e.g. prosthetic, animatronic, foam latex, silicone" />
+    <label>Mood / Horror Level</label>
+    <input id="modalMood" type="text" placeholder="e.g. grotesque, subtle aging, alien beauty, body horror" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+<script>
+const DESIGNERS = [
+  {
+    id: 'rick_baker', rank: '01', name: 'Rick Baker (릭 베이커)',
+    subtitle: 'Makeup Effects Artist · 미국 · 1950-',
+    styleType: 'transformation', styleLabel: 'Transformation Master',
+    desc: '아카데미상 7회 수상 — 역대 최다 수상 메이크업 아티스트. 런던의 미국 늑대인간의 변신 씬은 영화 역사상 가장 위대한 특수분장으로 꼽힌다. MiB, 그린치, 말레피센트까지 40년간 할리우드를 지배.',
+    styleDesc: '실시간 변신 메이크업의 창시자. 기계적 프로스테틱과 폼 라텍스를 결합한 혁명적 변신 효과. 인간에서 비인간으로의 전환을 물리적으로 구현.',
+    technique: 'Mechanical Prosthetics: 내부 메커니즘으로 실시간 변형 구현.\nFoam Latex Sculpture: 폼 라텍스를 이용한 정밀 조각.\nCharacter Transformation: 배우를 완전히 다른 존재로 변환.',
+    aiPrompt: 'Rick Baker makeup effects, American Werewolf London transformation, practical prosthetic makeup, foam latex creature, realistic werewolf mid-transformation, Oscar-winning special effects',
+    films: ['런던의 미국 늑대인간 (1981)', '맨 인 블랙 (1997)', '그린치 (2000)', '말레피센트 (2014)'],
+    characters: ['늑대인간 변신', 'MiB 외계인들', '그린치 전신분장', '말레피센트 뿔'],
+    links: [{ text: 'Wikipedia: Rick Baker', url: 'https://en.wikipedia.org/wiki/Rick_Baker_(makeup_artist)' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/5a/2e/bf/5a2ebf607357a6cf61053d8beabbe474.jpg', label: 'Baker — werewolf transformation' },
+      { src: 'https://i.pinimg.com/736x/86/d0/ca/86d0ca03dafcfbe22e1176a262a5af2e.jpg', label: 'Baker — creature effects' },
+      { src: 'https://i.pinimg.com/736x/27/f5/d5/27f5d506c46fcefc11a141f0da0c38e9.jpg', label: 'Baker — prosthetic makeup' },
+      { src: 'https://i.pinimg.com/736x/25/65/65/256565ebe494f068907164dc08092ae6.jpg', label: 'Baker — practical effects' },
+    ],
+  },
+  {
+    id: 'stan_winston', rank: '02', name: 'Stan Winston (스탠 윈스턴)',
+    subtitle: 'Creature & Effects Designer · 미국 · 1946-2008',
+    styleType: 'creature', styleLabel: 'Creature Animatronics',
+    desc: '아카데미상 4회 수상. 터미네이터의 엔도스켈레톤, 프레데터, 쥬라기 공원의 공룡을 물리적으로 창조한 전설. Stan Winston Studio는 할리우드 크리처 이펙트의 성지.',
+    styleDesc: '애니마트로닉스와 로봇 공학을 결합한 실물 크리처 제작의 황제. 실제로 움직이고 숨쉬는 것처럼 보이는 기계 생명체를 만드는 기술의 정점.',
+    technique: 'Full-Scale Animatronics: 실물 크기 로봇 크리처 제작.\nHybrid FX: 실물 메이크업과 CG의 유기적 결합.\nPuppet Engineering: 복잡한 내부 메커니즘의 퍼펫 설계.',
+    aiPrompt: 'Stan Winston creature design, Terminator endoskeleton, Predator alien warrior, Jurassic Park T-Rex animatronic, practical creature effects, full-scale mechanical puppet',
+    films: ['터미네이터 2 (1991)', '쥬라기 공원 (1993)', '프레데터 (1987)', '에일리언 2 (1986)'],
+    characters: ['T-800 엔도스켈레톤', 'T-Rex 실물 애니마트로닉', '프레데터 전사', '에일리언 퀸'],
+    links: [{ text: 'Stan Winston School', url: 'https://www.stanwinstonschool.com/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/2f/4b/74/2f4b741e286790c0ad8d8c6768318837.jpg', label: 'Winston — Terminator endoskeleton' },
+      { src: 'https://i.pinimg.com/736x/c1/ec/07/c1ec0751e94c6f7a7fd501700dae1395.jpg', label: 'Winston — Predator creature' },
+      { src: 'https://i.pinimg.com/736x/a7/f8/86/a7f886efbdbb3e703b876735749b7be0.jpg', label: 'Winston — Jurassic Park T-Rex' },
+      { src: 'https://i.pinimg.com/736x/c6/3b/0f/c63b0fdd55013503b53d7caef1684acb.jpg', label: 'Winston — animatronic creature' },
+    ],
+  },
+  {
+    id: 'dick_smith', rank: '03', name: 'Dick Smith (딕 스미스)',
+    subtitle: 'Makeup Artist · 미국 · 1922-2014',
+    styleType: 'aging', styleLabel: 'Aging & Prosthetic Pioneer',
+    desc: '"현대 메이크업의 대부." 엑소시스트의 악마 분장, 아마데우스의 노년 살리에리를 창조. 폼 라텍스 프로스테틱 기법의 발명자이자, 릭 베이커를 포함한 수많은 후배를 양성한 교육자.',
+    styleDesc: '노화 분장과 프로스테틱의 선구자. 폼 라텍스 어플라이언스를 영화에 처음 도입. 젊은 배우를 노인으로, 정상을 악마로 변환하는 기술을 체계화.',
+    technique: 'Foam Latex Innovation: 폼 라텍스 프로스테틱의 최초 개발.\nSubtle Aging: 자연스러운 노화 효과를 위한 미세 디테일.\nDemonic Transformation: 공포 영화의 악마적 변형 메이크업.',
+    aiPrompt: 'Dick Smith makeup effects, The Exorcist possessed Regan, realistic aging prosthetic, foam latex appliance, Amadeus old age makeup, practical horror transformation',
+    films: ['엑소시스트 (1973)', '아마데우스 (1984)', '대부 (1972)', '택시 드라이버 (1976)'],
+    characters: ['리건 악마 분장', '노년 살리에리', '비토 코를레오네 노화', '트래비스 비클 상처'],
+    links: [{ text: 'Academy: Dick Smith Legacy', url: 'https://www.oscars.org/governors/dick-smith' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/00/8a/95/008a9524e867f386d4dba150a6c84181.jpg', label: 'Smith — Exorcist demon makeup' },
+      { src: 'https://i.pinimg.com/736x/83/7f/59/837f59b5ac23e04d4e18efdb8622da44.jpg', label: 'Smith — aging prosthetic' },
+      { src: 'https://i.pinimg.com/736x/55/39/96/553996e1291fd65a7e36cbf6150827c0.jpg', label: 'Smith — foam latex pioneer' },
+      { src: 'https://i.pinimg.com/736x/0a/f4/65/0af46514d17883814e71f48b37809d88.jpg', label: 'Smith — practical horror FX' },
+    ],
+  },
+  {
+    id: 'greg_nicotero', rank: '04', name: 'Greg Nicotero (그렉 니코테로)',
+    subtitle: 'Makeup Effects & Director · 미국 · 1963-',
+    styleType: 'gore', styleLabel: 'Gore & Zombie Specialist',
+    desc: 'KNB EFX Group 공동 창립자. 워킹 데드 시리즈의 좀비 아미를 10년간 창조. 킬 빌, 신 시티, 이블 데드 등 고어 이펙트의 현대 마스터. 연출까지 겸하는 멀티 아티스트.',
+    styleDesc: '고어와 좀비 특수분장의 현대적 기준을 정립. 대량 생산과 일관된 품질을 유지하면서도 각각 개성 있는 좀비를 만드는 시스템을 구축.',
+    technique: 'Mass Production Quality: 수백 명의 좀비를 일관된 품질로 제작.\nStory-Driven Gore: 서사에 봉사하는 고어 효과.\nPractical-Digital Blend: 실물 분장과 디지털 보강의 하이브리드.',
+    aiPrompt: 'Greg Nicotero makeup effects, Walking Dead zombie prosthetic, KNB gore effects, practical undead makeup, horror creature design, decomposing corpse prosthetic',
+    films: ['워킹 데드 (2010-2022)', '킬 빌 (2003)', '이블 데드 2 (1987)', '신 시티 (2005)'],
+    characters: ['워커 좀비 아미', '크레이지 88 전투', '데드아이트', '옐로우 바스타드'],
+    links: [{ text: 'KNB EFX Group', url: 'https://knbefxgroup.com/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/be/9d/51/be9d513a214ddfbf3b62db1d4619f0c2.jpg', label: 'Nicotero — Walking Dead zombie' },
+      { src: 'https://i.pinimg.com/736x/02/04/0c/02040cda9c2c24daa1d337ee18472857.jpg', label: 'Nicotero — KNB gore effects' },
+      { src: 'https://i.pinimg.com/736x/02/63/9f/02639f8df146b46e78f9c1796648cbfd.jpg', label: 'Nicotero — undead prosthetic' },
+      { src: 'https://i.pinimg.com/736x/00/6e/51/006e513a2e6e9c922700b3a96600a4c5.jpg', label: 'Nicotero — practical horror FX' },
+    ],
+  },
+  {
+    id: 've_neill', rank: '05', name: 'Ve Neill (비 닐)',
+    subtitle: 'Makeup Artist · 미국 · 1951-',
+    styleType: 'character_sfx', styleLabel: 'Character Transformation',
+    desc: '아카데미상 3회 수상. 비틀주스, 가위손, 캐리비안의 해적 시리즈의 분장을 담당. 팀 버튼의 기묘한 캐릭터들과 잭 스패로우의 아이코닉한 룩을 창조한 거장.',
+    styleDesc: '캐릭터 변환 메이크업의 마스터. 유머러스한 판타지 캐릭터부터 해적의 거친 분장까지, 캐릭터의 개성을 극대화하는 분장 디자인.',
+    technique: 'Character Enhancement: 배우의 특성을 살리면서 캐릭터를 극대화.\nWhimsical Horror: 기묘하면서도 유머러스한 분장.\nWeathering & Aging: 자연스러운 풍화와 노화 효과.',
+    aiPrompt: 'Ve Neill makeup design, Beetlejuice ghost character makeup, Edward Scissorhands pale scarred face, Captain Jack Sparrow pirate weathered look, Tim Burton character transformation',
+    films: ['비틀주스 (1988)', '가위손 (1990)', '캐리비안의 해적 (2003-2017)', '배트맨 리턴즈 (1992)'],
+    characters: ['비틀주스 분장', '에드워드 창백한 얼굴', '잭 스패로우 해적룩', '펭귄맨 분장'],
+    links: [{ text: 'IMDb: Ve Neill', url: 'https://www.imdb.com/name/nm0624679/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/88/fe/5b/88fe5bf5cc2f4605d550dac3953d90d6.jpg', label: 'Neill — Beetlejuice makeup' },
+      { src: 'https://i.pinimg.com/736x/8e/99/f9/8e99f9614271a9fa5c007a6151e92e73.jpg', label: 'Neill — character transformation' },
+      { src: 'https://i.pinimg.com/736x/35/43/7c/35437c277be4396ef87fc8f47957ac84.jpg', label: 'Neill — Pirates makeup' },
+      { src: 'https://i.pinimg.com/736x/b8/8d/4d/b88d4d62c354094140400aa1895c1d1d.jpg', label: 'Neill — Tim Burton design' },
+    ],
+  },
+  {
+    id: 'rob_bottin', rank: '06', name: 'Rob Bottin (롭 보틴)',
+    subtitle: 'Makeup Effects Artist · 미국 · 1959-',
+    styleType: 'bodyhorror', styleLabel: 'Body Horror Pioneer',
+    desc: '존 카펜터의 더 씽에서 영화 역사상 가장 충격적인 바디 호러 이펙트를 창조. 로보캅의 슈트도 그의 작품. 23세에 더 씽을 완성한 천재로, 작업 강도로 인해 병원에 입원할 정도로 몰입.',
+    styleDesc: '바디 호러의 극한을 추구. 인체의 변형, 분열, 융합을 실물 이펙트로 구현. 관객의 육체적 공포를 자극하는 그로테스크한 실물 효과의 대가.',
+    technique: 'Practical Body Horror: 인체 변형을 100% 실물로 구현.\nMechanical Gore: 기계 장치를 이용한 신체 분열 효과.\nThing Effect: 외계 생명체의 세포 단위 변형 표현.',
+    aiPrompt: 'Rob Bottin makeup effects, The Thing alien transformation body horror, RoboCop suit design, practical creature effects, grotesque body mutation, mechanical gore prosthetic',
+    films: ['더 씽 (1982)', '로보캅 (1987)', '토탈 리콜 (1990)', '하울링 (1981)'],
+    characters: ['씽 변형체들', '로보캅 갑옷', '머리 스파이더', '화성 변이 인간'],
+    links: [{ text: 'Wikipedia: Rob Bottin', url: 'https://en.wikipedia.org/wiki/Rob_Bottin' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/ce/68/94/ce6894bab81ccbeb4d0fb39922978dac.jpg', label: 'Bottin — The Thing creature' },
+      { src: 'https://i.pinimg.com/736x/db/fc/9e/dbfc9ebc9ec97be6bc3e2dec65435079.jpg', label: 'Bottin — body horror effects' },
+      { src: 'https://i.pinimg.com/736x/d2/1e/a2/d21ea2c8c622203ba7e6b49138ab11d8.jpg', label: 'Bottin — RoboCop design' },
+      { src: 'https://i.pinimg.com/736x/42/ac/72/42ac723083e84a01510918b8ea47b54d.jpg', label: 'Bottin — practical FX' },
+    ],
+  },
+  {
+    id: 'kazuhiro_tsuji', rank: '07', name: 'Kazuhiro Tsuji (辻 一弘)',
+    subtitle: 'Prosthetic Makeup Artist · 일본/미국 · 1969-',
+    styleType: 'hyperreal', styleLabel: 'Hyper-Realistic Prosthetics',
+    desc: '아카데미상 수상 (다키스트 아워). 게리 올드먼을 윈스턴 처칠로 완벽히 변환한 초사실적 프로스테틱의 거장. 메이크업을 은퇴하고 순수미술 조각가로 활동하다가 올드먼의 요청으로 복귀.',
+    styleDesc: '초사실적(Hyper-Realistic) 프로스테틱의 극한. 배우의 모든 표정이 프로스테틱을 통해 자연스럽게 전달되도록 설계. 실리콘 어플라이언스의 기술적 정점.',
+    technique: 'Silicone Perfection: 초정밀 실리콘 프로스테틱 제작.\nExpression Transfer: 프로스테틱을 통한 자연스러운 표정 전달.\nAnatomical Accuracy: 해부학적 정확성에 기반한 얼굴 재구성.',
+    aiPrompt: 'Kazuhiro Tsuji prosthetic makeup, Darkest Hour Churchill transformation, hyper-realistic silicone prosthetic, Gary Oldman character change, anatomically accurate face rebuild',
+    films: ['다키스트 아워 (2017)', '봄쉘 (2019)', '로치 (2004)', '클릭 (2006)'],
+    characters: ['윈스턴 처칠 (게리 올드먼)', '로저 에일스 (존 리스고)', '에디 머피 분장'],
+    links: [{ text: 'Wired: Kazuhiro Tsuji', url: 'https://www.wired.com/story/kazuhiro-tsuji-darkest-hour/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/a2/0c/dd/a20cdd33474a7a35e29501e308a218dd.jpg', label: 'Tsuji — Churchill prosthetic' },
+      { src: 'https://i.pinimg.com/736x/51/62/fe/5162fe57cff4ebdab108cddbaab2e748.jpg', label: 'Tsuji — hyper-realistic makeup' },
+      { src: 'https://i.pinimg.com/736x/de/28/e2/de28e2d5a3359d4b327acbae49232dd1.jpg', label: 'Tsuji — silicone prosthetic' },
+      { src: 'https://i.pinimg.com/736x/28/cb/b1/28cbb1665ec23e08208ff91c706171ff.jpg', label: 'Tsuji — transformation detail' },
+    ],
+  },
+  {
+    id: 'jack_pierce', rank: '08', name: 'Jack Pierce (잭 피어스)',
+    subtitle: 'Makeup Artist · 그리스/미국 · 1889-1968',
+    styleType: 'classic', styleLabel: 'Classic Monster Design',
+    desc: '유니버설 몬스터의 창조자. 프랑켄슈타인, 미라, 늑대인간의 아이코닉한 외형을 설계한 할리우드 메이크업의 시조. 그의 디자인은 100년이 지난 지금도 몬스터의 원형으로 남아있다.',
+    styleDesc: '클래식 호러 몬스터의 시각적 원형 창조. 현대적 재료 없이 그리스페인트, 접착제, 면직물만으로 영화 역사상 가장 상징적인 몬스터들을 탄생시켰다.',
+    technique: 'Greasepaint Mastery: 기본 재료만으로 극적 변환 달성.\nIconic Silhouette: 한눈에 인식되는 몬스터 실루엣 설계.\nEndurance Application: 6-8시간 소요되는 정밀 분장 프로세스.',
+    aiPrompt: 'Jack Pierce classic monster makeup, Frankenstein flat-top monster, Universal Monsters horror design, The Mummy bandage wrapping, Wolfman transformation, 1930s practical makeup effects',
+    films: ['프랑켄슈타인 (1931)', '미라 (1932)', '늑대인간 (1941)', '프랑켄슈타인의 신부 (1935)'],
+    characters: ['프랑켄슈타인 몬스터', '임호텝 미라', '래리 탤봇 늑대인간', '프랑켄슈타인의 신부'],
+    links: [{ text: 'Wikipedia: Jack Pierce', url: 'https://en.wikipedia.org/wiki/Jack_Pierce_(makeup_artist)' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/5f/9b/f6/5f9bf654a12440404123dbec8ec8b562.jpg', label: 'Pierce — Frankenstein monster' },
+      { src: 'https://i.pinimg.com/736x/10/37/7b/10377b90df47b17ee0e6d64b3c12af08.jpg', label: 'Pierce — Universal Monsters' },
+      { src: 'https://i.pinimg.com/736x/84/af/41/84af41afeb7aca89c522df191935f588.jpg', label: 'Pierce — classic horror makeup' },
+      { src: 'https://i.pinimg.com/736x/87/6c/b9/876cb99d547e0e9d68800ed8cf7f573b.jpg', label: 'Pierce — Wolfman design' },
+    ],
+  },
+  {
+    id: 'stuart_freeborn', rank: '09', name: 'Stuart Freeborn (스튜어트 프리본)',
+    subtitle: 'Makeup Artist · 영국 · 1914-2013',
+    styleType: 'puppet', styleLabel: 'Puppet & Alien Creation',
+    desc: '스타워즈의 요다, 츄바카, 잡바 더 헛을 창조한 거장. 2001 스페이스 오디세이의 유인원 분장도 그의 작품. 조지 루카스가 "요다의 아버지"라 부른 영국 특수분장의 대부.',
+    styleDesc: '퍼펫과 마스크를 통한 캐릭터 창조의 대가. 요다의 얼굴에 아인슈타인의 이미지를 투영한 것으로 유명. 고무와 라텍스만으로 감정을 전달하는 캐릭터를 만듦.',
+    technique: 'Expressive Puppet: 감정을 전달하는 퍼펫 얼굴 설계.\nPortrait Sculpture: 실존 인물의 특징을 캐릭터에 투영.\nApe Suit Design: 전신 유인원 슈트의 사실적 설계.',
+    aiPrompt: 'Stuart Freeborn makeup design, Star Wars Yoda puppet creation, Chewbacca Wookiee suit, 2001 Space Odyssey ape makeup, expressive puppet face, classic sci-fi practical effects',
+    films: ['스타워즈 (1977-1983)', '2001 스페이스 오디세이 (1968)', '슈퍼맨 (1978)', '올리버 트위스트 (1948)'],
+    characters: ['요다', '츄바카', '잡바 더 헛', '유인원 (2001)'],
+    links: [{ text: 'StarWars.com: Stuart Freeborn', url: 'https://www.starwars.com/databank/stuart-freeborn' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/69/d9/14/69d914a7a06d052002c2343ba06f4797.jpg', label: 'Freeborn — Yoda creation' },
+      { src: 'https://i.pinimg.com/736x/f5/dc/93/f5dc93a0c633a8d67a74d30f38c98f1d.jpg', label: 'Freeborn — Star Wars makeup' },
+      { src: 'https://i.pinimg.com/736x/e6/fe/bd/e6febdfc7f608a2091a9c242f5c0c34c.jpg', label: 'Freeborn — Chewbacca design' },
+      { src: 'https://i.pinimg.com/736x/50/37/f8/5037f85fb3b966f1bc5ec22730d77815.jpg', label: 'Freeborn — 2001 ape makeup' },
+    ],
+  },
+  {
+    id: 'joel_harlow', rank: '10', name: 'Joel Harlow (조엘 할로우)',
+    subtitle: 'Makeup Effects Designer · 미국 · 1970s-',
+    styleType: 'alien', styleLabel: 'Alien & Multi-Character',
+    desc: '아카데미상 수상 (스타트렉). J.J. 에이브럼스의 스타트렉 시리즈에서 수십 종의 외계 종족을 디자인. 캐리비안의 해적에서 데비 존스 크루의 해양 크리처 분장도 담당.',
+    styleDesc: '다수의 외계 종족을 동시에 창조하는 멀티 캐릭터 디자인의 전문가. 각 종족의 고유한 생물학적 논리와 문화를 프로스테틱에 반영.',
+    technique: 'Species Design: 생물학적 논리에 기반한 외계 종족 설계.\nMultiple Characters: 단일 작품에 수십 개의 서로 다른 디자인 동시 진행.\nMarine Creature FX: 해양 생물 기반 크리처 분장.',
+    aiPrompt: 'Joel Harlow alien makeup design, Star Trek alien species prosthetic, Pirates of the Caribbean Davy Jones crew, multiple alien race design, sci-fi creature prosthetic makeup',
+    films: ['스타트렉 (2009)', '캐리비안의 해적 (2006-2017)', '스타트렉 비욘드 (2016)', '론 레인저 (2013)'],
+    characters: ['크링온 전사', '데비 존스 해적단', '제이라 외계인', '발라즈 종족'],
+    links: [{ text: 'Stan Winston School: Joel Harlow', url: 'https://www.stanwinstonschool.com/blog/joel-harlow-star-trek' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/69/e4/83/69e483f109a15646a3a7103a68f84d48.jpg', label: 'Harlow — Star Trek alien' },
+      { src: 'https://i.pinimg.com/736x/55/e0/1f/55e01f68ce15f9707bc42f05161e4594.jpg', label: 'Harlow — alien species design' },
+      { src: 'https://i.pinimg.com/736x/14/d4/c8/14d4c8c427f89cb854431953d921ac90.jpg', label: 'Harlow — Pirates creature' },
+      { src: 'https://i.pinimg.com/736x/19/b0/24/19b02452dccb7105a0eef410c63cf1ea.jpg', label: 'Harlow — prosthetic design' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+function buildArtistPanel() { document.getElementById('artistPanel').innerHTML = DESIGNERS.map(a => `<div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')"><span class="artist-rank">${a.rank}</span><div><div class="name">${a.name}</div><div class="role">${a.styleLabel}</div></div></div>`).join(''); }
+function selectArtist(id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; currentArtist = artist; currentImageIdx = 0; document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active')); document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active'); updateInfoPanel(artist); updateFilmstrip(artist); updateViewer(artist); }
+function updateInfoPanel(a) { let techniqueSec = ''; if (a.technique) { techniqueSec = `<div class="info-section"><h4>Technique</h4><p>${a.technique.replace(/\n/g, '<br>')}</p></div>`; } document.getElementById('infoPanel').innerHTML = `<h3>${a.name}</h3><div class="meta">${a.subtitle}</div><span class="style-indicator ${a.styleType}">${a.styleLabel}</span><div class="desc">${a.desc}</div><div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div><div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div><div class="info-section"><h4>Style</h4><p>${a.styleDesc}</p></div>${techniqueSec}<div class="info-section"><h4>AI Prompt</h4><div class="prompt-box" onclick="copyPrompt(this, '${a.id}')"><span class="copy-hint">click to copy</span>${a.aiPrompt}</div></div><div class="info-section"><h4>References</h4><div class="link-list">${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}</div></div>`; }
+function copyPrompt(el, id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; navigator.clipboard.writeText(artist.aiPrompt).then(() => { el.classList.add('copied'); el.querySelector('.copy-hint').textContent = 'copied!'; setTimeout(() => { el.classList.remove('copied'); el.querySelector('.copy-hint').textContent = 'click to copy'; }, 1500); }); }
+function updateFilmstrip(a) { const strip = document.getElementById('filmstrip'); strip.innerHTML = a.images.length === 0 ? Array.from({length: 4}, (_, i) => `<div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}"><div class="no-image">No image</div></div>`).join('') : a.images.map((img, i) => `<div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})"><img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" /><div class="thumb-label">${img.label}</div></div>`).join(''); }
+function updateViewer(a) { const img = document.getElementById('mainImage'); const ph = document.getElementById('viewerPlaceholder'); const counter = document.getElementById('imageCounter'); const badge = document.getElementById('artistBadge'); badge.style.display = 'block'; document.getElementById('badgeName').textContent = a.name; document.getElementById('badgeStyle').textContent = a.styleLabel; if (a.images.length > 0 && a.images[currentImageIdx]) { img.onerror = function() { this.style.display = 'none'; ph.style.display = 'block'; ph.innerHTML = `<p style="color:var(--accent)">${a.images[currentImageIdx].label}</p><p style="margin-top:8px;font-size:0.8em;color:#666;">Image could not be loaded.</p>`; }; img.src = a.images[currentImageIdx].src; img.style.display = 'block'; ph.style.display = 'none'; counter.style.display = 'block'; counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`; } else { img.style.display = 'none'; ph.style.display = 'block'; counter.style.display = 'none'; } }
+function selectImage(idx) { if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return; currentImageIdx = idx; updateViewer(currentArtist); document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx)); }
+function prevImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length; selectImage(currentImageIdx); }
+function nextImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length; selectImage(currentImageIdx); }
+function openModal() { const sel = document.getElementById('modalStyle'); if (sel.options.length <= 1) { DESIGNERS.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`; sel.appendChild(opt); }); } document.getElementById('modalOverlay').classList.add('show'); document.getElementById('modalScene').focus(); if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function handleGenerate() { const scene = document.getElementById('modalScene').value; const style = document.getElementById('modalStyle').value; if (!scene.trim()) { alert('Description is required.'); return; } closeModal(); setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`); setTimeout(() => { setStatus('ready', 'Generation complete.'); }, 2000); }
+function setStatus(state, text) { document.getElementById('statusDot').className = 'status-dot ' + state; document.getElementById('statusText').textContent = text; }
+document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return; if (e.key === 'ArrowLeft') prevImage(); if (e.key === 'ArrowRight') nextImage(); if (e.key === 'g' || e.key === 'G') openModal(); if (e.key === 'Escape') closeModal(); const num = parseInt(e.key); if (!isNaN(num)) { const idx = num === 0 ? 9 : num - 1; if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id); } });
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+buildArtistPanel();
+</script>
+</body>
+</html>
