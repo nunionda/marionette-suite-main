@@ -4,470 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Storyboard Gallery — 10 Masters</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
-<style>
-  :root {
-    --gold: #e8c872;
-    --gold-dim: #b89a4a;
-    --accent: #e8c872;
-    --bg: #0b0b12;
-    --bg-deep: #06060a;
-    --card-bg: #111119;
-    --bg-elevated: #16161f;
-    --border: #1e1e2a;
-    --border-hover: #2e2e3e;
-    --text: #d8d4cf;
-    --text-bright: #f0ece6;
-    --text-muted: #706c66;
-    --text-dim: #4a4844;
-    --font-display: 'DM Serif Display', 'Noto Serif KR', Georgia, serif;
-    --font-body: 'Libre Franklin', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
-    --radius-sm: 6px;
-    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: var(--font-body);
-    background: var(--bg);
-    color: var(--text);
-    overflow: hidden;
-    height: 100vh;
-  }
-  /* GALLERY NAV */
-  .gallery-nav {
-    display: flex; align-items: center; gap: 6px;
-    padding: 0 24px; height: 42px;
-    background: var(--bg-deep); border-bottom: 1px solid var(--border);
-    z-index: 101; position: relative;
-  }
-  .gallery-nav .logo {
-    color: var(--gold); font-family: var(--font-display);
-    font-size: 0.85em; text-decoration: none; margin-right: 10px;
-    font-weight: 400; letter-spacing: 0.5px;
-  }
-  .gallery-nav .sep { color: var(--border); margin: 0 4px; user-select: none; }
-  .gallery-nav .tab {
-    padding: 4px 12px; border-radius: var(--radius-sm);
-    font-size: 0.72em; font-weight: 500; letter-spacing: 0.3px;
-    color: var(--text-muted); border: 1px solid transparent;
-    text-decoration: none; transition: all 0.25s var(--ease-out);
-  }
-  .gallery-nav .tab:hover { color: var(--text); background: var(--bg-elevated); border-color: var(--border); }
-  .gallery-nav .tab.active {
-    color: var(--gold); background: var(--card-bg);
-    border-color: color-mix(in srgb, var(--gold) 40%, transparent);
-  }
-
-  /* === TOP BAR === */
-  .topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 24px;
-    background: #111118;
-    border-bottom: 1px solid var(--border);
-    height: 56px;
-  }
-  .topbar h1 {
-    font-family: var(--font-display);
-    font-size: 1em;
-    color: var(--gold);
-    letter-spacing: 1px;
-    font-weight: 400;
-  }
-  .topbar .subtitle {
-    color: var(--muted);
-    font-size: 0.75em;
-  }
-  .gen-btn {
-    background: linear-gradient(135deg, #c8a050, #a07830);
-    color: #111;
-    border: none;
-    padding: 8px 20px;
-    border-radius: 6px;
-    font-size: 0.85em;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .gen-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(240,208,144,0.3); }
-  .gen-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-  /* === LAYOUT === */
-  .layout {
-    display: flex;
-    height: calc(100vh - 56px - 42px);
-  }
-
-  /* === LEFT PANEL: ARTIST LIST === */
-  .artist-panel {
-    width: 260px;
-    min-width: 260px;
-    background: #0e0e16;
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 12px 0;
-  }
-  .artist-panel::-webkit-scrollbar { width: 4px; }
-  .artist-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-  .artist-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    cursor: pointer;
-    transition: all 0.15s;
-    border-left: 3px solid transparent;
-  }
-  .artist-item:hover { background: #1a1a28; }
-  .artist-item.active {
-    background: #1a1a2e;
-    border-left-color: var(--gold);
-  }
-  .artist-rank {
-    font-size: 0.7em;
-    color: var(--gold);
-    opacity: 0.6;
-    min-width: 20px;
-    text-align: right;
-    font-weight: bold;
-  }
-  .artist-item .name {
-    font-size: 0.88em;
-    color: #ddd;
-    font-weight: 500;
-  }
-  .artist-item .role {
-    font-size: 0.7em;
-    color: var(--muted);
-    margin-top: 1px;
-  }
-  .artist-item.active .name { color: var(--gold); }
-
-  /* === MAIN AREA === */
-  .main-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* === IMAGE VIEWER (TOP) === */
-  .viewer {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #080810;
-    position: relative;
-    overflow: hidden;
-    min-height: 0;
-  }
-  .viewer img {
-    max-width: 90%;
-    max-height: 90%;
-    object-fit: contain;
-    border-radius: 4px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
-    transition: opacity 0.3s;
-  }
-  .viewer .placeholder {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    text-align: center; color: #555;
-    overflow: hidden;
-  }
-  .viewer .placeholder .hero-img {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    object-fit: cover; opacity: 0.35;
-    filter: blur(1px) saturate(0.8);
-    transition: opacity 0.6s;
-  }
-  .viewer .placeholder:hover .hero-img { opacity: 0.5; }
-  .viewer .placeholder .hero-overlay {
-    position: relative; z-index: 2;
-    background: rgba(11,11,18,0.6);
-    backdrop-filter: blur(8px);
-    padding: 32px 48px; border-radius: 12px;
-    border: 1px solid var(--border);
-  }
-  .viewer .placeholder .hero-overlay h2 {
-    font-family: var(--font-display);
-    color: var(--gold); font-size: 1.6em;
-    font-weight: 400; margin-bottom: 8px;
-  }
-  .viewer .placeholder .hero-overlay p { font-size: 0.9em; color: var(--text-muted); }
-  .viewer .placeholder .hero-overlay kbd {
-    background: var(--bg-elevated); border: 1px solid var(--border);
-    padding: 2px 6px; border-radius: 3px; font-size: 0.85em;
-  }
-
-  .nav-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(20,20,32,0.8);
-    border: 1px solid var(--border);
-    color: var(--gold);
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 1.2em;
-    transition: all 0.2s;
-    z-index: 10;
-  }
-  .nav-arrow:hover { background: rgba(40,40,60,0.9); border-color: var(--gold); }
-  .nav-arrow.left { left: 16px; }
-  .nav-arrow.right { right: 16px; }
-
-  .image-counter {
-    position: absolute;
-    bottom: 12px;
-    right: 16px;
-    background: rgba(20,20,32,0.8);
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.75em;
-    color: var(--muted);
-  }
-
-  .artist-badge {
-    position: absolute;
-    top: 12px;
-    left: 16px;
-    background: rgba(20,20,32,0.85);
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 0.8em;
-  }
-  .artist-badge .badge-name { color: var(--gold); font-weight: 600; }
-  .artist-badge .badge-style { color: var(--muted); font-size: 0.85em; margin-top: 2px; }
-
-  /* === FILMSTRIP (BOTTOM) === */
-  .filmstrip-wrapper {
-    background: #111118;
-    border-top: 1px solid var(--border);
-    padding: 12px 16px;
-  }
-  .filmstrip {
-    display: flex;
-    gap: 8px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-  .filmstrip::-webkit-scrollbar { height: 4px; }
-  .filmstrip::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-  .thumb {
-    min-width: 120px;
-    height: 72px;
-    border-radius: 6px;
-    overflow: hidden;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.2s;
-    position: relative;
-    background: #1a1a28;
-    flex-shrink: 0;
-  }
-  .thumb:hover { border-color: #555; transform: translateY(-2px); }
-  .thumb.active { border-color: var(--gold); }
-  .thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .thumb .thumb-label {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: linear-gradient(transparent, rgba(0,0,0,0.85));
-    padding: 2px 6px 4px;
-    font-size: 0.6em;
-    color: #ccc;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .thumb .no-image {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    height: 100%;
-    color: #555;
-    font-size: 0.7em;
-    text-align: center;
-    padding: 4px;
-  }
-
-  /* === RIGHT PANEL: INFO === */
-  .info-panel {
-    width: 300px;
-    min-width: 300px;
-    background: #0e0e16;
-    border-left: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 20px;
-  }
-  .info-panel::-webkit-scrollbar { width: 4px; }
-  .info-panel::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
-
-  .info-panel h3 {
-    color: var(--gold);
-    font-size: 1.1em;
-    margin-bottom: 8px;
-  }
-  .info-panel .meta {
-    color: var(--muted);
-    font-size: 0.8em;
-    margin-bottom: 16px;
-  }
-  .info-panel .desc {
-    color: #bbb;
-    font-size: 0.85em;
-    line-height: 1.6;
-    margin-bottom: 16px;
-  }
-  .info-section {
-    margin-bottom: 16px;
-  }
-  .info-section h4 {
-    font-size: 0.75em;
-    color: var(--gold);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-  }
-  .info-section p {
-    color: #aaa;
-    font-size: 0.82em;
-    line-height: 1.5;
-  }
-  .film-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    margin-bottom: 16px;
-  }
-  .film-tag {
-    background: #1e1e30;
-    color: #d0c0a0;
-    padding: 3px 9px;
-    border-radius: 12px;
-    font-size: 0.72em;
-    border: 1px solid #333;
-  }
-  .link-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .link-list a {
-    color: #7090c0;
-    text-decoration: none;
-    font-size: 0.78em;
-    padding: 4px 0;
-    transition: color 0.2s;
-  }
-  .link-list a:hover { color: #90b0e0; }
-
-  .style-indicator {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 10px;
-    font-size: 0.72em;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-  .style-indicator.watercolor { background: #1a2a1a; color: #80c080; border: 1px solid #2a3a2a; }
-  .style-indicator.ink { background: #1a1a2a; color: #8080c0; border: 1px solid #2a2a3a; }
-  .style-indicator.pencil { background: #2a2a1a; color: #c0c080; border: 1px solid #3a3a2a; }
-  .style-indicator.comic { background: #2a1a1a; color: #c08080; border: 1px solid #3a2a2a; }
-  .style-indicator.minimal { background: #1a1a1a; color: #c0c0c0; border: 1px solid #333; }
-
-  /* === GENERATION MODAL === */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 28px;
-    width: 440px;
-    max-width: 90vw;
-  }
-  .modal h3 { color: var(--gold); margin-bottom: 16px; }
-  .modal label { display: block; color: #aaa; font-size: 0.82em; margin-bottom: 4px; margin-top: 12px; }
-  .modal input, .modal select, .modal textarea {
-    width: 100%;
-    background: #1a1a28;
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 8px 12px;
-    border-radius: 6px;
-    font-size: 0.88em;
-  }
-  .modal textarea { height: 80px; resize: vertical; }
-  .modal-actions { display: flex; gap: 8px; margin-top: 20px; justify-content: flex-end; }
-  .modal-actions button {
-    padding: 8px 20px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-size: 0.85em;
-  }
-  .btn-cancel { background: #2a2a3a; color: #aaa; }
-  .btn-generate { background: linear-gradient(135deg, #c8a050, #a07830); color: #111; font-weight: 600; }
-
-  /* === STATUS BAR === */
-  .status-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 16px;
-    height: 28px;
-    background: #0c0c14;
-    border-top: 1px solid #1a1a2a;
-    font-size: 0.7em;
-    color: var(--muted);
-  }
-  .status-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: #4a4a4a;
-  }
-  .status-dot.ready { background: #70b070; }
-  .status-dot.generating { background: var(--gold); animation: pulse 1s infinite; }
-  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
-
-  /* Keyboard hints */
-  kbd {
-    background: #1a1a28;
-    border: 1px solid #333;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-size: 0.85em;
-    color: var(--muted);
-  }
-</style>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #e8c872; }</style>
 </head>
 <body>
 
@@ -876,6 +414,7 @@ function selectArtist(id) {
   updateInfoPanel(artist);
   updateFilmstrip(artist);
   updateViewer(artist);
+  if (typeof isMobile === "function" && isMobile()) switchMobileTab("viewer");
 }
 
 function updateInfoPanel(a) {
@@ -932,18 +471,24 @@ function updateViewer(a) {
   document.getElementById('badgeStyle').textContent = a.styleLabel;
 
   if (a.images.length > 0 && a.images[currentImageIdx]) {
-    img.onerror = function() {
-      this.style.display = 'none';
-      ph.style.display = 'block';
-      ph.innerHTML = `
-        <div class="icon">&#128247;</div>
-        <p style="color:var(--gold)">${a.images[currentImageIdx].label}</p>
-        <p style="margin-top:8px;font-size:0.8em;color:#666;">이미지를 불러올 수 없습니다. 아래 링크에서 원본을 확인하세요.</p>
-      `;
-    };
-    img.src = a.images[currentImageIdx].src;
+    img.style.opacity = '0';
     img.style.display = 'block';
     ph.style.display = 'none';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.onerror = function() {
+      img.style.display = 'none';
+      ph.style.display = 'flex';
+      ph.style.flexDirection = 'column';
+      ph.style.alignItems = 'center';
+      ph.style.justifyContent = 'center';
+      ph.innerHTML = `<div style="text-align:center;color:var(--text-dim)">`
+        + `<div style="font-size:2em;margin-bottom:8px">&#9888;</div>`
+        + `<div style="font-size:0.85em;color:#888">${a.images[currentImageIdx].label}</div>`
+        + `<div style="font-size:0.75em;margin-top:4px;color:#555">이미지를 불러올 수 없습니다</div>`
+        + `<button onclick="selectImage(${currentImageIdx})" style="margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em">재시도</button>`
+        + `</div>`;
+    };
+    img.src = a.images[currentImageIdx].src;
     counter.style.display = 'block';
     counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
   } else {
@@ -1040,8 +585,59 @@ document.getElementById('modalOverlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) closeModal();
 });
 
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
 // Init
 buildArtistPanel();
 </script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
 </body>
 </html>
