@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marionette Studios — AI 영상제작의 미래</title>
+  <meta name="description"
+    data-i18n-en="Marionette Studios — Stories made with world-class directors. Korean film production company specializing in AI-enhanced filmmaking."
+    content="Marionette Studios — 정상급 감독과 함께 만드는 이야기. AI 기술과 정상급 감독이 만나 만드는 영화.">
+  <meta property="og:title" content="Marionette Studios">
+  <meta property="og:description" content="AI 영상제작의 미래 | AI-Powered Film Production">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://www.marionette-studios.com/assets/images/decode.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+    media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Noto+Serif+KR:wght@400;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap">
+  </noscript>
+  <link rel="stylesheet" href="assets/production.css">
+</head>
+
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="#hero" class="nav-logo" data-i18n="nav.logo">Marionette</a>
+      <div class="nav-links">
+        <a href="#works" data-i18n="nav.works">작품</a>
+        <a href="#team" data-i18n="nav.team">팀</a>
+        <a href="#pipeline" data-i18n="nav.pipeline">기술</a>
+        <a href="#contact" data-i18n="nav.contact">문의</a>
+      </div>
+      <button class="lang-toggle" id="langToggle" aria-label="Toggle language">EN / 한</button>
+    </nav>
+  </header>
+
+  <main>
+    <section id="hero" class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-gradient-overlay"></div>
+      <div class="film-strip" aria-hidden="true"></div>
+      <div class="hero-content">
+        <p class="hero-eyebrow" data-i18n="hero.tech">AI-Powered Film Production</p>
+        <h1 class="hero-title" data-i18n="hero.title">MARIONETTE<br>STUDIOS</h1>
+        <p class="hero-sub" data-i18n="hero.sub">AI 에이전트와 함께 만드는 영화의 새로운 미래</p>
+        <div class="hero-cta-group">
+          <a href="#works" class="btn btn-primary" data-i18n="hero.cta">View Works</a>
+          <a href="#pipeline" class="btn btn-secondary" data-i18n="hero.cta2">AI Pipeline</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-gradient gradient-a"></div>
+      </div>
+    </section>
+
+
+    <section id="works" class="section works">
+      <div class="container">
+        <h2 class="section-title" data-i18n="works.title">Selected Works</h2>
+        <div class="works-grid">
+          <!-- Card 1: Beat Savior (PRIORITY) -->
+          <article class="work-card">
+            <div class="work-poster">
+              <img src="assets/images/beat-savior-concept.png" alt="Beat Savior: The Last Code" loading="lazy">
+              <div class="work-overlay">
+                <span class="work-tag" data-i18n="works.card1.tag">금융 테크노 스릴러</span>
+                <span class="work-status" data-i18n="works.card1.status">시나리오 완료</span>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title" data-i18n="works.card1.title">비트세이비어: 더 라스트 코드</h3>
+              <p class="work-logline" data-i18n="works.card1.logline">전 세계 독재 정권의 비자금 15억 달러를 탈취한 천재 해커와 요원의 사투.</p>
+              <p class="work-desc" data-i18n="works.card1.desc">금융 하이스트 액션. 시나리오 완료, 제작 준비 중.</p>
+              <p class="work-meta" data-i18n="works.card1.meta">2026 · 시나리오 완료 · 극장 장편</p>
+            </div>
+          </article>
+
+          <!-- Card 2: DECODE -->
+          <article class="work-card">
+            <div class="work-poster">
+              <img src="assets/images/decode-concept.png" alt="DECODE" loading="lazy">
+              <div class="work-overlay">
+                <span class="work-tag" data-i18n="works.card2.tag">SF 스릴러</span>
+                <span class="work-status" data-i18n="works.card2.status">개발중</span>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title" data-i18n="works.card2.title">DECODE (디코드)</h3>
+              <p class="work-logline" data-i18n="works.card2.logline">100% 확률의 AI 범죄 예측이 빗나간 연쇄살인, 시스템 오류 뒤의 진실.</p>
+              <p class="work-desc" data-i18n="works.card2.desc">VFX 효율화 기반 AI 사회 담론 SF 스릴러.</p>
+              <p class="work-meta" data-i18n="works.card2.meta">2026 · 개발중 · OTT 시리즈</p>
+            </div>
+          </article>
+
+          <!-- Card 3: Mother's Resume -->
+          <article class="work-card">
+            <div class="work-poster">
+              <img src="assets/images/mother-resume-concept.png" alt="Mother's Resume" loading="lazy">
+              <div class="work-overlay">
+                <span class="work-tag" data-i18n="works.card3.tag">휴먼 드라마</span>
+                <span class="work-status" data-i18n="works.card3.status">개발중</span>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title" data-i18n="works.card3.title">어머니의 이력서</h3>
+              <p class="work-logline" data-i18n="works.card3.logline">평범한 어머니가 숨겨온 충격적 과거, 진실과 헌신의 경계.</p>
+              <p class="work-desc" data-i18n="works.card3.desc">저예산 고효율 감동 드라마. 천만 관객 타겟.</p>
+              <p class="work-meta" data-i18n="works.card3.meta">2026 · 제작중 · 극장 장편</p>
+            </div>
+          </article>
+
+          <!-- Card 4: Nano Community -->
+          <article class="work-card">
+            <div class="work-poster">
+              <img src="assets/images/nano-community-concept.png" alt="Nano Community" loading="lazy">
+              <div class="work-overlay">
+                <span class="work-tag" data-i18n="works.card4.tag">미스터리 드라마</span>
+                <span class="work-status" data-i18n="works.card4.status">개발중</span>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title" data-i18n="works.card4.title">나노 커뮤니티</h3>
+              <p class="work-logline" data-i18n="works.card4.logline">현실에서 만난 온라인 멤버들, 비밀과 이중 정체성의 충돌.</p>
+              <p class="work-desc" data-i18n="works.card4.desc">MZ세대 트렌드 반영 미스터리 스릴러.</p>
+              <p class="work-meta" data-i18n="works.card4.meta">2026 · 개발중 · OTT 시리즈</p>
+            </div>
+          </article>
+
+          <!-- Card 5: Meta Sensing -->
+          <article class="work-card">
+            <div class="work-poster">
+              <img src="assets/images/meta-sensing-concept.png" alt="Meta Sensing" loading="lazy">
+              <div class="work-overlay">
+                <span class="work-tag" data-i18n="works.card5.tag">로맨틱 판타지</span>
+                <span class="work-status" data-i18n="works.card5.status">개발중</span>
+              </div>
+            </div>
+            <div class="work-info">
+              <h3 class="work-title" data-i18n="works.card5.title">메타센싱 (감정의 지도)</h3>
+              <p class="work-logline" data-i18n="works.card5.logline">타인의 감정을 보는 상담사, 자신의 진심을 읽어주는 남자.</p>
+              <p class="work-desc" data-i18n="works.card5.desc">VFX AI 활용 감정 시각화 테크 로맨스.</p>
+              <p class="work-meta" data-i18n="works.card5.meta">2026 · 개발중 · OTT 시리즈</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="team" class="section team">
+      <div class="container">
+        <h2 class="section-title" data-i18n="team.title">Directors</h2>
+        <div class="team-grid">
+          <div class="team-card">
+            <div class="team-photo">
+              <img src="assets/images/shin-daeseung.png" alt="신대승" loading="lazy">
+            </div>
+            <div class="team-info">
+              <h3 class="team-name" data-i18n="team.d1.name">신대승</h3>
+              <p class="team-role" data-i18n="team.d1.role">CEO · PRODUCTION DIRECTOR</p>
+              <p class="team-bio" data-i18n="team.d1.bio">인간의 내면과 사회적 담론을 깊이 있게 통찰하는 연출가. <강철비>, <무법변호사> 등 다수의 히트작 제작 참여.</p>
+              <p class="team-credit" data-i18n="team.d1.credits">주요작: <강철비>, <돈>, <무법변호사> 외 다수</p>
+            </div>
+          </div>
+          <div class="team-card">
+            <div class="team-photo">
+              <img src="assets/images/choi-taeyoung.png" alt="최태영" loading="lazy">
+            </div>
+            <div class="team-info">
+              <h3 class="team-name" data-i18n="team.d2.name">최태영</h3>
+              <p class="team-role" data-i18n="team.d2.role">SOUND DIRECTOR / PRODUCER</p>
+              <p class="team-bio" data-i18n="team.d2.bio">대한민국 영화 음향의 거장. <기생충>, <오징어게임> 등 세계적 프로젝트의 사운드 디자인 총괄.</p>
+              <p class="team-credit" data-i18n="team.d2.credits">주요작: <기생충>, <오징어게임>, <명량> 외 다수</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="filmography" class="section filmography">
+      <div class="container">
+        <h2 class="section-title" data-i18n="filmography.title">Selected Credits</h2>
+        
+        <div class="filmography-content">
+          <div class="works-grid">
+            <!-- Steel Rain 2 -->
+            <article class="work-card">
+              <div class="work-poster">
+                <img src="https://image.tmdb.org/t/p/original/znzntjUs99gMJwEeNs62ck8uQ6Y.jpg" alt="강철비2: 정상회의" loading="lazy">
+                <div class="work-overlay">
+                  <span class="work-tag" data-i18n="filmography.steel2.tag">액션 스릴러</span>
+                  <span class="work-status" data-i18n="filmography.steel2.status">개봉완료</span>
+                </div>
+              </div>
+              <div class="work-info">
+                <h3 class="work-title" data-i18n="filmography.steel2.title">강철비2: 정상회의</h3>
+                <p class="work-logline" data-i18n="filmography.steel2.logline">남북 정상회의를 앞둔 핵심 순간, 표적 암살 작전에 직면한 남북 평화 프로세스</p>
+                <p class="work-role" data-i18n="filmography.steel2.role">제작 총괄</p>
+                <p class="work-meta" data-i18n="filmography.steel2.meta">2020 · 영화</p>
+              </div>
+            </article>
+
+            <!-- Masquerade (Gwanghae) -->
+            <article class="work-card">
+              <div class="work-poster">
+                <img src="assets/images/masquerade-poster.jpg" alt="광해, 왕이 된 남자" loading="lazy">
+                <div class="work-overlay">
+                  <span class="work-tag">사극 드라마</span>
+                  <span class="work-status">천만 관객</span>
+                </div>
+              </div>
+              <div class="work-info">
+                <h3 class="work-title">광해, 왕이 된 남자</h3>
+                <p class="work-logline">왕위를 둘러싼 권력 다툼 속, 왕의 대역이 된 광대의 이야기</p>
+                <p class="work-role">제작 지원 / 사운드</p>
+                <p class="work-meta">2012 · 영화</p>
+              </div>
+            </article>
+
+            <!-- Haeundae -->
+            <article class="work-card">
+              <div class="work-poster">
+                <img src="assets/images/haeundae-poster.jpg" alt="해운대" loading="lazy">
+                <div class="work-overlay">
+                  <span class="work-tag">재난 블록버스터</span>
+                  <span class="work-status">천만 관객</span>
+                </div>
+              </div>
+              <div class="work-info">
+                <h3 class="work-title">해운대</h3>
+                <p class="work-logline">부산 해운대를 덮친 거대한 쓰나미와 그 속에서 살아남으려는 사람들의 사투</p>
+                <p class="work-role">사운드 믹싱 / 제작 지원</p>
+                <p class="work-meta">2009 · 영화</p>
+              </div>
+            </article>
+
+            <!-- Marrying the Mafia: Returns -->
+            <article class="work-card">
+              <div class="work-poster">
+                <img src="https://image.tmdb.org/t/p/original/fuCFEjusMeNjp3V6dZCH8olE3J6.jpg" alt="가문의 영광: 리턴즈" loading="lazy">
+                <div class="work-overlay">
+                  <span class="work-tag" data-i18n="filmography.meta1.tag">코미디</span>
+                  <span class="work-status" data-i18n="filmography.meta1.status">개봉완료</span>
+                </div>
+              </div>
+              <div class="work-info">
+                <h3 class="work-title" data-i18n="filmography.meta1.title">가문의 영광: 리턴즈</h3>
+                <p class="work-logline" data-i18n="filmography.meta1.logline">명가 가문의 되찾은 영광, 가족의 웃음과 감동의 귀환</p>
+                <p class="work-role" data-i18n="filmography.meta1.role">총괄 PD</p>
+                <p class="work-meta" data-i18n="filmography.meta1.meta">2023 · 영화</p>
+              </div>
+            </article>
+
+            <!-- Lawless Lawyer -->
+            <article class="work-card">
+              <div class="work-poster">
+                <img src="https://media.themoviedb.org/t/p/original/wCn4W347JZB8Od0SGcbosDpqyfr.jpg" alt="무법 변호사" loading="lazy">
+                <div class="work-overlay">
+                  <span class="work-tag" data-i18n="filmography.meta2.tag">법정 드라마</span>
+                  <span class="work-status" data-i18n="filmography.meta2.status">방영완료</span>
+                </div>
+              </div>
+              <div class="work-info">
+                <h3 class="work-title" data-i18n="filmography.meta2.title">무법 변호사</h3>
+                <p class="work-logline" data-i18n="filmography.meta2.logline">법과 정의 사이, 변호사의 뜨거운 전투</p>
+                <p class="work-role" data-i18n="filmography.meta2.role">제작</p>
+                <p class="work-meta" data-i18n="filmography.meta2.meta">tvN · 드라마</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+      </div>
+    </section>
+
+    <section id="pipeline" class="section pipeline">
+      <div class="container">
+        <h2 class="section-title" data-i18n="pipeline.title">AI Film Production Pipeline</h2>
+        <p class="pipeline-intro" data-i18n="pipeline.intro">영화 제작을 위한 자사 개발 14+ AI Agent 하이브리드 파이프라인 — 인간 최종 승인 필수</p>
+        <div class="pipeline-flow">
+          <div class="pipeline-step">
+            <span class="pipeline-icon">01</span>
+            <div>
+              <h3 data-i18n="pipeline.step1">CREATIVE DEV</h3>
+              <p>Scripter → ConceptArtist → SoundDesigner → Generalist (Veo 3.0) → MasterEditor</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <span class="pipeline-icon">02</span>
+            <div>
+              <h3 data-i18n="pipeline.step2">PHYSICAL PROD</h3>
+              <p>AssetDesigner → VFXCompositor → CastingDirector → LocationScout</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <span class="pipeline-icon">03</span>
+            <div>
+              <h3 data-i18n="pipeline.step3">POST</h3>
+              <p>Cinematographer → Colorist → MixingEngineer → Previsualizer</p>
+            </div>
+          </div>
+          <div class="pipeline-step">
+            <span class="pipeline-icon">04</span>
+            <div>
+              <h3 data-i18n="pipeline.step4">BIZ</h3>
+              <p>Legal → Finance → Marketing → Distribution → IR → Deal Analyst</p>
+            </div>
+          </div>
+        </div>
+        <p class="pipeline-ref" data-i18n="pipeline.ref">Paperclip Films Dispatch System v5.0 | Production:
+          Cine-Script-Writer + Production Pipeline + Storyboard-Concept-Maker</p>
+        <a href="pipeline.html" class="btn btn-secondary" data-i18n="pipeline.cta">View Full Architecture →</a>
+      </div>
+    </section>
+
+    <section id="library" class="section library">
+      <div class="container">
+        <h2 class="section-title" data-i18n="library.title">Investor Library</h2>
+        <p class="library-intro" data-i18n="library.intro">투자자 전용 — 파이프라인 데모, ROI 분석, 제작 스케줄</p>
+        <div class="library-gate" id="libraryGate">
+          <div class="library-form" id="libraryForm">
+            <input type="email" id="libraryEmail" class="input" data-i18n-placeholder="library.email_placeholder"
+              placeholder="investor@example.com" required>
+            <button type="button" class="btn btn-primary" id="librarySubmit" data-i18n="library.submit">자료 받기</button>
+          </div>
+          <div class="library-links" id="libraryLinks" style="display:none;">
+            <p class="library-welcome" data-i18n="library.welcome">자료를 준비했습니다. 다운로드하세요.</p>
+            <div class="download-list">
+              <a href="assets/downloads/Marionette_IR.pptx" class="download-item" download>
+                <span class="download-icon">📄</span>
+                <span data-i18n="library.deck">IR Pitch Deck</span>
+              </a>
+              <a href="assets/downloads/Lineup_2025.pptx" class="download-item" download>
+                <span class="download-icon">🎬</span>
+                <span data-i18n="library.lineup">작품 라인업</span>
+              </a>
+              <a href="assets/company/마리오네트/비트세이비어_시나리오_20260401_v01.docx" class="download-item" download>
+                <span class="download-icon">📝</span>
+                <span data-i18n="library.script">비트세이비어 시나리오</span>
+              </a>
+              <a href="assets/downloads/Team_Bio.pdf" class="download-item" download>
+                <span class="download-icon">👥</span>
+                <span data-i18n="library.bios">팀 Biography</span>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="library-fallback" id="libraryFallback" style="display:none;">
+          <p><span data-i18n="library.fallback">자료 요청: </span><a
+              href="mailto:invest@marionette-studios.com">invest@marionette-studios.com</a></p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="section contact">
+      <div class="container">
+        <h2 class="section-title" data-i18n="contact.title">Collaborate</h2>
+        <div class="contact-grid">
+          <div class="contact-info">
+            <p data-i18n="contact.p1">투자 및 제휴 제안은 아래로 문의주세요.</p>
+            <p class="contact-email">
+              <a href="mailto:invest@marionette-studios.com">invest@marionette-studios.com</a>
+            </p>
+          </div>
+          <form class="contact-form" id="contactForm">
+            <div class="form-group">
+              <label for="contactName" data-i18n="contact.name">NAME</label>
+              <input type="text" id="contactName" name="name" class="input"
+                data-i18n-placeholder="contact.name_placeholder" required placeholder="홍길동">
+            </div>
+            <div class="form-group">
+              <label for="contactEmail" data-i18n="contact.email_label">EMAIL</label>
+              <input type="email" id="contactEmail" name="email" class="input"
+                data-i18n-placeholder="contact.email_placeholder" required placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label for="contactMessage" data-i18n="contact.message">PROJECT BRIEF</label>
+              <textarea id="contactMessage" name="message" class="input textarea" rows="4"
+                data-i18n-placeholder="contact.message_placeholder" required
+                placeholder="투자/제휴 관련 문의 내용을 입력해주세요."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%;" data-i18n="contact.submit">Submit
+              Mission</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <p class="footer-logo">MARIONETTE</p>
+      <p class="footer-copy" data-i18n="footer.copy">© 2024 MARIONETTE STUDIOS. THE DIGITAL AUTEUR.</p>
+      <p class="footer-email">invest@marionette-studios.com</p>
+    </div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+
+</html>

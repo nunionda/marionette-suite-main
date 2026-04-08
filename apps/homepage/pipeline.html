@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Film Production Pipeline — Marionette Studios</title>
+  <meta name="description" content="Marionette Studios' proprietary AI film production pipeline - 14+ AI agents, 5 development projects, global cinema quality.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+  <link rel="stylesheet" href="pipeline.css">
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a href="index.html" class="nav-logo">← Marionette</a>
+      <div class="nav-links">
+        <a href="#overview">Overview</a>
+        <a href="#projects">Projects</a>
+        <a href="#visual-flow">Visual Flow</a>
+        <a href="#agents">AI Agents</a>
+        <a href="#flow">Data Flow</a>
+      </div>
+      <button class="lang-toggle" id="langToggle" aria-label="Toggle language">EN / 한</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-pipeline">
+      <div class="hero-bg-image" style="background-image: url('assets/images/pipeline-hero-v2.png');"></div>
+      <div class="hero-overlay"></div>
+      <div class="container">
+        <p class="hero-eyebrow" data-i18n="pipeline.hero.eyebrow">The Digital Auteur Vision</p>
+        <h1 class="hero-title" data-i18n="pipeline.hero.title">Cinematic Creative Engine</h1>
+        <p class="hero-sub" data-i18n="pipeline.hero.sub">창작자의 비전을 고도로 정제된 지능형 시스템으로 실현하는 마리오네트 스튜디오의 제작 철학</p>
+      </div>
+    </section>
+
+
+
+    <section id="projects" class="section projects">
+      <div class="container">
+        <h2 class="section-title" data-i18n="pipeline.projects.title">Creative Pillars</h2>
+        
+        <div class="projects-grid">
+          <article class="project-card">
+            <div class="project-header">
+              <span class="project-icon">📜</span>
+              <div class="project-info">
+                <h3 class="project-name">Narrative Architect</h3>
+                <span class="project-status complete" data-i18n="pipeline.project.status.complete">Complete</span>
+              </div>
+            </div>
+            <p class="project-desc" data-i18n="pipeline.projects.script.desc">논리적 구조화와 예술적 감수성이 결합된 시나리오 설계 엔진</p>
+          </article>
+
+          <article class="project-card">
+            <div class="project-header">
+              <span class="project-icon">👁️</span>
+              <div class="project-info">
+                <h3 class="project-name">Visual Synthesizer</h3>
+                <span class="project-status complete" data-i18n="pipeline.project.status.complete">Complete</span>
+              </div>
+            </div>
+            <p class="project-desc" data-i18n="pipeline.projects.storyboard.desc">텍스트에 담긴 상상을 시각적 실체로 구현하는 프리비즈 파이프라인</p>
+          </article>
+
+          <article class="project-card">
+            <div class="project-header">
+              <span class="project-icon">🎻</span>
+              <div class="project-info">
+                <h3 class="project-name">Harmonic Orchestrator</h3>
+                <span class="project-status active" data-i18n="pipeline.project.status.active">In Development</span>
+              </div>
+            </div>
+            <p class="project-desc" data-i18n="pipeline.projects.prod.desc">영상, 음향, 음악의 조화를 통해 정서를 극대화하는 통합 마스터링 시스템</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="agents" class="section agents">
+      <div class="container">
+        <h2 class="section-title" data-i18n="pipeline.agents.title">Intelligent Creative Crew</h2>
+        
+        <div class="pipeline-stages">
+          <div class="stage">
+            <h3 class="stage-title"><span class="stage-num">01</span> <span data-i18n="pipeline.stage.pre">PRE-PRODUCTION</span> <span class="stage-ko" data-i18n="pipeline.stage.pre.ko">기획</span></h3>
+            <div class="agent-list">
+              <div class="agent-item complete">
+                <span class="agent-icon">📝</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.scripter.name">Scripter</h4>
+                  <p data-i18n="pipeline.agent.scripter.desc">시나리오 → DirectionPlan JSON 파싱</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.scripter.status">✅ Complete</span>
+              </div>
+              <div class="agent-item complete">
+                <span class="agent-icon">🎨</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.concept.name">ConceptArtist</h4>
+                  <p data-i18n="pipeline.agent.concept.desc">씬별 스토리보드 이미지 생성</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.concept.status">✅ Complete</span>
+              </div>
+              <div class="agent-item dev">
+                <span class="agent-icon">📹</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.previz.name">Previsualizer</h4>
+                  <p data-i18n="pipeline.agent.previz.desc">카메라 블로킹 3D 프리비즈</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.previz.status">🆕 Dev</span>
+              </div>
+              <div class="agent-item dev">
+                <span class="agent-icon">👥</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.casting.name">CastingDirector</h4>
+                  <p data-i18n="pipeline.agent.casting.desc">캐릭터 비주얼 레퍼런스 시트</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.casting.status">🆕 Dev</span>
+              </div>
+              <div class="agent-item dev">
+                <span class="agent-icon">📍</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.location.name">LocationScout</h4>
+                  <p data-i18n="pipeline.agent.location.desc">배경 컨셉아트 및 레퍼런스</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.location.status">🆕 Dev</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stage">
+            <h3 class="stage-title"><span class="stage-num">02</span> <span data-i18n="pipeline.stage.main">MAIN PRODUCTION</span> <span class="stage-ko" data-i18n="pipeline.stage.main.ko">본편성</span></h3>
+            <div class="agent-list">
+              <div class="agent-item dev">
+                <span class="agent-icon">🎥</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.cinema.name">Cinematographer</h4>
+                  <p data-i18n="pipeline.agent.cinema.desc">촬영 설정 최적화, video_prompt 강화</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.cinema.status">🆕 Dev</span>
+              </div>
+              <div class="agent-item complete">
+                <span class="agent-icon">🎬</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.general.name">Generalist</h4>
+                  <p data-i18n="pipeline.agent.general.desc">AI 비디오 클립 생성 (Veo 3.0)</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.general.status">✅ Complete</span>
+              </div>
+              <div class="agent-item mock">
+                <span class="agent-icon">🧊</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.asset.name">AssetDesigner</h4>
+                  <p data-i18n="pipeline.agent.asset.desc">3D 모델/프랍 생성 (Meshy)</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.asset.status">⚠️ Mock</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stage">
+            <h3 class="stage-title"><span class="stage-num">03</span> <span data-i18n="pipeline.stage.post">POST-PRODUCTION</span> <span class="stage-ko" data-i18n="pipeline.stage.post.ko">후반작업</span></h3>
+            <div class="agent-list">
+              <div class="agent-item mock">
+                <span class="agent-icon">✨</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.vfx.name">VFXCompositor</h4>
+                  <p data-i18n="pipeline.agent.vfx.desc">CG 합성, 크로마키, 로토</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.vfx.status">⚠️ Mock</span>
+              </div>
+              <div class="agent-item complete">
+                <span class="agent-icon">✂️</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.editor.name">MasterEditor</h4>
+                  <p data-i18n="pipeline.agent.editor.desc">비디오 클립 병합, 컷 편집</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.editor.status">✅ Complete</span>
+              </div>
+              <div class="agent-item dev">
+                <span class="agent-icon">🌈</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.color.name">Colorist</h4>
+                  <p data-i18n="pipeline.agent.color.desc">컬러 그레이딩, LUT 적용</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.color.status">🆕 Dev</span>
+              </div>
+              <div class="agent-item complete">
+                <span class="agent-icon">🔊</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.sound.name">SoundDesigner</h4>
+                  <p data-i18n="pipeline.agent.sound.desc">TTS 대사, SFX, 환경음</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.sound.status">✅ Complete</span>
+              </div>
+              <div class="agent-item dev">
+                <span class="agent-icon">🎵</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.composer.name">Composer</h4>
+                  <p data-i18n="pipeline.agent.composer.desc">AI 작곡, BGM/스코어 생성 (Suno)</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.composer.status">🆕 Dev</span>
+              </div>
+              <div class="agent-item dev">
+                <span class="agent-icon">🎚️</span>
+                <div class="agent-info">
+                  <h4 data-i18n="pipeline.agent.mix.name">MixingEngineer</h4>
+                  <p data-i18n="pipeline.agent.mix.desc">대사+BGM+SFX 최종 믹싱</p>
+                </div>
+                <span class="agent-status" data-i18n="pipeline.agent.mix.status">🆕 Dev</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="agent-summary">
+          <div class="summary-item complete">
+            <span class="summary-num">5</span>
+            <span class="summary-label" data-i18n="pipeline.agent.summary.complete">Complete</span>
+          </div>
+          <div class="summary-item dev">
+            <span class="summary-num">7</span>
+            <span class="summary-label" data-i18n="pipeline.agent.summary.dev">In Development</span>
+          </div>
+          <div class="summary-item mock">
+            <span class="summary-num">2</span>
+            <span class="summary-label" data-i18n="pipeline.agent.summary.mock">Mock/Planned</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="visual-flow" class="section visual-flow">
+      <div class="container">
+        <h2 class="section-title" data-i18n="pipeline.visual.title">The Journey of Creation</h2>
+        <p class="section-intro" data-i18n="pipeline.visual.intro">창작자의 비전이 실체화되는 예술적 여정</p>
+
+        <div class="infographic-container">
+          <h3 class="api-title">Production Architecture Flow</h3>
+          <img src="assets/images/pipeline-flowchart.png" alt="Production Pipeline Flowchart" class="flow-infographic">
+        </div>
+        
+        <div class="art-pipeline-grid">
+          <div class="art-step">
+            <div class="art-img-wrap"><img src="assets/images/pipeline-pre.png" alt="Pre-production Art"></div>
+            <div class="art-info">
+              <h3>Phase 1: Designing the World</h3>
+              <p>세심한 설계와 서사적 구축의 단계</p>
+            </div>
+          </div>
+          <div class="art-step">
+            <div class="art-img-wrap"><img src="assets/images/pipeline-main.png" alt="Main production Art"></div>
+            <div class="art-info">
+              <h3>Phase 2: Capturing the Vision</h3>
+              <p>순간의 감정을 빛과 어둠으로 빚어내는 단계</p>
+            </div>
+          </div>
+          <div class="art-step">
+            <div class="art-img-wrap"><img src="assets/images/pipeline-post.png" alt="Post-production Art"></div>
+            <div class="art-info">
+              <h3>Phase 3: The Concert of Creation</h3>
+              <p>모든 조각이 합쳐져 하나의 생명을 얻는 단계</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+    <section class="section cta">
+      <div class="container">
+        <h2 data-i18n="pipeline.cta.title">AI로 만드는 차세대 영화</h2>
+        <p data-i18n="pipeline.cta.desc">할리우드 수준의 AI-native 영상 제작 시스템을 경험하세요.</p>
+        <div class="cta-buttons">
+          <a href="index.html#works" class="btn btn-primary" data-i18n="pipeline.cta.works">View Works</a>
+          <a href="index.html#contact" class="btn btn-secondary" data-i18n="pipeline.cta.contact">Contact Us</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <p class="footer-logo">MARIONETTE</p>
+      <p class="footer-copy" data-i18n="footer.copy">© 2026 MARIONETTE STUDIOS. THE DIGITAL AUTEUR.</p>
+      <p class="footer-email">invest@marionette-studios.com</p>
+    </div>
+  </footer>
+
+  <script src="assets/app.js"></script>
+</body>
+</html>

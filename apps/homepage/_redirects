@@ -1,0 +1,5 @@
+# Block sensitive files
+/.env  /  404
+/.git* /  404
+/.DS_Store / 404
+/assets/downloads/ / 404

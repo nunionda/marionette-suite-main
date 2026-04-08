@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Assets & Downloads
+assets/downloads/
+*.pptx
+
+# Cloudflare Wrangler
+.wrangler/
+.dev.vars
+
+# Temporary files & logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+*.log
+
+# Build artifacts (if applicable later)
+dist/
+build/
+out/

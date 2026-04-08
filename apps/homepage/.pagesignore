@@ -1,0 +1,6 @@
+# Cloudflare Pages Ignore
+assets/downloads/
+*.pptx
+.git/
+.wrangler/
+node_modules/
