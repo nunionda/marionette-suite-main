@@ -24,10 +24,10 @@ export default function PipelineHealthHUD() {
   }, []);
 
   return (
-    <div className="flex flex-col gap-6 p-10 bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-[40px] shadow-2xl relative overflow-hidden h-full animate-in fade-in slide-in-from-right-10 duration-700">
+    <div className="flex flex-col gap-6 p-10 gstack-glass rounded-[var(--ms-radius-lg)] shadow-2xl relative overflow-hidden h-full animate-in fade-in slide-in-from-right-10 duration-700">
       
       {/* Background Pulse Layer */}
-      <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none">
+      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none">
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[var(--ms-green)] rounded-full blur-[120px] animate-pulse" />
       </div>
 
@@ -41,8 +41,8 @@ export default function PipelineHealthHUD() {
                <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Pipeline Health</h2>
             </div>
             <div className="flex flex-col items-end">
-               <span className="text-4xl font-mono font-bold text-white">{integrity.toFixed(1)}%</span>
-               <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-widest">Global Integrity</span>
+                <span className="text-4xl font-code font-bold text-[var(--ms-text-bright)]">{integrity.toFixed(1)}%</span>
+                <span className="text-[9px] text-[var(--ms-text-dim)] font-bold uppercase tracking-widest">Global Integrity</span>
             </div>
          </div>
 

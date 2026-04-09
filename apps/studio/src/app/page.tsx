@@ -27,7 +27,10 @@ import {
   GlobalAnalytics,
   PipelineHealthHUD,
   MasteringForge,
-  Project
+  Project,
+  GStackProvider,
+  SAILIntegrityMonitor,
+  VaultLineageExplorer
 } from "@marionette/ui";
 import { usePipelineSocket } from "@/hooks/usePipelineSocket";
 import { getProjects, updateProjectContext, getBenchmarks } from "@/actions/projects";
@@ -93,7 +96,8 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col bg-[var(--ms-bg)] text-[var(--ms-text)] py-6 px-4 md:px-8 relative overflow-hidden font-mono selection:bg-[var(--ms-green)] selection:text-[var(--ms-bg)]">
+    <GStackProvider initialIntegrity={systemHealth?.integrity_score ?? 94.2}>
+      <main className="min-h-screen flex flex-col bg-[var(--ms-bg-base)] text-[var(--ms-text-main)] py-6 px-4 md:px-8 relative overflow-hidden font-mono selection:bg-[var(--ms-green)] selection:text-black">
       {/* Industrial Grid Overlay */}
       <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
       <div className="absolute inset-0 z-0 opacity-[0.15] pointer-events-none" 
@@ -183,7 +187,8 @@ export default function Home() {
 
                 {showFlowMatrix ? (
                   <div className="space-y-6 animate-in fade-in duration-500">
-                    <AssetLineage />
+                    <SAILIntegrityMonitor />
+                    <VaultLineageExplorer />
                     <ProductionMatrix />
                   </div>
                 ) : (
@@ -352,5 +357,6 @@ export default function Home() {
         <CopilotWidget />
       </div>
     </main>
+    </GStackProvider>
   );
 }

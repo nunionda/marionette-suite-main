@@ -50,14 +50,14 @@ export default function AssetVault() {
   const [filter, setFilter] = useState("All");
 
   return (
-    <div className="flex flex-col h-full bg-[var(--ms-bg)] rounded-[32px] border border-[var(--ms-border)] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700">
+    <div className="flex flex-col h-full gstack-glass rounded-[var(--ms-radius-lg)] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-700">
       
       {/* Header & Search */}
-      <div className="px-10 py-10 border-b border-[var(--ms-border)] bg-black/20 flex items-center justify-between">
+      <div className="px-10 py-10 border-b border-[var(--ms-glass-border)] bg-black/20 flex items-center justify-between">
          <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
-               <span className="text-[10px] font-mono text-[var(--ms-gold)] font-bold uppercase tracking-[0.4em]">Digital Backlot</span>
-               <span className="w-1.5 h-1.5 rounded-full bg-[var(--ms-gold)] animate-pulse" />
+               <span className="text-[10px] font-code text-[var(--ms-amber)] font-bold uppercase tracking-[0.4em]">Digital Backlot</span>
+               <span className="w-1.5 h-1.5 rounded-full bg-[var(--ms-amber)] animate-pulse" />
             </div>
             <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Asset Vault</h2>
          </div>
@@ -103,11 +103,11 @@ export default function AssetVault() {
                   
                   {/* Floating Metadata */}
                   <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
-                     <span className="px-2 py-1 bg-black/80 backdrop-blur-md rounded text-[8px] font-mono text-white/50 border border-white/5 uppercase tracking-tighter">
+                     <span className="px-2 py-1 bg-black/80 backdrop-blur-md rounded text-[8px] font-code text-[var(--ms-text-bright)] opacity-50 border border-white/5 uppercase tracking-tighter">
                         {asset.id}
                      </span>
                      <span className={`px-2 py-1 rounded-md text-[9px] font-bold uppercase tracking-widest ${
-                       asset.quality >= 9.5 ? "bg-[var(--ms-gold)] text-[var(--ms-bg)]" : "bg-zinc-900 text-zinc-400"
+                       asset.quality >= 9.5 ? "bg-[var(--ms-amber)] text-black" : "bg-zinc-900/80 text-zinc-400"
                      }`}>
                        SOQ: {asset.quality}
                      </span>

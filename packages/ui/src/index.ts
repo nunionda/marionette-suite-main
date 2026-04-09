@@ -28,3 +28,6 @@ export { default as PipelineHealthHUD } from "./PipelineHealthHUD";
 export { default as MasteringForge } from "./MasteringForge";
 export { default as AssetHub } from "./AssetHub";
 export { default as ProductionBibleView } from "./ProductionBibleView";
+export { GStackProvider, useGStack } from "./GStackProvider";
+export { default as SAILIntegrityMonitor } from "./SAILIntegrityMonitor";
+export { default as VaultLineageExplorer } from "./VaultLineageExplorer";
