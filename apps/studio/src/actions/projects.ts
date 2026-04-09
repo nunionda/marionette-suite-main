@@ -1,6 +1,7 @@
 "use server";
 
-const API_BASE_URL = "http://localhost:3005/api";
+// 🎬 Stage 7: Unified Production Engine (Port 8000)
+const API_BASE_URL = "http://localhost:8000/api";
 
 export async function getProjects() {
   try {
@@ -73,5 +74,18 @@ export async function startPipeline(projectId: string, steps: string[]) {
   } catch (error) {
     console.error(`Error starting pipeline for ${projectId}:`, error);
     throw error;
+  }
+}
+
+export async function getBenchmarks() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/system/benchmarks`, {
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Failed to fetch benchmarks");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching benchmarks:", error);
+    return null;
   }
 }

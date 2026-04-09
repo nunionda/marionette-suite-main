@@ -8,7 +8,6 @@ import {
   LineProducerView,
   DirectorView,
   ScenarioIDManager,
-  DepartmentalBreakdown,
   ScriptImportUI,
   DevelopmentView,
   PipelineTracker,
@@ -31,12 +30,18 @@ import {
   Project
 } from "@marionette/ui";
 import { usePipelineSocket } from "@/hooks/usePipelineSocket";
-import { getProjects, updateProjectContext } from "@/actions/projects";
+import { getProjects, updateProjectContext, getBenchmarks } from "@/actions/projects";
 import { getProjectManifest, getPackageDownloadUrl } from "@/actions/delivery";
 import CopilotWidget from "@/components/Copilot/CopilotWidget";
 
+interface Benchmark {
+  agents: Record<string, Record<string, unknown>>;
+  benchmark_metadata: Record<string, unknown>;
+}
+
 export default function Home() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [benchmarks, setBenchmarks] = useState<Benchmark | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string>("");
   const [activeRunId, setActiveRunId] = useState<string | undefined>(undefined);
   const { steps, isConnected, systemHealth } = usePipelineSocket(activeRunId);
@@ -58,6 +63,9 @@ export default function Home() {
       if (data.length > 0 && !selectedProjectId) {
         setSelectedProjectId(data[0].id);
       }
+      
+      const bData = await getBenchmarks();
+      setBenchmarks(bData);
     }
     loadProjects();
   }, [selectedProjectId]);
@@ -269,7 +277,7 @@ export default function Home() {
                             )}
                         </div>
                     )}
-                    {currentRole === "system-admin" && <EngineRegistry health={systemHealth} />}
+                    {currentRole === "system-admin" && <EngineRegistry health={systemHealth} benchmarks={benchmarks} />}
                 </div>
              </section>
           </div>
