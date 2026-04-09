@@ -1,0 +1,38 @@
+:root {
+  /* Backgrounds (Deep Black) */
+  --ms-bg: #0A0A0A;
+  --ms-bg-2: #141414;
+  --ms-bg-3: #1E1E1E;
+  --ms-bg-4: #242424;
+  --ms-bg-5: #2A2A2A;
+  --ms-bg-6: #333333;
+
+  /* Brand Colors (Industrial Green) */
+  --ms-green: #00FF41;
+  --ms-green-dim: rgba(0, 255, 65, 0.1);
+  --ms-green-border: rgba(0, 255, 65, 0.3);
+
+  /* Functional Colors */
+  --ms-red: #C0392B;
+  --ms-orange: #F59E0B;
+  --ms-gray: #484848;
+
+  /* Typography Colors */
+  --ms-text: #F0F0F0;
+  --ms-text-muted: #707070;
+  --ms-text-dim: #505050;
+
+  /* Borders & UI Elements */
+  --ms-border: #1E1E1E;
+  --ms-border-active: rgba(0, 255, 65, 0.5);
+  
+  /* Fonts */
+  --ms-font-display: 'Anton', sans-serif;
+  --ms-font-mono: 'Geist Mono', 'Space Grotesk', monospace;
+  --ms-font-body: 'Geist Mono', sans-serif;
+
+  /* Layout */
+  --ms-container: 1440px;
+  --ms-radius: 2px;
+  --ms-transition: 0.2s ease;
+}

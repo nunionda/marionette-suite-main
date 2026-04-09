@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ms-gold: #c9a84c;
+  --color-ms-gold-light: #e6c364;
+  --color-ms-bg: #080808;
+  --color-ms-bg-2: #131313;
+  --color-ms-text: #e5e2e1;
+  --color-ms-text-dim: #99907e;
+  --color-ms-border: rgba(255, 255, 255, 0.1);
+  
+  --font-serif: "Pretendard", "Noto Serif KR", Georgia, serif;
+  --font-mono: "Space Grotesk", monospace;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-ms-bg);
+    color: var(--color-ms-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-serif);
+  }
+}
+
+@layer components {
+  .ms-glass {
+    @apply bg-ms-bg-2/50 backdrop-blur-md border border-ms-border;
+  }
+}

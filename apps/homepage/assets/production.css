@@ -1,26 +1,26 @@
-@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+@import "../../../packages/ui/src/theme.css";
 
 :root {
-  --bg: #080808;
-  --bg-2: #131313;
-  --bg-3: #1c1b1b;
-  --bg-4: #201f1f;
-  --bg-5: #2a2a2a;
-  --bg-6: #353534;
-  --gold: #c9a84c;
-  --gold-light: #e6c364;
-  --gold-dim: rgba(201, 168, 76, 0.15);
-  --text: #e5e2e1;
-  --text-muted: #d0c5b2;
-  --text-dim: #99907e;
-  --border: rgba(255,255,255,0.05);
-  --border-subtle: #4d4637;
-  --font-serif: 'Pretendard', 'Noto Serif KR', Georgia, serif;
-  --font-body: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-label: 'Pretendard', 'Space Grotesk', monospace;
-  --container: 1200px;
-  --radius: 4px;
-  --transition: 0.3s ease;
+  --bg: var(--ms-bg);
+  --bg-2: var(--ms-bg-2);
+  --bg-3: var(--ms-bg-3);
+  --bg-4: var(--ms-bg-4);
+  --bg-5: var(--ms-bg-5);
+  --bg-6: var(--ms-bg-6);
+  --gold: var(--ms-gold);
+  --gold-light: var(--ms-gold-light);
+  --gold-dim: var(--ms-gold-dim);
+  --text: var(--ms-text);
+  --text-muted: var(--ms-text-muted);
+  --text-dim: var(--ms-text-dim);
+  --border: var(--ms-border);
+  --border-subtle: var(--ms-border-subtle);
+  --font-serif: var(--ms-font-serif);
+  --font-body: var(--ms-font-body);
+  --font-label: var(--ms-font-label);
+  --container: var(--ms-container);
+  --radius: var(--ms-radius);
+  --transition: var(--ms-transition);
 }
 
 *, *::before, *::after {
