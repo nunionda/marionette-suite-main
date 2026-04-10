@@ -45,3 +45,4 @@ export { NeuralCalibration } from "./NeuralCalibration";
 export type { AgentStatus, MasteringMode, PipelineState } from "./PipelineProvider";
 export { default as NodeGraphViewer } from "./NodeGraphViewer";
 export type { PipelineNode, PipelineEdge } from "./NodeGraphViewer";
+export { default as ProjectCreator } from "./ProjectCreator";
