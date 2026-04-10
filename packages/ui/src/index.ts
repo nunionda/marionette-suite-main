@@ -43,3 +43,5 @@ export { default as EditSuite } from "./EditSuite";
 export { PipelineProvider, usePipeline } from "./PipelineProvider";
 export { NeuralCalibration } from "./NeuralCalibration";
 export type { AgentStatus, MasteringMode, PipelineState } from "./PipelineProvider";
+export { default as NodeGraphViewer } from "./NodeGraphViewer";
+export type { PipelineNode, PipelineEdge } from "./NodeGraphViewer";
