@@ -32,32 +32,19 @@ import {
   SAILIntegrityMonitor,
   VaultLineageExplorer,
   PipelineProvider,
-  usePipeline
+  NodeGraphViewer,
+  ProjectCreator,
+  PipelineNode,
+  PipelineEdge
 } from "@marionette/ui";
 import { usePipelineSocket } from "@/hooks/usePipelineSocket";
-import { getProjects, updateProjectContext, getBenchmarks, getLatestRuns } from "@/actions/projects";
-import { getProjectManifest, getPackageDownloadUrl, approveMastering, getProjectAnalysis, runProjectAnalysis } from "@/actions/delivery";
-import { RiskMonitor } from "@/components/intelligence/RiskMonitor";
+import { getProjects, createProject, updateProjectContext, getBenchmarks, getLatestRuns, getNodeGraph, executeGraph, getPresets } from "@/actions/projects";
+import { getProjectManifest, getPackageDownloadUrl, approveMastering } from "@/actions/delivery";
 import CopilotWidget from "@/components/Copilot/CopilotWidget";
 
 interface Benchmark {
   agents: Record<string, Record<string, unknown>>;
   benchmark_metadata: Record<string, unknown>;
-}
-
-/**
- * Helper to sync the selected project ID into the PipelineProvider context
- */
-function SyncProjectId({ id }: { id: string }) {
-  const { setProjectId } = usePipeline();
-  
-  useEffect(() => {
-    if (id) {
-      setProjectId(id);
-    }
-  }, [id, setProjectId]);
-
-  return null; 
 }
 
 export default function Home() {
@@ -76,8 +63,9 @@ export default function Home() {
   const [designerSubView, setDesignerSubView] = useState<"Visual DNA" | "Character Studio" | "Key Scenes" | "Set Design">("Visual DNA");
   const [ceoSubView, setCeoSubView] = useState<"Portfolio" | "Backlot" | "Health" | "Mastering">("Portfolio");
   const [showFlowMatrix, setShowFlowMatrix] = useState(false);
-  const [analysisData, setAnalysisData] = useState<any>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [showProjectCreator, setShowProjectCreator] = useState(false);
+  const [graphNodes, setGraphNodes] = useState<PipelineNode[]>([]);
+  const [graphEdges, setGraphEdges] = useState<PipelineEdge[]>([]);
 
   useEffect(() => {
     async function loadProjects() {
@@ -109,30 +97,16 @@ export default function Home() {
     syncActiveRun();
   }, [selectedProjectId]);
 
-  // Fetch Analysis Data
   useEffect(() => {
-    async function loadAnalysis() {
-      if (selectedProjectId) {
-        const data = await getProjectAnalysis(selectedProjectId);
-        setAnalysisData(data);
-      }
+    if (selectedProjectId) {
+      getNodeGraph(selectedProjectId).then((graph) => {
+        if (graph) {
+          setGraphNodes(graph.nodes || []);
+          setGraphEdges(graph.edges || []);
+        }
+      });
     }
-    loadAnalysis();
   }, [selectedProjectId]);
-
-  const handleRunAudit = async () => {
-    if (!selectedProjectId) return;
-    setIsAnalyzing(true);
-    try {
-      await runProjectAnalysis(selectedProjectId);
-      const data = await getProjectAnalysis(selectedProjectId);
-      setAnalysisData(data);
-    } catch (error) {
-      console.error("Audit failed:", error);
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
@@ -159,8 +133,7 @@ export default function Home() {
 
   return (
     <GStackProvider initialIntegrity={systemHealth?.integrity_score ?? 94.2}>
-      <PipelineProvider onApprove4K={handleApprove4K}>
-        <SyncProjectId id={selectedProjectId} />
+      <PipelineProvider>
         <main className="min-h-screen flex flex-col bg-[var(--ms-bg-base)] text-[var(--ms-text-main)] py-8 px-6 md:px-12 relative overflow-hidden selection:bg-[var(--ms-gold)] selection:text-black">
       {/* Cinematic Ambiance */}
       <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
@@ -208,12 +181,20 @@ export default function Home() {
           {/* Left Column: Project & Pipeline Control */}
           <div className="xl:col-span-8 space-y-6">
             <section className="bg-[var(--ms-bg-2)] border border-[var(--ms-border)] p-1 rounded-sm">
-                <ScenarioIDManager 
+                <ScenarioIDManager
                 projects={projects}
-                selectedProjectId={selectedProjectId} 
-                onSelectProject={(id: string) => setSelectedProjectId(id)} 
+                selectedProjectId={selectedProjectId}
+                onSelectProject={(id: string) => setSelectedProjectId(id)}
                 onImportScript={() => setShowImportModal(true)}
                 />
+                <div className="flex justify-end px-4 pb-2">
+                  <button
+                    onClick={() => setShowProjectCreator(true)}
+                    className="px-5 py-2 border border-[var(--ms-gold-border)] text-[var(--ms-gold)] text-[10px] font-bold tracking-widest rounded-full uppercase hover:bg-[var(--ms-gold-haze)] transition-all"
+                  >
+                    + New Project
+                  </button>
+                </div>
             </section>
 
             <section className="bg-[var(--ms-bg-elevated)]/40 border border-[var(--ms-gold-border)]/50 p-10 rounded-[var(--ms-radius-lg)] gstack-glass relative overflow-hidden">
@@ -329,104 +310,26 @@ export default function Home() {
                     )}
                     {currentRole === "line-producer" && (
                         <div className="space-y-6">
-                        {/* Intelligence & Health HUD (Fixed Placement) */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                         <div className="flex flex-col gap-6">
-                            <PipelineHealthHUD health={systemHealth} />
-                            {analysisData?.riskAudit && (
-                              <RiskMonitor data={analysisData.riskAudit} />
-                            )}
-                         </div>
-                         <div className="flex flex-col gap-6">
-                            <PipelineTracker steps={steps} currentStep={steps.find(s => s.status === 'RUNNING')?.id} />
-                            {!analysisData && (
-                              <div className="p-8 border border-[var(--ms-gold-border)]/10 rounded-[var(--ms-radius-lg)] gstack-glass flex flex-col items-center justify-center gap-4">
-                                <span className="text-[10px] font-mono uppercase tracking-widest opacity-40">Intelligence_Offline</span>
-                                <button 
-                                  onClick={handleRunAudit}
-                                  disabled={isAnalyzing}
-                                  className="px-8 py-3 bg-[var(--ms-gold)]/10 border border-[var(--ms-gold)]/20 text-[var(--ms-gold)] text-[10px] font-bold uppercase tracking-widest hover:bg-[var(--ms-gold)]/20 transition-all rounded-full"
-                                >
-                                  {isAnalyzing ? "Analyzing_Core..." : "Initiate_Intelligence_Audit"}
-                                </button>
-                              </div>
-                            )}
-                         </div>
-                      </div>
                             <LineProducerView />
                             <SceneRenderStudio />
                         </div>
                     )}
-                    {currentRole === "director" && <DirectorView />}
-                    {currentRole === "legacy-lab" && (
-                        <div className="animate-in fade-in duration-700 grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-                            {[
-                                { 
-                                    name: "cine-script-writer", 
-                                    url: "http://localhost:5174", 
-                                    desc: "할리우드 표준 2단 시나리오 작성로직 및 프론트엔드 랩(Lab) 구조 분석",
-                                    status: "LAB_OPERATIONAL",
-                                    icon: "🖋️"
-                                },
-                                { 
-                                    name: "cine-analysys-system", 
-                                    url: "http://localhost:4000", 
-                                    desc: "시나리오 분석 및 감정 곡선 등 시각화 데이터 플로우 분석",
-                                    status: "DATA_STREAMS_ACTIVE",
-                                    icon: "📊"
-                                },
-                                { 
-                                    name: "cine-art-department", 
-                                    url: "#", 
-                                    desc: "아트 디렉팅 및 자산 생성(이미지) 인터페이스 분석",
-                                    status: "DESIGN_CORE_READY",
-                                    icon: "🎨"
-                                },
-                                { 
-                                    name: "storyboard-concept-maker", 
-                                    url: "http://localhost:8080", 
-                                    desc: "스토리보드 갤러리 및 로컬 서버 환경 분석",
-                                    status: "GALLERY_SYNCED",
-                                    icon: "🖼️"
-                                },
-                                { 
-                                    name: "production_pipeline", 
-                                    url: "http://localhost:3005", 
-                                    desc: "에이전트 오케스트레이션 및 데이터베이스 연동 구조 분석",
-                                    status: "ENGINE_MASTERED",
-                                    icon: "⚙️",
-                                    fullWidth: true
-                                }
-                            ].map((lab) => (
-                                <a 
-                                    key={lab.name}
-                                    href={lab.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`group flex flex-col p-8 bg-[var(--ms-bg-elevated)]/30 border border-[var(--ms-gold-border)]/20 rounded-[var(--ms-radius-lg)] gstack-glass hover:border-[var(--ms-gold)]/40 transition-all duration-500 hover:scale-[1.02] ${lab.fullWidth ? 'md:col-span-2' : ''}`}
-                                >
-                                    <div className="flex justify-between items-start mb-6">
-                                        <span className="text-3xl filter saturate-0 group-hover:saturate-100 transition-all duration-500">{lab.icon}</span>
-                                        <div className="flex flex-col items-end gap-1">
-                                            <span className="text-[9px] font-mono text-[var(--ms-gold)] tracking-[0.3em] font-bold">{lab.status}</span>
-                                            <div className="w-12 h-[1px] bg-[var(--ms-gold)]/20" />
-                                        </div>
-                                    </div>
-                                    <h4 className="text-xl font-serif text-[var(--ms-text-bright)] mb-4 group-hover:text-[var(--ms-gold)] transition-colors tracking-tight">
-                                        {lab.name}
-                                    </h4>
-                                    <p className="text-xs text-[var(--ms-text-dim)] leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity flex-1">
-                                        {lab.desc}
-                                    </p>
-                                    <div className="mt-8 pt-6 border-t border-[var(--ms-gold-border)]/10 flex justify-between items-center">
-                                        <span className="text-[8px] font-mono text-[var(--ms-text-ghost)] uppercase tracking-widest">Connect_To_Module</span>
-                                        <div className="w-4 h-4 rounded-full border border-[var(--ms-gold)]/40 flex items-center justify-center group-hover:bg-[var(--ms-gold)] transition-all">
-                                            <div className="w-1 h-1 bg-[var(--ms-gold)] rounded-full group-hover:bg-black" />
-                                        </div>
-                                    </div>
-                                </a>
-                            ))}
-                        </div>
+                    {currentRole === "director" && (
+                      <div>
+                        <DirectorView />
+                        {graphNodes.length > 0 && (
+                          <div style={{ marginTop: 24 }}>
+                            <h3 style={{ color: '#D4AF37', fontFamily: 'Playfair Display', marginBottom: 12 }}>
+                              Pipeline Graph
+                            </h3>
+                            <NodeGraphViewer
+                              nodes={graphNodes}
+                              edges={graphEdges}
+                              onNodeClick={(nodeId) => console.log('Node clicked:', nodeId)}
+                            />
+                          </div>
+                        )}
+                      </div>
                     )}
                     {currentRole === "production-designer" && (
                         <div className="animate-in fade-in duration-500">
@@ -503,6 +406,7 @@ export default function Home() {
                 </button>
               </div>
               
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div className="lg:col-span-12">
                    <AssetHub 
                      assets={(manifest as any).assets} 
@@ -535,6 +439,20 @@ export default function Home() {
           </div>
         )}
         
+        {showProjectCreator && (
+          <ProjectCreator
+            isOpen={showProjectCreator}
+            onCancel={() => setShowProjectCreator(false)}
+            onSubmit={async (data) => {
+              const project = await createProject(data);
+              setShowProjectCreator(false);
+              const updated = await getProjects();
+              setProjects(updated);
+              if (project?.id) setSelectedProjectId(project.id);
+            }}
+          />
+        )}
+
         {/* Vibe Coding AI Copilot with Paywall Integration */}
         <CopilotWidget />
       </div>
