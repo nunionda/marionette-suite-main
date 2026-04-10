@@ -33,8 +33,8 @@ export function usePipelineSocket(runId?: string) {
     if (!runId) return;
     if (socketRef.current?.readyState === WebSocket.OPEN) return;
 
-    // 🎬 Stage 7: Redirect to Global Production Engine (Port 8000)
-    const wsUrl = `ws://localhost:8000/ws/pipeline/${runId}`;
+    // 🎬 Stage 7: Redirect to Global Production Engine (Port 3005)
+    const wsUrl = `ws://localhost:3005/ws/pipeline/${runId}`;
     const socket = new WebSocket(wsUrl);
 
     socket.onopen = () => {

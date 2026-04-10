@@ -13,19 +13,14 @@ export interface PipelineStep {
 }
 
 export const defaultPipelineSteps: PipelineStep[] = [
-  // PRE-PRODUCTION
   { phase: "Pre-Production", name: "Script", agent: "Scripter", status: "Queue", progress: 0 },
   { phase: "Pre-Production", name: "Concept", agent: "ConceptArtist", status: "Queue", progress: 0 },
   { phase: "Pre-Production", name: "Previs", agent: "Previsualizer", status: "Queue", progress: 0 },
   { phase: "Pre-Production", name: "Casting", agent: "CastingDirector", status: "Queue", progress: 0 },
   { phase: "Pre-Production", name: "Location", agent: "LocationScout", status: "Queue", progress: 0 },
-  
-  // MAIN PRODUCTION
   { phase: "Main Production", name: "DP Ref", agent: "Cinematographer", status: "Queue", progress: 0 },
   { phase: "Main Production", name: "Video", agent: "Generalist (Veo)", status: "Queue", progress: 0 },
   { phase: "Main Production", name: "Asset", agent: "AssetDesigner", status: "Queue", progress: 0 },
-  
-  // POST-PRODUCTION
   { phase: "Post-Production", name: "VFX", agent: "Compositor", status: "Queue", progress: 0 },
   { phase: "Post-Production", name: "Edit", agent: "MasterEditor", status: "Queue", progress: 0 },
   { phase: "Post-Production", name: "Color", agent: "Colorist", status: "Queue", progress: 0 },
@@ -48,78 +43,83 @@ export default function PipelineTracker({
   const phases = ["Pre-Production", "Main Production", "Post-Production"] as const;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 mb-10">
-      <div className="bg-[var(--ms-bg-2)]/80 backdrop-blur-xl border border-[var(--ms-border)] rounded-sm p-6 shadow-2xl">
-        <div className="flex items-center justify-between mb-8 px-2">
-          <div className="flex items-center gap-3">
-             <div className="w-2 h-2 rounded-full bg-[var(--ms-green)] animate-pulse shadow-[0_0_8px_var(--ms-green)]" />
-             <h4 className="text-[10px] uppercase tracking-[0.4em] font-mono font-bold text-[var(--ms-green)]">Global Pipeline Orchestration</h4>
+    <div className="w-full max-w-7xl mx-auto px-6 mb-12">
+      <div className="bg-[var(--ms-bg-elevated)]/60 backdrop-blur-2xl border border-[var(--ms-gold-border)] rounded-[var(--ms-radius-lg)] p-8 gstack-glass shadow-[var(--ms-glass-shadow)]">
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex flex-col gap-1">
+             <div className="flex items-center gap-3">
+                <div className="w-1.5 h-1.5 rounded-full bg-[var(--ms-gold)] animate-pulse shadow-[0_0_12px_var(--ms-gold)]" />
+                <h4 className="text-[12px] uppercase tracking-[0.4em] font-mono font-bold text-[var(--ms-gold)]">Global Pipeline Orchestration</h4>
+             </div>
+             <p className="text-[10px] text-[var(--ms-text-dim)] font-mono uppercase tracking-widest pl-5">Monitoring {activeAgents} Autonomous Agents</p>
           </div>
-          <div className="text-[10px] font-mono text-[var(--ms-text-dim)] uppercase tracking-widest">
-            AERIAL CONTROL • Active Agents: {activeAgents} • System Health: {systemHealth}%
+          <div className="text-[11px] font-mono text-[var(--ms-gold)] border border-[var(--ms-gold-border)] px-4 py-1.5 rounded-full bg-[var(--ms-gold-haze)] tracking-tighter">
+            SYSTEM INTEGRITY: {systemHealth}%
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          {/* Connector Lines (Visual) */}
+          <div className="absolute top-1/2 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--ms-gold-border)] to-transparent pointer-events-none opacity-20" />
+
           {phases.map((phase) => (
-            <div key={phase} className="relative bg-[var(--ms-bg)]/50 rounded-sm p-4 border border-[var(--ms-border)]">
-              <h5 className="text-[9px] uppercase tracking-[0.2em] font-mono font-bold text-[var(--ms-text-dim)] mb-6 text-center border-b border-[var(--ms-border)] pb-2">
+            <div key={phase} className="relative bg-[var(--ms-bg-surface)]/40 rounded-[var(--ms-radius-lg)] p-6 border border-[var(--ms-gold-border)]/30 backdrop-blur-xl">
+              <h5 className="text-sm font-serif text-[var(--ms-gold)] mb-8 text-center border-b border-[var(--ms-gold-border)]/20 pb-4 tracking-tight">
                 {phase}
               </h5>
               
-              <div className="flex flex-wrap justify-center gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">
                 {steps
                   .filter((s) => s.phase === phase)
                   .map((step, idx) => (
-                    <div key={step.name} className="flex flex-col items-center group relative w-16">
-                      {/* Step Box (2px radius) */}
-                      <div className={`w-8 h-8 rounded-sm flex items-center justify-center border transition-all duration-300 mb-2 ${
-                        step.status === "Completed" ? "bg-[var(--ms-gray)]/20 border-[var(--ms-gray)]/40 text-[var(--ms-text)]" :
-                        step.status === "Processing" ? "bg-[var(--ms-green-dim)] border-[var(--ms-green-border)] shadow-[0_0_10px_rgba(0,255,65,0.1)]" :
-                        step.status === "Error" ? "bg-[#1A0808] border-[var(--ms-red)]/40 text-[var(--ms-red)]" :
-                        "bg-[var(--ms-bg)] border-[var(--ms-border)]"
-                      }`}>
-                         {step.status === "Completed" ? (
-                            <span className="text-[var(--ms-green)] text-[10px] font-bold">✓</span>
-                         ) : (
-                            <span className={`text-[9px] font-mono ${
-                              step.status === "Processing" ? "text-[var(--ms-green)]" : 
-                              step.status === "Error" ? "text-[var(--ms-red)]" :
-                              "text-[var(--ms-text-dim)]"
-                            }`}>
-                              {(idx + 1).toString().padStart(2, '0')}
-                            </span>
-                         )}
+                    <div key={step.name} className="flex flex-col items-center group relative w-full">
+                      {/* Step Ring HUD */}
+                      <div className="relative">
+                        <div className={`w-14 h-14 rounded-full flex items-center justify-center border-2 transition-all duration-700 ${
+                          step.status === "Completed" ? "bg-[var(--ms-gold)]/10 border-[var(--ms-gold)] text-[var(--ms-gold)] shadow-[0_0_20px_var(--ms-gold-glint)]" :
+                          step.status === "Processing" ? "bg-[var(--ms-gold-haze)] border-[var(--ms-blue)] text-white shadow-[0_0_25px_rgba(52,152,219,0.3)] scale-110" :
+                          step.status === "Error" ? "bg-[var(--ms-crimson)]/20 border-[var(--ms-crimson)] text-white" :
+                          "bg-[var(--ms-bg-elevated)] border-[var(--ms-text-ghost)]/30 text-[var(--ms-text-dim)]"
+                        }`}>
+                          {/* Inner Decorative Ring */}
+                          <div className={`absolute inset-1 rounded-full border border-dashed opacity-30 ${
+                            step.status === "Processing" ? "animate-spin-slow border-[var(--ms-blue)]" : "border-current"
+                          }`} />
+                          
+                           {step.status === "Completed" ? (
+                              <span className="text-xl font-serif">●</span>
+                           ) : (
+                              <span className={`text-[11px] font-mono font-bold ${
+                                step.status === "Processing" ? "text-white" : "text-[var(--ms-text-dim)]"
+                              }`}>
+                                {(idx + 1).toString().padStart(2, '0')}
+                              </span>
+                           )}
+                        </div>
 
-                         {/* SOQ Badge (Seal of Quality) */}
-                         {step.soq !== undefined && (
-                            <div className={`absolute -top-1 -right-1 px-1 rounded-[1px] text-[7px] font-mono font-bold shadow-sm ${
-                              step.soq >= 80 ? "bg-[var(--ms-green)] text-[var(--ms-bg)]" :
-                              step.soq >= 60 ? "bg-amber-500 text-black" : "bg-red-600 text-white"
-                            }`}>
-                              {step.soq}
-                            </div>
-                         )}
+                        {/* SOQ Badge HUD */}
+                        {step.soq !== undefined && (
+                           <div className="absolute -top-1 -right-2 px-1.5 py-0.5 rounded-sm text-[8px] font-mono font-bold bg-[var(--ms-gold)] text-[var(--ms-bg-base)] shadow-lg ring-1 ring-black/50">
+                             {step.soq}%
+                           </div>
+                        )}
                       </div>
 
-                      {/* Info */}
-                      <div className="flex flex-col items-center text-center">
-                         <span className={`text-[8px] font-mono font-bold uppercase tracking-tighter mb-0.5 truncate w-full ${
+                      {/* Info & Metadata */}
+                      <div className="mt-4 flex flex-col items-center text-center px-1">
+                         <span className={`text-[10px] font-serif uppercase tracking-widest mb-1 transition-colors ${
                            step.status === "Queue" ? "text-[var(--ms-text-dim)]" : 
-                           step.status === "Error" ? "text-[var(--ms-red)]" :
-                           "text-[var(--ms-text)]"
+                           step.status === "Error" ? "text-[var(--ms-crimson)]" :
+                           "text-[var(--ms-text-bright)] group-hover:text-[var(--ms-gold)]"
                          }`}>{step.name}</span>
-                         <span className="text-[7px] font-mono text-[var(--ms-text-dim)] group-hover:text-[var(--ms-green)] transition-colors uppercase truncate w-full">{step.agent}</span>
+                         <span className="text-[8px] font-mono text-[var(--ms-text-ghost)] group-hover:text-[var(--ms-text-dim)] uppercase tracking-[0.2em] truncate w-full">{step.agent}</span>
                       </div>
 
-                      {/* Progress Mini-Bar for Processing */}
+                      {/* HUD Scanning Line for Active Agents */}
                       {step.status === "Processing" && (
-                         <div className="absolute -top-7 w-full flex flex-col items-center z-10">
-                            <span className="text-[6px] font-mono font-bold text-[var(--ms-green)] bg-[var(--ms-green-dim)] px-1 border border-[var(--ms-green-border)] rounded-sm mb-1 animate-pulse tracking-tighter">LIVE GROUNDING</span>
-                            <span className="text-[8px] font-mono text-[var(--ms-green)]">{step.progress}%</span>
-                            <div className="w-8 h-0.5 bg-[var(--ms-border)] rounded-none overflow-hidden mt-0.5">
-                              <div className="h-full bg-[var(--ms-green)] transition-all duration-700 ease-out" style={{ width: `${step.progress}%` }} />
-                            </div>
+                         <div className="absolute -top-12 w-full flex flex-col items-center z-10 animate-in fade-in slide-in-from-bottom-2 duration-700">
+                            <span className="text-[7px] font-mono font-bold text-[var(--ms-blue)] bg-black/40 px-2 py-0.5 rounded-full border border-[var(--ms-blue)]/50 mb-2 animate-pulse">ORCHESTRATING_STREAM</span>
+                            <div className="w-12 h-[1px] bg-[var(--ms-blue)] shadow-[0_0_10px_var(--ms-blue)] animate-progress-glow" />
                          </div>
                       )}
                     </div>

@@ -33,8 +33,8 @@ import {
   VaultLineageExplorer
 } from "@marionette/ui";
 import { usePipelineSocket } from "@/hooks/usePipelineSocket";
-import { getProjects, updateProjectContext, getBenchmarks } from "@/actions/projects";
-import { getProjectManifest, getPackageDownloadUrl } from "@/actions/delivery";
+import { getProjects, updateProjectContext, getBenchmarks, getLatestRuns } from "@/actions/projects";
+import { getProjectManifest, getPackageDownloadUrl, approveMastering } from "@/actions/delivery";
 import CopilotWidget from "@/components/Copilot/CopilotWidget";
 
 interface Benchmark {
@@ -76,11 +76,18 @@ export default function Home() {
   // 선택된 프로젝트의 최신 런(Run) ID 조회 시뮬레이션 (실제로는 API 연동 필요)
   // Note: Synchronous setState in useEffect is flagged to avoid cascading renders.
   useEffect(() => {
-    if (selectedProjectId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveRunId(`run_${selectedProjectId.slice(0, 8)}`);
+    async function syncActiveRun() {
+      if (selectedProjectId) {
+        const runs = await getLatestRuns(selectedProjectId);
+        if (runs && runs.length > 0) {
+          setActiveRunId(runs[0].id);
+        } else {
+          setActiveRunId(`run_${selectedProjectId.slice(0, 8)}`);
+        }
+      }
     }
-  }, [selectedProjectId]); // ESLint may still warn, but this is a standard prop-to-state sync pattern when async fetch isn't involved yet.
+    syncActiveRun();
+  }, [selectedProjectId]);
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
@@ -95,29 +102,46 @@ export default function Home() {
     }
   };
 
+  const handleApprove4K = async (projectId: string) => {
+    try {
+      await approveMastering(projectId);
+      const updatedProjects = await getProjects();
+      setProjects(updatedProjects);
+    } catch (error) {
+      alert("4K 마스터링 승인 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <GStackProvider initialIntegrity={systemHealth?.integrity_score ?? 94.2}>
-      <main className="min-h-screen flex flex-col bg-[var(--ms-bg-base)] text-[var(--ms-text-main)] py-6 px-4 md:px-8 relative overflow-hidden font-mono selection:bg-[var(--ms-green)] selection:text-black">
-      {/* Industrial Grid Overlay */}
-      <div className="absolute inset-0 z-0 opacity-[0.03] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
-      <div className="absolute inset-0 z-0 opacity-[0.15] pointer-events-none" 
-           style={{ backgroundImage: 'linear-gradient(var(--ms-border) 1px, transparent 1px), linear-gradient(90deg, var(--ms-border) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+      <main className="min-h-screen flex flex-col bg-[var(--ms-bg-base)] text-[var(--ms-text-main)] py-8 px-6 md:px-12 relative overflow-hidden selection:bg-[var(--ms-gold)] selection:text-black">
+      {/* Cinematic Ambiance */}
+      <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
+      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[var(--ms-gold-haze)] rounded-full blur-[160px] opacity-20 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
 
       <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col items-center">
-        {/* Header Section: Cockpit Command Node */}
-        <header className="w-full flex justify-between items-end mb-10 pb-6 border-b border-[var(--ms-border)]">
-          <div className="flex flex-col gap-1">
+        {/* Header Section: Auteur Elite Orchestrator */}
+        <header className="w-full flex justify-between items-center mb-16 pb-8 border-b border-[var(--ms-gold-border)]/30 border-dashed relative">
+          {/* Constrained scan line */}
+          <div className="absolute bottom-[-1px] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--ms-gold)] to-transparent opacity-20" />
+          
+          <div className="flex flex-col gap-2">
             <div className="flex items-center gap-3">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-[var(--ms-green)] shadow-[0_0_8px_var(--ms-green)]' : 'bg-red-500'} animate-pulse`} />
-              <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[var(--ms-text-dim)]">
-                MARIONETTE.STUDIO_HUB // {isConnected ? 'LINK_ESTABLISHED' : 'LINK_OFFLINE'}
+              <div className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-[var(--ms-gold)] shadow-[0_0_12px_var(--ms-gold)]' : 'bg-red-500'} animate-pulse`} />
+              <span className="text-[11px] font-bold uppercase tracking-[0.4em] text-[var(--ms-gold)] opacity-80">
+                AUTEUR.STUDIO // {isConnected ? 'SECURE_CHANNEL' : 'SIGNAL_LOST'}
               </span>
             </div>
-            <h1 className="text-4xl font-bold tracking-tighter uppercase">
-              COCKPIT.<span className="text-[var(--ms-green)]">EXECUTION_NODE</span>
+            <h1 className="text-6xl font-serif text-[var(--ms-text-bright)] tracking-tight">
+              Auteur <span className="text-[var(--ms-gold)] italic">Elite</span>
             </h1>
           </div>
-          <div className="flex gap-4 items-end">
+          <div className="flex gap-6 items-center">
+            <div className="flex bg-[var(--ms-bg-elevated)] border border-[var(--ms-gold-border)] p-1 rounded-full px-4 gap-4 mr-4">
+               <button className="text-[9px] font-bold uppercase tracking-widest text-[var(--ms-gold)] hover:opacity-100 opacity-60 transition-opacity">Studio</button>
+               <button className="text-[9px] font-bold uppercase tracking-widest text-[var(--ms-text-dim)] hover:opacity-100 opacity-40 transition-opacity">Premiere</button>
+               <button className="text-[9px] font-bold uppercase tracking-widest text-[var(--ms-text-dim)] hover:opacity-100 opacity-40 transition-opacity">Blueprint</button>
+            </div>
             <button 
               onClick={async () => {
                 if (selectedProjectId) {
@@ -126,14 +150,10 @@ export default function Home() {
                   setShowDeliveryHub(true);
                 }
               }}
-              className="px-6 py-2 bg-[var(--ms-green)] text-[var(--ms-bg)] text-[10px] font-bold uppercase tracking-[0.2em] rounded-sm hover:scale-105 transition-all shadow-[0_0_15px_rgba(0,255,65,0.3)] mb-1"
+              className="px-8 py-3 bg-[var(--ms-gold)] text-[var(--ms-bg-base)] text-[11px] font-bold uppercase tracking-[0.3em] rounded-full hover:scale-105 transition-all shadow-[0_8px_24px_var(--ms-gold-glint)]"
             >
-              Ship_Production
+              Ship Production
             </button>
-            <div className="text-right hidden md:block">
-              <div className="text-[10px] text-[var(--ms-text-dim)] uppercase mb-1">DATA_STREAM_v0.5.0 // SAIL_READY</div>
-              <div className="text-xs font-bold text-[var(--ms-green)]">ACTIVE_RUN_ID: {activeRunId || 'NULL'}</div>
-            </div>
           </div>
         </header>
 
@@ -149,10 +169,15 @@ export default function Home() {
                 />
             </section>
 
-            <section className="bg-[var(--ms-bg-2)] border border-[var(--ms-border)] p-6 rounded-sm">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--ms-green)]">14_AGENT_PIPELINE.OS</h3>
-                    <span className="text-[9px] text-[var(--ms-text-dim)]">REAL_TIME_ORCHESTRATION_ENABLED</span>
+            <section className="bg-[var(--ms-bg-elevated)]/40 border border-[var(--ms-gold-border)]/50 p-10 rounded-[var(--ms-radius-lg)] gstack-glass relative overflow-hidden">
+                {/* Section Scan Line */}
+                <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--ms-gold)] to-transparent opacity-10" />
+                <div className="flex justify-between items-center mb-10">
+                    <div className="flex flex-col gap-1">
+                        <h3 className="text-sm font-serif text-[var(--ms-gold)] tracking-tight">Active Pipeline</h3>
+                        <p className="text-[10px] text-[var(--ms-text-ghost)] uppercase tracking-[0.2em] font-mono">Real-time orchestration stream</p>
+                    </div>
+                    <div className="w-24 h-[1px] bg-[var(--ms-gold-border)]/30" />
                 </div>
                 <PipelineTracker steps={steps} />
             </section>
@@ -289,15 +314,16 @@ export default function Home() {
         </div>
 
         {/* Footer info: Operational Metadata */}
-        <footer className="mt-16 py-8 border-t border-[var(--ms-border)] w-full flex justify-between items-center text-[9px] font-mono text-[var(--ms-text-dim)]">
-          <div className="uppercase tracking-widest">AU_MARIONETTE // INFRA_SECURED</div>
-          <div className="flex gap-8">
-            <span className="uppercase tracking-widest">DEPLOY_ENV: INDUSTRIAL_PROD</span>
-            <span className={`uppercase tracking-widest transition-colors duration-500 ${
+        <footer className="mt-16 py-8 border-t border-[var(--ms-gold-border)]/20 w-full flex justify-between items-center text-[9px] font-mono text-[var(--ms-text-dim)] relative">
+          <div className="absolute top-[-1px] left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--ms-gold)] to-transparent opacity-10" />
+          <div className="uppercase tracking-[0.4em] opacity-60">AU_MARIONETTE // INFRA_SECURED</div>
+          <div className="flex gap-12">
+            <span className="uppercase tracking-[0.2em]">ENV: INDUSTRIAL_PROD</span>
+            <span className={`uppercase tracking-[0.2em] transition-colors duration-500 ${
               (systemHealth?.integrity_score ?? 100) < 60 ? "text-red-500 animate-pulse" : 
-              (systemHealth?.integrity_score ?? 100) < 90 ? "text-amber-500" : "text-[var(--ms-green)]"
+              (systemHealth?.integrity_score ?? 100) < 90 ? "text-amber-500" : "text-[var(--ms-gold)]"
             }`}>
-              SYSTEM_INTEGRITY: {systemHealth?.integrity_score ?? 100}%
+              INTEGRITY_INDEX: {systemHealth?.integrity_score ?? 100}%
             </span>
           </div>
         </footer>
@@ -318,34 +344,50 @@ export default function Home() {
           />
         )}
         {showDeliveryHub && manifest && (
-          <div className="fixed inset-0 z-[70] bg-black/90 backdrop-blur-2xl flex flex-col p-8 overflow-y-auto animate-in fade-in zoom-in duration-300">
-            <div className="w-full max-w-7xl mx-auto flex flex-col gap-10">
-              <div className="flex justify-between items-center bg-black/40 p-4 border border-[var(--ms-border)] rounded-sm">
-                <h2 className="text-2xl font-bold uppercase tracking-widest text-[var(--ms-green)]">Delivery_Manifest // {manifest.title}</h2>
-                <button onClick={() => setShowDeliveryHub(false)} className="px-4 py-2 border border-white/20 text-white hover:bg-white/10">CLOSE_EXIT</button>
+          <div className="fixed inset-0 z-[70] bg-[var(--ms-bg-base)]/95 backdrop-blur-3xl flex flex-col p-8 md:p-12 overflow-y-auto animate-in fade-in zoom-in duration-500 selection:bg-[var(--ms-gold)] selection:text-black">
+            <div className="w-full max-w-7xl mx-auto flex flex-col gap-12">
+              <div className="flex justify-between items-center bg-black/40 px-10 py-6 border border-[var(--ms-gold-border)]/20 rounded-[var(--ms-radius-lg)] gstack-glass">
+                <div className="flex flex-col gap-1">
+                   <div className="flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-[var(--ms-gold)] animate-pulse shadow-[0_0_10px_var(--ms-gold)]" />
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-[0.4em] text-[var(--ms-gold)]">Delivery_Protocol_v2.0</span>
+                   </div>
+                   <h2 className="text-3xl font-serif text-[var(--ms-text-bright)] tracking-tight">Archive Manifest // {manifest.title}</h2>
+                </div>
+                <button 
+                  onClick={() => setShowDeliveryHub(false)} 
+                  className="px-8 py-3 border border-[var(--ms-gold-border)]/30 text-[var(--ms-gold)] text-[10px] font-bold uppercase tracking-widest hover:bg-[var(--ms-gold-haze)] transition-all rounded-full"
+                >
+                  Terminate_Session
+                </button>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div className="lg:col-span-12">
                    <AssetHub 
-                     assets={manifest.assets} 
-                     projectName={manifest.title} 
+                     assets={(manifest as any).assets} 
+                     projectName={(manifest as any).title} 
                      onDownloadPackage={async () => {
                         const url = await getPackageDownloadUrl(selectedProjectId);
                         window.open(url, "_blank");
                      }}
                    />
                 </div>
-                <div className="lg:col-span-12 bg-zinc-900/50 p-10 border border-white/5 rounded-sm">
-                   <h3 className="text-sm font-bold uppercase text-zinc-500 mb-8 tracking-[0.5em]">Digital_Production_Bible</h3>
+                <div className="lg:col-span-12">
+                   <div className="flex items-center gap-4 mb-6">
+                      <div className="h-px flex-1 bg-gradient-to-r from-transparent to-[var(--ms-gold-border)] opacity-20" />
+                      <h3 className="text-[10px] font-mono font-bold uppercase text-[var(--ms-gold)] tracking-[0.6em]">Digital_Studio_Bible</h3>
+                      <div className="h-px flex-1 bg-gradient-to-r from-[var(--ms-gold-border)] to-transparent opacity-20" />
+                   </div>
                    <ProductionBibleView 
-                      project={selectedProject as unknown as Record<string, unknown>} 
+                      project={selectedProject as unknown as any} 
                       evaluations={((manifest as { assets: Record<string, unknown>[] })?.assets || []).filter((a: Record<string, unknown>) => a.soq_score).map((a: Record<string, unknown>) => ({
                         step: a.agent,
                         score: a.soq_score,
                         feedback: "Automated analysis verified via SAIL framework. Integration check: 100%.",
                         decision: a.soq_score >= 80 ? "Approved" : "Revision"
                       }))} 
+                      onApprove4K={handleApprove4K}
                    />
                 </div>
               </div>

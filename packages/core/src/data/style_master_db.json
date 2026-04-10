@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "masters": [
+    {
+      "id": "noir_precision",
+      "name": "Noir Precision",
+      "curator": "Auteur Studio",
+      "description": "High-contrast chiaroscuro with clinical digital precision. Inspired by David Fincher and classic Neo-Noir.",
+      "dna": {
+        "lighting": "Low-key, side-lit, dramatic chiaroscuro, cold color temperature (teal/cyan) with orange accents.",
+        "camera": "Locked-off shots, slow controlled pans, anamorphic 2.35:1, sharp focus, low grain.",
+        "color_palette": ["#050505", "#002B36", "#D4AF37", "#1A1A1A"],
+        "composition": "Centered or strictly Rule of Thirds, negative space, geometric framing.",
+        "prompt_logic": "Masterpiece, cinematic still, 8k, highly detailed, Arri Alexa 65, anamorphic lens, neo-noir aesthetic, high contrast, clinical precision."
+      }
+    },
+    {
+      "id": "golden_ethereal",
+      "name": "Golden Ethereal",
+      "curator": "Auteur Studio",
+      "description": "Soft, naturalistic lighting with organic textures. Inspired by Terrence Malick and poetic realism.",
+      "dna": {
+        "lighting": "Golden hour, natural backlighting, soft diffused sun, warm hazy glows.",
+        "camera": "Handheld feeling, low angle, wide lens (14mm-24mm), shallow depth of field, subtle lens flares.",
+        "color_palette": ["#F5F5F7", "#D4AF37", "#8E7618", "#FDF4FF"],
+        "composition": "Asymmetric, dynamic, nature-integrated, tracking shots.",
+        "prompt_logic": "Poetic realism, golden hour lighting, lens flare, wide angle lens, organic textures, hyper-detailed, soft atmosphere, naturalistic cinematography."
+      }
+    },
+    {
+      "id": "neon_utilitarian",
+      "name": "Neon Utilitarian",
+      "curator": "Auteur Studio",
+      "description": "Industrial cyberpunk with volumetric lighting. Inspired by Denis Villeneuve's Blade Runner 2049.",
+      "dna": {
+        "lighting": "Volumetric fog, neon glow, brutalist shadows, monochromatic color blocks (Total Orange / Deep Blue).",
+        "camera": "Scale-focused, massive wide shots, slow zoom, atmospheric perspective.",
+        "color_palette": ["#FF4500", "#1E1B4B", "#0D0D0D", "#A8A9AD"],
+        "composition": "Monolithic, brutalist, vanishing points, scale-contrast.",
+        "prompt_logic": "Cyberpunk, industrial, volumetric lighting, brutalist architecture, massive scale, moody atmosphere, heavy fog, monochromatic grading."
+      }
+    },
+    {
+      "id": "editorial_symmetric",
+      "name": "Editorial Symmetric",
+      "curator": "Auteur Studio",
+      "description": "Flat, symmetric, and highly curated pastel palettes. Inspired by Wes Anderson.",
+      "dna": {
+        "lighting": "High-key, flat lighting, soft shadows, vibrant but pastel.",
+        "camera": "Perfectly centered, 90-degree whip-pans, planimetric composition, toy-like scale.",
+        "color_palette": ["#F8D7DA", "#FFF3CD", "#D1E7DD", "#CCE5FF"],
+        "composition": "Centered symmetry, diorama style, flat planes, obsessive detail.",
+        "prompt_logic": "Symmetric composition, planimetric, pastel colors, whimsical, editorial design, diorama style, highly curated, flat lighting."
+      }
+    }
+  ]
+}

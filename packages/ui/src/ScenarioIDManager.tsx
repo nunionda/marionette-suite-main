@@ -8,6 +8,9 @@ export interface Project {
   genre?: string;
   status: string;
   updated_at: string;
+  is_4k_approved?: boolean;
+  master_2k_path?: string;
+  master_4k_path?: string;
 }
 
 interface ScenarioIDManagerProps {

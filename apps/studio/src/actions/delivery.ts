@@ -38,3 +38,23 @@ export async function getProductionBible(projectId: string) {
     // 추가적인 프로젝트 상세 정보 fetch 로직...
     return manifest;
 }
+/**
+ * 4K 마스터링 최종 승인 (Phase 7)
+ */
+export async function approveMastering(projectId: string, resolution: string = "4k") {
+  try {
+    const response = await fetch(`${API_BASE_URL}/${projectId}/mastering/approve`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ project_id: projectId, target_resolution: resolution }),
+    });
+
+    if (!response.ok) throw new Error("Failed to approve mastering");
+    
+    revalidatePath("/");
+    return await response.json();
+  } catch (error) {
+    console.error("Error approving mastering:", error);
+    throw error;
+  }
+}

@@ -68,26 +68,28 @@ export default function CopilotWidget() {
 
   return (
     <>
-      {/* Floating Action Button */}
+      {/* Floating Action Button: Gold Haze HUD */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-[var(--ms-green)] border border-[#00FF41] shadow-[0_0_15px_rgba(0,255,65,0.4)] rounded-full flex items-center justify-center z-40 hover:scale-110 active:scale-95 transition-all text-black font-mono font-bold"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-[var(--ms-bg-elevated)] border border-[var(--ms-gold-border)] shadow-[0_0_20px_var(--ms-gold-glint)] rounded-full flex items-center justify-center z-40 hover:scale-110 active:scale-95 transition-all group overflow-hidden"
       >
-        AI
+        <div className="absolute inset-0 bg-[var(--ms-gold)] opacity-0 group-hover:opacity-10 transition-opacity" />
+        <div className={`absolute inset-1 rounded-full border border-dashed border-[var(--ms-gold-border)] ${isOpen ? 'animate-spin-slow' : ''}`} />
+        <span className="font-serif text-[var(--ms-gold)] font-bold text-lg tracking-widest relative z-10">AI</span>
       </button>
 
       {/* Chat Panel */}
       {isOpen && (
         <div className="fixed bottom-24 right-6 w-[350px] h-[500px] bg-black/95 border border-[var(--ms-border)] shadow-[0_4px_30px_rgba(0,0,0,0.5)] flex flex-col z-40 rounded-sm font-mono text-xs animate-in slide-in-from-bottom-5 duration-300">
           {/* Header */}
-          <div className="p-4 border-b border-[var(--ms-border)] flex justify-between items-center bg-[#111]">
+          <div className="p-5 border-b border-[var(--ms-gold-border)]/30 flex justify-between items-center bg-[var(--ms-bg-elevated)]/80 backdrop-blur-xl">
             <div>
-              <h3 className="text-[var(--ms-green)] font-bold uppercase tracking-widest">Director&apos;s Copilot</h3>
-              <p className="text-[#666] text-[9px] uppercase tracking-wider">Vibe Coding Assistant</p>
+              <h3 className="text-[var(--ms-gold)] font-serif font-bold uppercase tracking-widest text-[10px]">Director&apos;s Copilot</h3>
+              <p className="text-[var(--ms-text-dim)] text-[8px] uppercase tracking-[0.3em] font-mono mt-0.5">Vibe Production Engine</p>
             </div>
             <div className="text-right">
-              <span className={`px-2 py-1 bg-black rounded-sm border \${credits > 0 ? 'border-[var(--ms-green)] text-[var(--ms-green)]' : 'border-red-500 text-red-500 animate-pulse'} text-[9px]`}>
-                CREDITS: {credits}/{FREE_CREDITS_LIMIT}
+              <span className={`px-2 py-1 bg-black/40 rounded-sm border ${credits > 0 ? 'border-[var(--ms-gold-border)] text-[var(--ms-gold)]' : 'border-red-500 text-red-500 animate-pulse'} text-[9px] font-mono font-bold`}>
+                SYS_CREDITS: {credits}
               </span>
             </div>
           </div>

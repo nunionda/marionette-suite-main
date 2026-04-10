@@ -30,10 +30,13 @@ export default function ScriptImportUI({ onImportComplete, onCancel }: ScriptImp
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--ms-bg)]/90 backdrop-blur-md">
-      <div className="w-full max-w-2xl bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-2xl p-8 shadow-[0_30px_60px_rgba(0,0,0,0.5)]">
-        <h2 className="text-3xl font-serif font-bold text-[var(--ms-gold)] mb-2">Import Production Scenario</h2>
-        <p className="text-[var(--ms-text-dim)] text-xs uppercase tracking-widest mb-8">Supported formats: PDF, Fountain, Final Draft (.fdx)</p>
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xl p-6">
+      <div className="w-full max-w-2xl bg-[var(--ms-bg-elevated)] border border-[var(--ms-gold-border)]/40 rounded-[var(--ms-radius-lg)] p-12 shadow-[var(--ms-glass-shadow)] relative overflow-hidden">
+        {/* Decorative Scanned Line */}
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[var(--ms-gold)] to-transparent opacity-20" />
+        
+        <h2 className="text-3xl font-serif text-[var(--ms-gold)] mb-2 tracking-tight">Import Production Scenario</h2>
+        <p className="text-[var(--ms-text-dim)] text-[9px] font-mono uppercase tracking-[0.4em] mb-10">Protocols: PDF // FOUNTAIN // FDX</p>
 
         {!isParsing ? (
           <div className="space-y-6">
