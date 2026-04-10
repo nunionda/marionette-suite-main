@@ -1,6 +1,5 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePipeline } from "./PipelineProvider";
 
 interface CharacterArchetype {
   id: string;
@@ -41,48 +40,88 @@ const characters: CharacterArchetype[] = [
 export default function CharacterConceptStudio() {
   const [selectedId, setSelectedId] = useState(characters[0].id);
   const activeChar = characters.find((c) => c.id === selectedId) || characters[0];
+  const { getEngineForAgent, globalHealthScore, getAgentMeta } = usePipeline();
+  const assignedEngine = getEngineForAgent("CNCP");
+  const meta = getAgentMeta("CNCP");
 
   return (
-    <div className="flex flex-col h-full bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-2xl overflow-hidden shadow-2xl animate-in fade-in duration-700">
+    <div className="flex flex-col h-full bg-[var(--ms-bg-base)] border border-[var(--ms-border)] rounded-3xl overflow-hidden shadow-3xl animate-in fade-in duration-1000 group">
       {/* Header */}
-      <div className="flex items-center justify-between px-8 py-6 border-b border-[var(--ms-border)] bg-[var(--ms-bg)]/80 backdrop-blur-xl">
-        <div className="flex flex-col gap-1">
-          <h3 className="font-serif text-xl font-bold text-[var(--ms-gold)]">Character Visual Studio</h3>
-          <p className="text-[10px] text-[var(--ms-text-dim)] uppercase tracking-[0.2em]">Synchronizing Artist Intent with AI Agents</p>
+      <div className="flex items-center justify-between px-10 py-8 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+        <div className="flex items-center gap-10">
+          <div className="flex flex-col gap-1">
+             <h3 className="font-serif text-3xl font-bold text-white tracking-tighter uppercase">Character DNA & Casting Suite</h3>
+             <div className="flex items-center gap-3">
+               <span className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-mono italic">AU_CAST_PROTOCOL // ARCHETYPE_SYNTHESIS</span>
+               <div className="flex gap-2">
+                 <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                   <div className="w-1 h-1 rounded-full bg-blue-500" />
+                   <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.stage}</span>
+                 </div>
+                 <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                   <div className="w-1 h-1 rounded-full bg-[var(--ms-gold)]" />
+                   <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.layer}</span>
+                 </div>
+               </div>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-8 px-6 py-3 bg-white/[0.02] border border-white/10 rounded-2xl">
+             <div className="flex flex-col items-end gap-1">
+                <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Neural_Auteur</span>
+                <span className="text-xs font-mono text-[var(--ms-gold)] font-bold">{assignedEngine?.name || "Initializing..."}</span>
+             </div>
+             <div className="w-px h-6 bg-white/10" />
+             <div className="flex flex-col items-end gap-1">
+                <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Latency</span>
+                <span className={`text-xs font-mono font-bold ${
+                   (assignedEngine?.latency ?? 0) > 1000 ? "text-amber-500" : "text-green-500"
+                }`}>
+                   {assignedEngine ? `${Math.floor(assignedEngine.latency)}ms` : "---"}
+                </span>
+             </div>
+             <div className="w-px h-6 bg-white/10" />
+             <div className="flex flex-col items-end gap-1">
+                <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Integrity</span>
+                <span className="text-xs font-mono text-white font-bold">{globalHealthScore}%</span>
+             </div>
+          </div>
         </div>
+
         <div className="flex gap-4">
-          <button className="px-5 py-2 bg-transparent border border-[var(--ms-gold)]/30 text-[var(--ms-gold)] text-[10px] font-bold uppercase tracking-widest rounded hover:bg-[var(--ms-gold)]/10 transition-all">
-            Export Visual Dossier
+          <button className="px-6 py-2 bg-zinc-900 border border-zinc-800 text-[10px] text-zinc-400 font-bold uppercase tracking-widest rounded-lg hover:border-zinc-700 transition-all">
+            Export Dossier
           </button>
-          <button className="px-5 py-2 bg-[var(--ms-gold)] text-[var(--ms-bg)] text-[10px] font-bold uppercase tracking-widest rounded shadow-lg shadow-[var(--ms-gold)]/20">
-            Generate Concept Art
+          <button className="px-8 py-2 bg-[var(--ms-gold)] text-black text-[10px] font-bold uppercase tracking-[0.2em] rounded-lg shadow-xl shadow-[var(--ms-gold)]/10 hover:scale-105 transition-all">
+            Synthesize Weights
           </button>
         </div>
       </div>
 
       <div className="flex flex-grow overflow-hidden">
         {/* Character List */}
-        <div className="w-80 border-r border-[var(--ms-border)] bg-[var(--ms-bg)]/40 overflow-y-auto p-6 space-y-4">
-          <h4 className="text-[10px] font-bold uppercase tracking-widest text-[var(--ms-text-dim)] mb-6">Major Archetypes</h4>
+        <div className="w-80 border-r border-[var(--ms-border)] bg-[var(--ms-bg-base)] overflow-y-auto p-8 space-y-6">
+          <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--ms-gold)]/60 mb-8 block">Master Digital Assets</h4>
           {characters.map((char) => (
             <button
               key={char.id}
               onClick={() => setSelectedId(char.id)}
-              className={`w-full text-left p-4 rounded-xl border transition-all duration-300 group ${
+              className={`w-full text-left p-6 rounded-2xl border transition-all duration-500 group relative overflow-hidden ${
                 selectedId === char.id
-                  ? "bg-[var(--ms-gold)]/10 border-[var(--ms-gold)]/50"
-                  : "bg-transparent border-transparent hover:border-[var(--ms-border)] hover:bg-[var(--ms-bg)]"
+                  ? "bg-[var(--ms-gold)]/10 border-[var(--ms-gold)]/40 shadow-xl"
+                  : "bg-transparent border-white/5 opacity-50 hover:opacity-100 hover:border-white/10"
               }`}
             >
-              <div className="flex justify-between items-start mb-2">
-                <span className={`text-[10px] font-bold uppercase tracking-widest ${selectedId === char.id ? "text-[var(--ms-gold)]" : "text-[var(--ms-text-dim)]"}`}>
-                  {char.role}
+              <div className="flex justify-between items-start mb-3">
+                <span className={`text-[9px] font-mono font-bold uppercase tracking-widest ${selectedId === char.id ? "text-[var(--ms-gold)]" : "text-[var(--ms-text-dim)]"}`}>
+                  Asset_ID: {char.id.toUpperCase()}
                 </span>
-                <div className={`w-1.5 h-1.5 rounded-full ${selectedId === char.id ? "bg-[var(--ms-gold)] shadow-[0_0_8px_var(--ms-gold)]" : "bg-transparent"}`} />
+                {selectedId === char.id && <div className="w-1.5 h-1.5 rounded-full bg-[var(--ms-gold)] shadow-[0_0_12px_var(--ms-gold)]" />}
               </div>
-              <h5 className={`text-lg font-serif font-bold ${selectedId === char.id ? "text-[var(--ms-text)]" : "text-[var(--ms-text-dim)]"}`}>
+              <h5 className={`text-xl font-serif font-bold ${selectedId === char.id ? "text-white" : "text-zinc-500"}`}>
                 {char.name}
               </h5>
+              <p className="text-[9px] text-[var(--ms-text-dim)] mt-1 font-mono">{char.role}</p>
             </button>
           ))}
         </div>

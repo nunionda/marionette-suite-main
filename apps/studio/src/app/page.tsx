@@ -30,7 +30,8 @@ import {
   Project,
   GStackProvider,
   SAILIntegrityMonitor,
-  VaultLineageExplorer
+  VaultLineageExplorer,
+  PipelineProvider
 } from "@marionette/ui";
 import { usePipelineSocket } from "@/hooks/usePipelineSocket";
 import { getProjects, updateProjectContext, getBenchmarks, getLatestRuns } from "@/actions/projects";
@@ -114,7 +115,8 @@ export default function Home() {
 
   return (
     <GStackProvider initialIntegrity={systemHealth?.integrity_score ?? 94.2}>
-      <main className="min-h-screen flex flex-col bg-[var(--ms-bg-base)] text-[var(--ms-text-main)] py-8 px-6 md:px-12 relative overflow-hidden selection:bg-[var(--ms-gold)] selection:text-black">
+      <PipelineProvider>
+        <main className="min-h-screen flex flex-col bg-[var(--ms-bg-base)] text-[var(--ms-text-main)] py-8 px-6 md:px-12 relative overflow-hidden selection:bg-[var(--ms-gold)] selection:text-black">
       {/* Cinematic Ambiance */}
       <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
       <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[var(--ms-gold-haze)] rounded-full blur-[160px] opacity-20 -translate-y-1/2 translate-x-1/4 pointer-events-none" />
@@ -399,6 +401,7 @@ export default function Home() {
         <CopilotWidget />
       </div>
     </main>
+    </PipelineProvider>
     </GStackProvider>
   );
 }

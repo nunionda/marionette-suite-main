@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import PipelineIntegrityDashboard from "./PipelineIntegrityDashboard";
 
 interface ApprovalItem {
   id: string;
@@ -40,7 +41,7 @@ const mockApprovalQueue: ApprovalItem[] = [
 ];
 
 export default function DirectorView() {
-  const [activeTab, setActiveTab] = useState<"Approvals" | "Storyboards" | "Notes">("Approvals");
+  const [activeTab, setActiveTab] = useState<"Approvals" | "Storyboards" | "Pipeline" | "Notes">("Approvals");
 
   return (
     <div className="flex flex-col h-full bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-sm overflow-hidden shadow-2xl">
@@ -49,7 +50,7 @@ export default function DirectorView() {
         <div className="flex items-center gap-6">
           <h3 className="font-mono text-xl font-bold text-[var(--ms-green)] tracking-tighter">DIRECTOR.COMMAND_NODE</h3>
           <nav className="flex gap-1">
-            {(["Approvals", "Storyboards", "Notes"] as const).map((tab) => (
+            {(["Approvals", "Storyboards", "Pipeline", "Notes"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -138,6 +139,12 @@ export default function DirectorView() {
                   </div>
                 ))}
              </div>
+          )}
+
+          {activeTab === "Pipeline" && (
+            <div className="space-y-10">
+               <PipelineIntegrityDashboard />
+            </div>
           )}
 
           {activeTab === "Notes" && (

@@ -1,8 +1,4 @@
-"use client";
-
-import React from "react";
-
-export type Role = "producer" | "line-producer" | "director" | "production-designer" | "writer" | "system-admin" | "studio-ceo";
+export type Role = "producer" | "line-producer" | "director" | "production-designer" | "writer" | "system-admin" | "studio-ceo" | "production-crew" | "post-production";
 
 interface RoleSelectorProps {
   currentRole: Role;
@@ -29,6 +25,12 @@ const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     desc: "Differentiated Visual DNA & Look Dev" 
   },
   { 
+    id: "production-crew", 
+    label: "Production Crew", 
+    icon: "🏗️", 
+    desc: "Cinematography, VFX, and Asset Design" 
+  },
+  { 
     id: "director", 
     label: "Director", 
     icon: "🎬", 
@@ -39,6 +41,12 @@ const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     label: "Line Producer", 
     icon: "📅", 
     desc: "Schedule and Production Resources" 
+  },
+  { 
+    id: "post-production", 
+    label: "Post Dept", 
+    icon: "🎞️", 
+    desc: "Color, Sound, Music, and Mastering" 
   },
   { 
     id: "system-admin", 

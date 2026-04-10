@@ -5,11 +5,15 @@
   --ms-bg-surface: #1a1a1a;
   --ms-bg-overlay: rgba(10, 10, 10, 0.9);
   
-  /* Brand Accents (Champagne Gold & Silver) */
+  /* Brand Accents (Champagne Gold & Signal Violet) */
   --ms-gold: #D4AF37; /* Metallic Champagne Gold */
   --ms-gold-glint: rgba(212, 175, 55, 0.4);
   --ms-gold-haze: rgba(212, 175, 55, 0.08);
   --ms-gold-border: rgba(212, 175, 55, 0.25);
+  
+  --ms-violet: #8B5CF6; /* Signal Violet - AI / Processing */
+  --ms-violet-glow: rgba(139, 92, 246, 0.4);
+  --ms-cyan: #00E6C8; /* Cinematic Cyan - Production / Status */
   
   --ms-silver: #A8A9AD;
   --ms-green: #27AE60; /* Muted production green for status only */
@@ -20,10 +24,8 @@
   --ms-crimson: #C0392B;
 
   /* Legacy Compatibility Mapping */
-  --ms-border: rgba(212, 175, 55, 0.2);
+  --ms-border: rgba(255, 255, 255, 0.1);
   --ms-bg-2: #0d0d0d;
-  --ms-green-dim: rgba(39, 174, 96, 0.1);
-  --ms-green-border: rgba(39, 174, 96, 0.2);
   
   /* High-End Glassmorphism */
   --ms-glass-bg: rgba(255, 255, 255, 0.01);
@@ -31,7 +33,7 @@
   --ms-glass-blur: blur(24px);
   --ms-glass-shadow: 0 12px 48px 0 rgba(0, 0, 0, 0.9);
 
-  /* Typography (Artistic Precision) */
+  /* Typography (Architectural Precision) */
   --ms-text-bright: #F5F5F7;
   --ms-text-main: #E1E1E1;
   --ms-text-dim: #8E8E93;
@@ -39,8 +41,8 @@
 
   /* Font Layers */
   --ms-font-title: "Playfair Display", serif;
-  --ms-font-body: "Inter", sans-serif;
-  --ms-font-mono: "Space Grotesk", monospace;
+  --ms-font-body: "Inter", -apple-system, sans-serif;
+  --ms-font-mono: "JetBrains Mono", source-code-pro, Menlo, monospace;
 
   /* Spacing & Motion */
   --ms-radius-lg: 12px; /* More refined radius */

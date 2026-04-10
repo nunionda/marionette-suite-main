@@ -1,6 +1,5 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePipeline } from "./PipelineProvider";
 
 interface ScriptVersion {
   id: string;
@@ -17,29 +16,68 @@ const mockVersions: ScriptVersion[] = [
 
 export default function DevelopmentView() {
   const [activeTab, setActiveTab] = useState<"Drafts" | "Characters" | "World">("Drafts");
+  const { getEngineForAgent, globalHealthScore, getAgentMeta } = usePipeline();
+  const assignedEngine = getEngineForAgent("WRIT");
+  const meta = getAgentMeta("WRIT");
 
   return (
-    <div className="flex flex-col h-full bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-xl overflow-hidden shadow-2xl">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--ms-border)] bg-[var(--ms-bg)]">
-        <div className="flex items-center gap-6">
-          <h3 className="font-serif text-xl font-bold text-[var(--ms-gold)]">Scenario Development</h3>
-          <nav className="flex gap-2">
-            {(["Drafts", "Characters", "World"] as const).map((tab) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-1.5 text-[10px] font-bold tracking-widest uppercase rounded-full transition-all border ${
-                  activeTab === tab 
-                    ? "bg-[var(--ms-gold)] text-[var(--ms-bg)] border-[var(--ms-gold)]" 
-                    : "text-[var(--ms-text-dim)] border-transparent hover:border-[var(--ms-border)]"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </nav>
+    <div className="flex flex-col h-full bg-[var(--ms-bg-base)] border border-[var(--ms-border)] rounded-3xl overflow-hidden shadow-3xl animate-in fade-in duration-1000 group">
+      <div className="flex items-center justify-between px-10 py-8 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+        <div className="flex items-center gap-10">
+          <div className="flex flex-col gap-1">
+             <h3 className="font-serif text-3xl font-bold text-white tracking-tighter uppercase">Scenario Development</h3>
+             <div className="flex items-center gap-3">
+               <span className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-mono italic">AU_WRIT_PROTOCOL // NARRATIVE_SYNTHESIS</span>
+               <div className="flex gap-2">
+                 <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                   <div className="w-1 h-1 rounded-full bg-blue-500" />
+                   <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.stage}</span>
+                 </div>
+                 <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                   <div className="w-1 h-1 rounded-full bg-[var(--ms-gold)]" />
+                   <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.layer}</span>
+                 </div>
+               </div>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-8 px-6 py-3 bg-white/[0.02] border border-white/10 rounded-2xl">
+             <div className="flex flex-col items-end gap-1">
+                <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Logic_Core</span>
+                <span className="text-xs font-mono text-[var(--ms-gold)] font-bold">{assignedEngine?.name || "Initializing..."}</span>
+             </div>
+             <div className="w-px h-6 bg-white/10" />
+             <div className="flex flex-col items-end gap-1">
+                <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Latency</span>
+                <span className={`text-xs font-mono font-bold ${
+                   (assignedEngine?.latency ?? 0) > 1000 ? "text-amber-500" : "text-green-500"
+                }`}>
+                   {assignedEngine ? `${Math.floor(assignedEngine.latency)}ms` : "---"}
+                </span>
+             </div>
+             <div className="w-px h-6 bg-white/10" />
+             <div className="flex flex-col items-end gap-1">
+                <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Integrity</span>
+                <span className="text-xs font-mono text-white font-bold">{globalHealthScore}%</span>
+             </div>
+          </div>
         </div>
+
+        <nav className="flex gap-4">
+          {(["Drafts", "Characters", "World"] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-6 py-2 text-[10px] font-bold tracking-widest uppercase rounded-lg transition-all border ${
+                activeTab === tab 
+                  ? "bg-[var(--ms-gold)] text-black border-[var(--ms-gold)]" 
+                  : "text-zinc-500 border-white/5 hover:border-white/20 hover:text-white"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </nav>
         <div className="flex gap-3">
           <button className="px-4 py-1.5 bg-[#1a1a1a] text-[10px] text-[var(--ms-gold)] font-bold uppercase tracking-widest border border-[var(--ms-gold)]/30 rounded hover:bg-[var(--ms-gold)]/10">
             Open Script Writer

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import PipelineIntegrityDashboard from "./PipelineIntegrityDashboard";
 
 interface FinancialKPI {
   label: string;
@@ -102,6 +103,11 @@ export default function ProducerView() {
                       </button>
                    </div>
                  </div>
+              </section>
+
+              {/* Pipeline Integrity Section */}
+              <section className="bg-[var(--ms-bg-2)] border border-[var(--ms-border)] p-8 rounded-2xl">
+                <PipelineIntegrityDashboard />
               </section>
             </div>
 

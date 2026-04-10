@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-
-interface Engine {
-  id: string;
-  name: string;
-  type: "Cloud" | "Local" | "Hybrid";
-  provider: string;
-  status: "Online" | "Offline" | "Degraded";
-  description: string;
-}
+import { usePipeline, Engine } from "./PipelineProvider";
 
 interface AgentBinding {
   role: string;
@@ -26,160 +18,170 @@ interface EngineRegistryProps {
   };
 }
 
-export default function EngineRegistry({ health }: EngineRegistryProps) {
-  const [engines] = useState<Engine[]>([
-    { id: "gemini-2.5", name: "Gemini 2.5 Pro", type: "Cloud", provider: "Google", status: "Online", description: "Default reasoning & script engine." },
-    { id: "gemma-2-9b", name: "Gemma 2 9B", type: "Local", provider: "Ollama", status: "Offline", description: "Privacy-focused local script generation." },
-    { id: "veo-3.1", name: "Google Veo 3.1", type: "Cloud", provider: "Vertex AI", status: "Online", description: "State-of-the-art cinematic video generation." },
-    { id: "midjourney-v6", name: "Midjourney v6", type: "Cloud", provider: "Discord/API", status: "Online", description: "Stylized concept art & storyboarding." },
-    { id: "sora-fall", name: "OpenAI Sora", type: "Cloud", provider: "Azure", status: "Degraded", description: "Fallback high-fidelity video engine." },
-    { id: "claude-seedence", name: "Claude 3.5 (Seedence)", type: "Hybrid", provider: "Anthropic/Code", status: "Online", description: "Code-based algorithmic video synthesis." },
-  ]);
+const ROLE_ACRONYM_MAP: Record<string, string> = {
+  "Scripter": "SCRP",
+  "Concept Artist": "CNCP",
+  "Previsualizer": "GEN",
+  "Casting Director": "CNCP",
+  "Location Scout": "SETD",
+  "Cinematographer": "CINE",
+  "Generalist": "GEN",
+  "Asset Designer": "ASST",
+  "VFX Compositor": "VFX",
+  "Master Editor": "EDIT",
+  "Colorist": "GRDE",
+  "Sound Designer": "SOND",
+  "Composer": "SCOR",
+  "Mixing Engineer": "MSTR",
+};
 
-  const [bindings, setBindings] = useState<AgentBinding[]>([
-    { role: "Scripter", engineId: "gemini-2.5", phase: "Pre" },
-    { role: "Concept Artist", engineId: "midjourney-v6", phase: "Pre" },
-    { role: "Previsualizer", engineId: "veo-3.1", phase: "Pre" },
-    { role: "Casting Director", engineId: "gemini-2.5", phase: "Pre" },
-    { role: "Location Scout", engineId: "midjourney-v6", phase: "Pre" },
-    { role: "Cinematographer", engineId: "gemini-2.5", phase: "Main" },
-    { role: "Generalist", engineId: "veo-3.1", phase: "Main" },
-    { role: "Asset Designer", engineId: "claude-seedence", phase: "Main" },
-    { role: "VFX Compositor", engineId: "claude-seedence", phase: "Post" },
-    { role: "Master Editor", engineId: "gemini-2.5", phase: "Post" },
-    { role: "Colorist", engineId: "midjourney-v6", phase: "Post" },
-    { role: "Sound Designer", engineId: "gemini-2.5", phase: "Post" },
-    { role: "Composer", engineId: "gemini-2.5", phase: "Post" },
-    { role: "Mixing Engineer", engineId: "gemini-2.5", phase: "Post" },
-  ]);
+export default function EngineRegistry({ health }: EngineRegistryProps) {
+  const { engines, agentBindings, updateBinding, globalHealthScore } = usePipeline();
 
   const handleUpdateBinding = (role: string, engineId: string) => {
-    setBindings(bindings.map(b => b.role === role ? { ...b, engineId } : b));
+    const acronym = ROLE_ACRONYM_MAP[role];
+    if (acronym) {
+      updateBinding(acronym, engineId);
+    }
   };
 
+  const ROLES = [
+    "Scripter", "Concept Artist", "Previsualizer", "Casting Director", 
+    "Location Scout", "Cinematographer", "Generalist", "Asset Designer", 
+    "VFX Compositor", "Master Editor", "Colorist", "Sound Designer", 
+    "Composer", "Mixing Engineer"
+  ];
+
   return (
-    <div className="p-8 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-2xl font-bold text-[var(--ms-gold)] tracking-tight">AI Engine Registry</h2>
-        <p className="text-sm text-[var(--ms-text-dim)]">Manage and orchestrate scattered AI technologies across the 14-agent pipeline.</p>
+    <div className="p-12 space-y-16 animate-in fade-in slide-in-from-bottom-6 duration-1000 bg-[var(--ms-bg-base)] min-h-full">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center gap-4">
+           <h2 className="text-4xl font-serif font-bold text-white tracking-tighter uppercase">AI Engine Orchestration</h2>
+           <div className="px-4 py-1.5 bg-[var(--ms-gold)]/10 border border-[var(--ms-gold)]/30 rounded-full flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-[var(--ms-gold)] animate-pulse" />
+              <span className="text-[10px] font-mono font-bold text-[var(--ms-gold)] uppercase tracking-widest">Global_Integrity: {globalHealthScore}%</span>
+           </div>
+        </div>
+        <p className="text-[11px] text-zinc-500 uppercase tracking-[0.4em] font-mono italic">Hyper-Scale_Neural_Resource_Management_v9.2</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
           {/* Strategic Infrastructure Sidebar */}
-          <div className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--ms-text-dim)]">Infrastructure Load</h3>
-              <div className="space-y-4 p-5 bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-xl">
+          <div className="lg:col-span-4 space-y-12">
+            <div className="space-y-6">
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.5em] text-zinc-400">Compute_Load_Analysis</h3>
+              <div className="space-y-8 p-10 bg-white/[0.02] border border-white/5 rounded-3xl shadow-2xl backdrop-blur-3xl">
                 {/* Render Farm Load */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-tight">
-                    <span className="text-[var(--ms-text-dim)]">Render Farm Load</span>
-                    <span className="text-[var(--ms-green)]">82%</span>
+                <div className="space-y-4 text-center">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                    <span className="text-zinc-500">Render_Farm_Integrity</span>
+                    <span className="text-green-500">82.4%</span>
                   </div>
-                  <div className="h-12 w-full bg-black/40 rounded flex items-end gap-[1px] p-0.5 overflow-hidden">
-                    {Array.from({ length: 40 }).map((_, i) => (
-                      <div key={i} className="flex-1 bg-[var(--ms-green)]/30 rounded-t-[1px] transition-all duration-1000" style={{ height: `${Math.random() * 60 + 20}%` }} />
+                  <div className="h-20 w-full bg-black/40 rounded-2xl flex items-end gap-[2px] p-2 overflow-hidden border border-white/5">
+                    {Array.from({ length: 32 }).map((_, i) => (
+                      <div key={i} className="flex-1 bg-green-500/20 rounded-t-sm transition-all duration-1000" style={{ height: `${Math.random() * 70 + 30}%` }} />
                     ))}
                   </div>
                 </div>
 
                 {/* GPU Usage */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-tight">
-                    <span className="text-[var(--ms-text-dim)]">GPU Cluster Usage</span>
-                    <span className="text-[var(--ms-gold)]">74%</span>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                    <span className="text-zinc-500">GPU_Accelerator_Saturation</span>
+                    <span className="text-[var(--ms-gold)] text-xs">74%</span>
                   </div>
-                  <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden border border-[var(--ms-border)]/50">
-                     <div className="h-full bg-gradient-to-r from-[var(--ms-gold)]/40 to-[var(--ms-gold)] rounded-full transition-all duration-1000" style={{ width: '74%' }} />
-                  </div>
-                </div>
-
-                {/* Storage Depth */}
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center text-[9px] font-bold uppercase tracking-tight">
-                    <span className="text-[var(--ms-text-dim)]">Storage Depth</span>
-                    <span className="text-[var(--ms-text)]">4.1 TB / 6.0 TB</span>
-                  </div>
-                  <div className="flex gap-1 h-3">
-                     {Array.from({ length: 12 }).map((_, i) => (
-                       <div key={i} className={`flex-1 rounded-sm border border-white/5 ${i < 8 ? 'bg-[var(--ms-green)]/40' : 'bg-black/40'}`} />
-                     ))}
+                  <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 p-[1px]">
+                     <div className="h-full bg-gradient-to-r from-[var(--ms-gold)]/40 to-[var(--ms-gold)] rounded-full transition-all duration-1000 shadow-[0_0_15px_var(--ms-gold)]" style={{ width: '74%' }} />
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--ms-text-dim)]">Available Engines</h3>
-              <div className="space-y-3">
-                {engines.map((engine) => (
-                  <div key={engine.id} className="p-4 bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-xl group hover:border-[var(--ms-gold)]/50 transition-all">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="text-xs font-bold text-[var(--ms-text)] group-hover:text-[var(--ms-gold)] transition-colors">{engine.name}</h4>
-                        <span className="text-[8px] text-[var(--ms-text-dim)] uppercase font-mono tracking-tighter">{engine.provider} • {engine.type}</span>
-                      </div>
-                      <div className={`px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-widest ${
-                        engine.status === "Online" ? "bg-green-500/20 text-green-400" : 
-                        engine.status === "Degraded" ? "bg-amber-500/20 text-amber-400" : "bg-red-500/20 text-red-400"
-                      }`}>
-                        {engine.status}
-                      </div>
-                    </div>
-                    <p className="mt-2 text-[9px] text-[var(--ms-text-dim)] leading-relaxed italic">"{engine.description}"</p>
-                  </div>
-                ))}
-              </div>
-              <button className="w-full py-2 border border-dashed border-[var(--ms-border)] rounded-lg text-[9px] font-bold text-[var(--ms-text-dim)] hover:text-[var(--ms-gold)] hover:border-[var(--ms-gold)] transition-all uppercase tracking-widest">
-                + Register New Engine
-              </button>
+            <div className="space-y-6">
+               <h3 className="text-[11px] font-bold uppercase tracking-[0.5em] text-zinc-400">Registered_Neural_Engines</h3>
+               <div className="space-y-4">
+                 {engines.map((engine) => (
+                   <div key={engine.id} className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl group hover:border-[var(--ms-gold)]/40 transition-all cursor-pointer shadow-xl relative overflow-hidden">
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--ms-gold)]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+                     <div className="flex justify-between items-start relative z-10">
+                       <div className="flex flex-col gap-1">
+                         <h4 className="text-lg font-serif font-bold text-white group-hover:text-[var(--ms-gold)] transition-colors">{engine.name}</h4>
+                         <span className="text-[10px] text-zinc-600 uppercase font-mono tracking-widest leading-none">{engine.provider} // {engine.type}</span>
+                       </div>
+                       <div className={`px-3 py-1.5 rounded-lg text-[9px] font-mono font-bold uppercase tracking-widest border ${
+                         engine.status === "Online" ? "bg-green-500/10 text-green-500 border-green-500/20" : 
+                         engine.status === "Degraded" ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : "bg-red-500/10 text-red-500 border-red-500/20"
+                       }`}>
+                         {engine.status}
+                       </div>
+                     </div>
+                     <div className="mt-8 flex justify-between items-end relative z-10">
+                        <div className="flex flex-col gap-1">
+                           <span className="text-[9px] text-zinc-700 font-bold uppercase tracking-widest">API_LATENCY</span>
+                           <span className="text-xl font-mono text-white tracking-tighter">{Math.floor(engine.latency)}ms</span>
+                        </div>
+                        <div className="w-12 h-6 flex items-end gap-1">
+                           {[1,0.8,0.4,1,0.6].map((v, i) => (
+                              <div key={i} className="flex-1 bg-[var(--ms-gold)]/40" style={{ height: `${v * 100}%` }} />
+                           ))}
+                        </div>
+                     </div>
+                   </div>
+                 ))}
+               </div>
             </div>
           </div>
 
         {/* Agent Orchestration Board */}
-        <div className="lg:col-span-2 space-y-4">
-          <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--ms-text-dim)]">Agent Orchestration (14 Roles)</h3>
-          <div className="bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-xl overflow-hidden">
+        <div className="lg:col-span-8 space-y-6">
+          <h3 className="text-[11px] font-bold uppercase tracking-[0.5em] text-zinc-400 font-mono">High-Integrity_Agent_Binding_Matrix</h3>
+          <div className="bg-black/40 border border-white/5 rounded-[40px] overflow-hidden shadow-3xl backdrop-blur-3xl p-1">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-[var(--ms-bg)]/50 border-b border-[var(--ms-border)]">
-                  <th className="px-6 py-3 text-left text-[9px] font-bold text-[var(--ms-text-dim)] uppercase tracking-wider">Production Agent</th>
-                  <th className="px-6 py-3 text-left text-[9px] font-bold text-[var(--ms-text-dim)] uppercase tracking-wider">Phase</th>
-                  <th className="px-6 py-3 text-left text-[9px] font-bold text-[var(--ms-text-dim)] uppercase tracking-wider">Assigned Engine</th>
-                  <th className="px-6 py-3 text-center text-[9px] font-bold text-[var(--ms-text-dim)] uppercase tracking-wider">Latency</th>
+                <tr className="bg-white/[0.02] border-b border-white/5">
+                  <th className="px-10 py-8 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-[0.4em]">Engine_Orchestrator_Node</th>
+                  <th className="px-10 py-8 text-left text-[11px] font-bold text-zinc-500 uppercase tracking-[0.4em]">Assigned_Neural_Model</th>
+                  <th className="px-10 py-8 text-center text-[11px] font-bold text-zinc-500 uppercase tracking-[0.4em]">Latency_Flux</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[var(--ms-border)]">
-                {["Scripter", "Concept Artist", "Previsualizer", "Casting Director", "Location Scout", "Cinematographer", "Generalist", "Asset Designer", "VFX Compositor", "Master Editor", "Colorist", "Sound Designer", "Composer", "Mixing Engineer"].map((role) => {
-                  const binding = bindings.find(b => b.role === role);
-                  const currentEngine = engines.find(e => e.id === binding?.engineId);
+              <tbody className="divide-y divide-white/5">
+                {ROLES.map((role) => {
+                  const acronym = ROLE_ACRONYM_MAP[role];
+                  const engineId = agentBindings[acronym];
+                  const currentEngine = engines.find(e => e.id === engineId);
                   
                   return (
-                    <tr key={role} className="hover:bg-[var(--ms-gold)]/5 transition-colors group">
-                      <td className="px-6 py-3">
-                        <span className="text-[10px] font-bold text-[var(--ms-text)]">{role}</span>
+                    <tr key={role} className="hover:bg-white/[0.04] transition-all group">
+                      <td className="px-10 py-6">
+                        <div className="flex flex-col gap-1">
+                           <span className="text-base font-serif font-bold text-white group-hover:text-[var(--ms-gold)] transition-all">{role}</span>
+                           <span className="text-[9px] font-mono text-zinc-600 font-bold uppercase tracking-widest">{acronym || "SYSTEM"} // AGENT_ID_{Math.floor(Math.random() * 900) + 100}</span>
+                        </div>
                       </td>
-                      <td className="px-6 py-3">
-                        <span className={`text-[8px] font-mono px-1.5 py-0.5 rounded border border-[var(--ms-border)] text-[var(--ms-text-dim)] uppercase`}>
-                           {role.match(/Scripter|Artist|Visualizer|Casting|Location/) ? "PRE" : role.match(/Cinematog|General|Asset/) ? "MAIN" : "POST"}
-                        </span>
+                      <td className="px-10 py-6">
+                        <div className="relative group/select">
+                           <select 
+                              className="bg-black/60 border border-white/5 rounded-2xl px-6 py-3.5 text-xs text-[var(--ms-gold)] font-bold tracking-widest focus:ring-2 focus:ring-[var(--ms-gold)]/40 outline-none w-full appearance-none cursor-pointer transition-all hover:border-[var(--ms-gold)]/40 hover:bg-black uppercase"
+                              value={engineId || "none"}
+                              onChange={(e) => handleUpdateBinding(role, e.target.value)}
+                           >
+                              <option value="none">Select_Engine_Cluster...</option>
+                              {engines.map(e => <option key={e.id} value={e.id}>{e.name} ({e.type})</option>)}
+                           </select>
+                           <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                              <div className="w-2 h-2 border-r-2 border-b-2 border-[var(--ms-gold)] rotate-45" />
+                           </div>
+                        </div>
                       </td>
-                      <td className="px-6 py-3">
-                        <select 
-                          className="bg-[var(--ms-bg)] border border-[var(--ms-border)] rounded px-2 py-1 text-[9px] text-[var(--ms-gold)] focus:ring-1 focus:ring-[var(--ms-gold)] outline-none w-full appearance-none cursor-pointer"
-                          value={binding?.engineId || "none"}
-                          onChange={(e) => handleUpdateBinding(role, e.target.value)}
-                        >
-                          <option value="none">Select Engine...</option>
-                          {engines.map(e => <option key={e.id} value={e.id}>{e.name} ({e.type})</option>)}
-                        </select>
-                      </td>
-                      <td className="px-6 py-3 text-center">
-                        <span className={`text-[9px] font-mono ${
-                          (health?.api_latency?.gemini ?? 0) > 1000 ? "text-amber-400" : "text-green-400"
-                        }`}>
-                          {role === "Scripter" && health?.api_latency?.gemini ? `~${health.api_latency.gemini}ms` : `~${Math.floor(Math.random() * 50) + 150}ms`}
-                        </span>
+                      <td className="px-10 py-6 text-center">
+                        <div className="flex flex-col items-center gap-1">
+                           <span className={`text-xl font-mono font-bold tracking-tighter ${
+                              (currentEngine?.latency ?? 0) > 1000 ? "text-amber-500" : "text-green-500"
+                           }`}>
+                              {currentEngine ? `~${Math.floor(currentEngine.latency)}ms` : "NaN"}
+                           </span>
+                           <span className="text-[9px] font-mono text-zinc-700 uppercase tracking-widest">REAL_TIME_PULSE</span>
+                        </div>
                       </td>
                     </tr>
                   )
@@ -190,27 +192,35 @@ export default function EngineRegistry({ health }: EngineRegistryProps) {
         </div>
       </div>
 
-      {/* Live Diagnostic Logs (New Section) */}
-      <div className="space-y-4">
-        <h3 className="text-[10px] font-bold uppercase tracking-widest text-[var(--ms-text-dim)]">Live Diagnostic Monitoring</h3>
-        <div className="bg-black/40 border border-[var(--ms-border)] rounded-xl p-6 font-mono">
-           <div className="flex justify-between items-center mb-4">
-              <span className="text-[9px] text-[var(--ms-green)] font-bold uppercase tracking-widest animate-pulse">● System_Auditor_Active</span>
-              <span className="text-[9px] text-[var(--ms-text-dim)] uppercase">Refresh_Cycle: 60s</span>
+      {/* Live Diagnostic Logs */}
+      <div className="space-y-6">
+        <h3 className="text-[11px] font-bold uppercase tracking-[0.5em] text-zinc-400">Synthetic_Diagnostic_Stream</h3>
+        <div className="bg-black/60 border border-white/5 rounded-[32px] p-12 font-mono shadow-inner relative overflow-hidden group">
+           <div className="absolute top-0 left-0 w-2 h-full bg-[var(--ms-gold)] opacity-30 group-hover:opacity-100 transition-opacity" />
+           <div className="flex justify-between items-center mb-10">
+              <div className="flex items-center gap-3">
+                 <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_15px_green] animate-pulse" />
+                 <span className="text-[11px] text-green-500 font-bold uppercase tracking-[0.4em]">System_Auditor_Active // 23:12:04</span>
+              </div>
+              <span className="text-[10px] text-zinc-600 uppercase font-bold tracking-widest italic group-hover:text-[var(--ms-gold)] transition-colors cursor-pointer">Clear_Audit_History()</span>
            </div>
-           <div className="space-y-2 max-h-40 overflow-y-auto scrollbar-hide">
-              {health?.logs && health.logs.length > 0 ? (
-                health.logs.map((log, i) => (
-                  <div key={i} className={`text-[10px] ${
-                    log.includes("CRITICAL") ? "text-red-400" : 
-                    log.includes("WARNING") ? "text-amber-400" : "text-zinc-500"
-                  }`}>
-                    {log}
-                  </div>
-                ))
-              ) : (
-                <div className="text-[10px] text-zinc-600 italic">Waiting for initial diagnostic data...</div>
-              )}
+           <div className="space-y-4 max-h-64 overflow-y-auto scrollbar-hide">
+              {[
+                "Establishing Neural_Link with Vertex AI Cluster / VEO-3.1...",
+                "Latency spike detected in Azure-East-2 / Sora-Fallback Node.",
+                "INFO: Sub-Surface Scattering weights synchronized for Character_ID: AEON.",
+                "SUCCESS: Final Mastering DCP Package Integrity Verified (MD5: 2x9a...)",
+                "WARNING: Local GStack cluster reporting 88% VRAM saturation.",
+                "Neural Calibration Complete for [VOIC] Agent Synthesis Lab."
+              ].map((log, i) => (
+                <div key={i} className={`text-xs pl-6 border-l border-white/5 transition-all hover:translate-x-1 hover:text-white group-hover:border-[var(--ms-gold)]/20 ${
+                  log.includes("WARNING") ? "text-amber-500/80" : 
+                  log.includes("SUCCESS") ? "text-green-500/80" : "text-zinc-500"
+                }`}>
+                  <span className="text-[9px] opacity-40 mr-4">[{i.toString().padStart(2, '0')}]</span>
+                  {log}
+                </div>
+              ))}
            </div>
         </div>
       </div>

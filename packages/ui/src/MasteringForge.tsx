@@ -1,153 +1,218 @@
-"use client";
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { usePipeline, MasteringMode } from "./PipelineProvider";
 
 const PRESETS = [
-  { id: "master_blockbuster", name: "Blockbuster Master", tone: "Cyan/Orange", grain: "Fine" },
-  { id: "master_noir", name: "80s Film Noir", tone: "Monochrome Low", grain: "Heavy" },
-  { id: "master_classic", name: "Technicolor Classic", tone: "Saturated", grain: "Organic" },
-  { id: "master_bleach", name: "Bleach Bypass", tone: "High Contrast", grain: "Harsh" },
+  { id: "master_blockbuster", name: "Blockbuster Master", tone: "Cyan/Orange", spec: "P3, 4K, J2K @ 250Mbps" },
+  { id: "master_noir", name: "80s Film Noir", tone: "Monochrome Low", spec: "Linear, 4K, Rec.2020" },
+  { id: "master_classic", name: "Technicolor Classic", tone: "Saturated", spec: "HDR10, Rec.709 ODT" },
 ];
 
 export default function MasteringForge() {
+  const { masteringMode, setMasteringMode, approve4K, is4KApproved, getEngineForAgent, globalHealthScore, getAgentMeta } = usePipeline();
+  const assignedEngine = getEngineForAgent("MSTR");
+  const meta = getAgentMeta("MSTR");
   const [selectedPreset, setSelectedPreset] = useState(PRESETS[0]);
-  const [intensity, setIntensity] = useState(85);
-  const [grain, setGrain] = useState(40);
-  const [distortion, setDistortion] = useState(12);
-  const [economyMode, setEconomyMode] = useState(true);
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    if ((masteringMode === "2K_PREVIEW" || masteringMode === "MASTERING_4K") && progress < 100) {
+      const timer = setInterval(() => {
+        setProgress(p => Math.min(p + 0.8, 100));
+      }, 50);
+      return () => clearInterval(timer);
+    } else if (progress >= 100) {
+      if (masteringMode === "2K_PREVIEW") setMasteringMode("AWAITING_4K_APPROVAL");
+      if (masteringMode === "MASTERING_4K") setMasteringMode("COMPLETE");
+    }
+  }, [masteringMode, progress, setMasteringMode]);
+
+  const handleStart2K = () => {
+    setProgress(0);
+    setMasteringMode("2K_PREVIEW");
+  };
+
+  const handleRequest4K = () => {
+    // In a real app, this would show a confirmation dialog
+    approve4K();
+    setProgress(0);
+  };
 
   return (
-    <div className="flex flex-col gap-6 p-10 bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-[40px] shadow-2xl relative overflow-hidden h-full animate-in fade-in slide-in-from-bottom-10 duration-700">
+    <div className="flex flex-col gap-8 p-12 bg-[var(--ms-bg-base)] border border-[var(--ms-border)] rounded-[48px] shadow-[0_0_100px_rgba(0,0,0,0.5)] relative overflow-hidden h-full animate-in fade-in duration-1000 group">
       
-      {/* Economy Mode Indicator Overlay */}
-      {economyMode && (
-        <div className="absolute top-0 right-0 z-20 px-4 py-1.5 bg-green-500/20 text-green-400 text-[8px] font-bold uppercase tracking-[0.3em] rounded-bl-xl border-l border-b border-green-500/30 backdrop-blur-md">
-          Economy Mode Active (Free API)
-        </div>
-      )}
-
-      {/* Header */}
-      <div className="flex justify-between items-start">
-         <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-3">
-               <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-[var(--ms-gold)]">Mastering Engine v4.2</span>
-               <div className="w-1.5 h-1.5 rounded-full bg-[var(--ms-gold)] shadow-[0_0_8px_var(--ms-gold)] animate-pulse" />
-               <button 
-                 onClick={() => setEconomyMode(!economyMode)}
-                 className={`ml-4 px-3 py-1 rounded-full text-[8px] font-bold uppercase tracking-widest transition-all ${economyMode ? 'bg-green-500 text-black shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-zinc-800 text-zinc-500 hover:text-white'}`}
-               >
-                 {economyMode ? "Mode: Economy" : "Mode: Production"}
-               </button>
-            </div>
-            <h2 className="text-3xl font-serif font-bold text-white tracking-tight">Mastering Forge</h2>
-         </div>
-         <div className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl flex items-center gap-3">
-            <span className="text-[10px] text-zinc-500 font-bold uppercase">Ready to Forge</span>
-            <div className="w-4 h-4 rounded-full border-2 border-[var(--ms-gold)] border-t-transparent animate-spin" />
-         </div>
+      {/* Mastering Status Overlay */}
+      <div className={`absolute top-0 right-0 z-30 px-8 py-3 text-[10px] font-mono font-bold uppercase tracking-[0.5em] rounded-bl-3xl border-l border-b backdrop-blur-3xl transition-all duration-500 ${
+        masteringMode === "COMPLETE" ? "bg-green-500/10 text-green-500 border-green-500/20" : "bg-amber-500/10 text-amber-500 border-amber-500/20"
+      }`}>
+        {masteringMode === "IDLE" && "Status: Standby"}
+        {masteringMode === "2K_PREVIEW" && "Status: Synthesizing_2K_Proxy"}
+        {masteringMode === "AWAITING_4K_APPROVAL" && "Status: Awaiting_Final_4K_Approval"}
+        {masteringMode === "MASTERING_4K" && "Status: Executing_Theatrical_DCP_Forge"}
+        {masteringMode === "COMPLETE" && "Status: Master_Locked_DCP_Ready"}
       </div>
 
-      <div className="grid grid-cols-12 gap-8 flex-grow">
+      {/* Header */}
+      <div className="flex justify-between items-start z-20">
+         <div className="flex items-center gap-10">
+            <div className="flex flex-col gap-3">
+               <div className="flex items-center gap-4">
+                  <span className="text-[11px] font-bold uppercase tracking-[0.6em] text-[var(--ms-gold)] opacity-80">Finishing_Orchestrator_v4.5</span>
+                  <div className="flex gap-2">
+                    <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                      <div className="w-1 h-1 rounded-full bg-blue-500" />
+                      <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.stage}</span>
+                    </div>
+                    <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                      <div className="w-1 h-1 rounded-full bg-[var(--ms-gold)]" />
+                      <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.layer}</span>
+                    </div>
+                  </div>
+                  <div className={`w-2 h-2 rounded-full shadow-[0_0_15px_var(--ms-gold)] ${masteringMode !== "IDLE" ? 'bg-[var(--ms-gold)] animate-pulse' : 'bg-zinc-800'}`} />
+               </div>
+               <h2 className="text-4xl font-serif font-bold text-white tracking-tighter uppercase">Mastering & Delivery Forge</h2>
+            </div>
+
+            <div className="flex items-center gap-8 px-6 py-3 bg-white/[0.02] border border-white/10 rounded-2xl ml-4 mt-6">
+               <div className="flex flex-col items-end gap-1">
+                  <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Master_Engine</span>
+                  <span className="text-xs font-mono text-[var(--ms-gold)] font-bold">{assignedEngine?.name || "Initializing..."}</span>
+               </div>
+               <div className="w-px h-6 bg-white/10" />
+               <div className="flex flex-col items-end gap-1">
+                  <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Latency</span>
+                  <span className={`text-xs font-mono font-bold ${
+                     (assignedEngine?.latency ?? 0) > 1000 ? "text-amber-500" : "text-green-500"
+                  }`}>
+                     {assignedEngine ? `${Math.floor(assignedEngine.latency)}ms` : "---"}
+                  </span>
+               </div>
+               <div className="w-px h-6 bg-white/10" />
+               <div className="flex flex-col items-end gap-1">
+                  <span className="text-[8px] text-zinc-600 font-bold uppercase tracking-widest">Integrity</span>
+                  <span className="text-xs font-mono text-white font-bold">{globalHealthScore}%</span>
+               </div>
+            </div>
+         </div>
+         {masteringMode === "AWAITING_4K_APPROVAL" && (
+            <div className="px-6 py-3 bg-red-500/10 border border-red-500/30 rounded-2xl flex items-center gap-4 animate-bounce">
+               <span className="text-[10px] text-red-500 font-bold uppercase tracking-widest">Explicit Approval Required</span>
+            </div>
+         )}
+      </div>
+
+      <div className="grid grid-cols-12 gap-12 flex-grow z-10">
         
-        {/* Left: Master Viewer Simulation */}
-        <div className="col-span-8 flex flex-col gap-4">
-           <div className="relative aspect-video bg-black rounded-3xl border border-white/10 overflow-hidden group shadow-inner">
-              {/* Mock Video Placeholder with Post-processing overlays */}
-              <div className="absolute inset-0 bg-gradient-to-br from-zinc-900 to-black flex items-center justify-center">
-                 <div className="w-full h-full opacity-30 mix-blend-overlay pointer-events-none" 
-                      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`, opacity: grain / 100 }} />
-                 <div className="text-zinc-800 font-serif text-8xl italic select-none">Master Forge View</div>
-              </div>
+        {/* Left: Final Preview & Scopes */}
+        <div className="col-span-8 flex flex-col gap-8">
+           <div className="relative aspect-video bg-black rounded-[40px] border border-white/5 overflow-hidden group shadow-3xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-zinc-900/40 via-transparent to-black" />
               
-              {/* Diagnostic Overlays */}
-              <div className="absolute top-6 left-6 flex flex-col gap-1 text-[9px] font-mono text-[var(--ms-gold)] opacity-70">
-                 <span>RES: 3840 x 2160 (4K Uncompressed)</span>
-                 <span>FPS: 23.976 | BT.2020 PQ</span>
-                 <span>MASTERING_INTENSITY: {intensity}%</span>
+              {/* Rendering Scanline */}
+              {(masteringMode === "2K_PREVIEW" || masteringMode === "MASTERING_4K") && (
+                <div className="absolute inset-0 z-20 pointer-events-none">
+                  <div className="absolute top-0 left-0 w-full h-[2px] bg-[var(--ms-gold)] shadow-[0_0_40px_var(--ms-gold)]" style={{ top: `${progress}%` }} />
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-md" style={{ clipPath: `inset(${progress}% 0 0 0)` }} />
+                </div>
+              )}
+
+              {/* Mastering Metadata Overlays */}
+              <div className="absolute top-10 left-10 flex flex-col gap-3 text-[11px] font-mono text-[var(--ms-gold)] opacity-90 bg-black/60 p-6 rounded-2xl border border-white/10 backdrop-blur-xl z-30">
+                 <div className="flex flex-col gap-1">
+                    <span className="text-[9px] text-white/40 uppercase font-bold tracking-widest">Mastering_Node</span>
+                    <span className="text-white">NODE_DX_9 // {masteringMode === "MASTERING_4K" ? '4K_FLUX' : '2K_PROXY'}</span>
+                 </div>
+                 <div className="flex flex-col gap-1 mt-2">
+                    <span className="text-[9px] text-white/40 uppercase font-bold tracking-widest">Color_Odometry</span>
+                    <span className="text-white">ACES_v1.3 // P3-D65_ODT</span>
+                 </div>
               </div>
 
-              {/* Scope Simulation */}
-              <div className="absolute bottom-6 right-6 w-32 h-20 bg-black/60 backdrop-blur-md rounded-lg border border-white/10 p-2 overflow-hidden">
-                 <div className="w-full h-full flex items-end gap-[1px]">
-                    {[...Array(20)].map((_, i) => (
-                      <div key={i} className="flex-1 bg-[var(--ms-gold)]/30" style={{ height: `${Math.random() * 80 + 20}%` }} />
-                    ))}
-                 </div>
-                 <div className="absolute top-1 left-1 text-[6px] text-white opacity-40 uppercase">Waveform</div>
-              </div>
+              {/* Progress Indicator */}
+              {(masteringMode === "2K_PREVIEW" || masteringMode === "MASTERING_4K") && (
+                <div className="absolute inset-0 flex items-center justify-center z-40">
+                   <div className="flex flex-col items-center gap-4">
+                      <span className="text-6xl font-mono font-bold text-white tracking-tighter">{Math.floor(progress)}%</span>
+                      <span className="text-[10px] font-mono text-[var(--ms-gold)] uppercase tracking-[0.5em] animate-pulse">
+                        {masteringMode === "MASTERING_4K" ? 'Synthesizing_4K_DCP_Packet' : 'Extracting_2K_Production_Proxy'}
+                      </span>
+                   </div>
+                </div>
+              )}
            </div>
 
-           {/* Shot Selector Bar */}
-           <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className={`flex-shrink-0 w-32 aspect-video rounded-xl border-2 transition-all cursor-pointer ${i === 1 ? 'border-[var(--ms-gold)] scale-105' : 'border-transparent opacity-50 hover:opacity-100'}`}>
-                   <div className="w-full h-full bg-zinc-800 rounded-lg flex items-center justify-center text-[10px] font-mono">SHOT_{i.toString().padStart(2, '0')}</div>
+           {/* Final Delivery QC List */}
+           <div className="grid grid-cols-3 gap-6">
+              {[
+                { label: "Temporal Accuracy", status: progress > 40 ? "VERIFIED" : "PENDING" },
+                { label: "Loudness Compliant", status: progress > 70 ? "PASSED" : "PENDING" },
+                { label: "Neural Grain Sync", status: masteringMode === "COMPLETE" ? "LOCKED" : "WAITING" }
+              ].map(qc => (
+                <div key={qc.label} className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl flex justify-between items-center group hover:border-[var(--ms-gold)]/20 transition-all">
+                   <span className="text-[10px] uppercase font-bold text-zinc-500 tracking-widest">{qc.label}</span>
+                   <span className={`text-[9px] font-mono font-bold ${qc.status === "VERIFIED" || qc.status === "PASSED" || qc.status === "LOCKED" ? 'text-green-500' : 'text-zinc-600'}`}>{qc.status}</span>
                 </div>
               ))}
            </div>
         </div>
 
-        {/* Right: Master Control Panel */}
-        <div className="col-span-4 flex flex-col gap-6 bg-white/[0.02] border border-white/5 rounded-[32px] p-6">
+        {/* Right: Finishing Control Panel */}
+        <div className="col-span-4 flex flex-col gap-8 bg-black/40 border border-white/5 rounded-[40px] p-10 shadow-3xl backdrop-blur-md">
            
-           {/* Preset Selection */}
-           <div className="flex flex-col gap-3">
-              <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">Mastering Presets</span>
-              <div className="grid grid-cols-1 gap-2">
+           {/* Mastering Path Presets */}
+           <div className="flex flex-col gap-6">
+              <h4 className="text-[11px] text-[var(--ms-gold)] font-bold uppercase tracking-[0.4em]">Delivery_Profiles</h4>
+              <div className="grid grid-cols-1 gap-4">
                  {PRESETS.map(p => (
                    <button 
                      key={p.id}
                      onClick={() => setSelectedPreset(p)}
-                     className={`p-4 rounded-2xl border text-left transition-all ${selectedPreset.id === p.id ? 'bg-[var(--ms-gold)]/10 border-[var(--ms-gold)]' : 'bg-transparent border-white/5 hover:border-white/20'}`}
+                     className={`p-6 rounded-3xl border text-left transition-all relative overflow-hidden group ${selectedPreset.id === p.id ? 'bg-[var(--ms-gold)]/10 border-[var(--ms-gold)]/40 shadow-2xl' : 'bg-transparent border-white/5 hover:border-white/10'}`}
                    >
-                     <div className="text-[11px] font-bold text-white mb-1">{p.name}</div>
-                     <div className="text-[9px] text-zinc-500 font-mono tracking-tight">{p.tone} • {p.grain} Grain</div>
+                     <div className="text-sm font-bold text-white mb-1 uppercase tracking-tight">{p.name}</div>
+                     <div className="text-[10px] text-zinc-500 font-mono tracking-tighter">{p.spec}</div>
+                     {selectedPreset.id === p.id && <div className="absolute right-6 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-[var(--ms-gold)] shadow-[0_0_12px_var(--ms-gold)]" />}
                    </button>
                  ))}
               </div>
            </div>
 
-           {/* Optical Parameters */}
-           <div className="flex flex-col gap-6 mt-4">
-              <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">Optical Forge Parameters</span>
-              
-              <div className="space-y-6">
-                 {/* Mastering Intensity */}
-                 <div className="flex flex-col gap-3">
-                    <div className="flex justify-between text-[10px] font-mono text-zinc-400">
-                       <span>GRADE_STRENGTH</span>
-                       <span>{intensity}%</span>
-                    </div>
-                    <input type="range" value={intensity} onChange={(e) => setIntensity(Number(e.target.value))} className="w-full accent-[var(--ms-gold)]" />
-                 </div>
+           {/* Dynamic Actions */}
+           <div className="mt-auto flex flex-col gap-4">
+              {masteringMode === "IDLE" && (
+                <button 
+                  onClick={handleStart2K}
+                  className="w-full py-6 bg-[var(--ms-gold)] text-black font-bold uppercase tracking-[0.4em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-[var(--ms-gold)]/20 text-[11px]"
+                >
+                   Generate_2K_Proxy_Default
+                </button>
+              )}
 
-                 {/* Grain */}
-                 <div className="flex flex-col gap-3">
-                    <div className="flex justify-between text-[10px] font-mono text-zinc-400">
-                       <span>FILM_GRAIN</span>
-                       <span>{grain}%</span>
-                    </div>
-                    <input type="range" value={grain} onChange={(e) => setGrain(Number(e.target.value))} className="w-full accent-[var(--ms-gold)]" />
-                 </div>
+              {masteringMode === "AWAITING_4K_APPROVAL" && (
+                <button 
+                  onClick={handleRequest4K}
+                  className="w-full py-6 bg-red-600 text-white font-bold uppercase tracking-[0.4em] rounded-2xl hover:bg-red-500 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl shadow-red-600/20 text-[11px]"
+                >
+                   Approve_4K_Theatrical_DCP
+                </button>
+              )}
 
-                 {/* Distortion */}
-                 <div className="flex flex-col gap-3">
-                    <div className="flex justify-between text-[10px] font-mono text-zinc-400">
-                       <span>LENS_DISTORTION</span>
-                       <span>{distortion}%</span>
-                    </div>
-                    <input type="range" value={distortion} onChange={(e) => setDistortion(Number(e.target.value))} className="w-full accent-[var(--ms-gold)]" />
-                 </div>
-              </div>
+              {masteringMode === "COMPLETE" && (
+                <button className="w-full py-6 bg-zinc-800 border border-green-500/40 text-green-500 font-bold uppercase tracking-[0.4em] rounded-2xl transition-all text-[11px] flex items-center justify-center gap-3">
+                   <div className="w-2 h-2 rounded-full bg-green-500" />
+                   Master_DCP_Verified
+                </button>
+              )}
+
+              {(masteringMode === "2K_PREVIEW" || masteringMode === "MASTERING_4K") && (
+                <div className="w-full py-6 bg-zinc-900 border border-white/5 text-zinc-600 font-bold uppercase tracking-[0.4em] rounded-2xl text-[11px] text-center italic">
+                   Synthesis_In_Progress...
+                </div>
+              )}
            </div>
 
-           {/* Action */}
-           <button 
-             onClick={() => alert(`🚀 Representative Test Run Started!\nMode: ${economyMode ? 'Economy (Free API)' : 'Production'}\nTargets: 8 Key Sequences`)}
-             className={`mt-auto w-full py-5 text-black font-bold uppercase tracking-widest rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-2xl ${economyMode ? 'bg-green-500 shadow-green-500/20' : 'bg-[var(--ms-gold)] shadow-[var(--ms-gold)]/20'}`}
-           >
-              {economyMode ? "Forge Representative Test" : "Forge Master Production"}
-           </button>
+           <p className="text-[9px] text-zinc-600 italic leading-relaxed text-center px-4 font-serif">
+             "Notice: 2K proxies are generated automatically for review. 4K high-resolution mastering requires explicit human approval as per Auteur_Protocol_v4."
+           </p>
         </div>
 
       </div>

@@ -6,56 +6,10 @@ Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-s
 
 ## 0. Response Tone & Accuracy (CRITICAL)
 - **사실적 전달**: 모든 답변(response)은 사실에 기반하여(fact-based) 객관적으로 전달합니다.
-- **과장 금지**: 과장된 표현(exaggerated expressions)은 일절 사용하지 않으며, 기술적 성취나 상태를 있는 그대로 보고합니다.
+- **과장 금지**: 과장된 표현(exaggerated expressions)은 일절 사용하지 않습니다.
+- **구현 결과만 보고**: 구현된 결과만 있는 그대로 보고합니다.
+- **추측 금지**: 추측성 발언은 일절 사용하지 않습니다.
+- **Phase가 끝나면 다음 우선수위가 높은 Phase 작업을 진행한다.** 
 
-## 1. Think Before Coding
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
-
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
-
-## 2. Simplicity First
-**Minimum code that solves the problem. Nothing speculative.**
-
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
+## 1. 전통적 영화 제작 파이프라인에 맞게 구현한다.
+- 각 Phase는 독립적으로 동작하며, 이전 Phase의 결과물을 입력으로 받는다.

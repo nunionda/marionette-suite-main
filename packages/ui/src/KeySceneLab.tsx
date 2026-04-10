@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { usePipeline } from "./PipelineProvider";
 
 interface KeyScene {
   id: string;
@@ -41,14 +42,28 @@ const keyScenes: KeyScene[] = [
 export default function KeySceneLab() {
   const [selectedId, setSelectedId] = useState(keyScenes[0].id);
   const activeScene = keyScenes.find((s) => s.id === selectedId) || keyScenes[0];
+  const { getAgentMeta } = usePipeline();
+  const meta = getAgentMeta("GEN");
 
   return (
-    <div className="flex flex-col h-full bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-6 duration-700">
+    <div className="flex flex-col h-full bg-[var(--ms-bg-2)] border border-[var(--ms-border)] rounded-2xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-6 duration-700 group">
       {/* Header */}
       <div className="flex items-center justify-between px-10 py-8 border-b border-[var(--ms-border)] bg-[var(--ms-bg)]/90 backdrop-blur-3xl">
         <div className="flex flex-col gap-2">
           <h3 className="font-serif text-2xl font-bold text-[var(--ms-gold)] tracking-tight">Key Scene Visual Lab</h3>
-          <p className="text-xs text-[var(--ms-text-dim)] uppercase tracking-[0.3em]">Orchestrating Cinematic Vibe per Sequence</p>
+          <div className="flex items-center gap-3">
+            <p className="text-xs text-[var(--ms-text-dim)] uppercase tracking-[0.3em]">Orchestrating Cinematic Vibe per Sequence</p>
+            <div className="flex gap-2">
+              <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-blue-500" />
+                <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.stage}</span>
+              </div>
+              <div className="px-2 py-1 bg-white/5 border border-white/10 rounded flex items-center gap-1.5">
+                <div className="w-1 h-1 rounded-full bg-[var(--ms-gold)]" />
+                <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{meta?.layer}</span>
+              </div>
+            </div>
+          </div>
         </div>
         <div className="flex gap-4">
           <button className="px-6 py-2.5 bg-transparent border border-[var(--ms-gold)]/30 text-[var(--ms-gold)] text-[10px] font-bold uppercase tracking-widest rounded hover:bg-[var(--ms-gold)]/10 transition-all">
