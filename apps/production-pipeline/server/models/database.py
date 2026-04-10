@@ -53,6 +53,14 @@ class ProductionPhase(str, enum.Enum):
     POST = "POST"
 
 
+class ProjectCategory(str, enum.Enum):
+    FILM = "film"
+    DRAMA_SERIES = "drama_series"
+    COMMERCIAL = "commercial"
+    YOUTUBE_SHORT = "youtube_short"
+    CUSTOM = "custom"
+
+
 def generate_uuid():
     return str(uuid.uuid4())
 
@@ -65,6 +73,7 @@ class Project(Base):
     genre = Column(String(100), default="")
     logline = Column(Text, default="")
     idea = Column(Text, default="")
+    category = Column(String(50), default=ProjectCategory.FILM.value)
     status = Column(String(50), default=ProjectStatus.DEVELOPMENT.value)
     progress = Column(Float, default=0.0)
 
@@ -90,11 +99,13 @@ class Project(Base):
     # 관계
     pipeline_runs = relationship("PipelineRun", back_populates="project", cascade="all, delete-orphan")
     assets = relationship("Asset", back_populates="project", cascade="all, delete-orphan")
+    node_graph = relationship("NodeGraph", back_populates="project", uselist=False, cascade="all, delete-orphan")
 
     def to_dict(self):
         return {
             "id": self.id,
             "title": self.title,
+            "category": self.category,
             "genre": self.genre,
             "logline": self.logline,
             "idea": self.idea,
@@ -167,8 +178,8 @@ class Asset(Base):
     file_name = Column(String(500), nullable=False)
     mime_type = Column(String(100), nullable=False)
     file_size = Column(Integer, nullable=True)
-    metadata = Column(JSON, nullable=True)
-    
+    asset_metadata = Column("metadata", JSON, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # 관계
@@ -186,6 +197,56 @@ class Asset(Base):
             "file_name": self.file_name,
             "mime_type": self.mime_type,
             "file_size": self.file_size,
-            "metadata": self.metadata,
+            "metadata": self.asset_metadata,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class PipelinePreset(Base):
+    __tablename__ = "pipeline_presets"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    category = Column(String(50), nullable=False)
+    name = Column(String(200), nullable=False)
+    description = Column(Text, default="")
+    agent_steps = Column(JSON, nullable=False)
+    is_default = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "category": self.category,
+            "name": self.name,
+            "description": self.description,
+            "agent_steps": self.agent_steps,
+            "is_default": bool(self.is_default),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class NodeGraph(Base):
+    __tablename__ = "node_graphs"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False, unique=True)
+    nodes = Column(JSON, nullable=False, default=list)
+    edges = Column(JSON, nullable=False, default=list)
+    version = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    project = relationship("Project", back_populates="node_graph")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "nodes": self.nodes,
+            "edges": self.edges,
+            "version": self.version,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

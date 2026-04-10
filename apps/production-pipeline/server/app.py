@@ -8,7 +8,7 @@ from pathlib import Path
 
 from server.core.config import settings
 from server.core.database import init_db
-from server.api import projects, pipeline, websocket, analysis
+from server.api import projects, pipeline, websocket, analysis, presets, graphs
 from server.api.websocket import manager
 from server.models.schemas import HealthResponse
 from server.services.auditor import auditor
@@ -42,6 +42,8 @@ def create_app() -> FastAPI:
     app.include_router(pipeline.router, prefix="/api/pipeline", tags=["pipeline"])
     app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
     app.include_router(websocket.router)
+    app.include_router(presets.router, prefix="/api/presets", tags=["presets"])
+    app.include_router(graphs.router, prefix="/api/projects", tags=["graphs"])
 
     # ─── 정적 파일 서빙 (산출물 다운로드) ───
     output_dir = settings.OUTPUT_DIR
@@ -53,6 +55,16 @@ def create_app() -> FastAPI:
     async def startup():
         init_db()
         settings.ensure_dirs()
+
+        # 기본 프리셋 시드
+        from server.core.database import SessionLocal
+        from server.services.preset_service import seed_default_presets
+        db = SessionLocal()
+        try:
+            seed_default_presets(db)
+        finally:
+            db.close()
+
         # 감사 엔진 데몬 시작
         asyncio.create_task(auditor.start_daemon())
         

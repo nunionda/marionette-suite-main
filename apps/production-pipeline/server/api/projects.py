@@ -6,8 +6,9 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from server.core.database import get_db
-from server.models.database import Project
+from server.models.database import Project, PipelinePreset
 from server.models.schemas import ProjectCreate, ProjectUpdate, ProjectResponse
+from server.services.preset_service import generate_graph_from_preset
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 
@@ -30,14 +31,26 @@ def get_project(project_id: str, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=ProjectResponse, status_code=201)
 def create_project(data: ProjectCreate, db: Session = Depends(get_db)):
-    """새 프로젝트 생성"""
+    """새 프로젝트 생성 — 카테고리에 맞는 노드 그래프 자동 생성"""
     project = Project(
         title=data.title,
+        category=data.category,
         genre=data.genre,
         logline=data.logline,
         idea=data.idea,
     )
     db.add(project)
+    db.flush()
+
+    # 카테고리에 맞는 기본 프리셋 조회 → 노드 그래프 자동 생성
+    preset = db.query(PipelinePreset).filter(
+        PipelinePreset.category == data.category,
+        PipelinePreset.is_default == 1,
+    ).first()
+    if preset:
+        graph = generate_graph_from_preset(project.id, preset.agent_steps)
+        db.add(graph)
+
     db.commit()
     db.refresh(project)
     return ProjectResponse(**project.to_dict())

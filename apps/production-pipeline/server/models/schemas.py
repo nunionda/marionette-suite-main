@@ -11,6 +11,7 @@ from datetime import datetime
 
 class ProjectCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=200, description="프로젝트 제목")
+    category: str = Field(default="film", description="프로젝트 카테고리: film, drama_series, commercial, youtube_short, custom")
     genre: str = Field(default="", description="장르")
     logline: str = Field(default="", description="로그라인")
     idea: str = Field(default="", description="기획 아이디어")
@@ -35,6 +36,7 @@ class ProjectUpdate(BaseModel):
 class ProjectResponse(BaseModel):
     id: str
     title: str
+    category: str = "film"
     genre: str
     logline: str
     idea: str
@@ -103,3 +105,74 @@ class HealthResponse(BaseModel):
 class ErrorResponse(BaseModel):
     detail: str
     error_code: Optional[str] = None
+
+
+# ─── Preset 스키마 ───
+
+class AgentStep(BaseModel):
+    agent: str = Field(..., description="에이전트 ID (예: WRIT, CNCP, GEN)")
+    order: int = Field(..., description="실행 순서")
+    required: bool = Field(default=True, description="필수 단계 여부")
+    defaultParams: dict = Field(default_factory=dict, description="기본 파라미터")
+
+
+class PresetCreate(BaseModel):
+    category: str = Field(..., description="프로젝트 카테고리")
+    name: str = Field(..., min_length=1, max_length=200)
+    description: str = Field(default="")
+    agent_steps: List[AgentStep]
+
+
+class PresetResponse(BaseModel):
+    id: str
+    category: str
+    name: str
+    description: str
+    agent_steps: list
+    is_default: bool
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+# ─── NodeGraph 스키마 ───
+
+class NodePosition(BaseModel):
+    x: float = 0.0
+    y: float = 0.0
+
+
+class PipelineNode(BaseModel):
+    id: str
+    type: str = Field(default="agent", description="agent | input | output | branch")
+    agentId: Optional[str] = None
+    label: str
+    position: NodePosition = Field(default_factory=NodePosition)
+    params: dict = Field(default_factory=dict)
+    status: str = Field(default="idle", description="idle | queued | running | completed | failed | skipped")
+
+
+class PipelineEdge(BaseModel):
+    id: str
+    source: str
+    target: str
+    sourceHandle: Optional[str] = None
+    targetHandle: Optional[str] = None
+
+
+class NodeGraphResponse(BaseModel):
+    id: str
+    project_id: str
+    nodes: list
+    edges: list
+    version: int
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+class NodeGraphUpdate(BaseModel):
+    nodes: Optional[List[PipelineNode]] = None
+    edges: Optional[List[PipelineEdge]] = None
