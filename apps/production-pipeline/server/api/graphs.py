@@ -1,14 +1,63 @@
 """
 마리오네트 스튜디오 — 노드 그래프 API
 """
+import asyncio
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
-from server.core.database import get_db
-from server.models.database import NodeGraph, Project, PipelineRun
+from server.core.database import get_db, SessionLocal
+from server.models.database import NodeGraph, Project, PipelineRun, RunStatus
 from server.models.schemas import NodeGraphResponse, NodeGraphUpdate
+from server.api import pipeline as pipeline_api
+from server.services.pipeline_runner import PipelineRunner
 
 router = APIRouter()
+
+
+async def update_node_status(project_id: str, agent_id: str, status: str, db_session):
+    """Update a specific node's status in the project's NodeGraph"""
+    graph = db_session.query(NodeGraph).filter(NodeGraph.project_id == project_id).first()
+    if graph:
+        nodes = graph.nodes
+        for node in nodes:
+            if node.get("agentId") and node["agentId"].lower() == agent_id.lower():
+                node["status"] = status
+        graph.nodes = nodes
+        db_session.commit()
+
+
+async def _run_graph_pipeline_background(run_id: str, project_id: str, idea: str):
+    """
+    백그라운드 태스크: 그래프 기반 파이프라인 실행
+    별도 DB 세션으로 실행하여 요청 세션과 분리, 노드 상태도 함께 업데이트
+    """
+    db = SessionLocal()
+    try:
+        run = db.query(PipelineRun).filter(PipelineRun.id == run_id).first()
+        project = db.query(Project).filter(Project.id == project_id).first()
+        if not run or not project:
+            return
+
+        # Reuse broadcast from pipeline module, wrap to also update node statuses
+        original_broadcast = pipeline_api._broadcast_fn
+
+        async def broadcast_with_node_status(message: dict):
+            if original_broadcast:
+                await original_broadcast(message)
+            msg_type = message.get("type", "")
+            step = message.get("step")
+            if step:
+                if msg_type == "step_started":
+                    await update_node_status(project_id, step, "running", db)
+                elif msg_type == "step_completed":
+                    await update_node_status(project_id, step, "completed", db)
+                elif msg_type == "step_failed":
+                    await update_node_status(project_id, step, "failed", db)
+
+        runner = PipelineRunner(broadcast_fn=broadcast_with_node_status)
+        await runner.run_pipeline(run, project, db, idea=idea)
+    finally:
+        db.close()
 
 
 @router.get("/{project_id}/graph", response_model=NodeGraphResponse)
@@ -57,10 +106,17 @@ def execute_graph(project_id: str, db: Session = Depends(get_db)):
     run = PipelineRun(
         project_id=project_id,
         steps=steps,
+        status=RunStatus.QUEUED.value,
     )
     db.add(run)
+    project.status = "in_production"
     db.commit()
     db.refresh(run)
+
+    idea = project.idea or project.title or ""
+
+    # 백그라운드 태스크로 파이프라인 실행
+    asyncio.create_task(_run_graph_pipeline_background(run.id, project_id, idea))
 
     return {
         "run_id": run.id,
