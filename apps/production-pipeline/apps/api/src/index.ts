@@ -15,6 +15,7 @@ import { exportRoutes } from "./routes/export.ts"
 import { snapshotRoutes } from "./routes/snapshots.ts"
 import { batchRoutes } from "./routes/batch.ts"
 import { authRoutes } from "./routes/auth.ts"
+import { analysisRoutes } from "./routes/analysis.ts"
 import { errorHandler } from "./middleware/error-handler.ts"
 import { authGuard } from "./middleware/auth.ts"
 import { wsHandler, initWSHandler } from "./ws/handler.ts"
@@ -61,6 +62,7 @@ app.route("/api/projects/:projectId/agents", agentOutputRoutes)
 app.route("/api/export", exportRoutes)
 app.route("/api/snapshots", snapshotRoutes)
 app.route("/api/batch", batchRoutes)
+app.route("/api/analysis", analysisRoutes)
 
 // Initialize WebSocket handler with shared dependencies
 initWSHandler(pipelineBus, prisma)

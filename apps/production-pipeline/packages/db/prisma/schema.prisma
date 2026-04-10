@@ -269,11 +269,40 @@ model AnalysisReport {
   production       Json?
   narrativeArc     Json?
   tropes           Json?
+  
+  // Creative Risk Audit relation
+  riskAudit        CreativeRiskAudit?
 
   @@index([predictedRoi])
   @@index([predictedRating])
   @@index([createdAt])
   @@map("analysis_reports")
+}
+
+model CreativeRiskAudit {
+  id                String   @id @default(cuid())
+  reportId          String   @unique
+  report            AnalysisReport @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  
+  // Risk Metrics (Derived from Quant Philosophy)
+  divergenceIndex   Float    @default(0) // Deviation from DECODE bible (0-1)
+  commercialScore   Float    @default(0) // Expected ROI score
+  budgetRisk        Float    @default(0) // VFX/Production cost overrun probability
+  
+  // Kelly Fraction inspired asset allocation
+  resourceAllocation Json?   // { vfx: 0.4, cast: 0.3, marketing: 0.3 }
+  
+  status            RiskStatus @default(STABLE)
+  findings          String?    @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum RiskStatus {
+  STABLE
+  CAUTION
+  CRITICAL
+  HALTED
 }
 
 model LoglineIdea {

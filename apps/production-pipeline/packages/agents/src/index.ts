@@ -63,6 +63,7 @@ import { VFXCompositorAgent } from "./post-production/vfx-compositor.js"
 import { ComposerAgent } from "./post-production/composer.js"
 import { ColoristAgent } from "./post-production/colorist.js"
 import { MixingEngineerAgent } from "./post-production/mixing-engineer.js"
+import { QualityEvaluatorAgent } from "./pre-production/quality-evaluator.js"
 
 /**
  * Create all available agents with shared dependencies.
@@ -78,6 +79,7 @@ export function createAgentRegistry(gateway: AIGateway, db: PrismaClient): Map<s
   registry.set("casting_director", new CastingDirectorAgent(gateway, db))
   registry.set("location_scout", new LocationScoutAgent(gateway, db))
   registry.set("previsualizer", new PrevisualizerAgent(gateway, db))
+  registry.set("quality_evaluator", new QualityEvaluatorAgent(gateway, db))
 
   // Main-Production
   registry.set("cinematographer", new CinematographerAgent(gateway, db))

@@ -1,0 +1,6 @@
+{
+  "name": "@marionette/agent-rules",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Centralized intelligence layer for Marionette AI agents"
+}

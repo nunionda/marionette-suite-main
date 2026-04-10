@@ -158,15 +158,33 @@ export class AIGateway {
       return entry.provider
     }
 
-    // Fall back to default provider that supports the capability
-    for (const [entryName, entry] of this.providers) {
+    // Zero-Cost Policy: Prioritize preferred free providers when no name is specified
+    const PREFERRED_FREE_PROVIDERS = ["gemini", "edge-tts", "musicgen"]
+    
+    // 1. Try preferred free providers that are also marked as default
+    for (const freeName of PREFERRED_FREE_PROVIDERS) {
+      const entry = this.providers.get(freeName)
+      if (entry && entry.isDefault && guard(entry.provider)) {
+        return entry.provider
+      }
+    }
+
+    // 2. Try any default provider
+    for (const [, entry] of this.providers) {
       if (entry.isDefault && guard(entry.provider)) {
         return entry.provider
       }
-      void entryName
     }
 
-    // No default found — try any provider that supports the capability
+    // 3. Try any preferred free provider that supports the capability
+    for (const freeName of PREFERRED_FREE_PROVIDERS) {
+      const entry = this.providers.get(freeName)
+      if (entry && guard(entry.provider)) {
+        return entry.provider
+      }
+    }
+
+    // 4. Fall back to any provider that supports the capability
     for (const [, entry] of this.providers) {
       if (guard(entry.provider)) {
         return entry.provider
