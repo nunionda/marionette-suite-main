@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@marionette/analysis-core": ["./packages/analysis-core"],
+      "@marionette/agent-rules": ["./packages/agent-rules"],
+      "@marionette/shared": ["./apps/production-pipeline/packages/shared/src"],
+      "@marionette/agents": ["./apps/production-pipeline/packages/agents/src"],
+      "@marionette/ai-gateway": ["./apps/production-pipeline/packages/ai-gateway/src"],
+      "@marionette/db": ["./apps/production-pipeline/packages/db/src"]
+    }
+  },
+  "include": ["packages/**/*", "apps/**/*"]
+}

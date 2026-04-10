@@ -32,7 +32,9 @@
       "@marionette/scenario-db": ["./packages/scenario-db/src"],
       "@marionette/scenario-db/*": ["./packages/scenario-db/src/*"],
       "@marionette/gate-review": ["./packages/gate-review/src"],
-      "@marionette/gate-review/*": ["./packages/gate-review/src/*"]
+      "@marionette/gate-review/*": ["./packages/gate-review/src/*"],
+      "@marionette/analysis-core": ["../../packages/analysis-core"],
+      "@marionette/agent-rules": ["../../packages/agent-rules"]
     }
   },
   "include": [

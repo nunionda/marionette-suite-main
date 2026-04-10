@@ -41,3 +41,4 @@ export * from './market/infrastructure/koficClient';
 export * from './shared/env';
 export * from './shared/MarketConfig';
 export * from './shared/currency';
+export * from './predictor/application/RiskAuditor';

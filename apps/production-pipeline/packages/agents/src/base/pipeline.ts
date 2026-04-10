@@ -107,7 +107,50 @@ export class PipelineOrchestrator {
           message: `Starting ${step}`,
           timestamp: new Date().toISOString(),
         })
-        const output = await agent.execute(input)
+
+        let output = await agent.execute(input)
+        let retryCount = 0
+        const MAX_RETRIES = 1
+        const CRITICAL_STEPS = ["script_writer", "scripter", "concept_artist", "previsualizer"]
+
+        // --- Autonomous Quality Gate & Retry Loop ---
+        if (CRITICAL_STEPS.includes(step)) {
+          const qualityAgent = this.registry.get("quality_evaluator")
+          if (qualityAgent) {
+            console.log(`[Pipeline] Quality Gate initiated for ${step}`)
+            let qualityOutput = await qualityAgent.execute({ ...input, asset: output.data })
+            
+            // 1. Safety HALT Check: High Divergence
+            if (qualityOutput.data.divergenceIndex > 0.7) {
+              const msg = `CRITICAL: Divergence Index (${qualityOutput.data.divergenceIndex}) exceeds safety threshold (0.7). Production HALTED to preserve integrity.`
+              await this.db.pipelineRun.update({
+                where: { id: runId },
+                data: { status: "FAILED", errorMessage: msg }
+              })
+              this.emit({ type: "run:completed", runId, status: "failed", error: msg })
+              return
+            }
+
+            // 2. Autonomous Retry: Low SOQ Score
+            while (qualityOutput.data.score < 70 && retryCount < MAX_RETRIES) {
+              retryCount++
+              console.log(`[Pipeline] Quality insufficient (${qualityOutput.data.score}). Retrying ${step} (Attempt ${retryCount + 1})...`)
+              this.emit({ 
+                type: "agent_progress", 
+                runId, agent: step, 
+                status: "retrying", 
+                message: `Quality below threshold. Re-generating asset...` 
+              })
+              
+              output = await agent.execute({ ...input, feedback: qualityOutput.data.feedback })
+              qualityOutput = await qualityAgent.execute({ ...input, asset: output.data })
+            }
+
+            // Update step result with quality metadata
+            (output.data as any).qualityScore = qualityOutput.data.score
+            (output.data as any).auditStatus = qualityOutput.data.status
+          }
+        }
 
         if (!output.success) {
           stepResults[step] = { status: "failed", error: output.message }

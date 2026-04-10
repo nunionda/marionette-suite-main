@@ -8,9 +8,11 @@ from pathlib import Path
 
 from server.core.config import settings
 from server.core.database import init_db
-from server.api import projects, pipeline, websocket
+from server.api import projects, pipeline, websocket, analysis
 from server.api.websocket import manager
 from server.models.schemas import HealthResponse
+from server.services.auditor import auditor
+import asyncio
 
 
 def create_app() -> FastAPI:
@@ -31,13 +33,15 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # ─── 라우터 등록 ───
-    app.include_router(projects.router)
-    app.include_router(pipeline.router)
-    app.include_router(websocket.router)
-
-    # ─── WebSocket 브로드캐스트 함수를 파이프라인 서비스에 주입 ───
+    # ─── WebSocket 브로드캐스트 함수를 서비스에 주입 ───
     pipeline.set_broadcast_fn(manager.broadcast)
+    auditor.broadcast_fn = manager.broadcast
+    
+    # ─── 라우터 등록 ───
+    app.include_router(projects.router, prefix="/api/projects", tags=["projects"])
+    app.include_router(pipeline.router, prefix="/api/pipeline", tags=["pipeline"])
+    app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
+    app.include_router(websocket.router)
 
     # ─── 정적 파일 서빙 (산출물 다운로드) ───
     output_dir = settings.OUTPUT_DIR
@@ -49,6 +53,9 @@ def create_app() -> FastAPI:
     async def startup():
         init_db()
         settings.ensure_dirs()
+        # 감사 엔진 데몬 시작
+        asyncio.create_task(auditor.start_daemon())
+        
         print(f"🎬 {settings.APP_NAME} v{settings.VERSION} 서버 시작!")
         print(f"📖 API 문서: http://{settings.HOST}:{settings.PORT}/docs")
         if settings.GEMINI_API_KEY:

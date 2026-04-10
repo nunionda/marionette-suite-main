@@ -123,3 +123,88 @@ def cancel_pipeline_run(project_id: str, run_id: str, db: Session = Depends(get_
     db.commit()
     db.refresh(run)
     return PipelineRunResponse(**run.to_dict())
+
+
+@router.post("/{project_id}/mastering/approve")
+async def approve_mastering(
+    project_id: str,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
+    """4K 마스터링 최종 승인 및 실행"""
+    from server.models.database import Project, Asset, PipelineRun, RunStatus
+    import json
+    import os
+
+    # 1. 프로젝트 확인
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+
+    # 2. 마스터링 대상 에셋 탐색 (최신 비디오 우선)
+    target_asset = db.query(Asset).filter(
+        Asset.project_id == project_id,
+        Asset.type == "VIDEO"
+    ).order_by(Asset.created_at.desc()).first()
+
+    if not target_asset:
+        # 비디오가 없으면 이미지 시도
+        target_asset = db.query(Asset).filter(
+            Asset.project_id == project_id,
+            Asset.type == "IMAGE"
+        ).order_by(Asset.created_at.desc()).first()
+
+    if not target_asset:
+        raise HTTPException(status_code=400, detail="마스터링할 수 있는 소스 에셋이 없습니다")
+
+    # 3. 새로운 마스터링 전용 PipelineRun 생성
+    run = PipelineRun(
+        project_id=project_id,
+        steps=["mastering"],
+        status=RunStatus.RUNNING.value,
+        current_step="mastering",
+        started_at=datetime.utcnow(),
+    )
+    db.add(run)
+    db.commit()
+    db.refresh(run)
+
+    # 4. 백그라운드에서 TS 에이전트 CLI 호출 (YOLO Bridge)
+    async def _trigger_ts_mastering(run_id: str, asset_id: str):
+        # TS 에이전트 패키지 경로
+        agents_dir = os.path.join(settings.PROJECT_ROOT, "apps/production-pipeline/packages/agents")
+        
+        input_data = {
+            "projectId": project_id,
+            "runId": run_id,
+            "assetId": asset_id,
+            "targetResolution": "4K"
+        }
+        
+        cmd = [
+            "bun", "run", "src/cli.ts", 
+            "mastering", 
+            json.dumps(input_data)
+        ]
+        
+        print(f"[MasteringBridge] Triggering: {' '.join(cmd)}")
+        
+        try:
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                cwd=agents_dir,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            stdout, stderr = await process.communicate()
+            
+            if process.returncode == 0:
+                print(f"[MasteringBridge] Success: {stdout.decode().split('--- RESULT START ---')[-1]}")
+            else:
+                print(f"[MasteringBridge] Failed: {stderr.decode()}")
+        except Exception as e:
+            print(f"[MasteringBridge] Error: {str(e)}")
+
+    background_tasks.add_task(_trigger_ts_mastering, run.id, target_asset.id)
+
+    return {"status": "accepted", "run_id": run.id, "target_asset": target_asset.file_name}

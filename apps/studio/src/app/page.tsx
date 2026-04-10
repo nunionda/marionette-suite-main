@@ -31,16 +31,33 @@ import {
   GStackProvider,
   SAILIntegrityMonitor,
   VaultLineageExplorer,
-  PipelineProvider
+  PipelineProvider,
+  usePipeline
 } from "@marionette/ui";
 import { usePipelineSocket } from "@/hooks/usePipelineSocket";
 import { getProjects, updateProjectContext, getBenchmarks, getLatestRuns } from "@/actions/projects";
-import { getProjectManifest, getPackageDownloadUrl, approveMastering } from "@/actions/delivery";
+import { getProjectManifest, getPackageDownloadUrl, approveMastering, getProjectAnalysis, runProjectAnalysis } from "@/actions/delivery";
+import { RiskMonitor } from "@/components/intelligence/RiskMonitor";
 import CopilotWidget from "@/components/Copilot/CopilotWidget";
 
 interface Benchmark {
   agents: Record<string, Record<string, unknown>>;
   benchmark_metadata: Record<string, unknown>;
+}
+
+/**
+ * Helper to sync the selected project ID into the PipelineProvider context
+ */
+function SyncProjectId({ id }: { id: string }) {
+  const { setProjectId } = usePipeline();
+  
+  useEffect(() => {
+    if (id) {
+      setProjectId(id);
+    }
+  }, [id, setProjectId]);
+
+  return null; 
 }
 
 export default function Home() {
@@ -59,6 +76,8 @@ export default function Home() {
   const [designerSubView, setDesignerSubView] = useState<"Visual DNA" | "Character Studio" | "Key Scenes" | "Set Design">("Visual DNA");
   const [ceoSubView, setCeoSubView] = useState<"Portfolio" | "Backlot" | "Health" | "Mastering">("Portfolio");
   const [showFlowMatrix, setShowFlowMatrix] = useState(false);
+  const [analysisData, setAnalysisData] = useState<any>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     async function loadProjects() {
@@ -90,6 +109,31 @@ export default function Home() {
     syncActiveRun();
   }, [selectedProjectId]);
 
+  // Fetch Analysis Data
+  useEffect(() => {
+    async function loadAnalysis() {
+      if (selectedProjectId) {
+        const data = await getProjectAnalysis(selectedProjectId);
+        setAnalysisData(data);
+      }
+    }
+    loadAnalysis();
+  }, [selectedProjectId]);
+
+  const handleRunAudit = async () => {
+    if (!selectedProjectId) return;
+    setIsAnalyzing(true);
+    try {
+      await runProjectAnalysis(selectedProjectId);
+      const data = await getProjectAnalysis(selectedProjectId);
+      setAnalysisData(data);
+    } catch (error) {
+      console.error("Audit failed:", error);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
   const handleUpdateContext = async (field: "visual_dna" | "set_concept", data: unknown) => {
@@ -115,7 +159,8 @@ export default function Home() {
 
   return (
     <GStackProvider initialIntegrity={systemHealth?.integrity_score ?? 94.2}>
-      <PipelineProvider>
+      <PipelineProvider onApprove4K={handleApprove4K}>
+        <SyncProjectId id={selectedProjectId} />
         <main className="min-h-screen flex flex-col bg-[var(--ms-bg-base)] text-[var(--ms-text-main)] py-8 px-6 md:px-12 relative overflow-hidden selection:bg-[var(--ms-gold)] selection:text-black">
       {/* Cinematic Ambiance */}
       <div className="absolute inset-0 z-0 opacity-[0.05] pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat" />
@@ -284,6 +329,30 @@ export default function Home() {
                     )}
                     {currentRole === "line-producer" && (
                         <div className="space-y-6">
+                        {/* Intelligence & Health HUD (Fixed Placement) */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                         <div className="flex flex-col gap-6">
+                            <PipelineHealthHUD health={systemHealth} />
+                            {analysisData?.riskAudit && (
+                              <RiskMonitor data={analysisData.riskAudit} />
+                            )}
+                         </div>
+                         <div className="flex flex-col gap-6">
+                            <PipelineTracker steps={steps} currentStep={steps.find(s => s.status === 'RUNNING')?.id} />
+                            {!analysisData && (
+                              <div className="p-8 border border-[var(--ms-gold-border)]/10 rounded-[var(--ms-radius-lg)] gstack-glass flex flex-col items-center justify-center gap-4">
+                                <span className="text-[10px] font-mono uppercase tracking-widest opacity-40">Intelligence_Offline</span>
+                                <button 
+                                  onClick={handleRunAudit}
+                                  disabled={isAnalyzing}
+                                  className="px-8 py-3 bg-[var(--ms-gold)]/10 border border-[var(--ms-gold)]/20 text-[var(--ms-gold)] text-[10px] font-bold uppercase tracking-widest hover:bg-[var(--ms-gold)]/20 transition-all rounded-full"
+                                >
+                                  {isAnalyzing ? "Analyzing_Core..." : "Initiate_Intelligence_Audit"}
+                                </button>
+                              </div>
+                            )}
+                         </div>
+                      </div>
                             <LineProducerView />
                             <SceneRenderStudio />
                         </div>
@@ -434,7 +503,6 @@ export default function Home() {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
                 <div className="lg:col-span-12">
                    <AssetHub 
                      assets={(manifest as any).assets} 

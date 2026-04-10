@@ -26,6 +26,7 @@ const agents: AgentSeed[] = [
   { agentName: "sound-designer",   phase: "POST", provider: "gemini", model: "gemini-tts",             enabled: true  },
   { agentName: "composer",         phase: "POST", provider: "suno",   model: "suno-v4",                enabled: true  },
   { agentName: "mixing-engineer",  phase: "POST", provider: "local",  model: "ffmpeg",                 enabled: true  },
+  { agentName: "quality-evaluator", phase: "PRE",  provider: "gemini", model: "gemini-2.5-pro",         enabled: true  },
 ];
 
 async function main() {

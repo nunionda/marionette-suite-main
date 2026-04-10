@@ -18,5 +18,11 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.28.2"
+  "packageManager": "pnpm@10.28.2",
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "apps/production-pipeline/packages/*",
+    "apps/analysis-system/packages/*"
+  ]
 }

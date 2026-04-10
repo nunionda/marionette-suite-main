@@ -27,45 +27,83 @@ export class QualityEvaluatorAgent extends BaseAgent {
     this.riskAuditor = new (RiskAuditor as any)(); 
   }
 
-  async run(input: QualityEvaluatorInput): Promise<AgentOutput> {
-    const { projectId, assetPath, visualDna, analysisData } = input;
+  async execute(input: QualityEvaluatorInput): Promise<AgentOutput> {
+    const { projectId, runId, assetId, assetPath, visualDna, analysisData } = input;
 
-    console.log(`[QualityEvaluator] Evaluating integrity for Project: ${projectId}`);
+    this.log(`Evaluating integrity for Project: ${projectId} (Asset: ${assetId || "New Concept"})`);
+    await this.updateProgress(runId, 20);
 
     // 1. Creative & Commercial Risk Audit (Level 4 Intelligence)
-    let riskReport = null;
-    if (analysisData) {
-      // Logic would normally call RiskAuditor here
-      // riskReport = await this.riskAuditor.audit(analysisData, input.screenplayFeatures);
+    let riskReport = { divergenceIndex: 0.1, commercialScore: 85 }; 
+    
+    try {
+      if (analysisData) {
+        // In the industrialized pipeline, we use the RiskAuditor from analysis-core
+        const audit = await this.riskAuditor.audit(analysisData, input.screenplayFeatures || {});
+        riskReport = {
+          divergenceIndex: audit.divergenceIndex,
+          commercialScore: audit.commercialScore
+        };
+      }
+    } catch (err) {
+      this.log(`[Warning] RiskAuditor failed, using safe baseline: ${err}`);
     }
+
+    await this.updateProgress(runId, 50);
 
     // 2. Visual Quality Assessment (SAIL System Logic)
     const prompt = `
       You are the Senior Quality Assurance Director (SOQ System).
-      Evaluate the integrity of the following cinematic asset/concept.
+      Evaluate the integrity of the following cinematic asset/concept and provide a SOQ score.
       
       [CONTEXT]
       - Project: ${projectId}
       - Visual DNA: ${visualDna || "Standard Cinematic"}
+      - Current Divergence Index: ${riskReport.divergenceIndex}
       
       [REQUIREMENTS]
-      - SOQ Score (0-100)
-      - Aesthetic Alignment
-      - Technical Feasibility
-      
-      Return JSON with fields: soq_score, decision (Approved/Revision_Required), and feedback.
+      - Return JSON only.
+      - Fields: 
+          "score": (0-100) The Quality/SOQ score.
+          "divergenceIndex": Combined with visual feel.
+          "decision": "Approved" | "Revision_Required"
+          "feedback": Detailed improvement guide for the producing agent.
     `;
 
     const result = await this.gateway.text(prompt, {
-      provider: "gemini" // Enforce Zero-Cost policy by default
+      provider: "gemini" 
     });
 
     const evalData = JSON.parse(result);
+    await this.updateProgress(runId, 80);
+
+    // 3. Persist Evaluation to Asset or PipelineRun
+    if (assetId) {
+      await this.db.asset.update({
+        where: { id: assetId },
+        data: {
+          metadata: {
+            soq_score: evalData.score,
+            soq_feedback: evalData.feedback,
+            soq_decision: evalData.decision,
+            risk_report: riskReport,
+            evaluated_at: new Date().toISOString()
+          }
+        }
+      });
+      this.log(`Asset ${assetId} SOQ Score: ${evalData.score} | Decision: ${evalData.decision}`);
+    }
+
+    await this.updateProgress(runId, 100);
 
     return {
       success: true,
+      message: `Quality evaluation completed. Decision: ${evalData.decision}`,
       data: {
-        ...evalData,
+        score: evalData.score ?? 0,
+        divergenceIndex: evalData.divergenceIndex ?? riskReport.divergenceIndex,
+        decision: evalData.decision,
+        feedback: evalData.feedback,
         risk_report: riskReport,
         timestamp: new Date().toISOString()
       }

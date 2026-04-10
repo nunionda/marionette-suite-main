@@ -55,7 +55,28 @@ export class ConceptArtistAgent extends BaseAgent {
       const seqNum = scene.sequence ?? 1
       this.log(`Scene ${sceneNum} (Seq ${seqNum}) — ${scene.setting} (${scene.time_of_day})`)
 
-      const enhancedPrompt = buildEnhancedPrompt(scene.image_prompt, style, aspectKey)
+      // [Intelligence Level 4] Fetch Previous Feedback for Self-Correction
+      let previousFeedback = "";
+      try {
+        const latestAsset = await this.db.asset.findFirst({
+          where: { 
+            project_id: projectId,
+            agent_name: this.name,
+            sceneNumber: sceneNum
+          },
+          orderBy: { created_at: 'desc' }
+        });
+        if ((latestAsset?.metadata as any)?.soq_decision === "Revision_Required") {
+          previousFeedback = (latestAsset?.metadata as any)?.soq_feedback || "";
+          this.log(`[Self-Correction] Applying feedback for Scene ${sceneNum}: ${previousFeedback.substring(0, 30)}...`);
+        }
+      } catch (e) { /* ignore sync errors */ }
+
+      const rawPrompt = previousFeedback 
+        ? `${scene.image_prompt} [IMPORTANT: FIX PREVIOUS MISTAKES: ${previousFeedback}]`
+        : scene.image_prompt;
+
+      const enhancedPrompt = buildEnhancedPrompt(rawPrompt, style, aspectKey)
 
       try {
         const imageBuffer = await this.gateway.image(enhancedPrompt, {

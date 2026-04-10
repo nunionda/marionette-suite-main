@@ -42,6 +42,8 @@ export { MixingEngineerAgent } from "./post-production/mixing-engineer.js"
 export type { MixingEngineerInput } from "./post-production/mixing-engineer.js"
 export { VFXCompositorAgent } from "./post-production/vfx-compositor.js"
 export type { VFXCompositorInput } from "./post-production/vfx-compositor.js"
+export { MasteringAgent } from "./post-production/mastering-agent.js"
+export type { MasteringInput } from "./post-production/mastering-agent.js"
 
 // ─── Agent Registry ───
 
@@ -64,6 +66,7 @@ import { ComposerAgent } from "./post-production/composer.js"
 import { ColoristAgent } from "./post-production/colorist.js"
 import { MixingEngineerAgent } from "./post-production/mixing-engineer.js"
 import { QualityEvaluatorAgent } from "./pre-production/quality-evaluator.js"
+import { MasteringAgent } from "./post-production/mastering-agent.js"
 
 /**
  * Create all available agents with shared dependencies.
@@ -93,6 +96,7 @@ export function createAgentRegistry(gateway: AIGateway, db: PrismaClient): Map<s
   registry.set("master_editor", new MasterEditorAgent(gateway, db))
   registry.set("colorist", new ColoristAgent(gateway, db))
   registry.set("mixing_engineer", new MixingEngineerAgent(gateway, db))
+  registry.set("mastering", new MasteringAgent(gateway, db))
 
   return registry
 }
