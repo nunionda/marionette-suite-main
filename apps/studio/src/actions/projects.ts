@@ -16,7 +16,7 @@ export async function getProjects() {
   }
 }
 
-export async function createProject(data: { title: string; genre?: string; idea?: string }) {
+export async function createProject(data: { title: string; category?: string; genre?: string; logline?: string; idea?: string }) {
   try {
     const response = await fetch(`${API_BASE_URL}/projects/`, {
       method: "POST",
@@ -86,6 +86,50 @@ export async function getLatestRuns(projectId: string) {
     return await response.json();
   } catch (error) {
     console.error(`Error fetching runs for ${projectId}:`, error);
+    return [];
+  }
+}
+
+// ─── Node Graph APIs ───
+
+export async function getNodeGraph(projectId: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/graph`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching graph for ${projectId}:`, error);
+    return null;
+  }
+}
+
+export async function executeGraph(projectId: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/projects/${projectId}/graph/execute`, {
+      method: "POST",
+    });
+    if (!response.ok) throw new Error("Failed to execute graph");
+    return await response.json();
+  } catch (error) {
+    console.error(`Error executing graph for ${projectId}:`, error);
+    throw error;
+  }
+}
+
+// ─── Preset APIs ───
+
+export async function getPresets(category?: string) {
+  try {
+    const url = category
+      ? `${API_BASE_URL}/presets/?category=${category}`
+      : `${API_BASE_URL}/presets/`;
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("Failed to fetch presets");
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching presets:", error);
     return [];
   }
 }
