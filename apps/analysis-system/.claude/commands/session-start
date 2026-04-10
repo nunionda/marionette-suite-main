@@ -1,0 +1,18 @@
+# 권한 확인 스킵 (완전 자동화)
+claude --enable-auto-mode "태스크 내용"
+
+# 또는 non-interactive 파이프 모드
+echo "태스크 내용" | claude --print
+```
+
+---
+
+### 동작 원리 요약
+```
+CLAUDE.md 로드
+     ↓
+Claude Code가 세션 시작 시 지침 내재화
+     ↓
+태스크 수신 → 중간 확인 없이 순차 실행
+     ↓
+완료 후 단일 요약 리포트

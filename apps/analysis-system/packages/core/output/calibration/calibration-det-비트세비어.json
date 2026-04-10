@@ -1,0 +1,4093 @@
+{
+  "scriptId": "biteusebieo_260323_v019",
+  "market": "korean",
+  "summary": {
+    "totalElements": 3458,
+    "protagonist": "진우",
+    "predictedRoi": "Hit",
+    "predictedRating": "15+"
+  },
+  "characterNetwork": {
+    "characters": [
+      {
+        "name": "진우",
+        "totalLines": 422,
+        "totalWords": 3329,
+        "role": "Protagonist",
+        "avgWordsPerLine": 7.9,
+        "vocabularyRichness": 0.608,
+        "sceneAppearances": [
+          6,
+          7,
+          12,
+          13,
+          14,
+          24,
+          27,
+          30,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          42,
+          43,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          54,
+          55,
+          56,
+          57,
+          59,
+          60,
+          67,
+          74,
+          75,
+          76,
+          77,
+          83,
+          86,
+          89,
+          90,
+          91,
+          97,
+          103,
+          105,
+          109,
+          111,
+          116,
+          117,
+          125,
+          126,
+          131
+        ],
+        "voiceScore": 41
+      },
+      {
+        "name": "설희",
+        "totalLines": 386,
+        "totalWords": 3057,
+        "role": "Antagonist",
+        "avgWordsPerLine": 7.9,
+        "vocabularyRichness": 0.6,
+        "sceneAppearances": [
+          1,
+          3,
+          8,
+          11,
+          17,
+          19,
+          22,
+          23,
+          25,
+          26,
+          27,
+          28,
+          34,
+          36,
+          37,
+          38,
+          39,
+          42,
+          43,
+          44,
+          49,
+          50,
+          51,
+          55,
+          56,
+          57,
+          58,
+          61,
+          67,
+          69,
+          74,
+          78,
+          82,
+          90,
+          91,
+          96,
+          103,
+          116,
+          117,
+          125,
+          126,
+          131
+        ],
+        "voiceScore": 40
+      },
+      {
+        "name": "사라",
+        "totalLines": 133,
+        "totalWords": 1020,
+        "role": "Supporting",
+        "avgWordsPerLine": 7.7,
+        "vocabularyRichness": 0.746,
+        "sceneAppearances": [
+          15,
+          18,
+          31,
+          46,
+          68,
+          81,
+          93,
+          108,
+          116,
+          123
+        ],
+        "voiceScore": 54
+      },
+      {
+        "name": "김도형",
+        "totalLines": 62,
+        "totalWords": 509,
+        "role": "Supporting",
+        "avgWordsPerLine": 8.2,
+        "vocabularyRichness": 0.766,
+        "sceneAppearances": [
+          9,
+          24,
+          94
+        ],
+        "voiceScore": 58
+      },
+      {
+        "name": "정찰총국",
+        "totalLines": 59,
+        "totalWords": 419,
+        "role": "Supporting",
+        "avgWordsPerLine": 7.1,
+        "vocabularyRichness": 0.716,
+        "sceneAppearances": [
+          66,
+          70,
+          121
+        ],
+        "voiceScore": 49
+      },
+      {
+        "name": "혜윤",
+        "totalLines": 43,
+        "totalWords": 327,
+        "role": "Supporting",
+        "avgWordsPerLine": 7.6,
+        "vocabularyRichness": 0.832,
+        "sceneAppearances": [
+          54,
+          62,
+          64,
+          84,
+          87,
+          93,
+          108,
+          117,
+          123
+        ],
+        "voiceScore": 63
+      },
+      {
+        "name": "오성민",
+        "totalLines": 31,
+        "totalWords": 242,
+        "role": "Minor",
+        "avgWordsPerLine": 7.8,
+        "vocabularyRichness": 0.806,
+        "sceneAppearances": [
+          40,
+          65,
+          87
+        ],
+        "voiceScore": 61
+      },
+      {
+        "name": "라이언",
+        "totalLines": 28,
+        "totalWords": 281,
+        "role": "Minor",
+        "avgWordsPerLine": 10,
+        "vocabularyRichness": 0.811,
+        "sceneAppearances": [
+          2,
+          10,
+          17,
+          24,
+          94,
+          121
+        ],
+        "voiceScore": 68
+      },
+      {
+        "name": "상관",
+        "totalLines": 5,
+        "totalWords": 26,
+        "role": "Minor",
+        "avgWordsPerLine": 5.2,
+        "vocabularyRichness": 0.846,
+        "sceneAppearances": [
+          46,
+          68
+        ],
+        "voiceScore": 57
+      },
+      {
+        "name": "비트 세이버",
+        "totalLines": 2,
+        "totalWords": 12,
+        "role": "Minor",
+        "avgWordsPerLine": 6,
+        "vocabularyRichness": 1,
+        "sceneAppearances": [],
+        "voiceScore": 75
+      },
+      {
+        "name": "강설희",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          1
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "은서",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          1
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "카르텔",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          2
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "상좌",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          4,
+          10
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "한진우",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          6
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "크기",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          6
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "간격",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          6
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "부장",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          9
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "국장",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          9
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "이리철",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          20
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "할머니",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          25
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "술정찰국",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          66
+        ],
+        "voiceScore": 43
+      },
+      {
+        "name": "남자",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          124
+        ],
+        "voiceScore": 43
+      }
+    ],
+    "edges": [
+      {
+        "source": "설희",
+        "target": "진우",
+        "weight": 24,
+        "dialogueExchanges": 119
+      },
+      {
+        "source": "사라",
+        "target": "혜윤",
+        "weight": 3,
+        "dialogueExchanges": 13
+      },
+      {
+        "source": "김도형",
+        "target": "라이언",
+        "weight": 2,
+        "dialogueExchanges": 8
+      },
+      {
+        "source": "사라",
+        "target": "상관",
+        "weight": 2,
+        "dialogueExchanges": 9
+      },
+      {
+        "source": "진우",
+        "target": "혜윤",
+        "weight": 2,
+        "dialogueExchanges": 2
+      },
+      {
+        "source": "강설희",
+        "target": "설희",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "설희",
+        "target": "은서",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "강설희",
+        "target": "은서",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "라이언",
+        "target": "카르텔",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "진우",
+        "target": "한진우",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "진우",
+        "target": "크기",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "간격",
+        "target": "진우",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "크기",
+        "target": "한진우",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "간격",
+        "target": "한진우",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "간격",
+        "target": "크기",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "김도형",
+        "target": "부장",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "국장",
+        "target": "김도형",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "국장",
+        "target": "부장",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "라이언",
+        "target": "상좌",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "라이언",
+        "target": "설희",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "김도형",
+        "target": "진우",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "라이언",
+        "target": "진우",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "설희",
+        "target": "할머니",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "술정찰국",
+        "target": "정찰총국",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "오성민",
+        "target": "혜윤",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "사라",
+        "target": "설희",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "사라",
+        "target": "진우",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "설희",
+        "target": "혜윤",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "라이언",
+        "target": "정찰총국",
+        "weight": 1,
+        "dialogueExchanges": 1
+      }
+    ],
+    "diversityMetrics": {
+      "speakingRoleDistribution": {
+        "top1Pct": 36.1,
+        "top3Pct": 80.3
+      },
+      "centralityGap": 2
+    }
+  },
+  "beatSheet": [
+    {
+      "act": 1,
+      "name": "Setup",
+      "sceneStart": 1,
+      "sceneEnd": 2,
+      "description": "The world and protagonist are introduced, establishing the status quo.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 1,
+      "name": "Inciting Incident",
+      "sceneStart": 3,
+      "sceneEnd": 4,
+      "description": "An unexpected event disrupts the protagonist's ordinary life.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 2,
+      "name": "Rising Action",
+      "sceneStart": 5,
+      "sceneEnd": 6,
+      "description": "Conflict intensifies as the protagonist faces mounting challenges.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 2,
+      "name": "Midpoint Crisis",
+      "sceneStart": 7,
+      "sceneEnd": 7,
+      "description": "A major revelation forces the protagonist to reassess everything.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 3,
+      "name": "Climax",
+      "sceneStart": 8,
+      "sceneEnd": 9,
+      "description": "The protagonist confronts the central conflict head-on.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 3,
+      "name": "Resolution",
+      "sceneStart": 10,
+      "sceneEnd": 10,
+      "description": "Loose ends are tied and the protagonist emerges transformed.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    }
+  ],
+  "emotionGraph": [
+    {
+      "sceneNumber": 1,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 2,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "A mysterious world is introduced.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 3,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Questions are raised about the protagonist's situation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 4,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 5,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "A mysterious world is introduced.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 6,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Questions are raised about the protagonist's situation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 7,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 8,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "A mysterious world is introduced.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 9,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Questions are raised about the protagonist's situation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 10,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 11,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "A mysterious world is introduced.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 12,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Questions are raised about the protagonist's situation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 13,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 14,
+      "score": -1,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 15,
+      "score": -1,
+      "dominantEmotion": "Joy",
+      "explanation": "Early victory lifts spirits.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 16,
+      "score": -1,
+      "dominantEmotion": "Joy",
+      "explanation": "Protagonist discovers an unexpected opportunity.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 17,
+      "score": -1,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 18,
+      "score": -1,
+      "dominantEmotion": "Joy",
+      "explanation": "Early victory lifts spirits.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 19,
+      "score": 0,
+      "dominantEmotion": "Joy",
+      "explanation": "Protagonist discovers an unexpected opportunity.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 20,
+      "score": 0,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 21,
+      "score": 0,
+      "dominantEmotion": "Joy",
+      "explanation": "Early victory lifts spirits.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 22,
+      "score": 0,
+      "dominantEmotion": "Joy",
+      "explanation": "Protagonist discovers an unexpected opportunity.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 23,
+      "score": 1,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 24,
+      "score": 1,
+      "dominantEmotion": "Joy",
+      "explanation": "Early victory lifts spirits.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 25,
+      "score": 1,
+      "dominantEmotion": "Joy",
+      "explanation": "Protagonist discovers an unexpected opportunity.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 26,
+      "score": 1,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 27,
+      "score": 1,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 28,
+      "score": 2,
+      "dominantEmotion": "Hope",
+      "explanation": "Early success builds momentum.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 29,
+      "score": 2,
+      "dominantEmotion": "Hope",
+      "explanation": "An ally appears with a new possibility.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 30,
+      "score": 2,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 31,
+      "score": 2,
+      "dominantEmotion": "Hope",
+      "explanation": "Early success builds momentum.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 32,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "An ally appears with a new possibility.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 33,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 34,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "Early success builds momentum.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 35,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "An ally appears with a new possibility.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 36,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 37,
+      "score": 4,
+      "dominantEmotion": "Hope",
+      "explanation": "Early success builds momentum.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 38,
+      "score": 4,
+      "dominantEmotion": "Hope",
+      "explanation": "An ally appears with a new possibility.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 39,
+      "score": 4,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 40,
+      "score": 4,
+      "dominantEmotion": "Doubt",
+      "explanation": "First signs of trouble emerge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 41,
+      "score": 4,
+      "dominantEmotion": "Doubt",
+      "explanation": "The protagonist questions their path.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 42,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "An unexpected obstacle creates uncertainty.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 43,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "First signs of trouble emerge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 44,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "The protagonist questions their path.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 45,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "An unexpected obstacle creates uncertainty.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 46,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "First signs of trouble emerge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 47,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "The protagonist questions their path.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 48,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "An unexpected obstacle creates uncertainty.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 49,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "First signs of trouble emerge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 50,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "The protagonist questions their path.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 51,
+      "score": 6,
+      "dominantEmotion": "Doubt",
+      "explanation": "An unexpected obstacle creates uncertainty.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 52,
+      "score": 6,
+      "dominantEmotion": "Doubt",
+      "explanation": "First signs of trouble emerge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 53,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 54,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "A confrontation reveals hidden dangers.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 55,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Conflict intensifies as stakes rise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 56,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 57,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "A confrontation reveals hidden dangers.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 58,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Conflict intensifies as stakes rise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 59,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 60,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "A confrontation reveals hidden dangers.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 61,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "Conflict intensifies as stakes rise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 62,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 63,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "A confrontation reveals hidden dangers.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 64,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "Conflict intensifies as stakes rise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 65,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 66,
+      "score": 5,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 67,
+      "score": 5,
+      "dominantEmotion": "Despair",
+      "explanation": "Major setback pushes protagonist to their lowest.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 68,
+      "score": 5,
+      "dominantEmotion": "Despair",
+      "explanation": "A devastating loss changes everything.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 69,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 70,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "Major setback pushes protagonist to their lowest.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 71,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "A devastating loss changes everything.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 72,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 73,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "Major setback pushes protagonist to their lowest.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 74,
+      "score": 3,
+      "dominantEmotion": "Despair",
+      "explanation": "A devastating loss changes everything.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 75,
+      "score": 3,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 76,
+      "score": 3,
+      "dominantEmotion": "Despair",
+      "explanation": "Major setback pushes protagonist to their lowest.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 77,
+      "score": 3,
+      "dominantEmotion": "Despair",
+      "explanation": "A devastating loss changes everything.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 78,
+      "score": 2,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 79,
+      "score": 2,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 80,
+      "score": 2,
+      "dominantEmotion": "Resolve",
+      "explanation": "A choice is made to fight back.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 81,
+      "score": 1,
+      "dominantEmotion": "Resolve",
+      "explanation": "Past lessons crystallize into determination.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 82,
+      "score": 1,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 83,
+      "score": 1,
+      "dominantEmotion": "Resolve",
+      "explanation": "A choice is made to fight back.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 84,
+      "score": 0,
+      "dominantEmotion": "Resolve",
+      "explanation": "Past lessons crystallize into determination.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 85,
+      "score": 0,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 86,
+      "score": 0,
+      "dominantEmotion": "Resolve",
+      "explanation": "A choice is made to fight back.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 87,
+      "score": 0,
+      "dominantEmotion": "Resolve",
+      "explanation": "Past lessons crystallize into determination.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 88,
+      "score": -1,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 89,
+      "score": -1,
+      "dominantEmotion": "Resolve",
+      "explanation": "A choice is made to fight back.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 90,
+      "score": -1,
+      "dominantEmotion": "Resolve",
+      "explanation": "Past lessons crystallize into determination.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 91,
+      "score": -2,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 92,
+      "score": -2,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 93,
+      "score": -2,
+      "dominantEmotion": "Determination",
+      "explanation": "The protagonist commits fully to the mission.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 94,
+      "score": -3,
+      "dominantEmotion": "Determination",
+      "explanation": "A new plan takes shape against the odds.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 95,
+      "score": -3,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 96,
+      "score": -3,
+      "dominantEmotion": "Determination",
+      "explanation": "The protagonist commits fully to the mission.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 97,
+      "score": -4,
+      "dominantEmotion": "Determination",
+      "explanation": "A new plan takes shape against the odds.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 98,
+      "score": -4,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 99,
+      "score": -4,
+      "dominantEmotion": "Determination",
+      "explanation": "The protagonist commits fully to the mission.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 100,
+      "score": -5,
+      "dominantEmotion": "Determination",
+      "explanation": "A new plan takes shape against the odds.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 101,
+      "score": -5,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 102,
+      "score": -5,
+      "dominantEmotion": "Determination",
+      "explanation": "The protagonist commits fully to the mission.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 103,
+      "score": -5,
+      "dominantEmotion": "Determination",
+      "explanation": "A new plan takes shape against the odds.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 104,
+      "score": -6,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 105,
+      "score": -6,
+      "dominantEmotion": "Triumph",
+      "explanation": "A hard-won battle reaches its turning point.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 106,
+      "score": -6,
+      "dominantEmotion": "Triumph",
+      "explanation": "Climactic confrontation with a decisive victory.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 107,
+      "score": -6,
+      "dominantEmotion": "Triumph",
+      "explanation": "The protagonist overcomes their greatest challenge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 108,
+      "score": -6,
+      "dominantEmotion": "Triumph",
+      "explanation": "A hard-won battle reaches its turning point.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 109,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "Climactic confrontation with a decisive victory.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 110,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "The protagonist overcomes their greatest challenge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 111,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "A hard-won battle reaches its turning point.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 112,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "Climactic confrontation with a decisive victory.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 113,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "The protagonist overcomes their greatest challenge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 114,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "A hard-won battle reaches its turning point.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 115,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "Climactic confrontation with a decisive victory.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 116,
+      "score": -8,
+      "dominantEmotion": "Triumph",
+      "explanation": "The protagonist overcomes their greatest challenge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 117,
+      "score": -8,
+      "dominantEmotion": "Triumph",
+      "explanation": "A hard-won battle reaches its turning point.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 118,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 119,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 120,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "A new equilibrium emerges from the struggle.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 121,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 122,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 123,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "A new equilibrium emerges from the struggle.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 124,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 125,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 126,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "A new equilibrium emerges from the struggle.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 127,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 128,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 129,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "A new equilibrium emerges from the struggle.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 130,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 131,
+      "score": -6,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    }
+  ],
+  "features": {
+    "sceneCount": 131,
+    "characterCount": 23,
+    "dialogueLineCount": 1171,
+    "actionLineCount": 1778,
+    "dialogueToActionRatio": 0.6586051743532059,
+    "averageWordsPerDialogue": 7.87532023911187,
+    "intExtRatio": 0,
+    "nightDayRatio": 0,
+    "uniqueLocationCount": 123,
+    "avgSceneLength": 25.366412213740457,
+    "longestScene": 71,
+    "shortestScene": 5,
+    "protagonistDialoguePct": 0.36037574722459437,
+    "top3CharDialoguePct": 0.8035866780529461,
+    "speakingRolesCount": 10,
+    "monologueCount": 39,
+    "questionDialoguePct": 0.05550811272416738,
+    "exclamationPct": 0.017933390264730998,
+    "parentheticalCount": 20,
+    "transitionCount": 6,
+    "montageCount": 0,
+    "flashbackCount": 0,
+    "vfxKeywordDensity": 0.562429696287964,
+    "emotionalRange": 14,
+    "emotionalVariance": 20.80578054891907,
+    "turningPointCount": 0,
+    "pacingScore": 14.324060848406726
+  },
+  "predictions": {
+    "roi": {
+      "tier": "Hit",
+      "predictedMultiplier": 3.5,
+      "confidence": 0.8,
+      "reasoning": "Mock reasoning"
+    },
+    "statisticalRoi": {
+      "predictedROI": 8.28,
+      "predictedMultiplier": 8.28,
+      "confidence": 94.3,
+      "tier": "Blockbuster",
+      "revenueRange": {
+        "low": 65832784000,
+        "likely": 26591028298,
+        "high": 105300000000
+      },
+      "neighbors": [
+        {
+          "title": "범죄도시 (The Roundup)",
+          "similarity": 0.9802,
+          "roi": 8.8,
+          "revenue": 105600000000,
+          "budget": 12000000000
+        },
+        {
+          "title": "도둑들 (The Thieves)",
+          "similarity": 0.9802,
+          "roi": 7.81,
+          "revenue": 93665568000,
+          "budget": 12000000000
+        },
+        {
+          "title": "베테랑 (Veteran)",
+          "similarity": 0.9659,
+          "roi": 10,
+          "revenue": 105000000000,
+          "budget": 10500000000
+        },
+        {
+          "title": "부산행 (Train to Busan)",
+          "similarity": 0.9659,
+          "roi": 9.85,
+          "revenue": 98500000000,
+          "budget": 10000000000
+        },
+        {
+          "title": "추격자 (The Chaser)",
+          "similarity": 0.9659,
+          "roi": 9.5,
+          "revenue": 38000000000,
+          "budget": 4000000000
+        },
+        {
+          "title": "달콤한 인생 (A Bittersweet Life)",
+          "similarity": 0.9394,
+          "roi": 4.01,
+          "revenue": 24060000000,
+          "budget": 6000000000
+        },
+        {
+          "title": "명량 (The Admiral: Roaring Currents)",
+          "similarity": 0.8022,
+          "roi": 7.54,
+          "revenue": 135748398000,
+          "budget": 18000000000
+        }
+      ],
+      "modelType": "statistical-knn"
+    },
+    "rating": {
+      "rating": "15+",
+      "reasons": [
+        "중간 수준 폭력",
+        "일부 심한 폭력",
+        "반복적 경미한 폭력",
+        "강한 욕설",
+        "약물 관련 표현"
+      ],
+      "confidence": 0.9,
+      "contentCounts": {
+        "violence": 99,
+        "profanity": 9,
+        "sexualContent": 2,
+        "drugReferences": 12
+      }
+    },
+    "comps": [
+      {
+        "title": "범죄도시 (The Roundup)",
+        "similarityScore": 0.98,
+        "sharedTraits": [
+          "Action Heavy",
+          "Action"
+        ],
+        "marketPerformance": {
+          "budget": 12000000000,
+          "revenue": 105600000000,
+          "roi": 8.8
+        }
+      },
+      {
+        "title": "도둑들 (The Thieves)",
+        "similarityScore": 0.98,
+        "sharedTraits": [
+          "Action Heavy",
+          "Action"
+        ],
+        "marketPerformance": {
+          "budget": 12000000000,
+          "revenue": 93665568000,
+          "roi": 7.81
+        }
+      },
+      {
+        "title": "베테랑 (Veteran)",
+        "similarityScore": 0.966,
+        "sharedTraits": [
+          "Action Heavy",
+          "High Emotional Volatility",
+          "Action"
+        ],
+        "marketPerformance": {
+          "budget": 10500000000,
+          "revenue": 105000000000,
+          "roi": 10
+        }
+      },
+      {
+        "title": "부산행 (Train to Busan)",
+        "similarityScore": 0.966,
+        "sharedTraits": [
+          "Action Heavy",
+          "High Emotional Volatility",
+          "Action"
+        ],
+        "marketPerformance": {
+          "budget": 10000000000,
+          "revenue": 98500000000,
+          "roi": 9.85
+        }
+      },
+      {
+        "title": "추격자 (The Chaser)",
+        "similarityScore": 0.966,
+        "sharedTraits": [
+          "Action Heavy",
+          "High Emotional Volatility",
+          "Action"
+        ],
+        "marketPerformance": {
+          "budget": 4000000000,
+          "revenue": 38000000000,
+          "roi": 9.5
+        }
+      }
+    ]
+  },
+  "tropes": [
+    "Heist (도둑/강탈)",
+    "Corruption Exposé (부패 폭로)",
+    "Corporate Corruption (재벌 비리)",
+    "Class Divide (계층 갈등)",
+    "Undercover (잠입 수사)",
+    "Survival Game (생존 게임)",
+    "Underdog Hero (약자의 승리)",
+    "Japanese Occupation Resistance (항일 독립운동)",
+    "Korean War Division (한국전쟁/분단)",
+    "Political Thriller (정치 스릴러)"
+  ],
+  "coverage": {
+    "scriptId": "biteusebieo_260323_v019",
+    "title": "Untitled Screenplay",
+    "genre": "Drama",
+    "logline": "A mock screenplay evaluation.",
+    "synopsis": "This is a placeholder synopsis generated by the mock provider.",
+    "categories": [
+      {
+        "name": "Plot Structure & Logic",
+        "score": 70,
+        "subcategories": [
+          {
+            "name": "Narrative Structure Completeness",
+            "score": 72,
+            "assessment": "Follows basic three-act structure."
+          },
+          {
+            "name": "Pacing & Scene Flow",
+            "score": 68,
+            "assessment": "Adequate pacing with room for improvement."
+          },
+          {
+            "name": "Conflict Intensity",
+            "score": 70,
+            "assessment": "Moderate conflict development."
+          }
+        ]
+      },
+      {
+        "name": "Character & Dialogue",
+        "score": 65,
+        "subcategories": [
+          {
+            "name": "Character Arc",
+            "score": 65,
+            "assessment": "Characters show some growth."
+          },
+          {
+            "name": "Dialogue Quality & Subtext",
+            "score": 65,
+            "assessment": "Dialogue is functional but lacks subtext."
+          }
+        ]
+      },
+      {
+        "name": "Theme & Tone",
+        "score": 68,
+        "subcategories": [
+          {
+            "name": "Theme Clarity",
+            "score": 70,
+            "assessment": "Theme is present but could be stronger."
+          },
+          {
+            "name": "Tone Consistency",
+            "score": 66,
+            "assessment": "Generally consistent tone."
+          }
+        ]
+      },
+      {
+        "name": "Market Appeal",
+        "score": 72,
+        "subcategories": [
+          {
+            "name": "Genre Fit & Trend Alignment",
+            "score": 70,
+            "assessment": "Fits genre conventions."
+          },
+          {
+            "name": "Industry Benchmarking",
+            "score": 72,
+            "assessment": "Comparable to mid-tier releases."
+          },
+          {
+            "name": "Rating Appropriateness",
+            "score": 74,
+            "assessment": "Content level appropriate for target audience."
+          }
+        ]
+      },
+      {
+        "name": "Production Feasibility",
+        "score": 75,
+        "subcategories": [
+          {
+            "name": "Budget & Resource Viability",
+            "score": 75,
+            "assessment": "Production requirements are reasonable."
+          }
+        ]
+      }
+    ],
+    "overallScore": 70,
+    "verdict": "Consider",
+    "strengths": [
+      "Solid premise",
+      "Clear genre identity",
+      "Manageable production scope"
+    ],
+    "weaknesses": [
+      "Character depth needs work",
+      "Dialogue lacks subtext",
+      "Pacing inconsistencies"
+    ],
+    "recommendation": "The screenplay shows promise with a solid structural foundation but needs further development in character depth and dialogue quality before it can be recommended for production.",
+    "marketPotential": "",
+    "comparableTitles": []
+  },
+  "narrativeArc": {
+    "scriptId": "biteusebieo_260323_v019",
+    "arcType": "icarus",
+    "arcConfidence": 1,
+    "arcDescription": "Rise to great heights, then fall",
+    "turningPoints": [
+      {
+        "sceneNumber": 2,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 3,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 4,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 5,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 6,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 9,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 10,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 11,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 12,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 15,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 16,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 17,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 20,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 21,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 24,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 25,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 26,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 29,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 30,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 33,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 34,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 35,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 38,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 39,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 40,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 43,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 44,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 45,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 46,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 47,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 48,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 49,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 52,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 53,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 54,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 55,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 56,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 57,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 58,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 61,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 62,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 63,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 64,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 65,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 66,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 67,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 70,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 71,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 72,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 75,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 76,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 79,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 82,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 85,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 86,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 89,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 92,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 95,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 98,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 101,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 102,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 105,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 106,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 107,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 110,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 111,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 112,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 113,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 114,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 117,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 118,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 119,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 120,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 121,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 122,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 125,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 126,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 127,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 128,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 129,
+        "type": "plateau",
+        "magnitude": 0
+      }
+    ],
+    "pacingIssues": [
+      {
+        "type": "flat",
+        "startScene": 1,
+        "endScene": 8,
+        "description": "Emotional flatline across 7 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 9,
+        "endScene": 14,
+        "description": "Emotional flatline across 5 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 15,
+        "endScene": 19,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 20,
+        "endScene": 23,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 24,
+        "endScene": 28,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 29,
+        "endScene": 32,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 33,
+        "endScene": 37,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 38,
+        "endScene": 42,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 43,
+        "endScene": 51,
+        "description": "Emotional flatline across 8 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 52,
+        "endScene": 60,
+        "description": "Emotional flatline across 8 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 61,
+        "endScene": 69,
+        "description": "Emotional flatline across 8 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 70,
+        "endScene": 74,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 75,
+        "endScene": 78,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 81,
+        "endScene": 84,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 85,
+        "endScene": 88,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 91,
+        "endScene": 94,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 97,
+        "endScene": 100,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 101,
+        "endScene": 104,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 105,
+        "endScene": 109,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 110,
+        "endScene": 116,
+        "description": "Emotional flatline across 6 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 117,
+        "endScene": 124,
+        "description": "Emotional flatline across 7 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 125,
+        "endScene": 131,
+        "description": "Emotional flatline across 6 scenes",
+        "severity": "high"
+      }
+    ],
+    "genreFit": {
+      "expectedArc": "man-in-a-hole",
+      "fitScore": 25,
+      "deviation": "Arc diverges from Drama norms (expected man-in-a-hole, got icarus)"
+    }
+  },
+  "production": {
+    "scriptId": "biteusebieo_260323_v019",
+    "locations": [
+      {
+        "name": "..",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          30,
+          44,
+          58,
+          63,
+          64
+        ],
+        "frequency": 5
+      },
+      {
+        "name": "은신처 내부 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          103,
+          109,
+          115
+        ],
+        "frequency": 3
+      },
+      {
+        "name": "서울 국정원 본부 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          62,
+          79
+        ],
+        "frequency": 2
+      },
+      {
+        "name": "FBI 싱가포르 벙커 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          68,
+          81
+        ],
+        "frequency": 2
+      },
+      {
+        "name": "싱가포르 국제학교 정문 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          1
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 APEX 거래소 메인홀 — 오전 (인서트)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          2
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "설희의 콘도 거실 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          3
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "평양, 정찰총국 110호 연구소 지하 3층 — 밤 (회상)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          4
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "에서 은서가 오늘 학교에서 그려 온 바로 그 그림과 똑같은 구도. 이 그림은 — 6개월 전에",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          5
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울, 국가정보원 해외정보국 6층 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          6
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "..큰 그림이요?",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          7
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르, CELAS TECH SOLUTIONS 사무실 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          8
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울, 청담동 한정식 요정 '송학재' — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          9
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "뉴욕, Meridian Capital 본사 + 평양, 국가보위부 — 인터커팅 / 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          10
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "설희의 콘도 — 심야",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          11
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울, 국가정보원 회의실 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          12
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "국정원 회의실 → 정 부장실 복도 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          13
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "진우의 자택 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          14
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "워싱턴 D.C., NCIJTF 퓨전센터 — 오전",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          15
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르, APEX 거래소 서버실 — 심야",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          16
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "APEX 거래소 메인홀 + 글로벌 뉴스 — 인터커팅 / 오전",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          17
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 금융당국(MAS) 긴급 회의 + 워싱턴 OFAC — 인터커팅 /",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          18
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "설희의 콘도 서재 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          19
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "평양, 121국 오퍼레이션룸 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          20
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "쿠알라룸푸르, 세이프하우스 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          21
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "설희의 콘도 서재 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          22
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은서의 방 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          23
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원 + 뉴욕 Meridian + 싱가포르 MAS — 인터커팅 / 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          24
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 차이나타운 뒷골목 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          25
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 외곽 산업단지, 은신처 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          26
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원 자금추적팀 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          27
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 — 밤 (D",
+        "setting": "INT",
+        "time": "40)",
+        "sceneNumbers": [
+          28
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울, 진우의 자택 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          29
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "워싱턴 D.C. NCIJTF 퓨전센터 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          31
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원 정 부장실 — 저녁",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          32
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "..감사합니다, 부장님. 최선을 다하겠습니다.",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          33
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "인천국제공항 탑승구 + 은신처 — 인터커팅 / 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          34
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 주롱 산업단지, 은신처 외곽 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          35
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 거실 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          36
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 창가 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          37
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 거실 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          38
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 거실 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          39
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원 통합데이터센터 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          40
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 마리나 베이 샌즈 호텔, 스위트룸 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          41
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          42
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 거실 — 새벽 (D",
+        "setting": "INT",
+        "time": "20)",
+        "sceneNumbers": [
+          43
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원 본부, 정 부장실 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          45
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "FBI 싱가포르 임시 벙커 — 오전",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          46
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 센트럴 전자상가 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          47
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "차이나타운 인근 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          48
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 — 저녁 (D",
+        "setting": "INT",
+        "time": "21)",
+        "sceneNumbers": [
+          49
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 — 자정",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          50
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 옥상 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          51
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 옥상 통신 — 저녁",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          52
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원, 정 부장실 — 저녁",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          53
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처, 백도어 통신망 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          54
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 — 새벽 (D",
+        "setting": "INT",
+        "time": "15)",
+        "sceneNumbers": [
+          55
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "..쿠알라룸푸르?",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          56
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "..은서 말이야.",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          57
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 도심 암시장 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          59
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "암시장 뒷골목 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          60
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 — 오후 (D",
+        "setting": "INT",
+        "time": "10)",
+        "sceneNumbers": [
+          61
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원 통합데이터센터 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          65
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "평양 정찰총국 수뇌부 + 39호실 — 인터커팅 / 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          66
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          67
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 창가 — 밤 (D",
+        "setting": "INT",
+        "time": "5)",
+        "sceneNumbers": [
+          69
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "평양 당 중앙위원회 특각 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          70
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "..문제는 그 손가락의 주인이 협조할 리가 없다는 거지.",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          71
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 국정원 본부 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          72
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "정 부장실 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          73
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 은신처 — 오전 (D",
+        "setting": "INT",
+        "time": "4)",
+        "sceneNumbers": [
+          74
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 도심 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          75
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 도심 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          76
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "도심 빈 타워 로비 — 저녁",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          77
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 내부 — 밤 (D",
+        "setting": "INT",
+        "time": "3)",
+        "sceneNumbers": [
+          78
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 외곽, 은신처 주변 — 저녁",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          80
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 내부 — 새벽 (D",
+        "setting": "INT",
+        "time": "2)",
+        "sceneNumbers": [
+          82
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 인근 폐공사장 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          83
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 창이공항 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          84
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 반경 도로 — 오전 (D",
+        "setting": "INT",
+        "time": "1)",
+        "sceneNumbers": [
+          85
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "지하 주차장 — 오후 (D",
+        "setting": "INT",
+        "time": "1)",
+        "sceneNumbers": [
+          86
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 로컬 네트워크 / 혜윤의 은신처 — 밤 (D",
+        "setting": "INT",
+        "time": "1)",
+        "sceneNumbers": [
+          87
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 마리나 베이 샌즈, 리 상좌 지휘소 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          88
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 앞 도로 — 새벽 (D",
+        "setting": "INT",
+        "time": "Day, 44일 차→45일 차)",
+        "sceneNumbers": [
+          89
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 내부 — 새벽",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          90
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 거실 — 아침 (D",
+        "setting": "INT",
+        "time": "Day, 45일 차)",
+        "sceneNumbers": [
+          91
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 도심 공중전화 — 낮 (D",
+        "setting": "INT",
+        "time": "Day 06:30)",
+        "sceneNumbers": [
+          92
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 외곽 카페 — 오후 (D",
+        "setting": "INT",
+        "time": "Day 14:00)",
+        "sceneNumbers": [
+          93
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "APEX 이사회실 + 서울 국정원 — 인터커팅 / 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          94
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 주변 — 밤 (D",
+        "setting": "INT",
+        "time": "Day 자정)",
+        "sceneNumbers": [
+          95
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 내부 — 밤 (자정)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          96
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "3층 복도, 엘리베이터 홀 — 새벽 (04:00)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          97
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "3층 복도 코너 — 새벽 (07:30)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          98
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 책상 앞 — 새벽 (07:45)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          99
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 철문 밖 — 아침 (08:00)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          100
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 내부 — 아침 (08:00)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          101
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 파괴된 복도 — 아침 (08:00)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          102
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "복도 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          104
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "거실 한가운데 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          105
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "복도 교전 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          106
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 책상 위 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          107
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 건물 앞 사거리 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          108
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "모니터 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          110
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "거실 벽면 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          111
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "은신처 바닥 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          112
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "사이버네틱 연출 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          113
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "전 세계 모니터 — 아침",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          114
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "건물 뒤편 비상 출구 / 도심 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          116
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "안전가옥 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          117
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "글로벌 뉴스 몽타주 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          118
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "서울 검찰 합동수사본부 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          119
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "검찰 / 언론 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          120
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "뉴욕 Meridian 본사 + 평양 — 인터커팅 / 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          121
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "평양 메인 모니터 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          122
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "싱가포르 출국장 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          123
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "제3국 국경 검문소 — 오후",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          124
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "어느 입국 라운지 — 저녁",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          125
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "항공기 퍼스트 클래스 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          126
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "경비행기 활주로 — 밤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          127
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "유럽 전경 몽타주 — 며칠 뒤",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          128
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "아프리카 남수단 MSF 야전 캠프 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          129
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "벤치 위 랩탑 클로즈업 — 낮",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          130
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "스위스 호숫가 — 낮 (엔딩)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          131
+        ],
+        "frequency": 1
+      }
+    ],
+    "uniqueLocationCount": 123,
+    "intExtRatio": {
+      "int": 100,
+      "ext": 0
+    },
+    "cast": [
+      {
+        "name": "진우",
+        "role": "Protagonist",
+        "sceneNumbers": [
+          6,
+          7,
+          12,
+          13,
+          14,
+          24,
+          27,
+          30,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          42,
+          43,
+          47,
+          48,
+          49,
+          50,
+          51,
+          52,
+          54,
+          55,
+          56,
+          57,
+          59,
+          60,
+          67,
+          74,
+          75,
+          76,
+          77,
+          83,
+          86,
+          89,
+          90,
+          91,
+          97,
+          103,
+          105,
+          109,
+          111,
+          116,
+          117,
+          125,
+          126,
+          131
+        ],
+        "totalScenes": 50
+      },
+      {
+        "name": "설희",
+        "role": "Antagonist",
+        "sceneNumbers": [
+          1,
+          3,
+          8,
+          11,
+          17,
+          19,
+          22,
+          23,
+          25,
+          26,
+          27,
+          28,
+          34,
+          36,
+          37,
+          38,
+          39,
+          42,
+          43,
+          44,
+          49,
+          50,
+          51,
+          55,
+          56,
+          57,
+          58,
+          61,
+          67,
+          69,
+          74,
+          78,
+          82,
+          90,
+          91,
+          96,
+          103,
+          116,
+          117,
+          125,
+          126,
+          131
+        ],
+        "totalScenes": 42
+      },
+      {
+        "name": "사라",
+        "role": "Supporting",
+        "sceneNumbers": [
+          15,
+          18,
+          31,
+          46,
+          68,
+          81,
+          93,
+          108,
+          116,
+          123
+        ],
+        "totalScenes": 10
+      },
+      {
+        "name": "혜윤",
+        "role": "Supporting",
+        "sceneNumbers": [
+          54,
+          62,
+          64,
+          84,
+          87,
+          93,
+          108,
+          117,
+          123
+        ],
+        "totalScenes": 9
+      },
+      {
+        "name": "라이언",
+        "role": "Minor",
+        "sceneNumbers": [
+          2,
+          10,
+          17,
+          24,
+          94,
+          121
+        ],
+        "totalScenes": 6
+      },
+      {
+        "name": "김도형",
+        "role": "Supporting",
+        "sceneNumbers": [
+          9,
+          24,
+          94
+        ],
+        "totalScenes": 3
+      },
+      {
+        "name": "오성민",
+        "role": "Minor",
+        "sceneNumbers": [
+          40,
+          65,
+          87
+        ],
+        "totalScenes": 3
+      },
+      {
+        "name": "정찰총국",
+        "role": "Supporting",
+        "sceneNumbers": [
+          66,
+          70,
+          121
+        ],
+        "totalScenes": 3
+      },
+      {
+        "name": "상관",
+        "role": "Minor",
+        "sceneNumbers": [
+          46,
+          68
+        ],
+        "totalScenes": 2
+      }
+    ],
+    "totalSpeakingRoles": 9,
+    "estimatedShootingDays": 27,
+    "vfxRequirements": [
+      {
+        "sceneNumber": 4,
+        "description": "[FIREWALL LAYER: 7/7]",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 16,
+        "description": "[FIREWALL ACCESS: INTERNAL OVERRIDE]",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 30,
+        "description": "CU — 진우의 눈. 냉소적 여유가 사라져 있다. 7년 전의 기억이 떠오르고 있다. 베를린. 카페.",
+        "tier": "simple",
+        "estimatedHours": 30
+      },
+      {
+        "sceneNumber": 101,
+        "description": "현관문이 지축을 뒤흔드는 굉음과 함께 산산조각 난다. 철문 파편이 총알처럼 방 안으로",
+        "tier": "simple",
+        "estimatedHours": 30
+      },
+      {
+        "sceneNumber": 102,
+        "description": "(지문) MS — 폭음과 연막. C4 폭발의 잔해가 복도를 가득 채운다. 철문 파편. 콘크리트 먼지.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 118,
+        "description": "CNN: \"Breaking: $1.5 billion in stolen cryptocurrency has permanently vanished from global",
+        "tier": "simple",
+        "estimatedHours": 30
+      }
+    ],
+    "vfxComplexityScore": 2,
+    "budgetEstimate": {
+      "low": 2568600000,
+      "likely": 3210750000,
+      "high": 4173975000,
+      "breakdown": {
+        "cast": 1945000000,
+        "locations": 327500000,
+        "vfx": 108000000,
+        "crew": 614250000,
+        "postProduction": 216000000
+      }
+    }
+  },
+  "strategy": "custom",
+  "providers": {
+    "beatSheet": "mock",
+    "emotion": "mock",
+    "rating": "deterministic",
+    "roi": "mock",
+    "coverage": "mock",
+    "vfx": "deterministic",
+    "trope": "deterministic"
+  },
+  "warning": "Mock placeholder data used for: Beat Sheet, Emotion, ROI, Coverage. These results are not actual AI analysis.",
+  "mockEngines": [
+    "Beat Sheet",
+    "Emotion",
+    "ROI",
+    "Coverage"
+  ]
+}

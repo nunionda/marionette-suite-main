@@ -1,0 +1,45 @@
+{
+  "disabledMcpServers": [
+    "06607890-5b04-4802-9574-1c39451b8f12",
+    "650b2b1f-d9f4-4bd0-81e1-dbcd3d16f8c3",
+    "Claude_in_Chrome",
+    "Excel__By_Anthropic_",
+    "Word__By_Anthropic_",
+    "PowerPoint__By_Anthropic_",
+    "PDF_Tools_-_Analyze__Extract__Fill__Compare",
+    "Figma",
+    "Read_and_Send_iMessages",
+    "c1fc4002-5f49-5f9d-a4e5-93c4ef5d6a75",
+    "filesystem",
+    "mcp-registry",
+    "scheduled-tasks",
+    "Control_your_Mac"
+  ],
+  "allowedCommands": [
+    "bun run typecheck",
+    "bun run test",
+    "bun run test:file",
+    "bun run lint",
+    "bun run lint:file",
+    "bun run lint:claude",
+    "git status",
+    "git diff",
+    "git log",
+    "git branch",
+    "git add",
+    "gh pr"
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bun run lint:file -- \"$CLAUDE_FILE_PATH\" --fix 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
+  }
+}

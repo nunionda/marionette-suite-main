@@ -289,6 +289,76 @@ export default function Home() {
                         </div>
                     )}
                     {currentRole === "director" && <DirectorView />}
+                    {currentRole === "legacy-lab" && (
+                        <div className="animate-in fade-in duration-700 grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+                            {[
+                                { 
+                                    name: "cine-script-writer", 
+                                    url: "http://localhost:5174", 
+                                    desc: "할리우드 표준 2단 시나리오 작성로직 및 프론트엔드 랩(Lab) 구조 분석",
+                                    status: "LAB_OPERATIONAL",
+                                    icon: "🖋️"
+                                },
+                                { 
+                                    name: "cine-analysys-system", 
+                                    url: "http://localhost:4000", 
+                                    desc: "시나리오 분석 및 감정 곡선 등 시각화 데이터 플로우 분석",
+                                    status: "DATA_STREAMS_ACTIVE",
+                                    icon: "📊"
+                                },
+                                { 
+                                    name: "cine-art-department", 
+                                    url: "#", 
+                                    desc: "아트 디렉팅 및 자산 생성(이미지) 인터페이스 분석",
+                                    status: "DESIGN_CORE_READY",
+                                    icon: "🎨"
+                                },
+                                { 
+                                    name: "storyboard-concept-maker", 
+                                    url: "http://localhost:8080", 
+                                    desc: "스토리보드 갤러리 및 로컬 서버 환경 분석",
+                                    status: "GALLERY_SYNCED",
+                                    icon: "🖼️"
+                                },
+                                { 
+                                    name: "production_pipeline", 
+                                    url: "http://localhost:3005", 
+                                    desc: "에이전트 오케스트레이션 및 데이터베이스 연동 구조 분석",
+                                    status: "ENGINE_MASTERED",
+                                    icon: "⚙️",
+                                    fullWidth: true
+                                }
+                            ].map((lab) => (
+                                <a 
+                                    key={lab.name}
+                                    href={lab.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`group flex flex-col p-8 bg-[var(--ms-bg-elevated)]/30 border border-[var(--ms-gold-border)]/20 rounded-[var(--ms-radius-lg)] gstack-glass hover:border-[var(--ms-gold)]/40 transition-all duration-500 hover:scale-[1.02] ${lab.fullWidth ? 'md:col-span-2' : ''}`}
+                                >
+                                    <div className="flex justify-between items-start mb-6">
+                                        <span className="text-3xl filter saturate-0 group-hover:saturate-100 transition-all duration-500">{lab.icon}</span>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className="text-[9px] font-mono text-[var(--ms-gold)] tracking-[0.3em] font-bold">{lab.status}</span>
+                                            <div className="w-12 h-[1px] bg-[var(--ms-gold)]/20" />
+                                        </div>
+                                    </div>
+                                    <h4 className="text-xl font-serif text-[var(--ms-text-bright)] mb-4 group-hover:text-[var(--ms-gold)] transition-colors tracking-tight">
+                                        {lab.name}
+                                    </h4>
+                                    <p className="text-xs text-[var(--ms-text-dim)] leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity flex-1">
+                                        {lab.desc}
+                                    </p>
+                                    <div className="mt-8 pt-6 border-t border-[var(--ms-gold-border)]/10 flex justify-between items-center">
+                                        <span className="text-[8px] font-mono text-[var(--ms-text-ghost)] uppercase tracking-widest">Connect_To_Module</span>
+                                        <div className="w-4 h-4 rounded-full border border-[var(--ms-gold)]/40 flex items-center justify-center group-hover:bg-[var(--ms-gold)] transition-all">
+                                            <div className="w-1 h-1 bg-[var(--ms-gold)] rounded-full group-hover:bg-black" />
+                                        </div>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    )}
                     {currentRole === "production-designer" && (
                         <div className="animate-in fade-in duration-500">
                             {designerSubView === "Visual DNA" && (

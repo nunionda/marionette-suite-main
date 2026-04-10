@@ -1,0 +1,2532 @@
+{
+  "scriptId": "jeonyulmigung-gwisin_260323_v001",
+  "market": "korean",
+  "summary": {
+    "totalElements": 2200,
+    "protagonist": "해영",
+    "predictedRoi": "히트",
+    "predictedRating": "15+"
+  },
+  "characterNetwork": {
+    "characters": [
+      {
+        "name": "해영",
+        "totalLines": 177,
+        "totalWords": 1312,
+        "role": "Protagonist",
+        "avgWordsPerLine": 7.4,
+        "vocabularyRichness": 0.752,
+        "sceneAppearances": [
+          9,
+          15,
+          19,
+          22,
+          23,
+          25,
+          27,
+          28,
+          29,
+          31,
+          35,
+          36,
+          40,
+          42,
+          50,
+          59,
+          61,
+          62,
+          64,
+          65,
+          66,
+          69
+        ],
+        "voiceScore": 6
+      },
+      {
+        "name": "마유",
+        "totalLines": 176,
+        "totalWords": 1273,
+        "role": "Antagonist",
+        "avgWordsPerLine": 7.2,
+        "vocabularyRichness": 0.738,
+        "sceneAppearances": [
+          7,
+          15,
+          19,
+          20,
+          21,
+          26,
+          39,
+          43,
+          45,
+          46,
+          54,
+          56,
+          60,
+          68,
+          69,
+          70,
+          71,
+          72,
+          76,
+          79,
+          82
+        ],
+        "voiceScore": 7
+      },
+      {
+        "name": "우노",
+        "totalLines": 132,
+        "totalWords": 972,
+        "role": "Supporting",
+        "avgWordsPerLine": 7.4,
+        "vocabularyRichness": 0.784,
+        "sceneAppearances": [
+          13,
+          20,
+          24,
+          39,
+          44,
+          46,
+          47,
+          56,
+          57,
+          62,
+          63,
+          64,
+          66,
+          76
+        ],
+        "voiceScore": 3
+      },
+      {
+        "name": "유진",
+        "totalLines": 102,
+        "totalWords": 684,
+        "role": "Supporting",
+        "avgWordsPerLine": 6.7,
+        "vocabularyRichness": 0.838,
+        "sceneAppearances": [
+          5,
+          8,
+          10,
+          15,
+          17,
+          20,
+          34,
+          36,
+          37,
+          38,
+          52,
+          73,
+          74,
+          77,
+          79,
+          80
+        ],
+        "voiceScore": 5
+      },
+      {
+        "name": "윤채",
+        "totalLines": 93,
+        "totalWords": 765,
+        "role": "Supporting",
+        "avgWordsPerLine": 8.2,
+        "vocabularyRichness": 0.779,
+        "sceneAppearances": [
+          9,
+          15,
+          22,
+          23,
+          25,
+          27,
+          28,
+          29,
+          30,
+          32,
+          44,
+          48,
+          49,
+          50,
+          51
+        ],
+        "voiceScore": 6
+      },
+      {
+        "name": "완수",
+        "totalLines": 91,
+        "totalWords": 684,
+        "role": "Supporting",
+        "avgWordsPerLine": 7.5,
+        "vocabularyRichness": 0.826,
+        "sceneAppearances": [
+          8,
+          9,
+          14,
+          19,
+          21,
+          22,
+          23,
+          25,
+          27,
+          28,
+          29,
+          30,
+          32,
+          55,
+          70
+        ],
+        "voiceScore": 4
+      },
+      {
+        "name": "아키",
+        "totalLines": 82,
+        "totalWords": 509,
+        "role": "Minor",
+        "avgWordsPerLine": 6.2,
+        "vocabularyRichness": 0.882,
+        "sceneAppearances": [
+          2,
+          7,
+          57,
+          68,
+          74,
+          76
+        ],
+        "voiceScore": 11
+      },
+      {
+        "name": "선호",
+        "totalLines": 54,
+        "totalWords": 450,
+        "role": "Minor",
+        "avgWordsPerLine": 8.3,
+        "vocabularyRichness": 0.878,
+        "sceneAppearances": [
+          9,
+          15,
+          21,
+          22,
+          23,
+          25,
+          27,
+          29,
+          31,
+          41,
+          50
+        ],
+        "voiceScore": 11
+      },
+      {
+        "name": "엄마",
+        "totalLines": 27,
+        "totalWords": 213,
+        "role": "Minor",
+        "avgWordsPerLine": 7.9,
+        "vocabularyRichness": 0.883,
+        "sceneAppearances": [
+          10,
+          34,
+          37,
+          80
+        ],
+        "voiceScore": 11
+      },
+      {
+        "name": "유야",
+        "totalLines": 17,
+        "totalWords": 142,
+        "role": "Minor",
+        "avgWordsPerLine": 8.4,
+        "vocabularyRichness": 0.859,
+        "sceneAppearances": [
+          26,
+          40
+        ],
+        "voiceScore": 10
+      },
+      {
+        "name": "통역",
+        "totalLines": 13,
+        "totalWords": 80,
+        "role": "Minor",
+        "avgWordsPerLine": 6.2,
+        "vocabularyRichness": 0.75,
+        "sceneAppearances": [
+          80
+        ],
+        "voiceScore": 8
+      },
+      {
+        "name": "제단",
+        "totalLines": 12,
+        "totalWords": 88,
+        "role": "Minor",
+        "avgWordsPerLine": 7.3,
+        "vocabularyRichness": 0.92,
+        "sceneAppearances": [
+          2,
+          6,
+          77
+        ],
+        "voiceScore": 12
+      },
+      {
+        "name": "세이조",
+        "totalLines": 9,
+        "totalWords": 79,
+        "role": "Minor",
+        "avgWordsPerLine": 8.8,
+        "vocabularyRichness": 0.949,
+        "sceneAppearances": [
+          13,
+          24
+        ],
+        "voiceScore": 20
+      },
+      {
+        "name": "전설 때문인",
+        "totalLines": 5,
+        "totalWords": 26,
+        "role": "Minor",
+        "avgWordsPerLine": 5.2,
+        "vocabularyRichness": 1,
+        "sceneAppearances": [
+          7
+        ],
+        "voiceScore": 25
+      },
+      {
+        "name": "수술실",
+        "totalLines": 2,
+        "totalWords": 21,
+        "role": "Minor",
+        "avgWordsPerLine": 10.5,
+        "vocabularyRichness": 1,
+        "sceneAppearances": [
+          61
+        ],
+        "voiceScore": 30
+      },
+      {
+        "name": "오유진",
+        "totalLines": 0,
+        "totalWords": 0,
+        "role": "Minor",
+        "avgWordsPerLine": 0,
+        "vocabularyRichness": 0,
+        "sceneAppearances": [
+          1
+        ],
+        "voiceScore": 100
+      }
+    ],
+    "edges": [
+      {
+        "source": "완수",
+        "target": "윤채",
+        "weight": 9,
+        "dialogueExchanges": 22
+      },
+      {
+        "source": "윤채",
+        "target": "해영",
+        "weight": 9,
+        "dialogueExchanges": 19
+      },
+      {
+        "source": "선호",
+        "target": "해영",
+        "weight": 9,
+        "dialogueExchanges": 15
+      },
+      {
+        "source": "선호",
+        "target": "윤채",
+        "weight": 8,
+        "dialogueExchanges": 14
+      },
+      {
+        "source": "완수",
+        "target": "해영",
+        "weight": 8,
+        "dialogueExchanges": 5
+      },
+      {
+        "source": "선호",
+        "target": "완수",
+        "weight": 7,
+        "dialogueExchanges": 7
+      },
+      {
+        "source": "마유",
+        "target": "우노",
+        "weight": 5,
+        "dialogueExchanges": 17
+      },
+      {
+        "source": "엄마",
+        "target": "유진",
+        "weight": 4,
+        "dialogueExchanges": 19
+      },
+      {
+        "source": "마유",
+        "target": "아키",
+        "weight": 3,
+        "dialogueExchanges": 16
+      },
+      {
+        "source": "마유",
+        "target": "해영",
+        "weight": 3,
+        "dialogueExchanges": 5
+      },
+      {
+        "source": "마유",
+        "target": "유진",
+        "weight": 3,
+        "dialogueExchanges": 4
+      },
+      {
+        "source": "마유",
+        "target": "완수",
+        "weight": 3,
+        "dialogueExchanges": 5
+      },
+      {
+        "source": "우노",
+        "target": "해영",
+        "weight": 3,
+        "dialogueExchanges": 16
+      },
+      {
+        "source": "세이조",
+        "target": "우노",
+        "weight": 2,
+        "dialogueExchanges": 10
+      },
+      {
+        "source": "마유",
+        "target": "선호",
+        "weight": 2,
+        "dialogueExchanges": 2
+      },
+      {
+        "source": "유진",
+        "target": "해영",
+        "weight": 2,
+        "dialogueExchanges": 8
+      },
+      {
+        "source": "아키",
+        "target": "우노",
+        "weight": 2,
+        "dialogueExchanges": 4
+      },
+      {
+        "source": "아키",
+        "target": "제단",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "아키",
+        "target": "전설 때문인",
+        "weight": 1,
+        "dialogueExchanges": 2
+      },
+      {
+        "source": "마유",
+        "target": "전설 때문인",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "완수",
+        "target": "유진",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "마유",
+        "target": "윤채",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "선호",
+        "target": "유진",
+        "weight": 1,
+        "dialogueExchanges": 0
+      },
+      {
+        "source": "유진",
+        "target": "윤채",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "우노",
+        "target": "유진",
+        "weight": 1,
+        "dialogueExchanges": 4
+      },
+      {
+        "source": "마유",
+        "target": "유야",
+        "weight": 1,
+        "dialogueExchanges": 8
+      },
+      {
+        "source": "유야",
+        "target": "해영",
+        "weight": 1,
+        "dialogueExchanges": 8
+      },
+      {
+        "source": "우노",
+        "target": "윤채",
+        "weight": 1,
+        "dialogueExchanges": 7
+      },
+      {
+        "source": "수술실",
+        "target": "해영",
+        "weight": 1,
+        "dialogueExchanges": 2
+      },
+      {
+        "source": "아키",
+        "target": "유진",
+        "weight": 1,
+        "dialogueExchanges": 2
+      },
+      {
+        "source": "유진",
+        "target": "제단",
+        "weight": 1,
+        "dialogueExchanges": 1
+      },
+      {
+        "source": "유진",
+        "target": "통역",
+        "weight": 1,
+        "dialogueExchanges": 4
+      },
+      {
+        "source": "엄마",
+        "target": "통역",
+        "weight": 1,
+        "dialogueExchanges": 1
+      }
+    ],
+    "diversityMetrics": {
+      "speakingRoleDistribution": {
+        "top1Pct": 18,
+        "top3Pct": 48.7
+      },
+      "centralityGap": 7
+    }
+  },
+  "beatSheet": [
+    {
+      "act": 1,
+      "name": "Setup",
+      "sceneStart": 1,
+      "sceneEnd": 2,
+      "description": "The world and protagonist are introduced, establishing the status quo.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 1,
+      "name": "Inciting Incident",
+      "sceneStart": 3,
+      "sceneEnd": 4,
+      "description": "An unexpected event disrupts the protagonist's ordinary life.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 2,
+      "name": "Rising Action",
+      "sceneStart": 5,
+      "sceneEnd": 6,
+      "description": "Conflict intensifies as the protagonist faces mounting challenges.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 2,
+      "name": "Midpoint Crisis",
+      "sceneStart": 7,
+      "sceneEnd": 7,
+      "description": "A major revelation forces the protagonist to reassess everything.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 3,
+      "name": "Climax",
+      "sceneStart": 8,
+      "sceneEnd": 9,
+      "description": "The protagonist confronts the central conflict head-on.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    },
+    {
+      "act": 3,
+      "name": "Resolution",
+      "sceneStart": 10,
+      "sceneEnd": 10,
+      "description": "Loose ends are tied and the protagonist emerges transformed.",
+      "pagePercentage": 0,
+      "pacingNote": null
+    }
+  ],
+  "emotionGraph": [
+    {
+      "sceneNumber": 1,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 2,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "A mysterious world is introduced.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 3,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Questions are raised about the protagonist's situation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 4,
+      "score": -3,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 5,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "A mysterious world is introduced.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 6,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Questions are raised about the protagonist's situation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 7,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Opening establishes an intriguing premise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 8,
+      "score": -2,
+      "dominantEmotion": "Curiosity",
+      "explanation": "A mysterious world is introduced.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 9,
+      "score": -1,
+      "dominantEmotion": "Curiosity",
+      "explanation": "Questions are raised about the protagonist's situation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 10,
+      "score": -1,
+      "dominantEmotion": "Joy",
+      "explanation": "Protagonist discovers an unexpected opportunity.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 11,
+      "score": -1,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 12,
+      "score": 0,
+      "dominantEmotion": "Joy",
+      "explanation": "Early victory lifts spirits.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 13,
+      "score": 0,
+      "dominantEmotion": "Joy",
+      "explanation": "Protagonist discovers an unexpected opportunity.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 14,
+      "score": 0,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 15,
+      "score": 1,
+      "dominantEmotion": "Joy",
+      "explanation": "Early victory lifts spirits.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 16,
+      "score": 1,
+      "dominantEmotion": "Joy",
+      "explanation": "Protagonist discovers an unexpected opportunity.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 17,
+      "score": 1,
+      "dominantEmotion": "Joy",
+      "explanation": "A moment of connection brings warmth.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 18,
+      "score": 2,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 19,
+      "score": 2,
+      "dominantEmotion": "Hope",
+      "explanation": "Early success builds momentum.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 20,
+      "score": 2,
+      "dominantEmotion": "Hope",
+      "explanation": "An ally appears with a new possibility.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 21,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 22,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "Early success builds momentum.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 23,
+      "score": 3,
+      "dominantEmotion": "Hope",
+      "explanation": "An ally appears with a new possibility.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 24,
+      "score": 4,
+      "dominantEmotion": "Hope",
+      "explanation": "Progress toward the goal renews confidence.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 25,
+      "score": 4,
+      "dominantEmotion": "Hope",
+      "explanation": "Early success builds momentum.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 26,
+      "score": 4,
+      "dominantEmotion": "Doubt",
+      "explanation": "The protagonist questions their path.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 27,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "An unexpected obstacle creates uncertainty.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 28,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "First signs of trouble emerge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 29,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "The protagonist questions their path.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 30,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "An unexpected obstacle creates uncertainty.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 31,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "First signs of trouble emerge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 32,
+      "score": 5,
+      "dominantEmotion": "Doubt",
+      "explanation": "The protagonist questions their path.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 33,
+      "score": 6,
+      "dominantEmotion": "Doubt",
+      "explanation": "An unexpected obstacle creates uncertainty.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 34,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Conflict intensifies as stakes rise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 35,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 36,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "A confrontation reveals hidden dangers.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 37,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Conflict intensifies as stakes rise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 38,
+      "score": 6,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 39,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "A confrontation reveals hidden dangers.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 40,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "Conflict intensifies as stakes rise.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 41,
+      "score": 5,
+      "dominantEmotion": "Tension",
+      "explanation": "Opposing forces close in.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 42,
+      "score": 5,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 43,
+      "score": 5,
+      "dominantEmotion": "Despair",
+      "explanation": "Major setback pushes protagonist to their lowest.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 44,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "A devastating loss changes everything.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 45,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 46,
+      "score": 4,
+      "dominantEmotion": "Despair",
+      "explanation": "Major setback pushes protagonist to their lowest.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 47,
+      "score": 3,
+      "dominantEmotion": "Despair",
+      "explanation": "A devastating loss changes everything.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 48,
+      "score": 3,
+      "dominantEmotion": "Despair",
+      "explanation": "All hope seems lost as allies fall away.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 49,
+      "score": 3,
+      "dominantEmotion": "Despair",
+      "explanation": "Major setback pushes protagonist to their lowest.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 50,
+      "score": 2,
+      "dominantEmotion": "Despair",
+      "explanation": "A devastating loss changes everything.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 51,
+      "score": 2,
+      "dominantEmotion": "Resolve",
+      "explanation": "Past lessons crystallize into determination.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 52,
+      "score": 1,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 53,
+      "score": 1,
+      "dominantEmotion": "Resolve",
+      "explanation": "A choice is made to fight back.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 54,
+      "score": 0,
+      "dominantEmotion": "Resolve",
+      "explanation": "Past lessons crystallize into determination.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 55,
+      "score": 0,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 56,
+      "score": -1,
+      "dominantEmotion": "Resolve",
+      "explanation": "A choice is made to fight back.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 57,
+      "score": -1,
+      "dominantEmotion": "Resolve",
+      "explanation": "Past lessons crystallize into determination.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 58,
+      "score": -2,
+      "dominantEmotion": "Resolve",
+      "explanation": "Protagonist begins to find inner strength.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 59,
+      "score": -2,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 60,
+      "score": -3,
+      "dominantEmotion": "Determination",
+      "explanation": "The protagonist commits fully to the mission.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 61,
+      "score": -3,
+      "dominantEmotion": "Determination",
+      "explanation": "A new plan takes shape against the odds.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 62,
+      "score": -4,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 63,
+      "score": -4,
+      "dominantEmotion": "Determination",
+      "explanation": "The protagonist commits fully to the mission.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 64,
+      "score": -5,
+      "dominantEmotion": "Determination",
+      "explanation": "A new plan takes shape against the odds.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 65,
+      "score": -5,
+      "dominantEmotion": "Determination",
+      "explanation": "Resources are gathered for the final push.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 66,
+      "score": -6,
+      "dominantEmotion": "Determination",
+      "explanation": "The protagonist commits fully to the mission.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 67,
+      "score": -6,
+      "dominantEmotion": "Triumph",
+      "explanation": "Climactic confrontation with a decisive victory.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 68,
+      "score": -6,
+      "dominantEmotion": "Triumph",
+      "explanation": "The protagonist overcomes their greatest challenge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 69,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "A hard-won battle reaches its turning point.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 70,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "Climactic confrontation with a decisive victory.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 71,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "The protagonist overcomes their greatest challenge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 72,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "A hard-won battle reaches its turning point.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 73,
+      "score": -7,
+      "dominantEmotion": "Triumph",
+      "explanation": "Climactic confrontation with a decisive victory.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 74,
+      "score": -8,
+      "dominantEmotion": "Triumph",
+      "explanation": "The protagonist overcomes their greatest challenge.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 75,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "A new equilibrium emerges from the struggle.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 76,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 77,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 78,
+      "score": -8,
+      "dominantEmotion": "Catharsis",
+      "explanation": "A new equilibrium emerges from the struggle.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 79,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 80,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 81,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "A new equilibrium emerges from the struggle.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 82,
+      "score": -7,
+      "dominantEmotion": "Catharsis",
+      "explanation": "Resolution brings emotional closure and transformation.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    },
+    {
+      "sceneNumber": 83,
+      "score": -6,
+      "dominantEmotion": "Catharsis",
+      "explanation": "The journey's meaning becomes clear.",
+      "tension": 0,
+      "humor": 0,
+      "engagement": "medium"
+    }
+  ],
+  "features": {
+    "sceneCount": 83,
+    "characterCount": 16,
+    "dialogueLineCount": 992,
+    "actionLineCount": 572,
+    "dialogueToActionRatio": 1.7342657342657342,
+    "averageWordsPerDialogue": 7.356854838709677,
+    "intExtRatio": 0,
+    "nightDayRatio": 0,
+    "uniqueLocationCount": 80,
+    "avgSceneLength": 25.46987951807229,
+    "longestScene": 79,
+    "shortestScene": 1,
+    "protagonistDialoguePct": 0.17842741935483872,
+    "top3CharDialoguePct": 0.4889112903225806,
+    "speakingRolesCount": 15,
+    "monologueCount": 13,
+    "questionDialoguePct": 0.10584677419354839,
+    "exclamationPct": 0.07560483870967742,
+    "parentheticalCount": 140,
+    "transitionCount": 9,
+    "montageCount": 0,
+    "flashbackCount": 0,
+    "vfxKeywordDensity": 0,
+    "emotionalRange": 14,
+    "emotionalVariance": 20.76701988677602,
+    "turningPointCount": 0,
+    "pacingScore": 15.892968324204222
+  },
+  "predictions": {
+    "roi": {
+      "tier": "히트",
+      "predictedMultiplier": 3.5,
+      "confidence": 0.82,
+      "reasoning": "제공된 스크립트의 특징을 분석한 결과,_budget이 3.28억 원으로 비교적 낮은 편이며, 장면 수는 83개로 적당한 편입니다. 주인공의 감정적 변동성은 4.56으로 비교적 높은 편이며, 대사와 액션의 비율은 1.73으로 대사 위주의 스크립트입니다. 장르 또한 드라마로, 감정적 변동성이 높은 스크립트에 적합합니다. 비교 영화와의 유사도 또한 0.95 이상으로 높은 편이며, 대사 위주와 감정적 변동성이 높은 특징을 공유합니다. 따라서, 이 스크립트의 ROI는 비교 영화의 평균적인 ROI와 비슷할 것으로 예상됩니다.",
+      "revenueRange": {
+        "low": 10000000000,
+        "likely": 12000000000,
+        "high": 18000000000
+      }
+    },
+    "statisticalRoi": {
+      "predictedROI": 9.62,
+      "predictedMultiplier": 9.62,
+      "confidence": 95,
+      "tier": "Blockbuster",
+      "revenueRange": {
+        "low": 87151526000,
+        "likely": 31510932603,
+        "high": 121456632000
+      },
+      "neighbors": [
+        {
+          "title": "서울의 봄 (12.12: The Day)",
+          "similarity": 0.9591,
+          "roi": 9.27,
+          "revenue": 139000000000,
+          "budget": 15000000000
+        },
+        {
+          "title": "기생충 (Parasite)",
+          "similarity": 0.9527,
+          "roi": 8.52,
+          "revenue": 132000000000,
+          "budget": 15500000000
+        },
+        {
+          "title": "택시운전사 (A Taxi Driver)",
+          "similarity": 0.9527,
+          "roi": 6.39,
+          "revenue": 95858064000,
+          "budget": 15000000000
+        },
+        {
+          "title": "국제시장 (Ode to My Father)",
+          "similarity": 0.9527,
+          "roi": 7.92,
+          "revenue": 110913264000,
+          "budget": 14000000000
+        },
+        {
+          "title": "변호인 (The Attorney)",
+          "similarity": 0.9527,
+          "roi": 9.75,
+          "revenue": 82871504000,
+          "budget": 8500000000
+        },
+        {
+          "title": "공동경비구역 JSA",
+          "similarity": 0.9527,
+          "roi": 7.17,
+          "revenue": 35848000000,
+          "budget": 5000000000
+        },
+        {
+          "title": "7번방의 선물 (Miracle in Cell No. 7)",
+          "similarity": 0.9527,
+          "roi": 18.29,
+          "revenue": 91431548000,
+          "budget": 5000000000
+        }
+      ],
+      "modelType": "statistical-knn"
+    },
+    "rating": {
+      "rating": "15+",
+      "reasons": [
+        "모의 폭력 장면"
+      ],
+      "confidence": 0.9
+    },
+    "comps": [
+      {
+        "title": "서울의 봄 (12.12: The Day)",
+        "similarityScore": 0.959,
+        "sharedTraits": [
+          "Dialogue Heavy",
+          "High Emotional Volatility",
+          "Drama"
+        ],
+        "marketPerformance": {
+          "budget": 15000000000,
+          "revenue": 139000000000,
+          "roi": 9.27
+        }
+      },
+      {
+        "title": "기생충 (Parasite)",
+        "similarityScore": 0.953,
+        "sharedTraits": [
+          "Dialogue Heavy",
+          "High Emotional Volatility",
+          "Drama"
+        ],
+        "marketPerformance": {
+          "budget": 15500000000,
+          "revenue": 132000000000,
+          "roi": 8.52
+        }
+      },
+      {
+        "title": "택시운전사 (A Taxi Driver)",
+        "similarityScore": 0.953,
+        "sharedTraits": [
+          "Dialogue Heavy",
+          "High Emotional Volatility",
+          "Drama"
+        ],
+        "marketPerformance": {
+          "budget": 15000000000,
+          "revenue": 95858064000,
+          "roi": 6.39
+        }
+      },
+      {
+        "title": "국제시장 (Ode to My Father)",
+        "similarityScore": 0.953,
+        "sharedTraits": [
+          "Dialogue Heavy",
+          "High Emotional Volatility",
+          "Drama"
+        ],
+        "marketPerformance": {
+          "budget": 14000000000,
+          "revenue": 110913264000,
+          "roi": 7.92
+        }
+      },
+      {
+        "title": "변호인 (The Attorney)",
+        "similarityScore": 0.953,
+        "sharedTraits": [
+          "Dialogue Heavy",
+          "High Emotional Volatility",
+          "Drama"
+        ],
+        "marketPerformance": {
+          "budget": 8500000000,
+          "revenue": 82871504000,
+          "roi": 9.75
+        }
+      }
+    ]
+  },
+  "tropes": [
+    "Folk Horror (토속 공포)",
+    "Shamanism (무속 신앙)",
+    "Historical Curse (역사적 저주)",
+    "National Tragedy (국가적 비극)",
+    "Period Piece (시대극)",
+    "Social Commentary (사회 비판)",
+    "Han / Collective Grief (한)",
+    "Jeong / Deep Bond (정)",
+    "Confucian Hierarchy (유교적 위계)",
+    "Buddhist Philosophy (불교 철학)"
+  ],
+  "coverage": {
+    "scriptId": "jeonyulmigung-gwisin_260323_v001",
+    "title": "Untitled Screenplay",
+    "genre": "Drama",
+    "logline": "A mock screenplay evaluation.",
+    "synopsis": "This is a placeholder synopsis generated by the mock provider.",
+    "categories": [
+      {
+        "name": "Plot Structure & Logic",
+        "score": 70,
+        "subcategories": [
+          {
+            "name": "Narrative Structure Completeness",
+            "score": 72,
+            "assessment": "Follows basic three-act structure."
+          },
+          {
+            "name": "Pacing & Scene Flow",
+            "score": 68,
+            "assessment": "Adequate pacing with room for improvement."
+          },
+          {
+            "name": "Conflict Intensity",
+            "score": 70,
+            "assessment": "Moderate conflict development."
+          }
+        ]
+      },
+      {
+        "name": "Character & Dialogue",
+        "score": 65,
+        "subcategories": [
+          {
+            "name": "Character Arc",
+            "score": 65,
+            "assessment": "Characters show some growth."
+          },
+          {
+            "name": "Dialogue Quality & Subtext",
+            "score": 65,
+            "assessment": "Dialogue is functional but lacks subtext."
+          }
+        ]
+      },
+      {
+        "name": "Theme & Tone",
+        "score": 68,
+        "subcategories": [
+          {
+            "name": "Theme Clarity",
+            "score": 70,
+            "assessment": "Theme is present but could be stronger."
+          },
+          {
+            "name": "Tone Consistency",
+            "score": 66,
+            "assessment": "Generally consistent tone."
+          }
+        ]
+      },
+      {
+        "name": "Market Appeal",
+        "score": 72,
+        "subcategories": [
+          {
+            "name": "Genre Fit & Trend Alignment",
+            "score": 70,
+            "assessment": "Fits genre conventions."
+          },
+          {
+            "name": "Industry Benchmarking",
+            "score": 72,
+            "assessment": "Comparable to mid-tier releases."
+          },
+          {
+            "name": "Rating Appropriateness",
+            "score": 74,
+            "assessment": "Content level appropriate for target audience."
+          }
+        ]
+      },
+      {
+        "name": "Production Feasibility",
+        "score": 75,
+        "subcategories": [
+          {
+            "name": "Budget & Resource Viability",
+            "score": 75,
+            "assessment": "Production requirements are reasonable."
+          }
+        ]
+      }
+    ],
+    "overallScore": 70,
+    "verdict": "Consider",
+    "strengths": [
+      "Solid premise",
+      "Clear genre identity",
+      "Manageable production scope"
+    ],
+    "weaknesses": [
+      "Character depth needs work",
+      "Dialogue lacks subtext",
+      "Pacing inconsistencies"
+    ],
+    "recommendation": "The screenplay shows promise with a solid structural foundation but needs further development in character depth and dialogue quality before it can be recommended for production.",
+    "marketPotential": "",
+    "comparableTitles": []
+  },
+  "narrativeArc": {
+    "scriptId": "jeonyulmigung-gwisin_260323_v001",
+    "arcType": "icarus",
+    "arcConfidence": 1,
+    "arcDescription": "Rise to great heights, then fall",
+    "turningPoints": [
+      {
+        "sceneNumber": 2,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 3,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 6,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 7,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 10,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 13,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 16,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 19,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 22,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 25,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 28,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 29,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 30,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 31,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 34,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 35,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 36,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 37,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 40,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 41,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 42,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 45,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 48,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 67,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 70,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 71,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 72,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 75,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 76,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 77,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 80,
+        "type": "plateau",
+        "magnitude": 0
+      },
+      {
+        "sceneNumber": 81,
+        "type": "plateau",
+        "magnitude": 0
+      }
+    ],
+    "pacingIssues": [
+      {
+        "type": "flat",
+        "startScene": 1,
+        "endScene": 5,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 6,
+        "endScene": 9,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 12,
+        "endScene": 15,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 18,
+        "endScene": 21,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 24,
+        "endScene": 27,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 28,
+        "endScene": 33,
+        "description": "Emotional flatline across 5 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 34,
+        "endScene": 39,
+        "description": "Emotional flatline across 5 scenes",
+        "severity": "high"
+      },
+      {
+        "type": "flat",
+        "startScene": 40,
+        "endScene": 44,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 47,
+        "endScene": 50,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 66,
+        "endScene": 69,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      },
+      {
+        "type": "flat",
+        "startScene": 70,
+        "endScene": 74,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 75,
+        "endScene": 79,
+        "description": "Emotional flatline across 4 scenes",
+        "severity": "medium"
+      },
+      {
+        "type": "flat",
+        "startScene": 80,
+        "endScene": 83,
+        "description": "Emotional flatline across 3 scenes",
+        "severity": "low"
+      }
+    ],
+    "genreFit": {
+      "expectedArc": "man-in-a-hole",
+      "fitScore": 25,
+      "deviation": "Arc diverges from Drama norms (expected man-in-a-hole, got icarus)"
+    }
+  },
+  "production": {
+    "scriptId": "jeonyulmigung-gwisin_260323_v001",
+    "locations": [
+      {
+        "name": "전율미궁",
+        "setting": "INT",
+        "time": "사장실 / 오전",
+        "sceneNumbers": [
+          7,
+          12,
+          14,
+          15,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45,
+          46,
+          47,
+          48,
+          49,
+          51,
+          52,
+          54,
+          55,
+          56,
+          58,
+          59,
+          60,
+          61,
+          62,
+          64,
+          65,
+          66,
+          67,
+          68,
+          69,
+          70,
+          71,
+          72,
+          73,
+          74,
+          75,
+          76,
+          77,
+          78,
+          79,
+          81,
+          82,
+          83
+        ],
+        "frequency": 64
+      },
+      {
+        "name": "플래시백",
+        "setting": "INT",
+        "time": "병실 / 과거",
+        "sceneNumbers": [
+          10,
+          35,
+          36,
+          50,
+          57,
+          63
+        ],
+        "frequency": 6
+      },
+      {
+        "name": "재개발 지역",
+        "setting": "INT",
+        "time": "마당 /아침 (교차)",
+        "sceneNumbers": [
+          3,
+          5
+        ],
+        "frequency": 2
+      },
+      {
+        "name": "프롤로그",
+        "setting": "INT",
+        "time": "재개발구역 어느 집 마당 / 이른 아침",
+        "sceneNumbers": [
+          1
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "일본",
+        "setting": "INT",
+        "time": "전율미궁 제단실 / 밤 (교차)",
+        "sceneNumbers": [
+          2
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "전율미궁 제단 / 밤 (빠른 교차)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          4
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "전율미궁 제단실 / 아침 (교차)",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          6
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "하이랜드 놀이공원 앞/ 오전",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          8
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "전율미궁 입구 / 오전",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          9
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "다시현재",
+        "setting": "INT",
+        "time": "전율미궁 입구",
+        "sceneNumbers": [
+          11
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "전율미궁 CCTV 통제실 / 오전",
+        "setting": "INT",
+        "time": "UNSPECIFIED",
+        "sceneNumbers": [
+          13
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "전율미궁 안",
+        "setting": "INT",
+        "time": "입구 / 낮",
+        "sceneNumbers": [
+          16
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "어둠 속 비밀의 방",
+        "setting": "INT",
+        "time": "제단 / 낮",
+        "sceneNumbers": [
+          53
+        ],
+        "frequency": 1
+      },
+      {
+        "name": "일본 병원",
+        "setting": "INT",
+        "time": "병실 / 낮",
+        "sceneNumbers": [
+          80
+        ],
+        "frequency": 1
+      }
+    ],
+    "uniqueLocationCount": 14,
+    "intExtRatio": {
+      "int": 100,
+      "ext": 0
+    },
+    "cast": [
+      {
+        "name": "해영",
+        "role": "Protagonist",
+        "sceneNumbers": [
+          9,
+          15,
+          19,
+          22,
+          23,
+          25,
+          27,
+          28,
+          29,
+          31,
+          35,
+          36,
+          40,
+          42,
+          50,
+          59,
+          61,
+          62,
+          64,
+          65,
+          66,
+          69
+        ],
+        "totalScenes": 22
+      },
+      {
+        "name": "마유",
+        "role": "Antagonist",
+        "sceneNumbers": [
+          7,
+          15,
+          19,
+          20,
+          21,
+          26,
+          39,
+          43,
+          45,
+          46,
+          54,
+          56,
+          60,
+          68,
+          69,
+          70,
+          71,
+          72,
+          76,
+          79,
+          82
+        ],
+        "totalScenes": 21
+      },
+      {
+        "name": "유진",
+        "role": "Supporting",
+        "sceneNumbers": [
+          5,
+          8,
+          10,
+          15,
+          17,
+          20,
+          34,
+          36,
+          37,
+          38,
+          52,
+          73,
+          74,
+          77,
+          79,
+          80
+        ],
+        "totalScenes": 16
+      },
+      {
+        "name": "완수",
+        "role": "Supporting",
+        "sceneNumbers": [
+          8,
+          9,
+          14,
+          19,
+          21,
+          22,
+          23,
+          25,
+          27,
+          28,
+          29,
+          30,
+          32,
+          55,
+          70
+        ],
+        "totalScenes": 15
+      },
+      {
+        "name": "윤채",
+        "role": "Supporting",
+        "sceneNumbers": [
+          9,
+          15,
+          22,
+          23,
+          25,
+          27,
+          28,
+          29,
+          30,
+          32,
+          44,
+          48,
+          49,
+          50,
+          51
+        ],
+        "totalScenes": 15
+      },
+      {
+        "name": "우노",
+        "role": "Supporting",
+        "sceneNumbers": [
+          13,
+          20,
+          24,
+          39,
+          44,
+          46,
+          47,
+          56,
+          57,
+          62,
+          63,
+          64,
+          66,
+          76
+        ],
+        "totalScenes": 14
+      },
+      {
+        "name": "선호",
+        "role": "Minor",
+        "sceneNumbers": [
+          9,
+          15,
+          21,
+          22,
+          23,
+          25,
+          27,
+          29,
+          31,
+          41,
+          50
+        ],
+        "totalScenes": 11
+      },
+      {
+        "name": "아키",
+        "role": "Minor",
+        "sceneNumbers": [
+          2,
+          7,
+          57,
+          68,
+          74,
+          76
+        ],
+        "totalScenes": 6
+      },
+      {
+        "name": "엄마",
+        "role": "Minor",
+        "sceneNumbers": [
+          10,
+          34,
+          37,
+          80
+        ],
+        "totalScenes": 4
+      },
+      {
+        "name": "제단",
+        "role": "Minor",
+        "sceneNumbers": [
+          2,
+          6,
+          77
+        ],
+        "totalScenes": 3
+      },
+      {
+        "name": "세이조",
+        "role": "Minor",
+        "sceneNumbers": [
+          13,
+          24
+        ],
+        "totalScenes": 2
+      },
+      {
+        "name": "유야",
+        "role": "Minor",
+        "sceneNumbers": [
+          26,
+          40
+        ],
+        "totalScenes": 2
+      },
+      {
+        "name": "전설 때문인",
+        "role": "Minor",
+        "sceneNumbers": [
+          7
+        ],
+        "totalScenes": 1
+      },
+      {
+        "name": "수술실",
+        "role": "Minor",
+        "sceneNumbers": [
+          61
+        ],
+        "totalScenes": 1
+      },
+      {
+        "name": "통역",
+        "role": "Minor",
+        "sceneNumbers": [
+          80
+        ],
+        "totalScenes": 1
+      }
+    ],
+    "totalSpeakingRoles": 15,
+    "estimatedShootingDays": 17,
+    "vfxRequirements": [
+      {
+        "sceneNumber": 2,
+        "description": "북소리가 이어진다. 좁고 긴 복도 끝으로 차가운 달빛이 스며든다.",
+        "tier": "simple",
+        "estimatedHours": 20
+      },
+      {
+        "sceneNumber": 5,
+        "description": "선홍빛 피가 흙바닥으로 줄줄 쏟아진다.",
+        "tier": "simple",
+        "estimatedHours": 30
+      },
+      {
+        "sceneNumber": 8,
+        "description": "전혀 다른 사람처럼 차갑고 낯선 눈빛. 미궁의 어두운 입구를 똑바로 사수하듯 노려보는 유진.",
+        "tier": "simple",
+        "estimatedHours": 20
+      },
+      {
+        "sceneNumber": 14,
+        "description": "완수, 휴대폰을 보며 걷다가 뒤돌아서는 순간, 바로 코앞 어둠 속에서 얼굴 하나가 불쑥 튀어나온다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 18,
+        "description": "기괴하게 뒤틀린 시체 모양의 마네킹들과 녹슨 의료용 도구들이 어지럽게 널려 있다.",
+        "tier": "moderate",
+        "estimatedHours": 50
+      },
+      {
+        "sceneNumber": 24,
+        "description": "낡은 세면대. 누런 물때 사이로 검붉은 핏물이 소용돌이치며 배수구로 빨려 들어간다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 27,
+        "description": "지지직- 형광등 하나가 깜빡이다 꺼진다. 선호의 손전등 불빛만이 앞을 비춘다.",
+        "tier": "simple",
+        "estimatedHours": 20
+      },
+      {
+        "sceneNumber": 34,
+        "description": "창문 너머로 비현실적으로 부드러운 햇살이 스며든다. 빛이 닿는 곳마다 병실이 변해간다.",
+        "tier": "moderate",
+        "estimatedHours": 70
+      },
+      {
+        "sceneNumber": 39,
+        "description": "그때, 복도 저 끝에서 비틀거리며 비상구 안으로 사라지는 윤채의 뒷모습을 발견한다.",
+        "tier": "simple",
+        "estimatedHours": 30
+      },
+      {
+        "sceneNumber": 41,
+        "description": "벽면을 가득 채운 시체 보관용 트레이들이 흉물스럽다.",
+        "tier": "moderate",
+        "estimatedHours": 50
+      },
+      {
+        "sceneNumber": 41,
+        "description": "바닥에 누운 선호를 내려다보는 정체불명의 그림자가 천천히 다가온다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 53,
+        "description": "그 순간, 제단 주위의 촛불들이 미친 듯이 일렁이기 시작한다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 53,
+        "description": "불꽃의 움직임에 따라 벽면에 비친 기괴한 형상들이 유진을 향해 발광하듯 요동친다.",
+        "tier": "complex",
+        "estimatedHours": 120
+      },
+      {
+        "sceneNumber": 55,
+        "description": "복도 구석에서 나타난 귀신 복장의 스태프 유레이가 완수를 발견하고 놀라게 하려다 멈칫한다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 57,
+        "description": "그 끝은 촛불이 일렁이는 지하 제단.",
+        "tier": "simple",
+        "estimatedHours": 20
+      },
+      {
+        "sceneNumber": 62,
+        "description": "해영이 안도하며 돌아서는 순간, 바로 코앞까지 다가와 있는 우노. 차분하고 조용한 목소리.",
+        "tier": "simple",
+        "estimatedHours": 20
+      },
+      {
+        "sceneNumber": 67,
+        "description": "투명한 피부 위로 검은 혈관이 나무뿌리처럼 흉측하게 번져나간다.",
+        "tier": "complex",
+        "estimatedHours": 150
+      },
+      {
+        "sceneNumber": 69,
+        "description": "목 주위의 핏줄이 터질 듯 불거지고 꺽-꺽-거리는 쇳소리만 새어 나온다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 70,
+        "description": "파직-! 하고 날카로운 푸른 빛이 번쩍인다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 71,
+        "description": "用途未定(용도 미정). 하얗게 비워진 밀실 하나.",
+        "tier": "simple",
+        "estimatedHours": 20
+      },
+      {
+        "sceneNumber": 73,
+        "description": "그때, 제단을 둘러싼 촛불들이 요동치듯 흔들리기 시작한다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 73,
+        "description": "살려달라는 소녀의 눈빛과 유진의 시선이 허공에서 마주친다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 76,
+        "description": "중심을 잃은 아키가 뒤로 물러나며 칼끝이 바닥을 긁어 불꽃을 튀긴다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      },
+      {
+        "sceneNumber": 77,
+        "description": "유진, 천천히 고개를 든다. 눈동자 속으로 파란 불꽃이 스며든다.",
+        "tier": "moderate",
+        "estimatedHours": 60
+      }
+    ],
+    "vfxComplexityScore": 14,
+    "budgetEstimate": {
+      "low": 2621800000,
+      "likely": 3277250000,
+      "high": 4260425000,
+      "breakdown": {
+        "cast": 2035000000,
+        "locations": 207500000,
+        "vfx": 512000000,
+        "crew": 386750000,
+        "postProduction": 136000000
+      }
+    }
+  },
+  "strategy": "custom",
+  "providers": {
+    "beatSheet": "mock",
+    "emotion": "mock",
+    "rating": "mock",
+    "roi": "groq",
+    "coverage": "mock",
+    "vfx": "groq",
+    "trope": "groq"
+  },
+  "warning": "Mock placeholder data used for: Beat Sheet, Emotion, Rating, Coverage. These results are not actual AI analysis.",
+  "mockEngines": [
+    "Beat Sheet",
+    "Emotion",
+    "Rating",
+    "Coverage"
+  ]
+}

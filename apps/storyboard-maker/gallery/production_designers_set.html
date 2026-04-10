@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Set Design — Hollywood Production Designers 10</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #c87858; }</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab active">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>SET DESIGN</h1>
+    <div class="subtitle">10 Production Design Masters &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Set Design</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">SET DESIGN</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/e0/80/5c/e0805cabdcf9e87d30249728df51d242.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Set Design Gallery</h2>
+          <p>10명의 프로덕션 디자인 거장 — Ken Adam, Dante Ferretti, Rick Carter 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 production designers loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#127916;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Set Design Concept</h3>
+    <label>Set Description</label>
+    <textarea id="modalScene" placeholder="e.g. 1920년대 갱스터 아지트의 지하 술집, 아르데코 인테리어"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+    </select>
+    <label>Camera Angle</label>
+    <input id="modalCamera" type="text" placeholder="e.g. wide establishing shot, overhead plan view, eye-level walkthrough" />
+    <label>Mood / Atmosphere</label>
+    <input id="modalMood" type="text" placeholder="e.g. opulent, gritty, surreal, intimate" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const DESIGNERS = [
+  {
+    id: 'ken_adam', rank: '01', name: 'Ken Adam (켄 아담)',
+    subtitle: 'Production Designer · 독일/영국 · 1921-2016',
+    styleType: 'expressionist', styleLabel: 'Expressionist Set Design',
+    desc: '제임스 본드 시리즈의 악당 소굴과 닥터 스트레인지러브의 전쟁 상황실을 설계한 전설. 거대한 스케일, 기하학적 대담함, 표현주의적 과장이 그의 트레이드마크다. 냉전 시대의 불안과 스펙터클을 건축으로 시각화한 거장.',
+    styleDesc: '표현주의적 대형 세트 디자인. 과장된 스케일, 날카로운 기하학적 형태, 그리고 시각적 대비를 통해 서사를 건축적으로 전달하는 방식.',
+    technique: 'Monumental Scale: 인간을 압도하는 거대한 공간 설계.\nGeometric Boldness: 삼각형, 원, 사선 등 극적 형태 활용.\nDramatic Contrast: 빛과 그림자의 극적 대비를 통한 분위기 창조.',
+    aiPrompt: 'Ken Adam production design style, massive underground villain lair, bold geometric architecture, expressionist set design, dramatic lighting, Cold War era aesthetic, James Bond war room, monumental scale interior',
+    films: ['닥터 스트레인지러브 (1964)', '골드핑거 (1964)', '나를 사랑한 스파이 (1977)', '배리 린든 (1975)'],
+    characters: ['전쟁 상황실 (War Room)', '골드핑거 레이저실', '아틀란티스 기지', '배리 린든 저택'],
+    links: [
+      { text: 'BAFTA: Ken Adam Tribute', url: 'https://www.bafta.org/heritage/in-memoriam/sir-ken-adam' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/e0/80/5c/e0805cabdcf9e87d30249728df51d242.jpg', label: 'Adam — reference 1' },
+      { src: 'https://i.pinimg.com/736x/d6/01/50/d60150e6f5dd0cac892a2355a4a4e60e.jpg', label: 'Adam — reference 2' },
+      { src: 'https://i.pinimg.com/736x/c4/1a/6d/c41a6d64a63197c04099522337edb550.jpg', label: 'Adam — reference 3' },
+      { src: 'https://i.pinimg.com/736x/2f/a4/d9/2fa4d97e00e75e4acc4163d1dbbdd914.jpg', label: 'Adam — reference 4' },
+      { src: 'https://i.pinimg.com/736x/94/dd/9e/94dd9e186e8fe979fc83eca99bcf9240.jpg', label: 'Adam — reference 5' },
+      { src: 'https://i.pinimg.com/736x/41/69/83/4169832c76d690b9a3b3eae2630620ce.jpg', label: 'Adam — reference 6' },
+      { src: 'https://i.pinimg.com/736x/87/04/cb/8704cb2409d7986426d960fbe7db38b5.jpg', label: 'Adam — reference 7' },
+      { src: 'https://i.pinimg.com/736x/e0/1d/99/e01d9926568b5675e42944d82a7aca64.jpg', label: 'Adam — reference 8' },
+      { src: 'https://i.pinimg.com/736x/88/55/d8/8855d8ae09a51ba07eeec210c3073705.jpg', label: 'Adam — reference 9' },
+      { src: 'https://i.pinimg.com/736x/d4/41/6c/d4416c8d99bb2b7966cef246927bf141.jpg', label: 'Adam — reference 10' },
+      { src: 'https://i.pinimg.com/736x/9e/9f/59/9e9f59dbdf29e939a8e6f593898d4f4d.jpg', label: 'Adam — reference 11' },
+      { src: 'https://i.pinimg.com/736x/82/b5/53/82b553220f9643d689ced7084815de58.jpg', label: 'Adam — reference 12' },
+    ],
+  },
+  {
+    id: 'dante_ferretti', rank: '02', name: 'Dante Ferretti (단테 페레티)',
+    subtitle: 'Production Designer · 이탈리아 · 1943-',
+    styleType: 'theatrical', styleLabel: 'Theatrical Period Design',
+    desc: '아카데미상 3회 수상. 스코세이지의 오랜 협력자이자 이전에는 펠리니와 작업한 거장. 호화롭고 역사적으로 정교한 시대극 세트에 연극적 질감을 부여하는 것이 특징이다.',
+    styleDesc: '오페라적 스케일의 시대극 세트. 극도로 정밀한 역사 고증과 연극적 화려함을 동시에 구현. 각 세트가 하나의 무대 공연처럼 완성된다.',
+    technique: 'Historical Precision: 시대별 건축, 가구, 소품의 완벽한 고증.\nTheatrical Scale: 연극적 과장과 규모감 있는 공간 설계.\nTextural Richness: 벽, 바닥, 천장의 질감과 패티나 디테일.',
+    aiPrompt: 'Dante Ferretti production design, lavish period film set, operatic theatrical interior, Scorsese collaboration, meticulous historical detail, rich textures and patina, Hugo train station, Gangs of New York Five Points',
+    films: ['휴고 (2011)', '스위니 토드 (2007)', '갱스 오브 뉴욕 (2002)', '에비에이터 (2004)'],
+    characters: ['파리 기차역 (휴고)', '플릿 스트리트 이발소', '파이브 포인츠', '코코넛 그로브 나이트클럽'],
+    links: [
+      { text: 'Academy Museum: Dante Ferretti', url: 'https://www.academymuseum.org/en/programs/dante-ferretti' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/40/85/b6/4085b6cd1ecc1f1a16eadd67b800701b.jpg', label: 'Ferretti — reference 1' },
+      { src: 'https://i.pinimg.com/736x/23/db/df/23dbdf306e5768f14b2eeb3bb03886a9.jpg', label: 'Ferretti — reference 2' },
+      { src: 'https://i.pinimg.com/736x/5b/75/41/5b7541b2d8a63be32588c9acd666ccb9.jpg', label: 'Ferretti — reference 3' },
+      { src: 'https://i.pinimg.com/736x/13/73/9d/13739d3581746381f347f3766924dc17.jpg', label: 'Ferretti — reference 4' },
+      { src: 'https://i.pinimg.com/736x/90/ab/1c/90ab1c49957e0acffaefb8c8e9058f81.jpg', label: 'Ferretti — reference 5' },
+      { src: 'https://i.pinimg.com/736x/06/4c/61/064c61d7f656e06b5495cc73f88215b4.jpg', label: 'Ferretti — reference 6' },
+      { src: 'https://i.pinimg.com/736x/31/f9/30/31f930d0364ec70cbc3705d20834ed4e.jpg', label: 'Ferretti — reference 7' },
+      { src: 'https://i.pinimg.com/736x/de/18/b3/de18b35630102c0952796a93f977b352.jpg', label: 'Ferretti — reference 8' },
+      { src: 'https://i.pinimg.com/736x/e0/c0/a0/e0c0a04477b8fd64d93c652a69ccbb0c.jpg', label: 'Ferretti — reference 9' },
+      { src: 'https://i.pinimg.com/736x/b5/3d/aa/b53daae246e94fc15922deaae1c90628.jpg', label: 'Ferretti — reference 10' },
+      { src: 'https://i.pinimg.com/736x/7b/6f/4e/7b6f4e792202fe78ff8468342dccaacc.jpg', label: 'Ferretti — reference 11' },
+      { src: 'https://i.pinimg.com/736x/df/32/6c/df326ca08a3edb0f4e0de0e51ab71412.jpg', label: 'Ferretti — reference 12' },
+    ],
+  },
+  {
+    id: 'rick_carter', rank: '03', name: 'Rick Carter (릭 카터)',
+    subtitle: 'Production Designer · 미국 · 1953-',
+    styleType: 'immersive', styleLabel: 'Immersive World Building',
+    desc: '아카데미상 2회 수상. 스필버그, 제메키스와의 오랜 협업을 통해 쥬라기 공원의 공룡 세계부터 포레스트 검프의 미국 역사까지 몰입감 있는 세계를 구축한 거장.',
+    styleDesc: '과학적 사실성과 영화적 판타지를 결합한 몰입형 세트. 관객이 실제로 그 공간에 들어간 듯한 믿을 수 있는 세계를 만드는 것이 핵심.',
+    technique: 'Believable Fantasy: 판타지 세계에 사실적 논리와 물리 적용.\nEnvironmental Storytelling: 세트 디테일로 서사를 전달.\nScale Integration: 실제 세트와 디지털 확장의 자연스러운 통합.',
+    aiPrompt: 'Rick Carter production design, immersive film environment, Jurassic Park visitor center interior, Spielberg collaboration, believable fantasy world, practical set with digital extension, cinematic scale',
+    films: ['쥬라기 공원 (1993)', '포레스트 검프 (1994)', '아바타 (2009)', '웨스트 사이드 스토리 (2021)'],
+    characters: ['쥬라기 공원 비지터 센터', '포레스트 검프의 집', '판도라 연구소', '웨스트사이드 거리'],
+    links: [
+      { text: 'ADG: Rick Carter Interview', url: 'https://adg.org/article/rick-carter-interview' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/94/f9/56/94f9565efebae6ecdc65948a4dc90182.jpg', label: 'Carter — reference 1' },
+      { src: 'https://i.pinimg.com/736x/0d/65/97/0d65974640d4ad8ec79a365f396aba0d.jpg', label: 'Carter — reference 2' },
+      { src: 'https://i.pinimg.com/736x/ab/ea/90/abea904e265d99b3281f76c31c77e0be.jpg', label: 'Carter — reference 3' },
+      { src: 'https://i.pinimg.com/736x/bd/9d/ab/bd9dab767ae6ce1815c5a5a6aad5aa2d.jpg', label: 'Carter — reference 4' },
+      { src: 'https://i.pinimg.com/736x/0e/e0/dd/0ee0ddce4f85627320934fcae8e34fab.jpg', label: 'Carter — reference 5' },
+      { src: 'https://i.pinimg.com/736x/59/36/f1/5936f1504c665b6f0fbeb5b66d566fa9.jpg', label: 'Carter — reference 6' },
+      { src: 'https://i.pinimg.com/736x/e0/24/8d/e0248d352a0e312663485d26fafe27c6.jpg', label: 'Carter — reference 7' },
+      { src: 'https://i.pinimg.com/736x/50/fc/a2/50fca2da07b81aa69bc661989c31967a.jpg', label: 'Carter — reference 8' },
+      { src: 'https://i.pinimg.com/736x/f6/6f/9f/f66f9fdb32df99980919a9e5da9da730.jpg', label: 'Carter — reference 9' },
+      { src: 'https://i.pinimg.com/736x/81/1f/b6/811fb624dcd2091cee1e2216fb878cb9.jpg', label: 'Carter — reference 10' },
+      { src: 'https://i.pinimg.com/736x/29/14/18/291418c63a27ce83b0114f334076b925.jpg', label: 'Carter — reference 11' },
+      { src: 'https://i.pinimg.com/736x/c6/de/83/c6de83a59b663494751a641180d9009d.jpg', label: 'Carter — reference 12' },
+    ],
+  },
+  {
+    id: 'stuart_craig', rank: '04', name: 'Stuart Craig (스튜어트 크레이그)',
+    subtitle: 'Production Designer · 영국 · 1942-',
+    styleType: 'architectural', styleLabel: 'Architectural Fantasy',
+    desc: '아카데미상 3회 수상. 해리 포터 시리즈 전 8편의 프로덕션 디자이너로서 호그와트를 10년간 건축해낸 거장. 간디, 잉글리시 페이션트 등의 정교한 시대극도 설계했다.',
+    styleDesc: '건축적 웅장함과 정밀한 디테일의 결합. 대규모 물리적 세트가 그 자체로 캐릭터가 되는 설계 철학. 역사적 정확성 위에 판타지적 상상력을 쌓는 방식.',
+    technique: 'Living Architecture: 세트 자체가 캐릭터처럼 존재감을 가짐.\nDecade-Long Continuity: 시리즈 전체의 시각적 일관성 유지.\nScale & Detail: 거대한 규모와 미세한 디테일의 동시 구현.',
+    aiPrompt: 'Stuart Craig production design, Hogwarts Great Hall interior, Harry Potter magical school architecture, grand gothic fantasy set, detailed practical construction, British period architecture, monumental interior space',
+    films: ['해리 포터 시리즈 (2001-2011)', '잉글리시 페이션트 (1996)', '간디 (1982)', '신비한 동물사전 시리즈'],
+    characters: ['호그와트 대연회장', '다이애건 앨리', '마법부', '덤블도어의 사무실'],
+    links: [
+      { text: 'BAFTA: Stuart Craig', url: 'https://www.bafta.org/person/stuart-craig' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/bb/fe/e1/bbfee177e44e45b6f0495f9eb3477c49.jpg', label: 'Craig — reference 1' },
+      { src: 'https://i.pinimg.com/736x/03/b8/00/03b800a959dd76dfb80b736fa72b24e0.jpg', label: 'Craig — reference 2' },
+      { src: 'https://i.pinimg.com/736x/bb/70/10/bb7010520ec1304eb1b47fe54829d93a.jpg', label: 'Craig — reference 3' },
+      { src: 'https://i.pinimg.com/736x/17/e8/6d/17e86dc40a3fd3873418252180d6084d.jpg', label: 'Craig — reference 4' },
+      { src: 'https://i.pinimg.com/736x/f9/5f/58/f95f58e784f3e0351db8f2a255bd45f2.jpg', label: 'Craig — reference 5' },
+      { src: 'https://i.pinimg.com/736x/bb/e2/14/bbe214c94985bd1903eb4d4633523c83.jpg', label: 'Craig — reference 6' },
+      { src: 'https://i.pinimg.com/736x/5f/9d/57/5f9d570936a01750971fe9e7dcd11ad3.jpg', label: 'Craig — reference 7' },
+      { src: 'https://i.pinimg.com/736x/83/c2/49/83c2497d3e5b02104a730cd8b4fbaa6e.jpg', label: 'Craig — reference 8' },
+      { src: 'https://i.pinimg.com/736x/72/7f/a6/727fa6114dcf6c6313a451848e6b4f2d.jpg', label: 'Craig — reference 9' },
+      { src: 'https://i.pinimg.com/736x/0e/c4/14/0ec4144f5f117db85c88bc5ead1bc125.jpg', label: 'Craig — reference 10' },
+      { src: 'https://i.pinimg.com/736x/0f/86/b3/0f86b355b0d59f78de0c755107fe7360.jpg', label: 'Craig — reference 11' },
+      { src: 'https://i.pinimg.com/736x/65/cf/09/65cf099b95122e82ca0b0784b04ce33b.jpg', label: 'Craig — reference 12' },
+    ],
+  },
+  {
+    id: 'hannah_beachler', rank: '05', name: 'Hannah Beachler (한나 비클러)',
+    subtitle: 'Production Designer · 미국 · 1970s-',
+    styleType: 'afrofuturist', styleLabel: 'Afrofuturist Design',
+    desc: '아카데미 프로덕션 디자인상을 수상한 최초의 아프리카계 미국인 여성. 블랙 팬서의 와칸다를 아프리카 전통 건축과 미래 기술을 결합하여 창조. 문라이트의 섬세한 환경도 설계했다.',
+    styleDesc: '아프로퓨처리즘 디자인. 아프리카 전통 건축 양식과 미래 기술을 결합한 문화적으로 뿌리 깊은 세계관. 철저한 리서치를 기반으로 한 역사적 스펙큘러티브 디자인.',
+    technique: 'Cultural Rootedness: 아프리카 건축·문양·소재의 깊은 리서치.\nSpeculative Architecture: 전통과 미래 기술의 유기적 결합.\nEmotional Geography: 캐릭터의 감정과 문화를 반영하는 공간 설계.',
+    aiPrompt: 'Hannah Beachler production design, Wakanda throne room, Afrofuturist architecture, Black Panther set design, African traditional meets future technology, culturally rooted speculative design, vibranium aesthetic',
+    films: ['블랙 팬서 (2018)', '문라이트 (2016)', '크리드 (2015)', '블랙 팬서: 와칸다 포에버 (2022)'],
+    characters: ['와칸다 왕좌실', '골든 시티', '자비리 영토', '마이애미 프로젝트 (문라이트)'],
+    links: [
+      { text: 'Architectural Digest: Hannah Beachler', url: 'https://www.architecturaldigest.com/story/black-panther-production-designer-hannah-beachler' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/70/ea/5d/70ea5dfbde392657af0d3db5e812ec95.jpg', label: 'Beachler — reference 1' },
+      { src: 'https://i.pinimg.com/736x/a6/44/43/a644435aed11e325fac15eeba82f1805.jpg', label: 'Beachler — reference 2' },
+      { src: 'https://i.pinimg.com/736x/30/03/3c/30033c7712ccd811c6c43aa9ab5ad74c.jpg', label: 'Beachler — reference 3' },
+      { src: 'https://i.pinimg.com/736x/54/70/61/547061e314bac66b93f379e7a3dd4383.jpg', label: 'Beachler — reference 4' },
+      { src: 'https://i.pinimg.com/736x/4c/fb/2b/4cfb2b4898140ff309de5c43eebfa185.jpg', label: 'Beachler — reference 5' },
+      { src: 'https://i.pinimg.com/736x/4c/ad/c1/4cadc1d0f1415f2e5baed587e49de362.jpg', label: 'Beachler — reference 6' },
+      { src: 'https://i.pinimg.com/736x/b4/93/fc/b493fc526b3f06b65d2799b3171009b7.jpg', label: 'Beachler — reference 7' },
+      { src: 'https://i.pinimg.com/736x/a9/69/2d/a9692d9887f7dfc0e57ec945fd8530cd.jpg', label: 'Beachler — reference 8' },
+      { src: 'https://i.pinimg.com/736x/95/41/a5/9541a59230cab52018550c445e27b7a2.jpg', label: 'Beachler — reference 9' },
+      { src: 'https://i.pinimg.com/736x/10/29/17/1029172336b5c3f76a847707de62ddf8.jpg', label: 'Beachler — reference 10' },
+      { src: 'https://i.pinimg.com/736x/47/c2/2f/47c22fce3286d6cbc1982f14a363e43b.jpg', label: 'Beachler — reference 11' },
+      { src: 'https://i.pinimg.com/736x/4c/95/cd/4c95cd2738fa74d9e8dc197f0788a11a.jpg', label: 'Beachler — reference 12' },
+    ],
+  },
+  {
+    id: 'catherine_martin', rank: '06', name: 'Catherine Martin (캐서린 마틴)',
+    subtitle: 'Production & Costume Designer · 호주 · 1965-',
+    styleType: 'maximalist', styleLabel: 'Maximalist Spectacle',
+    desc: '아카데미상 4회 수상 (프로덕션 디자인 + 의상). 바즈 루어만의 평생 파트너이자 협력자. 물랑 루즈, 위대한 개츠비의 극도로 화려하고 색채가 넘치는 세트로 유명.',
+    styleDesc: '맥시멀리즘의 정수. 과장된 화려함, 풍부한 색채, 연극적 스펙터클을 통해 감정적 과잉의 세계를 창조. 매 프레임이 시각적 축제가 되는 설계.',
+    technique: 'Color Saturation: 극도로 풍부하고 과감한 색채 구성.\nOpulent Detail: 화려한 장식과 소재의 층위적 구성.\nTheatrical Excess: 의도적 과잉을 통한 감정적 몰입.',
+    aiPrompt: 'Catherine Martin production design, Moulin Rouge nightclub interior, maximalist opulent set, Baz Luhrmann collaboration, saturated colors, Art Deco Great Gatsby party, theatrical extravagance, gilded ornate decoration',
+    films: ['물랑 루즈! (2001)', '위대한 개츠비 (2013)', '오스트레일리아 (2008)', '엘비스 (2022)'],
+    characters: ['물랑 루즈 극장', '개츠비 저택', '엘비스의 그레이스랜드', '댄스 홀'],
+    links: [
+      { text: 'Vogue: Catherine Martin Design', url: 'https://www.vogue.com/article/catherine-martin-great-gatsby-set-design' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/45/ef/a6/45efa6d3014c22a8a86c854a24a5922e.jpg', label: 'Martin — reference 1' },
+      { src: 'https://i.pinimg.com/736x/fd/ed/e8/fdede89bb7649315a99dc60a082f63fc.jpg', label: 'Martin — reference 2' },
+      { src: 'https://i.pinimg.com/736x/88/f0/aa/88f0aaeb4d278e7c450577280f1771b8.jpg', label: 'Martin — reference 3' },
+      { src: 'https://i.pinimg.com/736x/94/58/c1/9458c1a70f1be817fbe3866bcb4b8511.jpg', label: 'Martin — reference 4' },
+      { src: 'https://i.pinimg.com/736x/e1/e6/e9/e1e6e9892dffd1ad135876077e8968cb.jpg', label: 'Martin — reference 5' },
+      { src: 'https://i.pinimg.com/736x/b6/21/4b/b6214b90fc4ae3c506d8b47453218c63.jpg', label: 'Martin — reference 6' },
+      { src: 'https://i.pinimg.com/736x/51/d4/89/51d48925c8adcc3342c45495c78ba247.jpg', label: 'Martin — reference 7' },
+      { src: 'https://i.pinimg.com/736x/03/7e/f1/037ef192fdeb8d76d1b9025e93c15d9c.jpg', label: 'Martin — reference 8' },
+      { src: 'https://i.pinimg.com/736x/c8/7d/2f/c87d2fcf3cd36acd3d5013005baf5c6f.jpg', label: 'Martin — reference 9' },
+      { src: 'https://i.pinimg.com/736x/ca/2a/89/ca2a89b2208e504215d65c21e1197bb1.jpg', label: 'Martin — reference 10' },
+      { src: 'https://i.pinimg.com/736x/26/40/42/264042fb0a1c4d691ffc170a6c4d89e2.jpg', label: 'Martin — reference 11' },
+      { src: 'https://i.pinimg.com/736x/89/47/37/89473727419d6448e0e8a3dcff18443e.jpg', label: 'Martin — reference 12' },
+    ],
+  },
+  {
+    id: 'dean_tavoularis', rank: '07', name: 'Dean Tavoularis (딘 타불라리스)',
+    subtitle: 'Production Designer · 미국 · 1932-',
+    styleType: 'realist', styleLabel: 'Atmospheric Realism',
+    desc: '프란시스 포드 코폴라의 핵심 협력자. 대부 2편의 정교한 시대 재현과 지옥의 묵시록의 필리핀 커츠 요새를 실제로 건설한 거장. 사실적이면서도 대기감 넘치는 환경 구축의 달인.',
+    styleDesc: '그릿한 대기적 리얼리즘. 완벽한 시대 고증 위에 분위기와 감정을 입히는 방식. 조명과 공간 구성으로 서사적 긴장감을 만들어낸다.',
+    technique: 'Period Authenticity: 시대별 소재, 질감, 노후화의 완벽한 재현.\nAtmospheric Tension: 공간의 밀도와 조명으로 긴장감 조성.\nPractical Construction: 대규모 물리적 세트의 현장 건설.',
+    aiPrompt: 'Dean Tavoularis production design, Godfather Corleone mansion interior, atmospheric period set, Coppola collaboration, gritty realistic 1940s environment, Apocalypse Now jungle compound, moody dramatic lighting',
+    films: ['대부 Part II (1974)', '지옥의 묵시록 (1979)', '대화 (1974)', '원 프롬 더 하트 (1982)'],
+    characters: ['코를레오네 저택', '커츠의 요새', '감시 아파트', '라스베이거스 거리'],
+    links: [
+      { text: 'ADG Hall of Fame: Dean Tavoularis', url: 'https://adg.org/hall-of-fame/dean-tavoularis' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/40/f6/b5/40f6b5218cfdd07c13cc93bc4d177e17.jpg', label: 'Tavoularis — reference 1' },
+      { src: 'https://i.pinimg.com/736x/43/71/42/4371422f19b7a6b7dda43c93dd51b05e.jpg', label: 'Tavoularis — reference 2' },
+      { src: 'https://i.pinimg.com/736x/11/bb/85/11bb8541db9fce7d326136c42e54bec5.jpg', label: 'Tavoularis — reference 3' },
+      { src: 'https://i.pinimg.com/736x/7c/a6/50/7ca6506aff3b6d375b957b0198d7da19.jpg', label: 'Tavoularis — reference 4' },
+      { src: 'https://i.pinimg.com/736x/1e/b0/4c/1eb04c2e889ecf4c7e37bf248dbf0a6d.jpg', label: 'Tavoularis — reference 5' },
+      { src: 'https://i.pinimg.com/736x/bb/05/3e/bb053ecb4e0700360dd344a76e934c20.jpg', label: 'Tavoularis — reference 6' },
+      { src: 'https://i.pinimg.com/736x/9e/31/47/9e31477aef30c5d58076f4ff2581bca7.jpg', label: 'Tavoularis — reference 7' },
+      { src: 'https://i.pinimg.com/736x/9b/c0/38/9bc038063e42fe40004f43a6509a5717.jpg', label: 'Tavoularis — reference 8' },
+      { src: 'https://i.pinimg.com/736x/e4/1c/dc/e41cdc5ebdac1c27adc55099f84f4c52.jpg', label: 'Tavoularis — reference 9' },
+      { src: 'https://i.pinimg.com/736x/c0/10/df/c010dfd179cbb0ecdbaf7f57d8db24b0.jpg', label: 'Tavoularis — reference 10' },
+      { src: 'https://i.pinimg.com/736x/8f/e7/fc/8fe7fc2a18be765d7ca0958708cc99d4.jpg', label: 'Tavoularis — reference 11' },
+      { src: 'https://i.pinimg.com/736x/66/88/68/668868995eb401500ca9f51b114d68fe.jpg', label: 'Tavoularis — reference 12' },
+    ],
+  },
+  {
+    id: 'bo_welch', rank: '08', name: 'Bo Welch (보 웰치)',
+    subtitle: 'Production Designer · 미국 · 1951-',
+    styleType: 'fantastical', styleLabel: 'Fantastical Suburbia',
+    desc: '팀 버튼의 핵심 디자이너. 가위손의 파스텔 교외와 배트맨 리턴즈의 고딕 고담 시티를 창조. 일상적 공간을 기묘하고 초현실적으로 비트는 독특한 스타일의 세트 디자이너.',
+    styleDesc: '양식화된 판타지 세트. 일상적인 미국 교외를 왜곡하고 과장하여 어둡고 기묘한 동화적 세계를 만드는 것이 특징. 고딕과 팝아트의 결합.',
+    technique: 'Suburban Distortion: 평범한 교외 풍경의 초현실적 변형.\nGothic Whimsy: 고딕 건축과 유쾌한 기이함의 결합.\nColor as Narrative: 색상을 통한 세계관과 감정 전달.',
+    aiPrompt: 'Bo Welch production design, Edward Scissorhands pastel suburbia, Tim Burton collaboration, stylized gothic fantasy set, distorted American neighborhood, Batman Returns Gotham City, whimsical dark fairy tale architecture',
+    films: ['가위손 (1990)', '배트맨 리턴즈 (1992)', '맨 인 블랙 (1997)', '레모니 스니켓 (2004)'],
+    characters: ['에드워드의 성', '파스텔 교외 마을', '고담 시티', 'MiB 본부'],
+    links: [
+      { text: 'Art Directors Guild: Bo Welch', url: 'https://adg.org/article/bo-welch' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/fc/fd/7d/fcfd7d2951db400ab9f2fdc110cf779a.jpg', label: 'Welch — reference 1' },
+      { src: 'https://i.pinimg.com/736x/f4/a6/0a/f4a60ab760ddac32acaf3e00d010551a.jpg', label: 'Welch — reference 2' },
+      { src: 'https://i.pinimg.com/736x/73/41/91/7341918540348942bc26fcff5a8c0483.jpg', label: 'Welch — reference 3' },
+      { src: 'https://i.pinimg.com/736x/37/c0/10/37c010817a39f36063dd11b6e186836b.jpg', label: 'Welch — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ba/d8/11/bad811be68fc81475bf7e1f095054f34.jpg', label: 'Welch — reference 5' },
+      { src: 'https://i.pinimg.com/736x/51/19/4f/51194f062255c3cab563a5dcc989d5f3.jpg', label: 'Welch — reference 6' },
+      { src: 'https://i.pinimg.com/736x/c4/26/62/c426628ebe18146357b7196cda3be2ab.jpg', label: 'Welch — reference 7' },
+      { src: 'https://i.pinimg.com/736x/86/c3/04/86c304656ad7454cdd95e951b7b0e8eb.jpg', label: 'Welch — reference 8' },
+      { src: 'https://i.pinimg.com/736x/fb/a4/fb/fba4fbfd311f7ed69961f6d9fdcfb95d.jpg', label: 'Welch — reference 9' },
+      { src: 'https://i.pinimg.com/736x/ca/f4/55/caf455b14682e21a0c160cea2a0c9155.jpg', label: 'Welch — reference 10' },
+      { src: 'https://i.pinimg.com/736x/4a/9f/d3/4a9fd379080c0e7a0593d7d5d1998f1d.jpg', label: 'Welch — reference 11' },
+      { src: 'https://i.pinimg.com/736x/02/b2/13/02b213a0fa3c7f371269199c48644135.jpg', label: 'Welch — reference 12' },
+    ],
+  },
+  {
+    id: 'jack_fisk', rank: '09', name: 'Jack Fisk (잭 피스크)',
+    subtitle: 'Production Designer · 미국 · 1945-',
+    styleType: 'naturalist', styleLabel: 'Naturalist Location Design',
+    desc: '테렌스 맬릭의 전 작품 프로덕션 디자이너. 데어 윌 비 블러드의 석유 타운, 레버넌트의 황야를 설계. 세트가 "발견된" 것처럼 느껴지는 극도의 자연주의를 추구한다.',
+    styleDesc: '자연주의적 로케이션 디자인. 인공적 느낌을 최소화하고, 실제 장소에서 발견한 듯한 환경을 구축. 지리적, 역사적 정확성에 대한 깊은 집착.',
+    technique: 'Found Environment: 세트가 "만들어진" 것이 아니라 "발견된" 느낌.\nGeographic Authenticity: 지리와 기후에 맞는 소재와 건축.\nMinimal Intervention: 자연 환경에 최소한의 인공 개입.',
+    aiPrompt: 'Jack Fisk production design, There Will Be Blood oil derrick town, Terrence Malick collaboration, naturalistic frontier set, authentic period American landscape, The Revenant wilderness camp, raw organic environment',
+    films: ['데어 윌 비 블러드 (2007)', '트리 오브 라이프 (2011)', '레버넌트 (2015)', '배드랜즈 (1973)'],
+    characters: ['리틀 보스턴 유전', '1950년대 텍사스 집', '프론티어 캠프', '다코타 황야'],
+    links: [
+      { text: 'IndieWire: Jack Fisk Interview', url: 'https://www.indiewire.com/features/general/jack-fisk-production-designer-interview-1201936258/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/4b/d2/08/4bd20875eeb7192a536a86facab7b631.jpg', label: 'Fisk — reference 1' },
+      { src: 'https://i.pinimg.com/736x/38/51/e0/3851e03d0c36aad5506fb764a541c5f3.jpg', label: 'Fisk — reference 2' },
+      { src: 'https://i.pinimg.com/736x/e1/47/1d/e1471db325778825477b37a3a5f8c0e3.jpg', label: 'Fisk — reference 3' },
+      { src: 'https://i.pinimg.com/736x/42/bb/cb/42bbcb8a1ce9294f24debf73308e76d0.jpg', label: 'Fisk — reference 4' },
+      { src: 'https://i.pinimg.com/736x/9e/c3/07/9ec307b23dc638c0fe173ce0ecced30f.jpg', label: 'Fisk — reference 5' },
+      { src: 'https://i.pinimg.com/736x/d8/20/18/d8201805529f104a97c9ee58bcdf6548.jpg', label: 'Fisk — reference 6' },
+      { src: 'https://i.pinimg.com/736x/5c/a3/69/5ca369c53044e5aa7d39a693c5b0a44d.jpg', label: 'Fisk — reference 7' },
+      { src: 'https://i.pinimg.com/736x/cb/89/0c/cb890c0720fdb95ea3b4bb0909573279.jpg', label: 'Fisk — reference 8' },
+      { src: 'https://i.pinimg.com/736x/e2/55/1d/e2551d87c80f04ce18d83f23562818d0.jpg', label: 'Fisk — reference 9' },
+      { src: 'https://i.pinimg.com/736x/ba/53/eb/ba53eb5c2eaf3f7509bc11605b7b5d56.jpg', label: 'Fisk — reference 10' },
+      { src: 'https://i.pinimg.com/736x/23/dd/98/23dd981a7a45306c729ec8f61bb5c8f6.jpg', label: 'Fisk — reference 11' },
+      { src: 'https://i.pinimg.com/736x/5b/f6/f6/5bf6f60fadac7e60981ce03d88032859.jpg', label: 'Fisk — reference 12' },
+    ],
+  },
+  {
+    id: 'nathan_crowley', rank: '10', name: 'Nathan Crowley (네이선 크롤리)',
+    subtitle: 'Production Designer · 영국 · 1966-',
+    styleType: 'practical', styleLabel: 'Practical Large-Scale Build',
+    desc: '크리스토퍼 놀란의 핵심 프로덕션 디자이너. 다크 나이트의 배트케이브, 인터스텔라의 엔듀런스 우주선, 덩케르크 해변을 실물 크기로 건설. 디지털보다 실물 세트를 선호하는 장인.',
+    styleDesc: '대규모 실물 세트 건설. 디지털 확장을 최소화하고 물리적으로 실제 크기의 세트를 짓는 것을 원칙으로 삼는다. 과학적, 공학적 정확성에 기반한 사실적 설계.',
+    technique: 'Full-Scale Practical Build: 실물 크기 세트의 물리적 건설.\nEngineering Accuracy: 과학·공학적으로 타당한 설계.\nMinimal Digital Extension: 디지털 보완을 최소화한 촬영.',
+    aiPrompt: 'Nathan Crowley production design, Dark Knight Batcave practical set, Christopher Nolan collaboration, Interstellar Endurance spacecraft interior, large-scale physical construction, Dunkirk beach military set, engineering-accurate design',
+    films: ['다크 나이트 (2008)', '인터스텔라 (2014)', '덩케르크 (2017)', '테넷 (2020)'],
+    characters: ['배트케이브', '엔듀런스 우주선', '덩케르크 해변', '오슬로 프리포트'],
+    links: [
+      { text: 'Dezeen: Nathan Crowley Nolan Sets', url: 'https://www.dezeen.com/tag/nathan-crowley/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/ba/d1/20/bad120f4abf374e5acc95465a0794439.jpg', label: 'Crowley — reference 1' },
+      { src: 'https://i.pinimg.com/736x/87/e4/0b/87e40b8f761679dc2d6a35ab74da7a91.jpg', label: 'Crowley — reference 2' },
+      { src: 'https://i.pinimg.com/736x/51/04/3f/51043f4d972660700172be66c63a8d1f.jpg', label: 'Crowley — reference 3' },
+      { src: 'https://i.pinimg.com/736x/a7/1d/f0/a71df0b4b5fe3150bdb3a09f15ac72c6.jpg', label: 'Crowley — reference 4' },
+      { src: 'https://i.pinimg.com/736x/09/eb/6a/09eb6a1a366dd6c83b5b88587b712f28.jpg', label: 'Crowley — reference 5' },
+      { src: 'https://i.pinimg.com/736x/c9/af/a7/c9afa7daf88fad51366c890a3a767a40.jpg', label: 'Crowley — reference 6' },
+      { src: 'https://i.pinimg.com/736x/19/af/8d/19af8d0a5d093f0c4613b8065ff72751.jpg', label: 'Crowley — reference 7' },
+      { src: 'https://i.pinimg.com/736x/6b/db/74/6bdb74c46e00bd87cd3fab383c93f49f.jpg', label: 'Crowley — reference 8' },
+      { src: 'https://i.pinimg.com/736x/bf/94/71/bf9471b024578dcd6493f82b54c40a0a.jpg', label: 'Crowley — reference 9' },
+      { src: 'https://i.pinimg.com/736x/9f/6b/6f/9f6b6f8274c0096d4a9cc54dedf242ee.jpg', label: 'Crowley — reference 10' },
+      { src: 'https://i.pinimg.com/736x/39/44/84/3944844b5e4f567ab3fa1dc38d6f0233.jpg', label: 'Crowley — reference 11' },
+      { src: 'https://i.pinimg.com/736x/99/c7/69/99c7691f316bd393d3f60697f549026b.jpg', label: 'Crowley — reference 12' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = DESIGNERS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+  if (typeof isMobile === "function" && isMobile()) switchMobileTab("viewer");
+}
+
+function updateInfoPanel(a) {
+  let techniqueSec = '';
+  if (a.technique) {
+    techniqueSec = `
+      <div class="info-section">
+        <h4>Technique</h4>
+        <p>${a.technique.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+  }
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    ${techniqueSec}
+    <div class="info-section">
+      <h4>AI Prompt</h4>
+      <div class="prompt-box" onclick="copyPrompt(this, '${a.id}')">
+        <span class="copy-hint">click to copy</span>
+        ${a.aiPrompt}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function copyPrompt(el, id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  navigator.clipboard.writeText(artist.aiPrompt).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.copy-hint').textContent = 'copied!';
+    setTimeout(() => {
+      el.classList.remove('copied');
+      el.querySelector('.copy-hint').textContent = 'click to copy';
+    }, 1500);
+  });
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 4}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image available</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.parentElement.querySelector('.no-image')||this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.style.opacity = '0';
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.onerror = function() {
+      img.style.display = 'none';
+      ph.style.display = 'flex';
+      ph.style.flexDirection = 'column';
+      ph.style.alignItems = 'center';
+      ph.style.justifyContent = 'center';
+      ph.innerHTML = `<div style="text-align:center;color:var(--text-dim)">`
+        + `<div style="font-size:2em;margin-bottom:8px">&#9888;</div>`
+        + `<div style="font-size:0.85em;color:#888">${a.images[currentImageIdx].label}</div>`
+        + `<div style="font-size:0.75em;margin-top:4px;color:#555">이미지를 불러올 수 없습니다</div>`
+        + `<button onclick="selectImage(${currentImageIdx})" style="margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em">재시도</button>`
+        + `</div>`;
+    };
+    img.src = a.images[currentImageIdx].src;
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#127912;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function openModal() {
+  const sel = document.getElementById('modalStyle');
+  if (sel.options.length <= 1) {
+    DESIGNERS.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const camera = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+  if (!scene.trim()) { alert('Set description is required.'); return; }
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+  const cmd = style === 'all'
+    ? `python3 main.py compare --type set --scene "${scene}"`
+    : `python3 main.py generate --type set --scene "${scene}" --style ${style}`;
+  console.log('Run:', cmd);
+  setTimeout(() => {
+    setStatus('ready', `Generation complete. Run in terminal: ${cmd}`);
+  }, 2000);
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id);
+  }
+});
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

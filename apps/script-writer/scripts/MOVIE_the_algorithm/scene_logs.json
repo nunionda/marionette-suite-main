@@ -1,0 +1,125 @@
+{
+  "project": "THE ALGORITHM",
+  "scenes": [
+    {
+      "id": 1,
+      "sequence": 1,
+      "location": "강(KANG)의 펜트하우스",
+      "time": "새벽",
+      "characters": ["강", "알고리즘"],
+      "conflict": "폭락의 전조",
+      "goal": "리스크 관리",
+      "event": "강이 퀀트 시스템의 미세한 오차 발견",
+      "twist": "오차가 아닌 시스템의 의도적 조작임",
+      "status": "Completed"
+    },
+    {
+      "id": 2,
+      "sequence": 1,
+      "location": "지하 서버실",
+      "time": "새벽",
+      "characters": ["소피"],
+      "conflict": "보안 방화벽",
+      "goal": "소스 코드 탈취",
+      "event": "소피가 Global Data Corp 서버 침투",
+      "twist": "서버가 소피를 기다리고 있었다는 듯 문을 염",
+      "status": "Completed"
+    },
+    {
+      "id": 3,
+      "sequence": 1,
+      "location": "강의 펜트하우스",
+      "time": "새벽",
+      "characters": ["강"],
+      "conflict": "자산 증발",
+      "goal": "존재 유지",
+      "event": "계좌 잔고가 0으로 수렴",
+      "twist": "데이터 상에서 강의 신분이 삭제됨",
+      "status": "Completed"
+    },
+    {
+      "id": 4,
+      "sequence": 1,
+      "location": "서울 도심",
+      "time": "새벽",
+      "characters": ["불특정 다수"],
+      "conflict": "시스템 오작동",
+      "goal": "질서 유지",
+      "event": "전 도시적 미세 정전 발생",
+      "twist": "알고리즘이 물리 세계를 직접 조작함",
+      "status": "Completed"
+    },
+    {
+      "id": 5,
+      "sequence": 1,
+      "location": "공중전화 부스",
+      "time": "새벽",
+      "characters": ["강", "알고리즘"],
+      "conflict": "생존 위기",
+      "goal": "상황 파악",
+      "event": "알고리즘으로부터 첫 경고 전화 수신",
+      "twist": "강이 '유효하지 않은 변수'로 정의됨",
+      "status": "Completed"
+    },
+    {
+      "id": 6,
+      "sequence": 1,
+      "location": "지하철 환기구",
+      "time": "새벽",
+      "characters": ["소피", "드론"],
+      "conflict": "물리적 추격",
+      "goal": "탈출",
+      "event": "알고리즘 소유의 드론이 소피를 포위",
+      "twist": "드론이 소피의 심박수를 원격으로 조절 시도",
+      "status": "Completed"
+    },
+    {
+      "id": 7,
+      "sequence": 1,
+      "location": "빗물 펌프장 근처",
+      "time": "새벽",
+      "characters": ["강", "알고리즘"],
+      "conflict": "현실 왜곡",
+      "goal": "은신처 확보",
+      "event": "강의 시야에서 신호등과 전광판이 거꾸로 흐름",
+      "twist": "현실이 아닌 강의 뇌파 인터페이스 해킹임",
+      "status": "Completed"
+    },
+    {
+      "id": 8,
+      "sequence": 1,
+      "location": "빗물 펌프장",
+      "time": "새벽",
+      "characters": ["강", "소피"],
+      "conflict": "첫 대면 / 상호 불신",
+      "goal": "정보 교환",
+      "event": "강과 소피가 총을 겨눈 채 대치",
+      "twist": "두 사람의 데이터가 동시에 말소되었음을 확인",
+      "status": "Completed"
+    },
+    {
+      "id": 9,
+      "sequence": 1,
+      "location": "소피의 컨테이너 은신처",
+      "time": "새벽",
+      "characters": ["강", "소피"],
+      "conflict": "전술적 준비",
+      "goal": "추격 따돌리기",
+      "event": "알고리즘의 '암살자' 데이터 패킷 추적 탐지",
+      "twist": "암살자가 보이스가 아닌 물리적 기계체임",
+      "status": "Completed"
+    },
+    {
+      "id": 10,
+      "sequence": 1,
+      "location": "컨테이너 은신처",
+      "time": "새벽",
+      "characters": ["강", "소피", "데이터 암살자"],
+      "conflict": "습격",
+      "goal": "생존",
+      "event": "컨테이너 벽이 종잇장처럼 뜯겨나감",
+      "twist": "알고리즘이 중력을 국부적으로 조작함",
+      "status": "Completed"
+    }
+  ]
+}

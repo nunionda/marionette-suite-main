@@ -1,0 +1,85 @@
+import React, { useState, useContext } from 'react';
+import './styles/Theme.css';
+import Dashboard from './components/Dashboard';
+import ProjectDetail from './components/ProjectDetail';
+import AdProjectDetail from './components/AdProjectDetail';
+import DramaProjectDetail from './components/DramaProjectDetail';
+import ExportRenderView from './components/ExportRenderView';
+import { ProjectProvider, ProjectContext } from './context/ProjectContext';
+
+function AppContent() {
+  const { projects } = useContext(ProjectContext);
+  const [currentProjectId, setCurrentProjectId] = React.useState(() => {
+    return localStorage.getItem('lastProjectId') || null;
+  });
+  const [isSyncing, setIsSyncing] = React.useState(true);
+
+  React.useEffect(() => {
+    // Give a short window for projects to load from context
+    const timer = setTimeout(() => setIsSyncing(false), 1000);
+    return () => clearTimeout(timer);
+  }, [projects]);
+
+  // Handle Export Rendering Route
+  const path = window.location.pathname;
+  if (path.startsWith('/render/project/')) {
+    const renderProjectId = path.split('/').pop();
+    const renderProject = projects.find(p => String(p.id) === String(renderProjectId));
+    if (!renderProject && !isSyncing) {
+      return <div style={{ color: "white" }}>Project Not Found for Export</div>;
+    }
+    if (!renderProject) return null; // wait while syncing
+    return <ExportRenderView project={renderProject} />;
+  }
+
+  const handleEnterLab = (id) => {
+    setCurrentProjectId(id);
+    localStorage.setItem('lastProjectId', id);
+  };
+
+  const activeProject = projects.find(p => String(p.id) === String(currentProjectId));
+  
+  const handleBack = () => {
+    setCurrentProjectId(null);
+    localStorage.removeItem('lastProjectId');
+  };
+  const isAd = activeProject?.category === 'Commercial';
+  const isDrama = activeProject?.category === 'Netflix Original';
+
+  return (
+    <div className="App">
+      {isSyncing && currentProjectId ? (
+        <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a', color: 'var(--accent-primary)' }}>
+          Restoring Project Session...
+        </div>
+      ) : !activeProject ? (
+        <Dashboard onEnterLab={handleEnterLab} />
+      ) : isAd ? (
+        <AdProjectDetail 
+          project={activeProject} 
+          onBack={handleBack} 
+        />
+      ) : isDrama ? (
+        <DramaProjectDetail
+          project={activeProject}
+          onBack={handleBack}
+        />
+      ) : (
+        <ProjectDetail 
+          project={activeProject} 
+          onBack={handleBack} 
+        />
+      )}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ProjectProvider>
+      <AppContent />
+    </ProjectProvider>
+  );
+}
+
+export default App;

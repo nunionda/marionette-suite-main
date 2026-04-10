@@ -1,0 +1,49 @@
+graph TB
+    %% 퀀트 (Quant) 상세 인물 관계도: 아카데미 시상식 도전판
+
+    subgraph SOUTH["대한민국 (South Korea)"]
+        JinWoo["<b>진우 (Jin-woo)</b><br/>전직 국정원 블랙요원<br/>현 퀀트 데이터 과학자"]
+        DirJung["<b>정 부장 (Director Jung)</b><br/>국정원 사이버보안국<br/>권력 지향적 원칙주의자"]
+        HyeYoon["<b>혜윤 (Hye-yoon)</b><br/>국정원 현장 분석관<br/>진우의 과거 동료/조력자"]
+    end
+
+    subgraph NORTH["북한 (North Korea)"]
+        SeolHee["<b>설희 (Seol-hee)</b><br/>110호 연구소 팀장<br/>인간 병기 해커 / 은서의 엄마"]
+        ColRi["<b>리 상좌 (Col. Ri)</b><br/>보위성 작전관<br/>잔혹한 감시자"]
+        EunSeo["<b>은서 (Eun-seo, 7세)</b><br/>설희와 진우의 딸<br/>평양 보육기관 인질 (진우는 모름)"]
+        DeanKoo["<b>구 학장 (Dean Koo)</b><br/>설희의 스승/전 연구소장<br/>비밀 조력자"]
+    end
+
+    subgraph SHADOW["제3의 세력 (The Shadow Network)"]
+        Alexei["<b>알렉세이 (Alexei)</b><br/>전 KGB 출신 브로커<br/>핵개발 자금 세탁의 몸통"]
+        Smith["<b>스미스 (Smith)</b><br/>FBI/CIA 합동 태스크포스<br/>북한 핵자금 추적 총책"]
+    end
+
+    %% 관계선 설정
+    JinWoo <-.->|7년 전 하룻밤 / 운명적 재회| SeolHee
+    JinWoo ---|불신/감시| DirJung
+    JinWoo ---|신뢰/과거 연민| HyeYoon
+    JinWoo -.-|모르는 아이| EunSeo
+
+    SeolHee ---|공포/복종| ColRi
+    SeolHee ===|모성/희생의 핵심| EunSeo
+    SeolHee ---|정신적 지주/은밀한 보호| DeanKoo
+
+    DirJung <==>|정치적 거래| Smith
+    ColRi <==>|핵 자금 결제 계약| Alexei
+    Alexei ---|배후 조종| Smith
+
+    %% 갈등 구조
+    HyeYoon -.->|정 부장의 명령| JinWoo
+    ColRi -.->|설희 압박용 인질| EunSeo
+    Alexei -.->|알고리즘 탈취 타겟| JinWoo
+
+    %% 스타일링
+    style JinWoo fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    style SeolHee fill:#ffebee,stroke:#b71c1c,stroke-width:2px
+    style ColRi fill:#fce4ec,stroke:#880e4f
+    style DirJung fill:#f3e5f5,stroke:#4a148c
+    style Alexei fill:#fff3e0,stroke:#e65100
+    style Smith fill:#e8f5e9,stroke:#1b5e20
+    style EunSeo fill:#fff9c4,stroke:#f57f17,stroke-width:3px
+    style DeanKoo fill:#fffde7,stroke:#fbc02d

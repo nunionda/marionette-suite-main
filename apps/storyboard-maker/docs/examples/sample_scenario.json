@@ -1,0 +1,55 @@
+{
+  "project": "Dark Alley Mystery",
+  "scenes": [
+    {
+      "scene_id": "SC001",
+      "description": "주인공이 어두운 골목에서 그림자를 발견한다",
+      "camera_angle": "low angle",
+      "mood": "suspense",
+      "characters": ["주인공"],
+      "location": "dark alley at night"
+    },
+    {
+      "scene_id": "SC002",
+      "description": "그림자가 벽을 타고 빠르게 이동한다",
+      "camera_angle": "dutch angle",
+      "mood": "tension",
+      "characters": [],
+      "location": "narrow corridor"
+    },
+    {
+      "scene_id": "SC003",
+      "description": "주인공이 손전등을 켜고 그림자를 추적한다",
+      "camera_angle": "over the shoulder",
+      "mood": "determination",
+      "characters": ["주인공"],
+      "location": "abandoned building entrance"
+    },
+    {
+      "scene_id": "SC004",
+      "description": "그림자의 정체가 드러나는 클로즈업",
+      "camera_angle": "extreme close-up",
+      "mood": "reveal",
+      "characters": ["주인공", "그림자 인물"],
+      "location": "dimly lit room"
+    },
+    {
+      "scene_id": "SC005",
+      "description": "두 인물이 대치하는 와이드 샷",
+      "camera_angle": "wide shot",
+      "mood": "confrontation",
+      "characters": ["주인공", "그림자 인물"],
+      "location": "open rooftop under moonlight"
+    },
+    {
+      "scene_id": "SC006",
+      "description": "주인공이 달빛 아래 혼자 서있는 엔딩",
+      "camera_angle": "extreme wide shot",
+      "mood": "melancholy",
+      "characters": ["주인공"],
+      "location": "rooftop edge, city skyline"
+    }
+  ],
+  "style": "all",
+  "output_format": "both"
+}

@@ -1,0 +1,136 @@
+.analysis-module {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.analysis-loading, .analysis-error {
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  letter-spacing: 0.2em;
+}
+
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.analysis-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-radius: 12px;
+}
+
+.card-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+}
+
+.roi-badge {
+  font-size: 1.5rem;
+  font-weight: 800;
+  padding: 8px 16px;
+  border-radius: 6px;
+  text-align: center;
+  width: fit-content;
+}
+
+.roi-badge.gold {
+  background: rgba(255, 215, 0, 0.1);
+  color: #ffd700;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+}
+
+.roi-badge.blue {
+  background: rgba(0, 150, 255, 0.1);
+  color: var(--accent-primary);
+  border: 1px solid rgba(0, 150, 255, 0.3);
+}
+
+.rating-tag {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.market-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.market-value span {
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
+.sentiment-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #00ffcc;
+}
+
+.sentiment-value span {
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+
+.sentiment-bar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sentiment-fill {
+  height: 100%;
+  background: #00ffcc;
+  box-shadow: 0 0 10px #00ffcc;
+}
+
+/* Emotion Section */
+.emotion-section {
+  padding: 24px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.6rem;
+}
+
+.pos { color: #00ffcc; }
+.neg { color: #ff00cc; }
+
+.sparkline-container {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.emotion-sparkline {
+  filter: drop-shadow(0 0 8px rgba(0, 255, 200, 0.2));
+}
+
+.analysis-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}

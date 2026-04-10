@@ -1,3 +1,5 @@
 packages:
   - 'apps/*'
   - 'packages/*'
+  - 'apps/production-pipeline/packages/*'
+  - 'apps/analysis-system/packages/*'
