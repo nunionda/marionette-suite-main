@@ -10,7 +10,7 @@ from server.models.database import Project, PipelinePreset
 from server.models.schemas import ProjectCreate, ProjectUpdate, ProjectResponse
 from server.services.preset_service import generate_graph_from_preset
 
-router = APIRouter(prefix="/api/projects", tags=["projects"])
+router = APIRouter()
 
 
 @router.get("/", response_model=List[ProjectResponse])

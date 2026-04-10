@@ -11,7 +11,7 @@ from server.models.database import Project, PipelineRun, RunStatus
 from server.models.schemas import PipelineRunCreate, PipelineRunResponse
 from server.services.pipeline_runner import PipelineRunner, PIPELINE_STEPS
 
-router = APIRouter(prefix="/api/pipeline", tags=["pipeline"])
+router = APIRouter()
 
 # WebSocket 브로드캐스트 함수 (app.py에서 주입)
 _broadcast_fn = None

@@ -7,7 +7,7 @@ from server.core.database import get_db
 from server.services.bible_service import BibleService
 from server.models.database import Project
 
-router = APIRouter(prefix="/api/bible", tags=["bible"])
+router = APIRouter()
 
 @router.post("/{project_id}/generate")
 async def generate_bible(project_id: str, db: Session = Depends(get_db)):

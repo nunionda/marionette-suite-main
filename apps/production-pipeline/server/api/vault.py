@@ -10,7 +10,7 @@ from server.core.database import get_db
 from server.models.database import Credential
 from server.utils.encryption import encrypt_key, decrypt_key
 
-router = APIRouter(prefix="/api/vault", tags=["vault"])
+router = APIRouter()
 
 class CredentialCreate(BaseModel):
     provider: str

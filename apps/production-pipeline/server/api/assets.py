@@ -7,7 +7,7 @@ from server.core.database import get_db
 from server.models.database import GlobalAsset, PipelineTake, Project
 from server.models.schemas import AssetResponse, AssetPromotionRequest
 
-router = APIRouter(prefix="/api/assets", tags=["assets"])
+router = APIRouter()
 
 @router.get("/", response_model=List[AssetResponse])
 def list_assets(

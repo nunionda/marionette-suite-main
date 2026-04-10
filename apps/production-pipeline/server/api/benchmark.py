@@ -7,7 +7,7 @@ from server.services.benchmark_service import BenchmarkService
 from server.services.pipeline_runner import PipelineRunner
 from server.api.websocket import manager
 
-router = APIRouter(prefix="/api/benchmark", tags=["benchmark"])
+router = APIRouter()
 
 # 전역 PipelineRunner 인스턴스 (app.py에서 주입받아야 함)
 _runner: PipelineRunner = None

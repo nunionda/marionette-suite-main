@@ -6,7 +6,7 @@ from server.core.config import settings
 
 from server.services.auditor import auditor
 
-router = APIRouter(prefix="/api/system", tags=["system"])
+router = APIRouter()
 
 @router.get("/health")
 def get_system_health() -> Dict[str, Any]:
