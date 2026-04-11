@@ -103,6 +103,26 @@ export interface Agent {
   };
 }
 
+/* ─── Queue ─── */
+export type QueueItemStatus = 'pending' | 'processing' | 'done' | 'error';
+
+export interface QueueItem {
+  id: string;
+  sceneSlug: string;
+  cutSlug: string;
+  displayId: string;
+  status: QueueItemStatus;
+  errorMessage?: string;
+  durationMs?: number;
+}
+
+export interface AgentWithQueue extends Agent {
+  label: string;
+  paused: boolean;
+  queue: QueueItem[];
+  history: QueueItem[];
+}
+
 /* ─── API responses ─── */
 export interface ProjectListResponse {
   projects: Project[];

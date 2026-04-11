@@ -3,6 +3,7 @@ import type {
   SceneMeta,
   SceneDetail,
   SceneListResponse,
+  AgentWithQueue,
 } from './types';
 import {
   MOCK_PROJECTS,
@@ -10,6 +11,7 @@ import {
   makeMockSceneDetail,
   makeMockSequences,
 } from './mock-data';
+import { makeMockAgents } from './agent-mock';
 
 const PRODUCTION_API = process.env.NEXT_PUBLIC_PRODUCTION_API_URL ?? 'http://localhost:4000';
 
@@ -65,6 +67,20 @@ export async function fetchScenes(
   if (opts.status) scenes = scenes.filter(s => s.status === opts.status);
   return { ...data, scenes };
 }
+
+/* ─── Agents ─── */
+
+export async function fetchAgents(projectId: string): Promise<AgentWithQueue[]> {
+  const project = await fetchProject(projectId);
+  const initials = project?.initials ?? 'UNK';
+
+  return fetchJSON<AgentWithQueue[]>(
+    `${PRODUCTION_API}/api/projects/${projectId}/agents`,
+    () => makeMockAgents(projectId, initials),
+  );
+}
+
+/* ─── Scene Detail ─── */
 
 export async function fetchSceneDetail(
   projectId: string,
