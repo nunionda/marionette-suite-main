@@ -21,7 +21,73 @@
 
 ---
 
-## 2. 데이터 규모
+## 2. 네이밍 컨벤션
+
+### 기본 형식
+```
+[프로젝트이니셜]_sc[씬번호3자리]_cut[컷번호3자리]
+```
+
+### 예시
+| 요소 | 예시 | 설명 |
+|------|------|------|
+| 프로젝트 이니셜 | `TDK` | 영화 제목 첫글자 조합 (The Dark Knight → TDK) |
+| 씬 | `sc001` ~ `sc150` | 3자리 zero-padding |
+| 컷 | `cut001` ~ `cut020` | 3자리 zero-padding |
+| **전체 식별자** | `TDK_sc001_cut001` | 프로젝트 전역 고유 ID |
+
+### 파생 네이밍 규칙
+
+```
+# 에셋 파일명
+TDK_sc001_cut001_img001.jpg      ← 이미지 (생성순)
+TDK_sc001_cut001_img001_v2.jpg   ← 재생성 버전
+TDK_sc001_cut001_vid001.mp4      ← 영상
+TDK_sc001_cut001_aud001.mp3      ← 음성/TTS
+
+# 프롬프트 버전
+TDK_sc001_cut001_prompt_v1.json
+TDK_sc001_cut001_prompt_v2.json
+
+# 씬 대표이미지 (컷 없음)
+TDK_sc001_cover.jpg
+```
+
+### URL 반영
+```
+/projects/[id]/scenes/sc001               ← 씬 상세
+/projects/[id]/scenes/sc001/cuts/cut001   ← 컷 노드 에디터
+```
+
+### 데이터 모델 반영
+```typescript
+Scene {
+  id: string          // DB UUID
+  slug: 'sc001'       // URL/파일명용 식별자
+  displayId: 'TDK_sc001'  // UI 표시용
+}
+
+Cut {
+  id: string          // DB UUID
+  slug: 'cut001'      // 씬 내 순서
+  displayId: 'TDK_sc001_cut001'  // 전역 고유 표시명
+}
+
+Asset {
+  id: string
+  filename: 'TDK_sc001_cut001_img001.jpg'  // 저장소 파일명
+}
+```
+
+### 프로젝트 이니셜 생성 규칙
+1. 영어 제목: 단어 첫글자 대문자 조합 (`The Dark Knight` → `TDK`)
+2. 한글 제목: 로마자 변환 후 첫글자 (`기생충` → `GSC`, `Gisaengchung`)
+3. 충돌 시: 숫자 suffix 추가 (`TDK2`)
+4. 최대 5자리
+
+---
+
+## 3. 데이터 규모
 
 ```
 영화 1편 = 120~150씬 × 20컷 = 2,400~3,000컷
@@ -36,74 +102,118 @@
 
 ---
 
-## 3. 데이터 모델
+## 4. 데이터 모델
 
 ```typescript
 Project {
-  id, title, status, posterUrl
+  id: string             // DB UUID
+  initials: string       // 'TDK' — 네이밍 컨벤션 접두사
+  title: string
+  status: 'development' | 'production' | 'post'
+  posterUrl: string
   sequences: Sequence[]
 }
 
 Sequence {
-  id, number, title, projectId
-  sceneCount, completedSceneCount
+  id: string
+  number: number         // 1, 2, 3...
+  title: string
+  projectId: string
+  sceneCount: number
+  completedSceneCount: number
 }
 
 Scene {
-  id, number, sequenceId
-  title, location, timeOfDay, summary
-  representativeImageUrl          // 씬 목록 썸네일
-  cutCount, completedCutCount
+  id: string             // DB UUID
+  slug: string           // 'sc001' — URL/파일명용
+  displayId: string      // 'TDK_sc001' — UI 표시
+  number: number         // 1~150
+  sequenceId: string
+  title: string
+  location: string
+  timeOfDay: string
+  summary: string
+  coverImageUrl: string  // 'TDK_sc001_cover.jpg' — 씬 목록 썸네일
+  cutCount: number
+  completedCutCount: number
   status: 'pending' | 'in_progress' | 'done'
-  cuts: Cut[]                     // 씬 상세 진입 시에만 로드
+  cuts: Cut[]            // 씬 상세 진입 시에만 로드
 }
 
 Cut {
-  id, number, sceneId
-  duration: 3 | 4 | 5            // 초 단위
-  imagePrompt, videoPrompt
+  id: string             // DB UUID
+  slug: string           // 'cut001' — 씬 내 순서
+  displayId: string      // 'TDK_sc001_cut001' — 전역 고유 표시명
+  number: number         // 1~20
+  sceneId: string
+  duration: 3 | 4 | 5   // 초 단위
+  imagePrompt: string
+  videoPrompt: string
   status: 'pending' | 'generating' | 'done' | 'approved'
   assets: Asset[]
 }
 
 Asset {
-  id, cutId, type: 'image' | 'video' | 'audio'
-  url, provider, approved: boolean
+  id: string
+  cutId: string
+  type: 'image' | 'video' | 'audio'
+  filename: string       // 'TDK_sc001_cut001_img001.jpg'
+  url: string
+  version: number        // 재생성 버전
+  provider: string       // 'midjourney' | 'runway' | 'elevenlabs'
+  approved: boolean
 }
 
 Agent {
-  id, type, projectId
+  id: string
+  type: 'image_gen' | 'video_gen' | 'audio_gen' | 'prompt' | 'analysis'
+  projectId: string
   status: 'idle' | 'running' | 'done' | 'error'
-  currentTask?: { sceneId, cutId }
-  stats: { processed, errors, queueSize }
+  currentTask?: { sceneSlug: string; cutSlug: string; displayId: string }
+  stats: { processed: number; errors: number; queueSize: number }
 }
 ```
 
 ---
 
-## 4. URL 구조
+## 5. URL 구조
+
+씬/컷 URL은 네이밍 컨벤션 slug를 그대로 사용합니다.
 
 ```
-/                                                   홈 · 프로젝트 목록
-/studio/[projectId]                                 씨네 스크립라이터 (1단계)
+/                                                         홈 · 프로젝트 목록
+/studio/[projectId]                                       씨네 스크립라이터 (1단계)
 
-/projects/[id]                                      프로젝트 허브
+/projects/[id]                                            프로젝트 허브
   ?tab=overview|analysis|agents|management
 
-/projects/[id]/scenes                               씬 목록 (2,3단계 진입점)
-  ?seq=[sequenceId]                                 시퀀스 필터
-  ?status=pending|in_progress|done                  상태 필터
+/projects/[id]/scenes                                     씬 목록 (2,3단계 진입점)
+  ?seq=[sequenceNumber]                                   시퀀스 필터
+  ?status=pending|in_progress|done                        상태 필터
 
-/projects/[id]/scenes/[sceneId]                     씬 상세 · 컷 필름스트립
-/projects/[id]/scenes/[sceneId]/cuts/[cutId]        컷 노드 에디터
+/projects/[id]/scenes/sc001                               씬 상세 · 컷 필름스트립
+/projects/[id]/scenes/sc001/cuts/cut001                   컷 노드 에디터
 
-/projects/[id]/agents                               에이전트 허브
-/projects/[id]/agents/[agentId]                     에이전트 상세
+/projects/[id]/agents                                     에이전트 허브
+/projects/[id]/agents/[agentId]                           에이전트 상세
+```
+
+**URL 예시 (TDK 프로젝트)**
+```
+/projects/tdk/scenes/sc023                 TDK 씬23 상세
+/projects/tdk/scenes/sc023/cuts/cut007    TDK 씬23 컷07 노드 에디터
+```
+
+**URL ↔ displayId 매핑**
+```
+URL slug    displayId (UI 표시)   파일명 접두사
+sc001       TDK_sc001             TDK_sc001_*
+cut007      TDK_sc023_cut007      TDK_sc023_cut007_*
 ```
 
 ---
 
-## 5. 페이지별 설계
+## 6. 페이지별 설계
 
 ### 5-1. 홈 `/`
 - **역할:** 제작 중인 영화 프로젝트 목록
@@ -130,15 +240,15 @@ Agent {
 - **성능:** react-virtual 가상 스크롤 (150개 DOM 동시 렌더 금지)
 - **인터랙션:** 카드 클릭 → 씬 상세
 
-### 5-5. 씬 상세 `/projects/[id]/scenes/[sceneId]`
+### 5-5. 씬 상세 `/projects/[id]/scenes/sc001`
 - **역할:** 씬 정보 + 20컷 필름스트립
 - **레이아웃:**
-  - 상단 헤더: 씬 정보 (시퀀스, 장소, 시간대, 등장인물, 길이)
+  - 상단 헤더: `TDK_sc001` displayId + 씬 정보 (시퀀스, 장소, 시간대, 등장인물, 길이)
   - 본문: 가로 스크롤 필름스트립 (컷 카드 20개)
-  - 컷 카드: 이미지/상태/duration 표시, 클릭 → 컷 노드 에디터
-- **이동:** 이전씬 ← → 다음씬 네비게이션
+  - 컷 카드: `cut001`~`cut020` 라벨 + 이미지/상태/duration, 클릭 → 컷 노드 에디터
+- **이동:** 이전씬(`sc000`) ← → 다음씬(`sc002`) 네비게이션
 
-### 5-6. 컷 노드 에디터 `/projects/[id]/scenes/[sceneId]/cuts/[cutId]` ⭐
+### 5-6. 컷 노드 에디터 `/projects/[id]/scenes/sc001/cuts/cut007` ⭐
 - **역할:** AI 영상 제작 프로세스를 노드로 표현
 - **기술:** React Flow (또는 @xyflow/react)
 - **노드 타입:**
@@ -185,7 +295,7 @@ Agent {
 
 ---
 
-## 6. 기술 스택
+## 7. 기술 스택
 
 ```
 Framework:      Next.js 15 (App Router)
@@ -201,7 +311,7 @@ Styling:        Tailwind CSS + CSS Variables (다크 테마 우선)
 
 ---
 
-## 7. 디자인 시스템
+## 8. 디자인 시스템
 
 ```css
 /* 컬러 팔레트 — 시네마틱 다크 */
@@ -219,7 +329,7 @@ Styling:        Tailwind CSS + CSS Variables (다크 테마 우선)
 
 ---
 
-## 8. 구현 우선순위
+## 9. 구현 우선순위
 
 | 단계 | 범위 | 목표 |
 |------|------|------|
@@ -232,7 +342,7 @@ Styling:        Tailwind CSS + CSS Variables (다크 테마 우선)
 
 ---
 
-## 9. 기존 백엔드 API 활용
+## 10. 기존 백엔드 API 활용
 
 ```
 scenario-api  :4005  → 시나리오 분석 (그대로 사용)
