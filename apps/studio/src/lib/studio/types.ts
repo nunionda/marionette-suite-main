@@ -114,6 +114,8 @@ export interface QueueItem {
   status: QueueItemStatus;
   errorMessage?: string;
   durationMs?: number;
+  audioUrl?: string;           // WAV preview URL (audio_gen agent)
+  speaker?: string;            // 화자 이름 (multi-speaker TTS)
 }
 
 export interface AgentWithQueue extends Agent {

@@ -8,6 +8,8 @@ class Scene(BaseModel):
     camera_angle: str = Field(description="카메라 앵글 및 워킹 (예: Wide shot, Close-up, Tracking shot)")
     action_description: str = Field(description="장면 내 시각적 행동 및 연출 묘사")
     dialogue: Optional[str] = Field(description="해당 씬에서 발생하는 대사 또는 내레이션 (없으면 null)")
+    narration_script: Optional[str] = Field(default=None, description="나레이션 스크립트 (수동 입력). 없으면 카테고리 설정에 따라 자동 생성")
+    speaker: Optional[str] = Field(default=None, description="대사 화자 이름 (다중화자 모드에서 voice_id 매핑용)")
     image_prompt: str = Field(description="NanoBanana 2 (Gemini Flash Image) 엔진용 5단 구조 영어 영문 이미지 생성 프롬프트. 구체적인 스타일, 조명, 구도, 피사체 묘사 포함.")
     video_prompt: str = Field(description="Veo 3.1 등 영상 생성 AI용 6단 구조 영어 영문 비디오 프롬프트. 카메라 움직임, 피사체 동작, 그리고 [Audio] 중심 묘사 포함.")
 

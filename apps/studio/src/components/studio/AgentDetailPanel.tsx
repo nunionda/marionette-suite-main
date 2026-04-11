@@ -249,35 +249,54 @@ function HistoryRow({ item, agentId }: { item: QueueItem; agentId: string }) {
 
   return (
     <div
-      className="flex items-center justify-between px-3 py-2 border-b border-[var(--studio-border)] last:border-b-0"
+      className="flex flex-col border-b border-[var(--studio-border)] last:border-b-0"
       style={{ background: isError ? '#ef444406' : undefined }}
     >
-      <div className="flex items-center gap-2">
-        <span
-          className="text-[11px]"
-          style={{ color: isError ? '#ef4444' : '#22c55e' }}
-        >
-          {isError ? '✕' : '✓'}
-        </span>
-        <span className="text-[11px] font-mono text-[var(--studio-text-dim)]">{item.displayId}</span>
-      </div>
-      <div className="flex items-center gap-3">
-        {item.durationMs && (
-          <span className="text-[10px] font-mono text-[var(--studio-text-muted)]">
-            {(item.durationMs / 1000).toFixed(1)}s
+      <div className="flex items-center justify-between px-3 py-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="text-[11px]"
+            style={{ color: isError ? '#ef4444' : '#22c55e' }}
+          >
+            {isError ? '✕' : '✓'}
           </span>
-        )}
-        {isError && (
-          <>
-            <span className="text-[9px] text-red-400 max-w-[180px] truncate" title={item.errorMessage}>
-              {item.errorMessage}
+          <span className="text-[11px] font-mono text-[var(--studio-text-dim)]">{item.displayId}</span>
+          {item.speaker && (
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-900/30 text-blue-400">
+              {item.speaker}
             </span>
-            <ActionBtn onClick={() => retryItem(agentId, item.id)} title="Retry" color="var(--studio-warning)">
-              <RotateCcw size={10} />
-            </ActionBtn>
-          </>
-        )}
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {item.durationMs && (
+            <span className="text-[10px] font-mono text-[var(--studio-text-muted)]">
+              {(item.durationMs / 1000).toFixed(1)}s
+            </span>
+          )}
+          {isError && (
+            <>
+              <span className="text-[9px] text-red-400 max-w-[180px] truncate" title={item.errorMessage}>
+                {item.errorMessage}
+              </span>
+              <ActionBtn onClick={() => retryItem(agentId, item.id)} title="Retry" color="var(--studio-warning)">
+                <RotateCcw size={10} />
+              </ActionBtn>
+            </>
+          )}
+        </div>
       </div>
+      {/* WAV preview for audio_gen items */}
+      {item.audioUrl && (
+        <div className="px-3 pb-2">
+          <audio
+            src={item.audioUrl}
+            controls
+            preload="none"
+            className="w-full h-7 opacity-80"
+            style={{ filter: 'hue-rotate(180deg) saturate(0.5)' }}
+          />
+        </div>
+      )}
     </div>
   );
 }
