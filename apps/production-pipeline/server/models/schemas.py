@@ -144,6 +144,42 @@ class PresetResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+# ─── CutGraph 스키마 ───
+
+class CutGraphUpdate(BaseModel):
+    nodes: list
+    edges: list
+
+
+class CutGraphResponse(BaseModel):
+    project_id: str
+    cut_slug: str
+    nodes: list
+    edges: list
+    updated_at: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+# ─── Asset 스키마 ───
+
+class ProjectAssetResponse(BaseModel):
+    id: str
+    project_id: str
+    type: str
+    phase: str
+    agent_name: str
+    scene_number: Optional[int] = None
+    file_path: str
+    file_name: str
+    mime_type: str
+    file_size: Optional[int] = None
+    metadata: Optional[dict] = None
+    created_at: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
 # ─── NodeGraph 스키마 ───
 
 class NodePosition(BaseModel):

@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ReactFlow,
   Background,
@@ -27,6 +27,10 @@ import {
   buildInitialEdges,
   loadNodePositions,
   saveNodePositions,
+  loadNodeData,
+  saveNodeData,
+  saveNodeGraphToBackend,
+  loadNodeGraphFromBackend,
 } from '@/lib/studio/flow-data';
 
 // nodeTypes MUST be defined outside the component to prevent React Flow edge flicker
@@ -70,12 +74,13 @@ export function CutNodeEditor({
   cutTotal,
 }: Props) {
   const initialNodes = useMemo(() => {
-    const nodes = buildInitialNodes(cutSlug, displayId, script);
-    const saved = loadNodePositions(cutSlug);
-    if (saved) {
+    const savedData = loadNodeData(cutSlug);
+    const nodes = buildInitialNodes(cutSlug, displayId, script, savedData ?? undefined);
+    const savedPositions = loadNodePositions(cutSlug);
+    if (savedPositions) {
       return nodes.map((n) => ({
         ...n,
-        position: saved[n.id] ?? n.position,
+        position: savedPositions[n.id] ?? n.position,
       }));
     }
     return nodes;
@@ -84,27 +89,71 @@ export function CutNodeEditor({
   const initialEdges = useMemo(() => buildInitialEdges(cutSlug), [cutSlug]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  // Store only the id — derive current node from nodes so it stays fresh after edits
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const selectedNode = nodes.find((n) => n.id === selectedNodeId) ?? null;
+
+  // Debounce timer for backend saves (1500ms)
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scheduleBackendSave = useCallback(
+    (latestNodes: Parameters<typeof saveNodeGraphToBackend>[2]) => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        // Edges are deterministic from cutSlug — no stale closure risk
+        void saveNodeGraphToBackend(projectId, cutSlug, latestNodes, buildInitialEdges(cutSlug));
+      }, 1500);
+    },
+    [projectId, cutSlug],
+  );
+
+  // On mount: try backend first, fall back to localStorage
+  useEffect(() => {
+    loadNodeGraphFromBackend(projectId, cutSlug).then((remote) => {
+      if (remote && remote.nodes.length > 0) {
+        setNodes(remote.nodes);
+        setEdges(remote.edges);
+      }
+    });
+    return () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    };
+  }, [projectId, cutSlug, setNodes, setEdges]);
 
   const handleNodesChange: OnNodesChange = useCallback(
     (changes) => {
       onNodesChange(changes);
-      // Persist positions after drag
+      // Persist positions locally (fast) and debounce backend save
       setNodes((nds) => {
         saveNodePositions(cutSlug, nds);
+        scheduleBackendSave(nds);
         return nds;
       });
     },
-    [onNodesChange, setNodes, cutSlug]
+    [onNodesChange, setNodes, cutSlug, scheduleBackendSave]
+  );
+
+  const handleNodeDataChange = useCallback(
+    (nodeId: string, updates: Record<string, unknown>) => {
+      setNodes((nds) => {
+        const updated = nds.map((n) =>
+          n.id === nodeId ? { ...n, data: { ...(n.data as object), ...updates } } : n
+        );
+        saveNodeData(cutSlug, updated);
+        scheduleBackendSave(updated);
+        return updated;
+      });
+    },
+    [setNodes, cutSlug, scheduleBackendSave]
   );
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
-    setSelectedNode(node);
+    setSelectedNodeId(node.id);
   }, []);
 
   const onPaneClick = useCallback(() => {
-    setSelectedNode(null);
+    setSelectedNodeId(null);
   }, []);
 
   const cutUrl = (slug: string) =>
@@ -196,11 +245,11 @@ export function CutNodeEditor({
             style={{ height: 40, display: 'flex', alignItems: 'center', flexShrink: 0, background: 'var(--studio-bg-elevated)' }}
           >
             <span className="text-[10px] font-bold uppercase tracking-widest text-[var(--studio-text-muted)]">
-              Node Preview
+              Node Editor
             </span>
           </div>
           <div className="flex-1 overflow-hidden">
-            <NodePreviewPanel node={selectedNode} />
+            <NodePreviewPanel node={selectedNode} onDataChange={handleNodeDataChange} />
           </div>
         </div>
       </div>

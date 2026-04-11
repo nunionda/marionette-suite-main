@@ -5,7 +5,7 @@ SQLAlchemy + SQLite (개발) / PostgreSQL (프로덕션)
 import re
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, Float, Text, DateTime, Enum, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, Float, Text, DateTime, Enum, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.orm import relationship, DeclarativeBase
 import enum
 
@@ -111,6 +111,7 @@ class Project(Base):
     pipeline_runs = relationship("PipelineRun", back_populates="project", cascade="all, delete-orphan")
     assets = relationship("Asset", back_populates="project", cascade="all, delete-orphan")
     node_graph = relationship("NodeGraph", back_populates="project", uselist=False, cascade="all, delete-orphan")
+    cut_graphs = relationship("CutGraph", back_populates="project", cascade="all, delete-orphan")
 
     def to_dict(self):
         plan: dict = self.direction_plan_json or {}
@@ -288,5 +289,30 @@ class NodeGraph(Base):
             "edges": self.edges,
             "version": self.version,
             "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class CutGraph(Base):
+    """ReactFlow cut-level node graph — one row per (project, cut_slug)."""
+    __tablename__ = "cut_graphs"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    cut_slug = Column(String(100), nullable=False)
+    nodes = Column(JSON, nullable=False, default=list)
+    edges = Column(JSON, nullable=False, default=list)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    project = relationship("Project", back_populates="cut_graphs")
+
+    __table_args__ = (UniqueConstraint("project_id", "cut_slug", name="uq_cut_graph"),)
+
+    def to_dict(self):
+        return {
+            "project_id": self.project_id,
+            "cut_slug": self.cut_slug,
+            "nodes": self.nodes,
+            "edges": self.edges,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }

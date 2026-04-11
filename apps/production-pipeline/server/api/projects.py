@@ -12,6 +12,7 @@ from server.models.schemas import (
     ProjectCreate, ProjectUpdate, ProjectResponse,
     SceneListResponse, SceneMetaResponse, SequenceResponse,
     AgentWithQueueResponse, AgentStatsResponse, AgentQueueItemResponse,
+    ProjectAssetResponse,
 )
 from server.services.preset_service import generate_graph_from_preset
 
@@ -116,6 +117,16 @@ def delete_project(project_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
     db.delete(project)
     db.commit()
+
+
+@router.get("/{project_id}/assets", response_model=List[ProjectAssetResponse])
+def get_project_assets(project_id: str, db: Session = Depends(get_db)):
+    """프로젝트의 에셋 목록 조회"""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+    assets = db.query(Asset).filter(Asset.project_id == project_id).order_by(Asset.created_at.desc()).all()
+    return [ProjectAssetResponse(**a.to_dict()) for a in assets]
 
 
 @router.get("/{project_id}/scenes", response_model=SceneListResponse)

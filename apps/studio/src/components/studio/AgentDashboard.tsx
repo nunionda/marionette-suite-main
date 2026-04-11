@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import type { AgentWithQueue } from '@/lib/studio/types';
 import { useAgentStore } from '@/lib/studio/agent-store';
 import { AgentCard } from './AgentCard';
 import { AgentDetailPanel } from './AgentDetailPanel';
-
-const TICK_INTERVAL = 2500;
 
 interface Props {
   initialAgents: AgentWithQueue[];
@@ -14,27 +12,11 @@ interface Props {
 }
 
 export function AgentDashboard({ initialAgents, projectId }: Props) {
-  const { agents, selectedAgentId, selectAgent, init, tick, simulationRunning, setSimulationRunning } =
-    useAgentStore();
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { agents, selectedAgentId, selectAgent, init } = useAgentStore();
 
   // Initialize store on mount
   useEffect(() => {
     init(initialAgents);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Simulation timer
-  useEffect(() => {
-    setSimulationRunning(true);
-    intervalRef.current = setInterval(() => {
-      tick();
-    }, TICK_INTERVAL);
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      setSimulationRunning(false);
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -59,12 +41,8 @@ export function AgentDashboard({ initialAgents, projectId }: Props) {
         <div className="flex items-center gap-3">
           <h1 className="text-[14px] font-bold text-[var(--studio-text)]">에이전트 대시보드</h1>
           <div className="flex items-center gap-1.5">
-            <span
-              className={`w-2 h-2 rounded-full ${simulationRunning ? 'bg-green-500 animate-pulse' : 'bg-[var(--studio-text-muted)]'}`}
-            />
-            <span className="text-[10px] text-[var(--studio-text-muted)]">
-              {simulationRunning ? 'Simulation active' : 'Paused'}
-            </span>
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-[10px] text-[var(--studio-text-muted)]">Live</span>
           </div>
         </div>
         <div className="flex gap-5 text-[11px] text-[var(--studio-text-muted)]">

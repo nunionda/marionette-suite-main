@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from server.core.database import get_db, SessionLocal
-from server.models.database import NodeGraph, Project, PipelineRun, RunStatus
-from server.models.schemas import NodeGraphResponse, NodeGraphUpdate
+from server.models.database import NodeGraph, CutGraph, Project, PipelineRun, RunStatus
+from server.models.schemas import NodeGraphResponse, NodeGraphUpdate, CutGraphResponse, CutGraphUpdate
 from server.api import pipeline as pipeline_api
 from server.services.pipeline_runner import PipelineRunner
 
@@ -85,6 +85,41 @@ def update_graph(project_id: str, data: NodeGraphUpdate, db: Session = Depends(g
     db.commit()
     db.refresh(graph)
     return NodeGraphResponse(**graph.to_dict())
+
+
+@router.get("/{project_id}/cuts/{cut_slug}/graph", response_model=CutGraphResponse)
+def get_cut_graph(project_id: str, cut_slug: str, db: Session = Depends(get_db)):
+    """컷 노드 그래프 조회"""
+    graph = db.query(CutGraph).filter(
+        CutGraph.project_id == project_id,
+        CutGraph.cut_slug == cut_slug,
+    ).first()
+    if not graph:
+        raise HTTPException(status_code=404, detail="컷 그래프가 없습니다")
+    return CutGraphResponse(**graph.to_dict())
+
+
+@router.put("/{project_id}/cuts/{cut_slug}/graph", response_model=CutGraphResponse)
+def upsert_cut_graph(project_id: str, cut_slug: str, data: CutGraphUpdate, db: Session = Depends(get_db)):
+    """컷 노드 그래프 저장 (upsert)"""
+    graph = db.query(CutGraph).filter(
+        CutGraph.project_id == project_id,
+        CutGraph.cut_slug == cut_slug,
+    ).first()
+    if graph:
+        graph.nodes = data.nodes
+        graph.edges = data.edges
+    else:
+        graph = CutGraph(
+            project_id=project_id,
+            cut_slug=cut_slug,
+            nodes=data.nodes,
+            edges=data.edges,
+        )
+        db.add(graph)
+    db.commit()
+    db.refresh(graph)
+    return CutGraphResponse(**graph.to_dict())
 
 
 @router.post("/{project_id}/graph/execute")
