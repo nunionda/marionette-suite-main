@@ -14,6 +14,7 @@ import clicheRules from '../.agents/rules/cliche_strategy.md?raw';
 
 import { useAgentEngine } from '../hooks/useAgentEngine';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import SendToStudioButton from './SendToStudioButton';
 
 const GENRE_HINTS = {
   'Thriller/Action': { icon: '🔪', cues: ['Shaky Cam', 'Dutch Tilt', 'Jump Cuts', 'Drones'] },
@@ -336,7 +337,13 @@ const ProjectDetail = ({ project, onBack }) => {
           <h1 style={{ fontSize: '2.2rem', margin: '0', letterSpacing: '2px' }}>{project.title.toUpperCase()}</h1>
           <span className="badge category-badge" style={{ letterSpacing: '1.2px', fontWeight: 700 }}>🎞️ {project.category.toUpperCase()} PRODUCTION</span>
         </div>
-        <button className="tactical-btn" onClick={saveToContext}>💾 SAVE PROJECT</button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <SendToStudioButton
+            scriptWriterProjectId={project.id}
+            scriptData={pipelineData}
+          />
+          <button className="tactical-btn" onClick={saveToContext}>💾 SAVE PROJECT</button>
+        </div>
       </header>
 
       <div className="orchestration-controls">

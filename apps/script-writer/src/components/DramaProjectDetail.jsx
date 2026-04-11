@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
 import '../styles/ProjectDetail.css';
+import SendToStudioButton from './SendToStudioButton';
 
 // Rules
 import scenarioRule from '../.agents/rules/scenario_writer.md?raw';
@@ -151,7 +152,13 @@ const DramaProjectDetail = ({ project, onBack }) => {
           <h1 style={{ fontSize: '2.5rem', margin: '0', letterSpacing: '2px' }}>{project.title.toUpperCase()}</h1>
           <span className="badge category-badge" style={{ background: '#E50914', color: 'white', letterSpacing: '1.2px', fontWeight: 700 }}>📺 NETFLIX ORIGINAL SERIES</span>
         </div>
-        <button className="tactical-btn" onClick={saveToContext}>💾 SAVE SEASON</button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <SendToStudioButton
+            scriptWriterProjectId={project.id}
+            scriptData={pipelineData}
+          />
+          <button className="tactical-btn" onClick={saveToContext}>💾 SAVE SEASON</button>
+        </div>
       </header>
 
       <div className="studio-container">

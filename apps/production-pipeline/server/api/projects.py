@@ -3,8 +3,9 @@
 """
 import uuid
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from typing import List
+from typing import Any, List
 
 from server.core.database import get_db
 from server.models.database import Project, PipelinePreset, PipelineRun, Asset, _make_initials
@@ -105,6 +106,22 @@ def update_project_status(project_id: str, data: ProjectUpdate, db: Session = De
         if key in allowed_fields:
             setattr(project, key, value)
 
+    db.commit()
+    db.refresh(project)
+    return ProjectResponse(**project.to_dict())
+
+
+class ScriptPushRequest(BaseModel):
+    direction_plan_json: Any
+
+
+@router.put("/{project_id}/script", response_model=ProjectResponse)
+def push_script(project_id: str, data: ScriptPushRequest, db: Session = Depends(get_db)):
+    """script-writer 앱에서 완성된 스크립트를 스튜디오로 내보내기"""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+    project.direction_plan_json = data.direction_plan_json
     db.commit()
     db.refresh(project)
     return ProjectResponse(**project.to_dict())
