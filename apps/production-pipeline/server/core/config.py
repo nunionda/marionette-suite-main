@@ -16,13 +16,16 @@ class Settings:
     VERSION: str = "0.1.0"
     DEBUG: bool = os.getenv("DEBUG", "true").lower() == "true"
     HOST: str = os.getenv("HOST", "0.0.0.0")
-    PORT: int = int(os.getenv("PORT", "8000"))
+    PORT: int = int(os.getenv("PORT", "3005"))
 
-    # CORS
+    # CORS — 모든 프론트엔드 서비스 허용
     CORS_ORIGINS: list = [
-        "http://localhost:5173",    # Vite dev server
-        "http://localhost:3000",    # React dev server
-        "http://localhost:8000",    # API self
+        "http://localhost:5173",    # Production Pipeline Vite dev
+        "http://localhost:5174",    # Script Writer Vite dev
+        "http://localhost:3000",    # Homepage
+        "http://localhost:3001",    # Studio Hub (Next.js)
+        "http://localhost:3005",    # API self
+        "http://localhost:4007",    # Analysis System Web (Next.js)
     ]
 
     # 데이터베이스 (개발: SQLite 인메모리 or 로컬파일, 프로덕션: PostgreSQL)

@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Optional, Callable
 
 from server.core.config import settings
-from server.models.database import PipelineRun, Project, RunStatus
+from server.models.database import PipelineRun, Project, RunStatus, NodeGraph
 
 
 # 파이프라인 단계 정의 (순서)
@@ -50,6 +50,38 @@ class PipelineRunner:
         if self.broadcast_fn:
             await self.broadcast_fn(message)
 
+    async def update_node_status(self, db_session, project_id: str, agent_id: str, status: str):
+        """NodeGraph에서 특정 에이전트 노드의 상태 업데이트"""
+        graph = db_session.query(NodeGraph).filter(NodeGraph.project_id == project_id).first()
+        if not graph:
+            return
+
+        # 해당 에이전트 노드 찾기 및 상태 업데이트
+        nodes = graph.nodes or []
+        updated = False
+        updated_node = None
+        for node in nodes:
+            if node.get("agentId") == agent_id.upper():
+                node["status"] = status
+                updated = True
+                updated_node = node
+                break
+
+        if updated:
+            graph.nodes = nodes
+            graph.version += 1
+            db_session.commit()
+
+            # 노드 상태 변경을 WebSocket으로 브로드캐스트
+            await self.notify({
+                "type": "node_status_updated",
+                "project_id": project_id,
+                "node_id": updated_node["id"],
+                "agent_id": agent_id.upper(),
+                "status": status,
+                "graph_version": graph.version,
+            })
+
     async def run_pipeline(self, run: PipelineRun, project: Project, db_session, idea: str = ""):
         """
         파이프라인 전체 실행
@@ -75,6 +107,9 @@ class PipelineRunner:
             try:
                 run.current_step = step
                 db_session.commit()
+
+                # 노드 상태를 "running"으로 업데이트
+                await self.update_node_status(db_session, project.id, step, "running")
 
                 await self.notify({
                     "type": "step_started",
@@ -109,6 +144,9 @@ class PipelineRunner:
                         if result.get("genre"):
                             project.genre = result["genre"]
 
+                # 노드 상태를 "completed"로 업데이트
+                await self.update_node_status(db_session, project.id, step, "completed")
+
                 completed_weight += STEP_WEIGHTS.get(step, 10)
                 progress = (completed_weight / total_weight) * 100
                 run.progress = progress
@@ -125,6 +163,9 @@ class PipelineRunner:
                 })
 
             except Exception as e:
+                # 노드 상태를 "failed"로 업데이트
+                await self.update_node_status(db_session, project.id, step, "failed")
+
                 error_msg = f"{step} 실행 중 오류: {str(e)}\n{traceback.format_exc()}"
                 step_results = run.step_results or {}
                 step_results[step] = {"status": "failed", "error": str(e)}

@@ -55,9 +55,13 @@ class ProductionPhase(str, enum.Enum):
 
 class ProjectCategory(str, enum.Enum):
     FILM = "film"
+    SHORT_FILM = "short_film"
     DRAMA_SERIES = "drama_series"
     COMMERCIAL = "commercial"
+    MUSIC_VIDEO = "music_video"
+    CORPORATE = "corporate"
     YOUTUBE_SHORT = "youtube_short"
+    YOUTUBE_LONG = "youtube_long"
     CUSTOM = "custom"
 
 
