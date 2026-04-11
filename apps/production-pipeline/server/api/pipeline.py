@@ -2,10 +2,12 @@
 마리오네트 스튜디오 — 파이프라인 실행 API 라우터
 """
 import asyncio
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from typing import List
 
+from server.core.config import settings
 from server.core.database import get_db, SessionLocal
 from server.models.database import Project, PipelineRun, RunStatus
 from server.models.schemas import PipelineRunCreate, PipelineRunResponse
