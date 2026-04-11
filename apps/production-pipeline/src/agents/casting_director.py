@@ -104,9 +104,33 @@ class CastingDirectorAgent:
             return None
 
     def _mock(self, name: str, prompt: str) -> str:
+        from PIL import ImageDraw, ImageFont
         safe_name = name.split("(")[0].strip().replace(" ", "_")
-        filepath = os.path.join(self.output_dir, f"char_{safe_name}_mock.txt")
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(f"[MOCK CHARACTER SHEET] {name}\n{prompt}\n")
+        filepath = os.path.join(self.output_dir, f"char_{safe_name}_mock.png")
+
+        # 1:1 square character sheet placeholder (1024×1024)
+        img = Image.new("RGB", (1024, 1024), color=(35, 35, 45))
+        draw = ImageDraw.Draw(img)
+
+        label = f"CHARACTER  {name}"
+        try:
+            font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 36)
+            small = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 22)
+        except OSError:
+            font = ImageFont.load_default()
+            small = font
+
+        # Character name centred
+        bbox = draw.textbbox((0, 0), label, font=font)
+        x = (1024 - (bbox[2] - bbox[0])) // 2
+        draw.text((x, 460), label, fill=(180, 180, 200), font=font)
+
+        # Subtitle
+        sub = "[MOCK REFERENCE SHEET]"
+        bbox2 = draw.textbbox((0, 0), sub, font=small)
+        x2 = (1024 - (bbox2[2] - bbox2[0])) // 2
+        draw.text((x2, 510), sub, fill=(100, 100, 120), font=small)
+
+        img.save(filepath, "PNG")
         print(f"   ✅ Mock: {filepath}")
         return filepath
