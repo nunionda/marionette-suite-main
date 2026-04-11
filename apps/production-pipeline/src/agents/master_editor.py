@@ -28,11 +28,22 @@ class MasterEditorAgent:
         video_files = [v for v in all_mp4 if os.path.getsize(v) > 10240]  # 10KB 이상
 
         if not video_files:
-            print("⚠️ 병합할 영상 파일(mp4)이 없으므로 더미 모드로 처리합니다.")
+            print("⚠️ 병합할 영상 파일(mp4)이 없으므로 FFmpeg 블랙 플레이스홀더를 생성합니다.")
             master_filename = f"master_edit_{title}.mp4"
             master_path = os.path.join(self.output_dir, master_filename)
-            with open(master_path, "w", encoding="utf-8") as master_file:
-                master_file.write(f"Mock Master Edit File for: '{title}'. Please add real MP4s to output/videos.\n")
+            cmd = [
+                "ffmpeg", "-y",
+                "-t", "5",
+                "-f", "lavfi", "-i", "color=black:s=1920x1080",
+                "-c:v", "libx264",
+                master_path,
+            ]
+            try:
+                subprocess.run(cmd, check=True, capture_output=True)
+                print(f"   ✅ 블랙 플레이스홀더 생성 완료: {master_path}")
+            except subprocess.CalledProcessError as e:
+                print(f"   ⚠️  플레이스홀더 생성 실패: {e}")
+                return None
             return master_path
 
         print(f"🔍 병합 대상 클립 {len(video_files)}개 발견. FFMPEG 콘캣(Concat)을 준비합니다.")

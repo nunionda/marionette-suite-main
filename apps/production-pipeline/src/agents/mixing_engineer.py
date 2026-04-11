@@ -81,13 +81,22 @@ class MixingEngineerAgent:
         print(f"   🎵 BGM: {bgm or '없음'}")
 
         if not video:
-            print("   ⚠️ 유효한 비디오 파일이 없습니다")
-            # Mock 출력
-            mock_path = os.path.join(self.output_dir, f"FINAL_{title}_mock.txt")
-            with open(mock_path, "w") as f:
-                f.write(f"[MOCK FINAL MIX] {title}\n")
-                f.write(f"Dialogue tracks: {len(dialogues)}\nBGM: {bgm}\n")
-            return mock_path
+            print("   ⚠️ 유효한 비디오 파일이 없습니다 — FFmpeg 블랙 플레이스홀더를 생성합니다.")
+            placeholder_path = os.path.join(self.output_dir, f"FINAL_{title}_placeholder.mp4")
+            cmd = [
+                "ffmpeg", "-y",
+                "-t", "5",
+                "-f", "lavfi", "-i", "color=black:s=1920x1080",
+                "-c:v", "libx264",
+                placeholder_path,
+            ]
+            try:
+                subprocess.run(cmd, check=True, capture_output=True)
+                print(f"   ✅ 블랙 플레이스홀더 생성 완료: {placeholder_path}")
+            except subprocess.CalledProcessError as e:
+                print(f"   ⚠️  플레이스홀더 생성 실패: {e}")
+                return None
+            return placeholder_path
 
         output_path = os.path.join(self.output_dir, f"FINAL_{title}.mp4")
 
