@@ -3,6 +3,7 @@
 DirectionPlan JSON의 video_prompt를 기반으로 Veo 3.1 API로 비디오 클립 생성
 """
 import os
+import subprocess
 from typing import Optional, Union, List
 import json
 import time
@@ -74,14 +75,23 @@ class GeneralistAgent:
             print(f"   ❌ 씬 {scene_number} 비디오 생성 오류: {e}")
             return None
 
-    def _generate_video_mock(self, prompt: str, scene_number: int) -> str:
-        """Mock 비디오 파일 생성"""
-        filename = f"scene_{scene_number:03d}_mock.txt"
+    def _generate_video_mock(self, prompt: str, scene_number: int) -> Optional[str]:
+        """FFmpeg 블랙 플레이스홀더 MP4 생성 (API 미연동 시)"""
+        filename = f"scene_{scene_number:03d}_placeholder.mp4"
         filepath = os.path.join(self.output_dir, filename)
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(f"[MOCK VIDEO] Scene {scene_number}\n")
-            f.write(f"Prompt: {prompt}\n")
-        return filepath
+        cmd = [
+            "ffmpeg", "-y",
+            "-t", "5",
+            "-f", "lavfi", "-i", "color=black:s=1920x1080",
+            "-c:v", "libx264",
+            filepath,
+        ]
+        try:
+            subprocess.run(cmd, check=True, capture_output=True)
+            return filepath
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            print(f"   ⚠️  ffmpeg 없음 — 씬 {scene_number} 플레이스홀더 생성 실패")
+            return None
 
     def generate_videos(self, json_path: str) -> list[str]:
         """기획안 JSON에서 씬별 비디오 클립 생성"""
@@ -111,12 +121,16 @@ class GeneralistAgent:
                     print(f"   ✅ 비디오 생성: {filepath} ({size_kb:.0f}KB)")
                 else:
                     mock = self._generate_video_mock(scene.video_prompt, scene.scene_number)
-                    generated_videos.append(mock)
-                    print(f"   ⚠️  Mock 폴백: {mock}")
+                    if mock:
+                        generated_videos.append(mock)
+                        print(f"   ⚠️  플레이스홀더 폴백: {mock}")
             else:
                 mock = self._generate_video_mock(scene.video_prompt, scene.scene_number)
-                generated_videos.append(mock)
-                print(f"   ✅ Mock: {mock}")
+                if mock:
+                    generated_videos.append(mock)
+                    print(f"   ✅ 플레이스홀더: {mock}")
+                else:
+                    print(f"   ⚠️  씬 {scene.scene_number} 건너뜀")
 
         print(f"\n🎉 비디오 클립 생성 완료! ({len(generated_videos)}클립)")
         return generated_videos

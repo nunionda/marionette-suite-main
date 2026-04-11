@@ -221,14 +221,28 @@ class ConceptArtistAgent:
             return None
 
     def _generate_image_mock(self, prompt: str, scene_number: int) -> str:
-        """Mock 이미지 파일 생성 (API 미연동 시)"""
-        filename = f"scene_{scene_number:03d}_mock.txt"
+        """PIL로 회색 플레이스홀더 PNG 생성 (API 미연동 시)"""
+        from PIL import ImageDraw, ImageFont
+        filename = f"scene_{scene_number:03d}_placeholder.png"
         filepath = os.path.join(self.output_dir, filename)
-        with open(filepath, "w", encoding="utf-8") as f:
-            f.write(f"[MOCK STORYBOARD] Scene {scene_number}\n")
-            f.write(f"Style: {self.style['name']}\n")
-            f.write(f"Aspect: {self.style['aspect_ratio']}\n")
-            f.write(f"Prompt: {prompt}\n")
+
+        # 2.35:1 기준 1024x436
+        w, h = 1024, int(1024 / self.aspect_ratio)
+        img = Image.new("RGB", (w, h), color=(40, 40, 40))
+        draw = ImageDraw.Draw(img)
+
+        # 씬 번호 + 스타일 텍스트
+        label = f"Scene {scene_number:03d}  [{self.style['name']}]"
+        try:
+            font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 36)
+        except OSError:
+            font = ImageFont.load_default()
+        bbox = draw.textbbox((0, 0), label, font=font)
+        x = (w - (bbox[2] - bbox[0])) // 2
+        y = (h - (bbox[3] - bbox[1])) // 2
+        draw.text((x, y), label, fill=(160, 160, 160), font=font)
+
+        img.save(filepath, "PNG")
         return filepath
 
     def generate_storyboard_images(self, json_path: str) -> list[str]:
@@ -272,11 +286,11 @@ class ConceptArtistAgent:
                 else:
                     mock_path = self._generate_image_mock(scene.image_prompt, scene.scene_number)
                     generated_images.append(mock_path)
-                    print(f"   ⚠️  Mock 폴백: {mock_path}")
+                    print(f"   ⚠️  플레이스홀더 폴백: {mock_path}")
             else:
                 mock_path = self._generate_image_mock(scene.image_prompt, scene.scene_number)
                 generated_images.append(mock_path)
-                print(f"   ✅ Mock 저장: {mock_path}")
+                print(f"   ✅ 플레이스홀더: {mock_path}")
 
         print(f"\n🎉 스토리보드 생성 완료! ({len(generated_images)}장)")
         print(f"   📁 출력 폴더: {self.output_dir}")
