@@ -1,3 +1,4 @@
+@import './studio-tokens.css';
 @import "tailwindcss";
 
 @theme {
