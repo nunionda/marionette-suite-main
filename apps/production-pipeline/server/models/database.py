@@ -2,11 +2,18 @@
 마리오네트 스튜디오 — 데이터베이스 모델
 SQLAlchemy + SQLite (개발) / PostgreSQL (프로덕션)
 """
+import re
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Integer, Float, Text, DateTime, Enum, ForeignKey, JSON
 from sqlalchemy.orm import relationship, DeclarativeBase
 import enum
+
+
+def _make_initials(title: str) -> str:
+    """'The Dark Knight' → 'TDK'"""
+    words = re.sub(r'[^a-zA-Z0-9\s]', '', title).split()
+    return "".join(w[0].upper() for w in words if w)[:6] or "PRJ"
 
 
 class Base(DeclarativeBase):
@@ -106,15 +113,43 @@ class Project(Base):
     node_graph = relationship("NodeGraph", back_populates="project", uselist=False, cascade="all, delete-orphan")
 
     def to_dict(self):
+        plan: dict = self.direction_plan_json or {}
+        scenes: list = plan.get("scenes", [])
+        total_scenes = len(scenes)
+
+        # completed scenes = IMAGE assets with scene_number set
+        completed_scene_nums: set = {
+            a.scene_number
+            for a in (self.assets or [])
+            if a.scene_number is not None and a.type == "IMAGE"
+        }
+        completed_scenes = len(completed_scene_nums)
+
+        # frontend status mapping
+        _status_map = {
+            "development": "development",
+            "pre_production": "development",
+            "in_production": "production",
+            "post_production": "post",
+            "completed": "post",
+        }
+
         return {
             "id": self.id,
             "title": self.title,
+            "initials": _make_initials(self.title),
+            "titleKo": None,
             "category": self.category,
             "genre": self.genre,
             "logline": self.logline,
             "idea": self.idea,
-            "status": self.status,
+            "status": _status_map.get(self.status, self.status),
+            "posterUrl": "",
             "progress": self.progress,
+            "totalScenes": total_scenes,
+            "completedScenes": completed_scenes,
+            "totalCuts": total_scenes * 4,
+            "completedCuts": completed_scenes * 4,
             "protagonist": self.protagonist,
             "antagonist": self.antagonist,
             "worldview": self.worldview,
@@ -126,6 +161,7 @@ class Project(Base):
             "production_book_path": self.production_book_path,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "createdAt": self.created_at.isoformat() if self.created_at else None,
         }
 
 

@@ -36,12 +36,19 @@ class ProjectUpdate(BaseModel):
 class ProjectResponse(BaseModel):
     id: str
     title: str
+    initials: str = ""
+    titleKo: Optional[str] = None
     category: str = "film"
     genre: str
     logline: str
     idea: str
     status: str
+    posterUrl: str = ""
     progress: float
+    totalScenes: int = 0
+    completedScenes: int = 0
+    totalCuts: int = 0
+    completedCuts: int = 0
     protagonist: str
     antagonist: str
     worldview: str
@@ -53,6 +60,7 @@ class ProjectResponse(BaseModel):
     direction_plan_json: Optional[dict] = None
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
+    createdAt: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -176,3 +184,73 @@ class NodeGraphResponse(BaseModel):
 class NodeGraphUpdate(BaseModel):
     nodes: Optional[List[PipelineNode]] = None
     edges: Optional[List[PipelineEdge]] = None
+
+
+# ─── Scene / SceneList 스키마 ───
+
+class SceneMetaResponse(BaseModel):
+    id: str
+    slug: str
+    displayId: str
+    number: int
+    sequenceId: str
+    title: str
+    location: str
+    timeOfDay: str
+    summary: str
+    coverImageUrl: str
+    cutCount: int
+    completedCutCount: int
+    status: str  # 'pending' | 'in_progress' | 'done'
+
+
+class SequenceResponse(BaseModel):
+    id: str
+    number: int
+    title: str
+    projectId: str
+    sceneCount: int
+    completedSceneCount: int
+
+
+class SceneListResponse(BaseModel):
+    scenes: List[SceneMetaResponse]
+    sequences: List[SequenceResponse]
+    totalCount: int
+
+
+# ─── Agent Queue 스키마 ───
+
+class AgentStatsResponse(BaseModel):
+    processed: int
+    errors: int
+    queueSize: int
+
+
+class AgentCurrentTaskResponse(BaseModel):
+    sceneSlug: str
+    cutSlug: str
+    displayId: str
+
+
+class AgentQueueItemResponse(BaseModel):
+    id: str
+    sceneSlug: str
+    cutSlug: str
+    displayId: str
+    status: str  # 'pending' | 'processing' | 'done' | 'error'
+    errorMessage: Optional[str] = None
+    durationMs: Optional[int] = None
+
+
+class AgentWithQueueResponse(BaseModel):
+    id: str
+    type: str   # 'image_gen' | 'video_gen' | 'audio_gen' | 'prompt' | 'analysis'
+    projectId: str
+    status: str  # 'idle' | 'running' | 'done' | 'error'
+    label: str
+    paused: bool
+    currentTask: Optional[AgentCurrentTaskResponse] = None
+    stats: AgentStatsResponse
+    queue: List[AgentQueueItemResponse]
+    history: List[AgentQueueItemResponse]

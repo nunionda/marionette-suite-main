@@ -1,14 +1,30 @@
 """
 마리오네트 스튜디오 — 프로젝트 API 라우터
 """
+import uuid
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
 from server.core.database import get_db
-from server.models.database import Project, PipelinePreset
-from server.models.schemas import ProjectCreate, ProjectUpdate, ProjectResponse
+from server.models.database import Project, PipelinePreset, PipelineRun, Asset, _make_initials
+from server.models.schemas import (
+    ProjectCreate, ProjectUpdate, ProjectResponse,
+    SceneListResponse, SceneMetaResponse, SequenceResponse,
+    AgentWithQueueResponse, AgentStatsResponse, AgentQueueItemResponse,
+)
 from server.services.preset_service import generate_graph_from_preset
+
+# pipeline step → agent type + display label
+_STEP_AGENT_META = {
+    "script_writer":   ("prompt",    "Script Writer"),
+    "concept_artist":  ("image_gen", "Concept Artist"),
+    "generalist":      ("image_gen", "Generalist"),
+    "asset_designer":  ("image_gen", "Asset Designer"),
+    "vfx_compositor":  ("video_gen", "VFX Compositor"),
+    "master_editor":   ("video_gen", "Master Editor"),
+    "sound_designer":  ("audio_gen", "Sound Designer"),
+}
 
 router = APIRouter()
 
@@ -100,3 +116,134 @@ def delete_project(project_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
     db.delete(project)
     db.commit()
+
+
+@router.get("/{project_id}/scenes", response_model=SceneListResponse)
+def get_project_scenes(project_id: str, db: Session = Depends(get_db)):
+    """direction_plan_json 에서 씬 목록 조출 — Asset 테이블로 완료 상태 보강"""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+
+    plan: dict = project.direction_plan_json or {}
+    raw_scenes: list = plan.get("scenes", [])
+    initials = _make_initials(project.title)
+
+    # completed scene_numbers (IMAGE assets produced for that scene)
+    completed_scene_nums: set[int] = {
+        a.scene_number
+        for a in db.query(Asset).filter(
+            Asset.project_id == project_id,
+            Asset.type == "IMAGE",
+        ).all()
+        if a.scene_number is not None
+    }
+
+    CUTS_PER_SCENE = 4  # default placeholder until cut-level tracking lands
+
+    scenes_out: list[SceneMetaResponse] = []
+    for raw in raw_scenes:
+        n = raw.get("scene_number", 0)
+        slug = f"sc{n:03d}"
+        seq_num = (n - 1) // 5 + 1
+        seq_id = f"{project_id[:8]}_seq{seq_num}"
+        is_done = n in completed_scene_nums
+        scenes_out.append(SceneMetaResponse(
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{project_id}/{slug}")),
+            slug=slug,
+            displayId=f"{initials}_{slug}",
+            number=n,
+            sequenceId=seq_id,
+            title=raw.get("setting", f"Scene {n}"),
+            location=raw.get("setting", ""),
+            timeOfDay=raw.get("time_of_day", ""),
+            summary=raw.get("action_description", "")[:200],
+            coverImageUrl="",
+            cutCount=CUTS_PER_SCENE,
+            completedCutCount=CUTS_PER_SCENE if is_done else 0,
+            status="done" if is_done else "pending",
+        ))
+
+    # build sequence summaries
+    seq_map: dict[str, list[SceneMetaResponse]] = {}
+    for s in scenes_out:
+        seq_map.setdefault(s.sequenceId, []).append(s)
+
+    sequences_out = [
+        SequenceResponse(
+            id=seq_id,
+            number=int(seq_id.split("seq")[-1]),
+            title=f"Sequence {seq_id.split('seq')[-1]}",
+            projectId=project_id,
+            sceneCount=len(members),
+            completedSceneCount=sum(1 for m in members if m.status == "done"),
+        )
+        for seq_id, members in sorted(seq_map.items())
+    ]
+
+    return SceneListResponse(
+        scenes=scenes_out,
+        sequences=sequences_out,
+        totalCount=len(scenes_out),
+    )
+
+
+@router.get("/{project_id}/agents", response_model=List[AgentWithQueueResponse])
+def get_project_agents(project_id: str, db: Session = Depends(get_db)):
+    """최신 파이프라인 런의 단계별 에이전트 상태 조회"""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+
+    latest_run: PipelineRun | None = (
+        db.query(PipelineRun)
+        .filter(PipelineRun.project_id == project_id)
+        .order_by(PipelineRun.created_at.desc())
+        .first()
+    )
+
+    steps: list[str] = (latest_run.steps if latest_run else []) or list(_STEP_AGENT_META.keys())
+    step_results: dict = (latest_run.step_results if latest_run else {}) or {}
+    current_step: str | None = latest_run.current_step if latest_run else None
+    run_status: str = latest_run.status if latest_run else "queued"
+
+    agents_out: list[AgentWithQueueResponse] = []
+    for step in steps:
+        agent_type, label = _STEP_AGENT_META.get(step, ("prompt", step.replace("_", " ").title()))
+        result = step_results.get(step, {})
+        step_status = result.get("status", "pending")
+
+        if step == current_step and run_status == "running":
+            agent_status = "running"
+        elif step_status == "completed":
+            agent_status = "done"
+        elif step_status == "failed":
+            agent_status = "error"
+        else:
+            agent_status = "idle"
+
+        processed = 1 if agent_status == "done" else 0
+        history = (
+            [AgentQueueItemResponse(
+                id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{project_id}/{step}/done")),
+                sceneSlug="sc001", cutSlug="cut001",
+                displayId=f"{step}/done",
+                status="done",
+                durationMs=result.get("duration_ms"),
+            )]
+            if agent_status == "done" else []
+        )
+
+        agents_out.append(AgentWithQueueResponse(
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{project_id}/{step}")),
+            type=agent_type,
+            projectId=project_id,
+            status=agent_status,
+            label=label,
+            paused=False,
+            stats=AgentStatsResponse(processed=processed, errors=0, queueSize=0),
+            queue=[],
+            history=history,
+        ))
+
+    return agents_out
