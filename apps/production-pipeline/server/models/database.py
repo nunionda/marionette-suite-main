@@ -97,6 +97,10 @@ class Project(Base):
     direction_plan_json = Column(JSON, nullable=True)
     direction_plan_path = Column(String(500), nullable=True)
 
+    # 창작 방향성 (Visual DNA + Set Concept)
+    visual_dna = Column(JSON, nullable=True)
+    set_concept = Column(JSON, nullable=True)
+
     # 🔗 통합 상태 추적 (Phase 60)
     analysis_id = Column(String(100), nullable=True)
     analysis_status = Column(String(50), default="none")  # none | analyzing | done
@@ -315,4 +319,83 @@ class CutGraph(Base):
             "nodes": self.nodes,
             "edges": self.edges,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }
+
+
+class GlobalAsset(Base):
+    """글로벌 백롯 — 프로젝트 간 공유되는 승격된 자산"""
+    __tablename__ = "global_assets"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=True)
+    name = Column(String(500), nullable=False)
+    asset_type = Column(String(100), nullable=False)
+    output_path = Column(String(500), nullable=False)
+    metadata_json = Column(JSON, nullable=True)
+    tags = Column(String(500), default="")
+    is_verified = Column(Integer, default=0)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "name": self.name,
+            "asset_type": self.asset_type,
+            "output_path": self.output_path,
+            "metadata": self.metadata_json,
+            "tags": self.tags,
+            "is_verified": bool(self.is_verified),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class PipelineTake(Base):
+    """파이프라인 단계 결과물 (테이크)"""
+    __tablename__ = "pipeline_takes"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=False)
+    step = Column(String(100), nullable=False)
+    engine = Column(String(100), nullable=True)
+    soq_score = Column(Float, nullable=True)
+    description = Column(Text, nullable=True)
+    output_path = Column(String(500), nullable=False)
+    is_master = Column(Integer, default=0)  # 1 = 마스터 선정된 테이크
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "project_id": self.project_id,
+            "step": self.step,
+            "engine": self.engine,
+            "soq_score": self.soq_score,
+            "description": self.description,
+            "output_path": self.output_path,
+            "is_master": bool(self.is_master),
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class Credential(Base):
+    """암호화된 API 키 보관소 (Vault)"""
+    __tablename__ = "vault_credentials"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    provider = Column(String(100), nullable=False)    # e.g. "gemini", "elevenlabs"
+    key_name = Column(String(100), nullable=False, default="default")
+    encrypted_key = Column(Text, nullable=False)
+    is_active = Column(Integer, default=1)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    __table_args__ = (UniqueConstraint("provider", "key_name", name="uq_credential"),)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "provider": self.provider,
+            "key_name": self.key_name,
+            "is_active": bool(self.is_active),
         }

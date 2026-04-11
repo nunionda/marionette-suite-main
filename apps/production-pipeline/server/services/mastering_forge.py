@@ -1,13 +1,13 @@
 """
 마리오네트 스튜디오 — Mastering Forge 서비스
-개별 에셋(영상, 오디오)을 결합하여 최종 프로덕션 마스터 생성
+개별 에셋(이미지, manifest)을 수집하여 ZIP 패키지로 번들링
 """
-import os
-import subprocess
+import zipfile
 import json
 from pathlib import Path
 from datetime import datetime
 from server.core.config import settings
+
 
 class MasteringForge:
     def __init__(self, db_session=None):
@@ -17,52 +17,65 @@ class MasteringForge:
 
     async def generate_master(self, project_id: str, resolution: str = "2k") -> str:
         """
-        최종 마스터 영상 생성
-        - 2k: 프리뷰용 (빠른 렌더링)
-        - 4k: 상업용 고화질 (Lanczos 업스케일링 및 고비트레이트)
+        프로젝트 에셋을 ZIP으로 번들링하여 최종 패키지 생성.
+        - 파이프라인이 생성한 이미지/manifest/script 파일을 수집
+        - ZIP 파일로 묶어 다운로드 가능한 패키지 생성
         """
-        print(f"🎬 Mastering Forge: Generating {resolution} master for project {project_id}...")
-        
-        # 1. 프로젝트 자산(Takes) 수집 (Master로 승인된 것들 위주)
-        # 실제 구현에서는 DB에서 해당 프로젝트의 최신 Master Take들을 가져와야 함
-        # 여기서는 프로토타입으로 시퀀스 순서대로 결합하는 로직을 시뮬레이션
-        
+        print(f"📦 Mastering Forge: Bundling assets for project {project_id} ({resolution})...")
+
         project_dir = self.output_base / project_id
         project_dir.mkdir(parents=True, exist_ok=True)
-        
+
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_filename = f"master_{resolution}_{timestamp}.mp4"
-        output_path = project_dir / output_filename
+        zip_filename = f"master_{resolution}_{timestamp}.zip"
+        zip_path = project_dir / zip_filename
 
-        # 2. FFmpeg 실행 (Placeholder 스크립트)
-        # 실제로는 모든 샷의 경로가 담긴 concat 파일을 생성해야 함
-        
-        scale_filter = "scale=1920:1080" if resolution == "2k" else "scale=3840:2160:flags=lanczos"
-        bitrate = "5M" if resolution == "2k" else "20M"
+        # 프로젝트에 속하는 에셋 디렉토리 목록
+        asset_dirs = [
+            settings.STORYBOARDS_DIR / project_id,
+            settings.PLANS_DIR / project_id,
+            settings.VIDEOS_DIR / project_id,
+            settings.AUDIO_DIR / project_id,
+        ]
 
-        # 임시: 단순히 첫 번째 샷을 사용하여 마스터 생성 시뮬레이션
-        # 실제 구현 시 concat filter 사용 권장
-        
-        try:
-            # subprocess.run(["ffmpeg", "-version"], capture_output=True) # ffmpeg 존재 확인
-            
-            # TODO: 실제 마스터링 로직 (Concat 영상 + 오디오 믹싱)
-            # 여기선 간단한 복사 및 스케일링으로 프로토타입 구현
-            print(f"🚀 FFmpeg Trigger: {scale_filter} | Bitrate: {bitrate}")
-            
-            # 실제 파일이 없을 경우를 대비한 가상 생성 (테스트용)
-            if not output_path.exists():
-                with open(output_path, "w") as f:
-                    f.write(f"Master file for {project_id} in {resolution}")
-            
-            return str(output_path)
-            
-        except Exception as e:
-            print(f"❌ Mastering failed: {e}")
-            return None
+        # manifest 파일 (프로젝트 루트 manifests/ 에 저장됨)
+        manifest_path = settings.OUTPUT_DIR / "manifests" / f"{project_id}_manifest.json"
+
+        collected: list[tuple[Path, str]] = []  # (실제경로, ZIP 내부 경로)
+
+        for asset_dir in asset_dirs:
+            if asset_dir.exists():
+                for file in sorted(asset_dir.rglob("*")):
+                    if file.is_file():
+                        arcname = str(file.relative_to(settings.OUTPUT_DIR))
+                        collected.append((file, arcname))
+
+        if manifest_path.exists():
+            collected.append((manifest_path, f"manifests/{project_id}_manifest.json"))
+
+        # 수집된 파일이 없으면 메타데이터만 포함한 ZIP 생성
+        if not collected:
+            print(f"⚠️  No assets found for {project_id}, creating metadata-only package")
+
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            for file_path, arcname in collected:
+                zf.write(file_path, arcname)
+
+            # 패키지 메타데이터 추가
+            meta = {
+                "project_id": project_id,
+                "resolution": resolution,
+                "bundled_at": timestamp,
+                "file_count": len(collected),
+                "files": [arc for _, arc in collected],
+            }
+            zf.writestr("package_meta.json", json.dumps(meta, ensure_ascii=False, indent=2))
+
+        print(f"✅ Package ready: {zip_path} ({len(collected)} files)")
+        return str(zip_path)
 
     def _create_concat_file(self, video_paths: list, concat_file_path: Path):
-        """FFmpeg concat용 텍스트 파일 생성"""
+        """FFmpeg concat용 텍스트 파일 생성 (향후 실제 영상 지원 시 사용)"""
         with open(concat_file_path, "w") as f:
             for v in video_paths:
                 f.write(f"file '{v}'\n")

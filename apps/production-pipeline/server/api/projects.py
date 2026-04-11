@@ -11,6 +11,7 @@ from server.models.database import Project, PipelinePreset, PipelineRun, Asset, 
 from server.models.schemas import (
     ProjectCreate, ProjectUpdate, ProjectResponse,
     SceneListResponse, SceneMetaResponse, SequenceResponse,
+    SceneDetailResponse, CutMetaResponse,
     AgentWithQueueResponse, AgentStatsResponse, AgentQueueItemResponse,
     ProjectAssetResponse,
 )
@@ -150,7 +151,7 @@ def get_project_scenes(project_id: str, db: Session = Depends(get_db)):
         if a.scene_number is not None
     }
 
-    CUTS_PER_SCENE = 4  # default placeholder until cut-level tracking lands
+    CUTS_PER_SCENE = 4  # TODO: derive from cut_graphs table once cut-level tracking is implemented
 
     scenes_out: list[SceneMetaResponse] = []
     for raw in raw_scenes:
@@ -196,6 +197,77 @@ def get_project_scenes(project_id: str, db: Session = Depends(get_db)):
         scenes=scenes_out,
         sequences=sequences_out,
         totalCount=len(scenes_out),
+    )
+
+
+@router.get("/{project_id}/scenes/{scene_slug}", response_model=SceneDetailResponse)
+def get_scene_detail(project_id: str, scene_slug: str, db: Session = Depends(get_db)):
+    """씬 상세 조회 — direction_plan_json에서 씬 추출 후 컷 목록 합성"""
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+
+    # scene_slug: 'sc003' → scene_number: 3
+    try:
+        scene_number = int(scene_slug.replace("sc", ""))
+    except ValueError:
+        raise HTTPException(status_code=400, detail="잘못된 씬 슬러그 형식입니다")
+
+    plan: dict = project.direction_plan_json or {}
+    raw_scenes: list = plan.get("scenes", [])
+    raw = next((s for s in raw_scenes if s.get("scene_number") == scene_number), None)
+    if not raw:
+        raise HTTPException(status_code=404, detail="씬을 찾을 수 없습니다")
+
+    initials = _make_initials(project.title)
+    slug = f"sc{scene_number:03d}"
+    scene_id = str(uuid.uuid5(uuid.NAMESPACE_URL, f"{project_id}/{slug}"))
+
+    # Check if this scene has any IMAGE assets (scene-level completion only — no cut-level tracking yet)
+    scene_has_assets = db.query(Asset).filter(
+        Asset.project_id == project_id,
+        Asset.scene_number == scene_number,
+        Asset.type == "IMAGE",
+    ).first() is not None
+
+    # Synthesise 4 cuts per scene
+    CUTS_PER_SCENE = 4
+    cuts_out: list[CutMetaResponse] = []
+    for n in range(1, CUTS_PER_SCENE + 1):
+        cut_slug = f"cut{n:03d}"
+        cut_display = f"{initials}_{slug}_{cut_slug}"
+        cuts_out.append(CutMetaResponse(
+            id=str(uuid.uuid5(uuid.NAMESPACE_URL, f"{project_id}/{slug}/{cut_slug}")),
+            slug=cut_slug,
+            displayId=cut_display,
+            number=n,
+            sceneId=scene_id,
+            duration=[3, 4, 5][(n - 1) % 3],
+            status="done" if scene_has_assets else "pending",
+        ))
+
+    seq_num = (scene_number - 1) // 5 + 1
+    seq_id = f"{project_id[:8]}_seq{seq_num}"
+    is_scene_done = any(c.status == "done" for c in cuts_out)
+
+    return SceneDetailResponse(
+        id=scene_id,
+        slug=slug,
+        displayId=f"{initials}_{slug}",
+        number=scene_number,
+        sequenceId=seq_id,
+        title=raw.get("setting", f"Scene {scene_number}"),
+        location=raw.get("setting", ""),
+        timeOfDay=raw.get("time_of_day", ""),
+        summary=raw.get("action_description", "")[:200],
+        coverImageUrl="",
+        cutCount=CUTS_PER_SCENE,
+        completedCutCount=sum(1 for c in cuts_out if c.status == "done"),
+        status="done" if is_scene_done else "pending",
+        synopsis=raw.get("action_description"),
+        characters=raw.get("characters", []),
+        durationSeconds=60,
+        cuts=cuts_out,
     )
 
 

@@ -202,6 +202,7 @@ export function PipelineProvider({ children, onApprove4K }: { children: ReactNod
       globalHealthScore: 100,
       engines: INITIAL_ENGINES,
       agentBindings: INITIAL_BINDINGS,
+      projectId: state.projectId,
     });
   };
 

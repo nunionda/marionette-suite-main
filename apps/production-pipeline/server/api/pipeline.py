@@ -210,3 +210,96 @@ async def approve_mastering(
     background_tasks.add_task(_trigger_ts_mastering, run.id, target_asset.id)
 
     return {"status": "accepted", "run_id": run.id, "target_asset": target_asset.file_name}
+
+
+@router.get("/{project_id}/manifest")
+def get_project_manifest(project_id: str, db: Session = Depends(get_db)):
+    """프로젝트 에셋 매니페스트 조회 (마스터 에디터가 생성한 JSON)"""
+    import json as json_mod
+    from pathlib import Path
+
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+
+    manifest_path = Path(settings.OUTPUT_DIR) / "manifests" / f"{project_id}_manifest.json"
+    if not manifest_path.exists():
+        return {
+            "project_id": project_id,
+            "title": project.title,
+            "assets": [],
+            "total_frames": 0,
+            "status": "not_generated",
+        }
+
+    with open(manifest_path, encoding="utf-8") as f:
+        manifest = json_mod.load(f)
+
+    manifest["status"] = "ready"
+    return manifest
+
+
+@router.get("/{project_id}/package")
+def get_package_download_url(project_id: str, db: Session = Depends(get_db)):
+    """최종 패키지(마스터링 결과물) 다운로드 URL 반환"""
+    from pathlib import Path
+
+    project = db.query(Project).filter(Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="프로젝트를 찾을 수 없습니다")
+
+    mastering_dir = Path(settings.OUTPUT_DIR) / "mastering" / project_id
+    if mastering_dir.exists():
+        # ZIP 패키지 우선, 없으면 MP4 폴백
+        candidates = sorted(
+            list(mastering_dir.glob("master_*.zip")) + list(mastering_dir.glob("master_*.mp4")),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )
+        if candidates:
+            best = candidates[0]
+            relative = best.relative_to(settings.OUTPUT_DIR)
+            return {
+                "project_id": project_id,
+                "download_url": f"/output/{relative}",
+                "filename": best.name,
+                "status": "ready",
+            }
+
+    return {"project_id": project_id, "download_url": None, "status": "not_generated"}
+
+
+@router.patch("/{project_id}/runs/{run_id}/status")
+def update_step_review_status(
+    project_id: str,
+    run_id: str,
+    payload: dict,
+    db: Session = Depends(get_db),
+):
+    """
+    특정 파이프라인 스텝의 리뷰 상태 업데이트 (Approved / Revision).
+    payload: { "step_name": "concept_artist", "status": "Approved" | "Revision" }
+    """
+    run = (
+        db.query(PipelineRun)
+        .filter(PipelineRun.id == run_id, PipelineRun.project_id == project_id)
+        .first()
+    )
+    if not run:
+        raise HTTPException(status_code=404, detail="파이프라인 런을 찾을 수 없습니다")
+
+    step_name = payload.get("step_name")
+    review_status = payload.get("status")
+
+    if not step_name or review_status not in ("Approved", "Revision"):
+        raise HTTPException(status_code=422, detail="step_name과 status(Approved|Revision)가 필요합니다")
+
+    # JSON 컬럼 in-place 수정: 전체 dict 교체 (SQLite JSON 호환)
+    updated_results = dict(run.step_results or {})
+    step_data = dict(updated_results.get(step_name, {}))
+    step_data["review_status"] = review_status
+    updated_results[step_name] = step_data
+    run.step_results = updated_results
+
+    db.commit()
+    return {"run_id": run_id, "step_name": step_name, "review_status": review_status}

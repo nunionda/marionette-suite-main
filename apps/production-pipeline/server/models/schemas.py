@@ -31,6 +31,8 @@ class ProjectUpdate(BaseModel):
     analysis_status: Optional[str] = None
     art_bible_status: Optional[str] = None
     production_book_path: Optional[str] = None
+    visual_dna: Optional[dict] = None
+    set_concept: Optional[dict] = None
 
 
 class ProjectResponse(BaseModel):
@@ -253,6 +255,50 @@ class SceneListResponse(BaseModel):
     scenes: List[SceneMetaResponse]
     sequences: List[SequenceResponse]
     totalCount: int
+
+
+class CutMetaResponse(BaseModel):
+    id: str
+    slug: str
+    displayId: str
+    number: int
+    sceneId: str
+    duration: int  # 3 | 4 | 5 seconds
+    status: str    # 'pending' | 'generating' | 'done' | 'approved'
+    thumbnailUrl: Optional[str] = None
+    description: Optional[str] = None
+
+
+class SceneDetailResponse(SceneMetaResponse):
+    synopsis: Optional[str] = None
+    characters: List[str]
+    durationSeconds: int
+    cuts: List[CutMetaResponse]
+
+
+# ─── Agent Queue 스키마 ───
+
+# ─── GlobalAsset / PipelineTake 스키마 ───
+
+class AssetResponse(BaseModel):
+    id: str
+    project_id: Optional[str] = None
+    name: str
+    asset_type: str
+    output_path: str
+    metadata: Optional[dict] = None
+    tags: Optional[str] = ""
+    is_verified: bool = False
+    created_at: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+
+class AssetPromotionRequest(BaseModel):
+    take_id: str
+    name: str
+    tags: Optional[str] = ""
+    override_metadata: Optional[dict] = None
 
 
 # ─── Agent Queue 스키마 ───

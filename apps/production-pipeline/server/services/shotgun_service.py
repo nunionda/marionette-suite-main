@@ -117,12 +117,12 @@ class ShotgunService:
                     "description": f"VFX Pass {variant_idx + 1}"
                 }
             
-            # 기본 모크 처리
+            # 미지원 스텝 — 실제 출력 없음
             await asyncio.sleep(2)
             return {
-                "output_path": f"mock_take_{variant_idx}.mp4",
+                "output_path": None,
                 "engine": "Mock Engine",
-                "description": f"Mock Variant {variant_idx + 1}"
+                "description": f"Mock Variant {variant_idx + 1} (미지원 스텝)"
             }
             
         except Exception as e:

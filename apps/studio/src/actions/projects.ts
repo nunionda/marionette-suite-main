@@ -1,7 +1,8 @@
 "use server";
 
-// 🎬 Stage 7: Unified Production Engine (Port 3005)
-const API_BASE_URL = "http://localhost:3005/api";
+import { serviceUrl } from "@marionette/config";
+
+const API_BASE_URL = serviceUrl("pipelineApi", "/api");
 
 export async function getProjects() {
   try {

@@ -16,6 +16,10 @@ interface EngineRegistryProps {
     infrastructure: any;
     logs: string[];
   };
+  benchmarks?: {
+    agents: Record<string, Record<string, unknown>>;
+    benchmark_metadata: Record<string, unknown>;
+  } | null;
 }
 
 const ROLE_ACRONYM_MAP: Record<string, string> = {
@@ -35,7 +39,7 @@ const ROLE_ACRONYM_MAP: Record<string, string> = {
   "Mixing Engineer": "MSTR",
 };
 
-export default function EngineRegistry({ health }: EngineRegistryProps) {
+export default function EngineRegistry({ health, benchmarks }: EngineRegistryProps) {
   const { engines, agentBindings, updateBinding, globalHealthScore } = usePipeline();
 
   const handleUpdateBinding = (role: string, engineId: string) => {

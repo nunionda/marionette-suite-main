@@ -7,7 +7,7 @@ from typing import List
 from pydantic import BaseModel
 
 from server.core.database import get_db
-from server.models.database import Credential
+from server.models.database import Credential  # noqa: F401 — registered via Base
 from server.utils.encryption import encrypt_key, decrypt_key
 
 router = APIRouter()

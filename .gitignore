@@ -5,3 +5,8 @@ dist/
 .next/
 .turbo/
 .DS_Store
+
+# 환경변수 (절대 커밋 금지)
+.env
+.env.local
+.env.*.local

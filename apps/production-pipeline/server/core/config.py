@@ -46,10 +46,11 @@ class Settings:
     STORYBOARDS_DIR: Path = OUTPUT_DIR / "storyboards"
     VIDEOS_DIR: Path = OUTPUT_DIR / "videos"
     AUDIO_DIR: Path = OUTPUT_DIR / "audio"
+    BIBLES_DIR: Path = OUTPUT_DIR / "bibles"
 
     def ensure_dirs(self):
         """모든 출력 디렉토리가 존재하는지 확인"""
-        for d in [self.OUTPUT_DIR, self.PLANS_DIR, self.STORYBOARDS_DIR, self.VIDEOS_DIR, self.AUDIO_DIR]:
+        for d in [self.OUTPUT_DIR, self.PLANS_DIR, self.STORYBOARDS_DIR, self.VIDEOS_DIR, self.AUDIO_DIR, self.BIBLES_DIR]:
             d.mkdir(parents=True, exist_ok=True)
 
 

@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { usePipeline } from "./PipelineProvider";
 
+interface EditSequence {
+  id: string;
+  scene: string;
+  duration: string;
+  status: string;
+  continuityScore: number;
+}
+
 export default function EditSuite() {
   const [progress, setProgress] = useState(0);
   const [isAnalyzing, setIsAnalyzing] = useState(true);

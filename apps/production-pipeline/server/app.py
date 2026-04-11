@@ -8,7 +8,7 @@ from pathlib import Path
 
 from server.core.config import settings
 from server.core.database import init_db
-from server.api import projects, pipeline, websocket, analysis, presets, graphs, audio
+from server.api import projects, pipeline, websocket, analysis, presets, graphs, audio, system, assets, bible, vault, benchmark
 from server.api.websocket import manager
 from server.models.schemas import HealthResponse
 from server.services.auditor import auditor
@@ -45,6 +45,11 @@ def create_app() -> FastAPI:
     app.include_router(presets.router, prefix="/api/presets", tags=["presets"])
     app.include_router(graphs.router, prefix="/api/projects", tags=["graphs"])
     app.include_router(audio.router, prefix="/api/audio", tags=["audio"])
+    app.include_router(system.router, prefix="/api/system", tags=["system"])
+    app.include_router(assets.router, prefix="/api/assets", tags=["assets"])
+    app.include_router(bible.router, prefix="/api/bible", tags=["bible"])
+    app.include_router(vault.router, prefix="/api/vault", tags=["vault"])
+    app.include_router(benchmark.router, prefix="/api/benchmark", tags=["benchmark"])
 
     # ─── 정적 파일 서빙 (산출물 다운로드) ───
     output_dir = settings.OUTPUT_DIR
@@ -101,7 +106,7 @@ def create_app() -> FastAPI:
                 {"id": "asset_designer", "name": "AI 에셋 디자이너", "status": "ready"},
                 {"id": "vfx_compositor", "name": "AI VFX 컴포지터", "status": "ready"},
                 {"id": "master_editor", "name": "AI 마스터 에디터", "status": "ready"},
-                {"id": "sound_designer", "name": "AI 사운드 디자이너", "status": "mock"},
+                {"id": "sound_designer", "name": "AI 사운드 디자이너", "status": "ready_narration"},
             ],
         }
 

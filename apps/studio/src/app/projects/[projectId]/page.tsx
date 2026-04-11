@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { fetchProject, fetchScenes } from '@/lib/studio/api';
 import { ProgressBar } from '@/components/studio/ProgressBar';
 import { RiskMonitor } from '@/components/intelligence/RiskMonitor';
+import { ExecuteGraphButton } from '@/components/studio/ExecuteGraphButton';
 import Link from 'next/link';
 import type { ProjectStatus } from '@/lib/studio/types';
 
@@ -36,6 +37,11 @@ export default async function ProjectHubPage({ params }: Props) {
 
   return (
     <div className="px-8 py-10 max-w-[1200px]">
+      {/* Action bar */}
+      <div className="flex justify-end mb-6">
+        <ExecuteGraphButton projectId={projectId} />
+      </div>
+
       {/* Project stats */}
       <div className="mb-10 grid grid-cols-2 md:grid-cols-4 gap-4">
         {[

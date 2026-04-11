@@ -13,7 +13,7 @@ import {
 } from './mock-data';
 import { makeMockAgents } from './agent-mock';
 
-const PRODUCTION_API = process.env.NEXT_PUBLIC_PRODUCTION_API_URL ?? 'http://localhost:4000';
+const PRODUCTION_API = process.env.NEXT_PUBLIC_PRODUCTION_API_URL ?? 'http://localhost:3005';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === 'true';
 
@@ -40,8 +40,10 @@ export async function fetchProjects(): Promise<Project[]> {
 }
 
 export async function fetchProject(projectId: string): Promise<Project | null> {
-  const projects = await fetchProjects();
-  return projects.find(p => p.id === projectId) ?? null;
+  return fetchJSON<Project | null>(
+    `${PRODUCTION_API}/api/projects/${projectId}`,
+    () => MOCK_PROJECTS.find(p => p.id === projectId) ?? null,
+  );
 }
 
 /* ─── Scenes ─── */

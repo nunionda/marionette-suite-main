@@ -1,38 +1,36 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { serviceUrl } from "@marionette/config";
 
-const API_BASE_URL = "http://localhost:3005/api";
+const API_BASE_URL = serviceUrl("pipelineApi", "/api");
 
 /**
  * 샷 리뷰 상태 업데이트 (승인/재작업 요청)
+ * PATCH /api/pipeline/{projectId}/runs/{runId}/status
  */
 export async function updateShotStatus(
-  projectId: string, 
-  runId: string, 
-  stepName: string, 
+  projectId: string,
+  runId: string,
+  stepName: string,
   status: "Approved" | "Revision"
 ) {
-  try {
-    const response = await fetch(`${API_BASE_URL}/pipeline/${projectId}/runs/${runId}/status`, {
+  const response = await fetch(
+    `${API_BASE_URL}/pipeline/${projectId}/runs/${runId}/status`,
+    {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        step: stepName, 
-        status: status === "Approved" ? "completed" : "failed" 
-      }),
-    });
-
-    if (!response.ok) {
-        throw new Error("Failed to update shot status");
+      body: JSON.stringify({ step_name: stepName, status }),
     }
+  );
 
-    revalidatePath("/");
-    return await response.json();
-  } catch (error) {
-    console.error("Error updating shot status:", error);
-    throw error;
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`리뷰 상태 업데이트 실패: ${error}`);
   }
+
+  revalidatePath(`/projects/${projectId}`);
+  return response.json();
 }
 
 /**

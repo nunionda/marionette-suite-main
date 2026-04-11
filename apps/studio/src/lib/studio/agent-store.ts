@@ -1,19 +1,31 @@
 import { create } from 'zustand';
 import type { AgentWithQueue, QueueItem } from './types';
 
+// Maps backend pipeline step names → agent labels
+const STEP_TO_LABEL: Record<string, string> = {
+  script_writer: 'Script Writer',
+  concept_artist: 'Concept Artist',
+  generalist: 'Generalist',
+  asset_designer: 'Asset Designer',
+  vfx_compositor: 'VFX Compositor',
+  master_editor: 'Master Editor',
+  sound_designer: 'Sound Designer',
+};
+
 interface AgentStore {
   agents: AgentWithQueue[];
   selectedAgentId: string | null;
-  simulationRunning: boolean;
 
   init: (agents: AgentWithQueue[]) => void;
   selectAgent: (id: string | null) => void;
-  tick: () => void;
   retryItem: (agentId: string, itemId: string) => void;
   moveItem: (agentId: string, itemId: string, direction: 'up' | 'down') => void;
   togglePause: (agentId: string) => void;
   runItem: (agentId: string, itemId: string) => void;
-  setSimulationRunning: (running: boolean) => void;
+  /** Apply a real-time WS step update to the matching agent */
+  applyWsUpdate: (step: string, status: 'running' | 'done' | 'error', durationMs?: number) => void;
+  /** Reset all agents to idle when a new pipeline run starts */
+  resetForPipeline: () => void;
 }
 
 function updateAgent(
@@ -27,93 +39,10 @@ function updateAgent(
 export const useAgentStore = create<AgentStore>((set) => ({
   agents: [],
   selectedAgentId: null,
-  simulationRunning: false,
 
   init: (agents) => set({ agents }),
 
   selectAgent: (id) => set({ selectedAgentId: id }),
-
-  setSimulationRunning: (running) => set({ simulationRunning: running }),
-
-  tick: () =>
-    set((state) => {
-      const updated = state.agents.map((agent) => {
-        if (agent.paused) return agent;
-
-        // Agent has a current task being processed
-        if (agent.status === 'running' && agent.currentTask) {
-          const isError = Math.random() < 0.1;
-          const processingItem = agent.queue.find((q) => q.status === 'processing');
-          const duration = 1200 + Math.floor(Math.random() * 3000);
-
-          const completedItem: QueueItem | undefined = processingItem
-            ? {
-                ...processingItem,
-                status: isError ? 'error' : 'done',
-                durationMs: duration,
-                errorMessage: isError ? 'Generation timeout — provider did not respond within 30s' : undefined,
-              }
-            : undefined;
-
-          const remainingQueue = agent.queue.filter((q) => q.status !== 'processing');
-          const newHistory = completedItem
-            ? [completedItem, ...agent.history].slice(0, 50)
-            : agent.history;
-
-          // Pick next from queue
-          const nextItem = remainingQueue.find((q) => q.status === 'pending');
-          const nextQueue = nextItem
-            ? remainingQueue.map((q) => (q.id === nextItem.id ? { ...q, status: 'processing' as const } : q))
-            : remainingQueue;
-
-          const nextTask = nextItem
-            ? { sceneSlug: nextItem.sceneSlug, cutSlug: nextItem.cutSlug, displayId: nextItem.displayId }
-            : undefined;
-
-          return {
-            ...agent,
-            status: (nextTask ? 'running' : 'idle') as AgentWithQueue['status'],
-            currentTask: nextTask,
-            queue: nextQueue,
-            history: newHistory,
-            stats: {
-              processed: agent.stats.processed + (completedItem && !isError ? 1 : 0),
-              errors: agent.stats.errors + (isError ? 1 : 0),
-              queueSize: nextQueue.filter((q) => q.status === 'pending' || q.status === 'processing').length,
-            },
-          };
-        }
-
-        // Agent is idle but has pending queue items — start processing
-        if (agent.status === 'idle' && agent.queue.some((q) => q.status === 'pending')) {
-          const nextItem = agent.queue.find((q) => q.status === 'pending')!;
-          return {
-            ...agent,
-            status: 'running' as const,
-            currentTask: { sceneSlug: nextItem.sceneSlug, cutSlug: nextItem.cutSlug, displayId: nextItem.displayId },
-            queue: agent.queue.map((q) => (q.id === nextItem.id ? { ...q, status: 'processing' as const } : q)),
-          };
-        }
-
-        // Agent errored — try to recover by picking next item
-        if (agent.status === 'error') {
-          const pendingItems = agent.queue.filter((q) => q.status === 'pending');
-          if (pendingItems.length > 0) {
-            const nextItem = pendingItems[0];
-            return {
-              ...agent,
-              status: 'running' as const,
-              currentTask: { sceneSlug: nextItem.sceneSlug, cutSlug: nextItem.cutSlug, displayId: nextItem.displayId },
-              queue: agent.queue.map((q) => (q.id === nextItem.id ? { ...q, status: 'processing' as const } : q)),
-            };
-          }
-        }
-
-        return agent;
-      });
-
-      return { agents: updated };
-    }),
 
   retryItem: (agentId, itemId) =>
     set((state) => ({
@@ -182,5 +111,51 @@ export const useAgentStore = create<AgentStore>((set) => ({
           queue: [{ ...item, status: 'processing' as const }, ...withoutItem],
         };
       }),
+    })),
+
+  applyWsUpdate: (step, status, durationMs) =>
+    set((state) => {
+      const label = STEP_TO_LABEL[step] ?? step.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+      return {
+        agents: state.agents.map((agent) => {
+          if (agent.label !== label) return agent;
+          if (status === 'running') {
+            return { ...agent, status: 'running' as const };
+          }
+          if (status === 'done') {
+            const historyItem: QueueItem = {
+              id: `ws-${step}-done`,
+              sceneSlug: 'sc001',
+              cutSlug: 'cut001',
+              displayId: `${step}/done`,
+              status: 'done' as const,
+              durationMs,
+            };
+            return {
+              ...agent,
+              status: 'done' as const,
+              currentTask: undefined,
+              stats: { ...agent.stats, processed: agent.stats.processed + 1 },
+              history: [historyItem, ...agent.history].slice(0, 50),
+            };
+          }
+          if (status === 'error') {
+            return { ...agent, status: 'error' as const, currentTask: undefined };
+          }
+          return agent;
+        }),
+      };
+    }),
+
+  resetForPipeline: () =>
+    set((state) => ({
+      agents: state.agents.map((agent) => ({
+        ...agent,
+        status: 'idle' as const,
+        currentTask: undefined,
+        queue: [],
+        history: [],
+        stats: { processed: 0, errors: 0, queueSize: 0 },
+      })),
     })),
 }));
