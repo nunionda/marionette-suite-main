@@ -7,8 +7,8 @@ import { useAuth } from "../../lib/auth-context";
 
 const navItems = [
   { href: "/projects", label: "Projects", icon: "🎬" },
-  { href: "http://localhost:5173", label: "CineScript Writer", icon: "✍️", external: true },
-  { href: "http://localhost:3001", label: "Art Department", icon: "🎨", external: true },
+  { href: process.env.NEXT_PUBLIC_SCRIPT_WRITER_URL || "http://localhost:5174", label: "CineScript Writer", icon: "✍️", external: true },
+  { href: process.env.NEXT_PUBLIC_STUDIO_URL || "http://localhost:3001", label: "Art Department", icon: "🎨", external: true },
   { href: "/scenario", label: "Scenario Analysis", icon: "📊" },
   { href: "/pipeline", label: "Pipeline", icon: "⚙️" },
   { href: "/agents", label: "Agents", icon: "🤖" },

@@ -8,8 +8,8 @@ if (!fs.existsSync(EXPORT_DIR)) {
 }
 
 export async function generatePdf(projectId: string): Promise<string> {
-  // Use frontend URL, typically http://localhost:5173
-  const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+  // Use frontend URL — Script Writer runs on :5174
+  const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5174";
   const targetUrl = `${FRONTEND_URL}/render/project/${projectId}`;
   
   console.log(`[PDF_GEN] Launching Puppeteer for ${targetUrl}`);

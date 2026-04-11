@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './BenchmarkDashboard.css';
 
-const API_BASE = 'http://localhost:8000/api/benchmark';
+const API_BASE = '/api/benchmark';
 
 const BenchmarkDashboard = () => {
   const [suites, setSuites] = useState({});

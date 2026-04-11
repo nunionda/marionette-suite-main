@@ -8,7 +8,7 @@ const BibleViewer = ({ projectId, onClose }) => {
   useEffect(() => {
     const fetchBible = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/api/bible/${projectId}`);
+        const res = await fetch(`/api/bible/${projectId}`);
         if (res.ok) {
           const data = await res.json();
           setContent(data.content);

@@ -56,7 +56,7 @@ export const usePipelineSocket = (runId) => {
       socketRef.current.close();
     }
 
-    const wsUrl = `ws://localhost:8000/ws/pipeline/${runId}`;
+    const wsUrl = `ws://${window.location.hostname}:${import.meta.env.VITE_API_PORT || '3005'}/ws/pipeline/${runId}`;
     console.log(`🔌 Connecting to Pipeline Engine: ${wsUrl}`);
     
     const ws = new WebSocket(wsUrl);

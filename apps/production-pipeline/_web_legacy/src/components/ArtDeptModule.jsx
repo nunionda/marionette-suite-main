@@ -16,6 +16,8 @@ const AGENTS = [
   { key: 'bible', name: 'Bible Compiler', avatar: 'BC' },
 ];
 
+const STUDIO_URL = import.meta.env.VITE_STUDIO_URL || 'http://localhost:3001';
+
 const ArtDeptModule = ({ project }) => {
   const [status, setStatus] = useState('IDLE');
   const [activeAgentIndex, setActiveAgentIndex] = useState(-1);
@@ -43,7 +45,7 @@ const ArtDeptModule = ({ project }) => {
       const formData = new FormData();
       formData.append('file', file);
       
-      const parseRes = await fetch('http://localhost:3001/api/pdf/parse', {
+      const parseRes = await fetch(`${STUDIO_URL}/api/pdf/parse`, {
         method: 'POST',
         body: formData
       });
@@ -53,7 +55,7 @@ const ArtDeptModule = ({ project }) => {
       setLogs(prev => [...prev, { type: 'info', text: '[SYSTEM] PDF extraction complete. Starting semantic analysis...' }]);
 
       // Step 2: Semantic Analysis
-      const analyzeRes = await fetch('http://localhost:3001/api/pdf/analyze', {
+      const analyzeRes = await fetch(`${STUDIO_URL}/api/pdf/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text })
@@ -90,7 +92,7 @@ const ArtDeptModule = ({ project }) => {
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/pipeline/full', {
+      const response = await fetch(`${STUDIO_URL}/api/pipeline/full`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

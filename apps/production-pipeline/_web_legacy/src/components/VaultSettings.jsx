@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AssetLibrary from './AssetLibrary';
 import './VaultSettings.css';
 
-const API_BASE = 'http://localhost:8000/api/vault';
+const API_BASE = '/api/vault';
 
 const VaultSettings = () => {
   const [activeTab, setActiveTab] = useState('keys'); // 'keys' | 'assets'

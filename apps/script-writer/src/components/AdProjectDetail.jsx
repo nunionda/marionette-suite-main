@@ -22,6 +22,8 @@ import { useAgentEngine } from '../hooks/useAgentEngine';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import ScriptTableView from './ScriptTableView';
 
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3006';
+
 const AD_GENRE_HINTS = {
   'BrandFilm': { icon: '✨', name: 'Brand Film', cues: ['Cinematic', 'Emotional', 'Poetic', 'Manifesto'] },
   'ProductDemo': { icon: '📦', name: 'Product Demo', cues: ['Hard Sell', 'USP', 'X-Ray View', 'Tech Specs'] },
@@ -409,7 +411,7 @@ const AdProjectDetail = ({ project, onBack }) => {
   const handleExportPDF = async () => {
     try {
       setExportStatus('pending');
-      const res = await fetch(`http://localhost:3006/api/projects/${project.id}/export`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/api/projects/${project.id}/export`, { method: 'POST' });
       const data = await res.json();
       if (data.jobId) {
         pollExportStatus(data.jobId);
@@ -424,12 +426,12 @@ const AdProjectDetail = ({ project, onBack }) => {
   const pollExportStatus = async (jobId) => {
     const interval = setInterval(async () => {
       try {
-        const res = await fetch(`http://localhost:3006/api/export/${jobId}`);
+        const res = await fetch(`${API_BASE}/api/export/${jobId}`);
         const data = await res.json();
         if (data.job?.status === 'completed') {
           clearInterval(interval);
           setExportStatus(null);
-          window.open(`http://localhost:3006${data.job.url}`, '_blank');
+          window.open(`${API_BASE}${data.job.url}`, '_blank');
         } else if (data.job?.status === 'failed') {
           clearInterval(interval);
           setExportStatus(null);

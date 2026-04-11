@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AssetCard from './AssetCard';
 
-const ASSET_API = 'http://localhost:8000/api/assets';
+const ASSET_API = '/api/assets';
 
 const AssetLibrary = () => {
   const [assets, setAssets] = useState([]);

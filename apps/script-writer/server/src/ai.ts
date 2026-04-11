@@ -23,7 +23,7 @@ async function downloadAndSaveImage(url: string): Promise<string | null> {
     const fileName = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
     const filePath = path.join(STORYBOARD_DIR, fileName);
     fs.writeFileSync(filePath, buffer);
-    const host = process.env.BACKEND_URL || "http://localhost:3005";
+    const host = process.env.BACKEND_URL || "http://localhost:3006";
     return `${host}/public/storyboards/${fileName}`;
   } catch (err) {
     console.error("[IMAGE_DOWNLOAD] Error saving image:", err);

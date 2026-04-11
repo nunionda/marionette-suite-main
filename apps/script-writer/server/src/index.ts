@@ -9,7 +9,7 @@ import { addJob, getJob } from "./services/pdfQueue";
 import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
-const API_BASE = "http://localhost:3006/api";
+const API_BASE = `http://localhost:${process.env.PORT || "3006"}/api`;
 const app = new Elysia()
   .use(cors())
   .use(staticPlugin({

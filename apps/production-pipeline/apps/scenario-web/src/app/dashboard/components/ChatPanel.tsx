@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react';
 import './ChatPanel.css';
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4005';
+
 interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
@@ -52,7 +54,7 @@ export default function ChatPanel({ scriptId, locale, strategy }: ChatPanelProps
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:4005/chat', {
+      const res = await fetch(`${API}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -8,7 +8,7 @@ const BenchmarkInsights = () => {
   useEffect(() => {
     const fetchBenchmarks = async () => {
       try {
-        const res = await fetch('http://localhost:8000/api/system/benchmarks');
+        const res = await fetch('/api/system/benchmarks');
         if (res.ok) {
           const data = await res.json();
           setBenchmarks(data);

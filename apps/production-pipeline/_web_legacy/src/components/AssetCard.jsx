@@ -6,7 +6,7 @@ const AssetCard = ({ asset, onRefresh }) => {
     if (!window.confirm("Remove this asset from global vault?")) return;
     
     try {
-      const res = await fetch(`http://localhost:8000/api/assets/${asset.id}`, {
+      const res = await fetch(`/api/assets/${asset.id}`, {
         method: 'DELETE'
       });
       if (res.ok) {
@@ -19,7 +19,7 @@ const AssetCard = ({ asset, onRefresh }) => {
 
   // 썸네일 경로 처리 (로컬 vs 클라우드)
   const isCloud = asset.output_path?.startsWith('http');
-  const previewUrl = isCloud ? asset.output_path : `http://localhost:8000/output/${asset.output_path?.split('/').pop()}`;
+  const previewUrl = isCloud ? asset.output_path : `/output/${asset.output_path?.split('/').pop()}`;
 
   return (
     <div className="asset-card glass fade-in">

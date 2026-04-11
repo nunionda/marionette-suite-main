@@ -26,6 +26,8 @@ import PhaseSection from './components/PhaseSection';
 import InvestmentVerdict from './components/InvestmentVerdict';
 import { generateExportFileName } from './utils/naming';
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4006';
+
 export default function DashboardPage() {
   return (
     <Suspense fallback={<div className="dashboard-grid"><main className="main-content" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'100vh'}}><Loader2 className="animate-spin" size={32} /></main></div>}>
@@ -110,7 +112,7 @@ function Dashboard() {
 
   useEffect(() => {
     fetchReportHistory();
-    fetch('http://localhost:4006/providers')
+    fetch(`${API}/providers`)
       .then(r => r.json())
       .then(d => setAvailableProviders(d.available || {}))
       .catch(() => {});
@@ -135,7 +137,7 @@ function Dashboard() {
     (async () => {
       setMode('analyzing');
       try {
-        const res = await fetch(`http://localhost:4006/report/${encodeURIComponent(reportId)}`);
+        const res = await fetch(`${API}/report/${encodeURIComponent(reportId)}`);
         if (!res.ok) throw new Error('Failed to load report');
         const result = await res.json();
         setData(result);
@@ -156,7 +158,7 @@ function Dashboard() {
     }
     setIsTranslating(true);
     try {
-      const res = await fetch('http://localhost:4006/translate', {
+      const res = await fetch(`${API}/translate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ report, targetLanguage: 'ko', strategy }),
@@ -199,7 +201,7 @@ function Dashboard() {
 
   async function fetchReportHistory() {
     try {
-      const res = await fetch('http://localhost:4006/reports?pageSize=10');
+      const res = await fetch(`${API}/reports?pageSize=10`);
       if (res.ok) {
         const result = await res.json();
         setReports(result.data || []);
@@ -235,7 +237,7 @@ function Dashboard() {
       bodyPayload.customProviders = customProviders;
 
       abortControllerRef.current = new AbortController();
-      const res = await fetch('http://localhost:4006/analyze', {
+      const res = await fetch(`${API}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bodyPayload),
@@ -269,7 +271,7 @@ function Dashboard() {
     setMode('analyzing');
     setUploadError(null);
     try {
-      const res = await fetch(`http://localhost:4006/report/${encodeURIComponent(scriptId)}`);
+      const res = await fetch(`${API}/report/${encodeURIComponent(scriptId)}`);
       if (!res.ok) throw new Error('Failed to load report');
       const result = await res.json();
       setData(result);
