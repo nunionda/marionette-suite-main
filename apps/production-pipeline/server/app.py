@@ -8,7 +8,7 @@ from pathlib import Path
 
 from server.core.config import settings
 from server.core.database import init_db
-from server.api import projects, pipeline, websocket, analysis, presets, graphs
+from server.api import projects, pipeline, websocket, analysis, presets, graphs, audio
 from server.api.websocket import manager
 from server.models.schemas import HealthResponse
 from server.services.auditor import auditor
@@ -44,6 +44,7 @@ def create_app() -> FastAPI:
     app.include_router(websocket.router)
     app.include_router(presets.router, prefix="/api/presets", tags=["presets"])
     app.include_router(graphs.router, prefix="/api/projects", tags=["graphs"])
+    app.include_router(audio.router, prefix="/api/audio", tags=["audio"])
 
     # ─── 정적 파일 서빙 (산출물 다운로드) ───
     output_dir = settings.OUTPUT_DIR
@@ -97,8 +98,8 @@ def create_app() -> FastAPI:
                 {"id": "script_writer", "name": "AI 시나리오 작가", "status": "ready" if settings.GEMINI_API_KEY else "no_api_key"},
                 {"id": "concept_artist", "name": "AI 컨셉 아티스트", "status": "mock"},
                 {"id": "generalist", "name": "AI 제너럴리스트", "status": "mock"},
-                {"id": "asset_designer", "name": "AI 에셋 디자이너", "status": "mock"},
-                {"id": "vfx_compositor", "name": "AI VFX 컴포지터", "status": "mock"},
+                {"id": "asset_designer", "name": "AI 에셋 디자이너", "status": "ready"},
+                {"id": "vfx_compositor", "name": "AI VFX 컴포지터", "status": "ready"},
                 {"id": "master_editor", "name": "AI 마스터 에디터", "status": "ready"},
                 {"id": "sound_designer", "name": "AI 사운드 디자이너", "status": "mock"},
             ],

@@ -108,10 +108,10 @@ export default function CopilotWidget() {
             )}
             
             {messages.map((msg, idx) => (
-              <div key={idx} className={`flex \${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`p-3 max-w-[85%] rounded-sm \${
-                  msg.role === 'user' 
-                    ? 'bg-[var(--ms-green-dim)] border border-[var(--ms-green)] text-[var(--ms-green)]' 
+              <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`p-3 max-w-[85%] rounded-sm ${
+                  msg.role === 'user'
+                    ? 'bg-[var(--ms-green-dim)] border border-[var(--ms-green)] text-[var(--ms-green)]'
                     : 'bg-[#222] border border-[#444] text-[#DDD] whitespace-pre-wrap'
                 }`}>
                   <span className="opacity-50 text-[8px] block mb-1 uppercase tracking-widest">[{msg.role}]</span>

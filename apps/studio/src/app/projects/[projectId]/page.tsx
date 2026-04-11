@@ -1,7 +1,15 @@
 import { notFound } from 'next/navigation';
 import { fetchProject, fetchScenes } from '@/lib/studio/api';
 import { ProgressBar } from '@/components/studio/ProgressBar';
+import { RiskMonitor } from '@/components/intelligence/RiskMonitor';
 import Link from 'next/link';
+import type { ProjectStatus } from '@/lib/studio/types';
+
+const RISK_STATUS: Record<ProjectStatus, string> = {
+  development: 'CAUTION',
+  production: 'STABLE',
+  post: 'STABLE',
+};
 
 interface Props {
   params: Promise<{ projectId: string }>;
@@ -16,6 +24,15 @@ export default async function ProjectHubPage({ params }: Props) {
   if (!project) notFound();
 
   const { sequences } = sceneData;
+
+  // Derive risk metrics from project completion data
+  const completionRatio = project.totalCuts > 0 ? project.completedCuts / project.totalCuts : 0;
+  const riskData = {
+    divergenceIndex: Math.max(0, 1 - completionRatio),
+    commercialScore: Math.round(completionRatio * 65 + (project.completedScenes / Math.max(project.totalScenes, 1)) * 35),
+    status: RISK_STATUS[project.status] ?? 'CAUTION',
+    resourceAllocation: { vfx: 0.35, cast: 0.30, marketing: 0.25, contingency: 0.10 },
+  };
 
   return (
     <div className="px-8 py-10 max-w-[1200px]">
@@ -45,6 +62,11 @@ export default async function ProjectHubPage({ params }: Props) {
       >
         <h2 className="text-[14px] font-semibold mb-4">전체 진행률</h2>
         <ProgressBar completed={project.completedCuts} total={project.totalCuts} />
+      </div>
+
+      {/* Intelligence Audit */}
+      <div className="mb-10">
+        <RiskMonitor data={riskData} />
       </div>
 
       {/* Sequence cards */}
