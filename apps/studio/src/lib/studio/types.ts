@@ -13,6 +13,7 @@ export interface Project {
   totalCuts: number;
   completedCuts: number;
   createdAt: string;        // ISO 8601
+  direction_plan_json?: unknown; // FastAPI field: scene plan from Script Writer agent
 }
 
 /* ─── Sequence ─── */

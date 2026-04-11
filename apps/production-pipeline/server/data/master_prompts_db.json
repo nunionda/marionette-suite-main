@@ -8,7 +8,7 @@
       "desc": "화가 출신 감독. 전체 장면을 수채화/구아슈/크레용으로 직접 그렸다. 반 고흐와 인상파의 영향을 받아 색채와 감정을 동시에 전달하는 독보적 스타일.",
       "styleDesc": "수채화/구아슈/크레용 기법. 풀컬러 회화 수준. 반 고흐 + 일본 전통화 융합. 색채로 장면의 감정 온도를 전달.",
       "technique": "시대별 색온도 시스템은 구로사와의 \"색채로 감정 전달\" 철학과 정확히 일치. AI 이미지 프롬프트에 color palette를 명시적으로 포함해야 함.",
-      "aiPrompt": "",
+      "aiPrompt": "Akira Kurosawa storyboard style, watercolor and gouache painting, Van Gogh expressive brushstrokes, Japanese ink wash influence, full color emotional palette, impressionist atmosphere, hand-painted cinematic frame",
       "films": [
         "乱 Ran (1985)",
         "影武者 Kagemusha (1980)",
@@ -25,7 +25,7 @@
       "desc": "자신의 영화를 직접 스토리보드하는 감독. \"Ridleygrams\"라 불리는 스토리보드는 잉크+연필로 그린 코믹북 스타일이며, 등고선 렌더링으로 깊이와 볼륨을 정확하게 전달한다.",
       "styleDesc": "잉크+연필 드로잉. 미국 코믹북/Heavy Metal 매거진 스타일. 등고선 기반 렌더링으로 깊이감. Jean Giraud(뫼비우스) 영향.",
       "technique": "리들리그램의 핵심은 \"분위기 전달력\". AI 프롬프트에서 조명 방향, 대기 연무, 렌즈 선택까지 명시해야 함.",
-      "aiPrompt": "",
+      "aiPrompt": "Ridleygram storyboard style, ink and pencil contour drawing, Heavy Metal magazine aesthetic, Moebius influence, deep shadow rendering, atmospheric haze, dramatic chiaroscuro lighting, cinematic comic book panel",
       "films": [
         "Alien (1979)",
         "Blade Runner (1982)",
@@ -42,7 +42,7 @@
       "desc": "모든 영화의 모든 씬, 모든 샷을 직접 스토리보드한다. 기생충에서 960개 샷 전체를 304페이지에 걸쳐 사전 드로잉. 그래픽 노블로 출판되었다.",
       "styleDesc": "깔끔한 펜 라인 드로잉. 만화적이면서도 시네마틱한 구도. 카메라 앵글/이동 방향 화살표 상세. 대사와 사운드 효과까지 기입.",
       "technique": "봉준호 방식의 \"전 샷 사전 계획\"은 AI 파이프라인에서 더욱 중요. 전체를 통합 관리해야 함.",
-      "aiPrompt": "",
+      "aiPrompt": "Bong Joon-ho storyboard style, clean pen line drawing, graphic novel composition, Korean cinematic framing, precise camera angle with direction arrows, manga-influenced panel layout, black and white ink",
       "films": [
         "기생충 Parasite (2019)",
         "설국열차 Snowpiercer (2013)",
@@ -59,7 +59,7 @@
       "desc": "영화 타이틀 디자인의 전설. 히치콕의 사이코 샤워 씬을 위해 48장의 양식화된 스토리보드를 제작. 스콜세지와도 Goodfellas, Casino에서 협업.",
       "styleDesc": "그래픽 디자인 기반의 양식화. 강렬한 대비, 실루엣 활용. 미니멀하면서도 충격적인 구성. 타이틀 시퀀스 디자인의 선구자.",
       "technique": "Scene 1 타이틀 시퀀스와 엔딩 크레딧에 솔 바스 스타일 직접 참조. B&W, high contrast 비주얼 키와 일치.",
-      "aiPrompt": "",
+      "aiPrompt": "Saul Bass storyboard style, high contrast black and white graphic design, bold silhouette shapes, geometric minimalism, title sequence aesthetic, flat graphic composition, Hitchcock film storyboard",
       "films": [
         "Psycho (1960)",
         "The Birds (1963)",
@@ -76,7 +76,7 @@
       "desc": "스크립트 대신 에콘테(絵コンテ)를 직접 그려 영화를 \"쓴다\". 스토리보드가 곧 시나리오. 스튜디오 지브리 전 작품의 에콘테 전집이 출판.",
       "styleDesc": "모노크롬 연필 드로잉 + 타이밍 코드. 정보 밀도 극한 — 카메라 무브, 대사, 효과음, 프레임 수까지 한 칸에 기입.",
       "technique": "미야자키의 \"한 장에 모든 정보\" 원칙을 AI 프롬프트에 적용: 카메라/조명/감정/사운드를 하나의 프롬프트에 통합.",
-      "aiPrompt": "",
+      "aiPrompt": "Miyazaki ekonte storyboard style, monochrome pencil sketch, Studio Ghibli aesthetic, information-dense single frame with timing annotations, organic flowing lines, hand-drawn animation planning",
       "films": [
         "센과 치히로 (2001)",
         "하울의 움직이는 성 (2004)",
@@ -93,7 +93,7 @@
       "desc": "11세에 로마 시대 에픽 영화의 스토리보드를 그린 천재. 택시 드라이버 클라이맥스를 연필+빨간 펜으로 직접 스토리보드. 피는 빨간 잉크로 표현.",
       "styleDesc": "러프 스케치 + 메모. 스틱 피겨 수준의 간결함이지만 구도와 카메라 무빙이 정확. 협업자에게 여지를 남기는 열린 스토리보드.",
       "technique": "스콜세지의 \"최소한의 선으로 최대 정보\"는 AI 프롬프트의 효율성과 연결. 핵심 감정/구도/조명 3가지에 집중.",
-      "aiPrompt": "",
+      "aiPrompt": "Martin Scorsese storyboard style, rough pencil sketch with red ink highlights, stick figure composition, minimal expressive lines, handwritten scene notes, 1970s New York cinema atmosphere",
       "films": [
         "Taxi Driver (1976)",
         "Goodfellas (1990)",
@@ -110,7 +110,7 @@
       "desc": "Mad Max: Fury Road는 전통적 시나리오 없이 3,500장의 스토리보드로 \"쓰였다\". 최종 영화는 스토리보드와 거의 샷바이샷으로 일치.",
       "styleDesc": "코믹북 아티스트 기반의 정밀 드로잉. 3,500+ 패널. 컬러 & B/W 모두 사용. 액션 동선/카메라 무브/VFX 레이어까지 표현.",
       "technique": "\"대본 대신 스토리보드로 영화 만들기\"는 AI 비주얼 파이프라인의 미래. 드라마에서도 같은 정밀도를 유지하는 것이 관건.",
-      "aiPrompt": "",
+      "aiPrompt": "Mad Max Fury Road storyboard style, action comic book art, Brendan McCarthy illustration, full color kinetic panel, post-apocalyptic vehicle action, motion blur lines, dynamic extreme angle",
       "films": [
         "Mad Max: Fury Road (2015)",
         "Furiosa (2024)"
@@ -125,7 +125,7 @@
       "desc": "1985년 Raising Arizona부터 코엔 형제의 모든 영화를 스토리보드. 영화 한 편당 약 1,000장의 드로잉. 구술→스케치→잉크+그림자 6주 반복 프로세스.",
       "styleDesc": "잉크+그림자 드로잉. 감독의 비전을 \"해석\"하는 통역사 역할. 전 장면 보딩으로 영화의 리듬과 페이싱까지 설계.",
       "technique": "Anderson의 \"전 장면 보딩\" 원칙은 AI 제작에서 더욱 필수. 리듬/페이싱/톤의 일관성을 위해 전체를 통합 관리.",
-      "aiPrompt": "",
+      "aiPrompt": "J. Todd Anderson Coen Brothers storyboard style, ink and shadow cross-hatching, noir cinematic depth, dramatic low-angle framing, precise scene blocking arrows, film noir atmosphere",
       "films": [
         "No Country for Old Men (2007)",
         "Fargo (1996)",
@@ -142,7 +142,7 @@
       "desc": "70편 이상의 장편영화 스토리보드를 담당. 쥬라기 공원의 전설적인 랩터 주방 시퀀스를 그렸으며, 스필버그의 레귤러 콜라보레이터.",
       "styleDesc": "시네마틱 리얼리즘. 조명/그림자의 정밀한 표현. 서스펜스 구축을 위한 프레이밍 설계.",
       "technique": "Lowery의 \"서스펜스를 위한 프레이밍\"은 이력서 발견 씬에 직접 적용. 프레임 단위로 서스펜스를 설계.",
-      "aiPrompt": "",
+      "aiPrompt": "David Lowery Spielberg storyboard style, cinematic realism pencil drawing, precise lighting and shadow study, suspense framing composition, detailed depth-of-field indication, dramatic perspective",
       "films": [
         "Jurassic Park (1993)",
         "Jurassic World (2015)",
@@ -158,7 +158,7 @@
       "desc": "모든 애니매틱을 직접 손으로 그린다. 그랜드 부다페스트 호텔에서는 25분짜리 애니매틱 영상을 제작. 대칭 구도가 스토리보드 단계에서 이미 완성.",
       "styleDesc": "심플 라인 드로잉 + 애니매틱 전환. 대칭/중앙 구도의 교과서. 스토리북 스타일. B&W 기본.",
       "technique": "Anderson의 \"대칭 구도\"는 이력서의 좌우 대비에 완벽히 적용. 과거와 현재의 시각적 대칭 구도 활용.",
-      "aiPrompt": "",
+      "aiPrompt": "Wes Anderson storyboard style, simple symmetrical line drawing, center-frame perfect composition, storybook aesthetic, pastel color palette, flat graphic depth, dollhouse framing",
       "films": [
         "The Grand Budapest Hotel (2014)",
         "Isle of Dogs (2018)",

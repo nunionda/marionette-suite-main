@@ -5,7 +5,8 @@ const CATEGORIES = [
   { id: 'Feature Film', name: '🎥 Feature Film', desc: 'Full-length theatrical screenplay, 3-act structure (90-120p)' },
   { id: 'Short Film', name: '🎬 Short Film', desc: 'Single theme, high mise-en-scène (5-20p)' },
   { id: 'Netflix Original', name: '📺 Netflix Original', desc: 'Binge-hook strategy, serialized arcs (8-10 episodes)' },
-  { id: 'Commercial', name: '💼 Commercial / Ad', desc: 'USP-focused, A/V Two-Column format (15-60s)' }
+  { id: 'Commercial', name: '💼 Commercial / Ad', desc: 'USP-focused, A/V Two-Column format (15-60s)' },
+  { id: 'YouTube', name: '▶️ YouTube / Creator', desc: 'Hook-driven content, retention optimized (3-15 min)' }
 ];
 
 const GENRES_BY_CATEGORY = {
@@ -32,6 +33,12 @@ const GENRES_BY_CATEGORY = {
     { id: 'ProductDemo', name: '📦 Product Demo' },
     { id: 'Cinematic', name: '🎥 Cinematic Narrative' },
     { id: 'Social', name: '📱 Social / Digital' }
+  ],
+  'YouTube': [
+    { id: 'Documentary', name: '🎙️ Mini Documentary' },
+    { id: 'Story', name: '📖 Narrative Story' },
+    { id: 'Educational', name: '📚 Educational / Tutorial' },
+    { id: 'Comedy', name: '😂 Sketch / Comedy' }
   ]
 };
 

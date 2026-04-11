@@ -46,17 +46,14 @@ export const aiRoutes = new Elysia()
   .post("/stream", async ({ body, set }) => {
     const { prompt, system, model: requestedModel, mode = "agent" } = body as any;
     
-    // Determine priority based on mode
-    // 'chat' mode: OpenRouter first, then Direct
-    // 'agent' mode: Direct first, then OpenRouter (default)
-    const isChatMode = mode === "chat";
-
+    // Provider chain: Gemini Free → Groq → Anthropic (credits) → Mock
+    // OpenRouter is NOT used as default — only as last resort if OPENROUTER_API_KEY is explicitly set
     const fallbackModels = [
-      requestedModel || "anthropic/claude-3-5-sonnet",
+      requestedModel || "google/gemini-2.5-flash",
       "google/gemini-2.0-flash-001",
-      "google/gemini-2.5-flash",
       "google/gemini-2.0-flash-lite-001",
-      "deepseek/deepseek-chat"
+      "groq/llama-3.3-70b-versatile",
+      "anthropic/claude-3-5-haiku",
     ];
 
     for (const currentModel of fallbackModels) {
@@ -65,31 +62,23 @@ export const aiRoutes = new Elysia()
       try {
         let response: any = null;
 
-        // --- 1. CHAT MODE: OPENROUTER FIRST ---
-        if (isChatMode && KEYS.OPENROUTER) {
-          console.log(`[AI_ORCHESTRATOR] Chat Mode: Prioritizing OpenRouter for ${currentModel}`);
-          response = await callOpenRouterStream(currentModel, prompt, system, KEYS.OPENROUTER);
-          if (response && response.ok) {
-            console.log(`[AI_ORCHESTRATOR] OpenRouter Success (Chat Mode)`);
-            return new Response(response.body, { headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive" } });
-          }
-        }
-
-        // --- 2. DIRECT API ATTEMPT (Agent Mode priority or Chat Fallback) ---
+        // --- DIRECT API ATTEMPT (Gemini Free → Groq → Anthropic credits) ---
         console.log(`[AI_ORCHESTRATOR] Attempting Direct API for ${currentModel}`);
-        if (currentModel.includes("claude") && KEYS.ANTHROPIC) {
-          response = await callAnthropicDirect(currentModel, prompt, system);
-        } else if (currentModel.includes("gemini") && KEYS.GEMINI) {
+        if (currentModel.includes("gemini") && KEYS.GEMINI) {
           response = await callGeminiDirect(currentModel, prompt, system);
+        } else if ((currentModel.includes("groq/") || currentModel.includes("llama") || currentModel.includes("mixtral")) && KEYS.GROQ) {
+          response = await callGroqDirect(currentModel, prompt, system);
+        } else if (currentModel.includes("claude") && KEYS.ANTHROPIC) {
+          response = await callAnthropicDirect(currentModel, prompt, system);
         } else if (currentModel.includes("openai") && KEYS.OPENAI) {
           response = await callOpenAIDirect(currentModel, prompt, system);
         } else if (currentModel.includes("deepseek") && KEYS.DEEPSEEK) {
           response = await callDeepSeekDirect(currentModel, prompt, system);
         }
-        
-        // --- 3. OPENROUTER FALLBACK (Agent Mode) ---
-        if ((!response || !response.ok) && !isChatMode && KEYS.OPENROUTER) {
-          console.log(`[AI_ORCHESTRATOR] Agent Mode: Falling back to OpenRouter for ${currentModel}`);
+
+        // --- OPENROUTER LAST RESORT (only if explicitly configured) ---
+        if ((!response || !response.ok) && KEYS.OPENROUTER) {
+          console.log(`[AI_ORCHESTRATOR] Last resort: OpenRouter for ${currentModel}`);
           response = await callOpenRouterStream(currentModel, prompt, system, KEYS.OPENROUTER);
         }
 
@@ -324,6 +313,11 @@ async function callOpenAIDirect(model: string, prompt: string, system?: string) 
 
 async function callDeepSeekDirect(model: string, prompt: string, system?: string) {
   return fetch("https://api.deepseek.com/chat/completions", { method: "POST", headers: { "Authorization": `Bearer ${KEYS.DEEPSEEK}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: "deepseek-chat", messages: [{ role: "system", content: system || "You are a creative assistant." }, { role: "user", content: prompt }], stream: true }) });
+}
+
+async function callGroqDirect(model: string, prompt: string, system?: string) {
+  const groqModel = model.includes("/") ? model.split("/")[1] : model;
+  return fetch("https://api.groq.com/openai/v1/chat/completions", { method: "POST", headers: { "Authorization": `Bearer ${KEYS.GROQ}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: groqModel, messages: [{ role: "system", content: system || "You are a creative assistant." }, { role: "user", content: prompt }], stream: true }) });
 }
 
 async function callOpenRouterStream(model: string, prompt: string, system: string | undefined, apiKey: string) {
