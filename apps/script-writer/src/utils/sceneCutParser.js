@@ -138,19 +138,41 @@ function classifyLine(text) {
   return 'action'; // dialogue detection requires context (follows character)
 }
 
+// Non-character patterns to reject
+const NOT_CHARACTER_RE = /^\[.*\]$|^\[.*|^SUPER:|^STAGE\s+\d|^PART\s+[A-Z]|^[A-Z]\.\s|^—\s|^S#\d|^\d+\.|^FADE|^CUT|인터커팅|완료\]|→|경고|보고/;
+
 function isCharacterLine(text) {
   const cleaned = text.replace(/\s*\(.*?\)\s*/g, '').trim();
-  // English ALL CAPS character name
-  if (cleaned === cleaned.toUpperCase() && /[A-Z]/.test(cleaned) && !cleaned.match(/[.:?!]$/) && cleaned.length < 30) {
+
+  // Reject system messages, markers, and structural elements
+  if (NOT_CHARACTER_RE.test(cleaned)) return false;
+  if (/[\[\]{}]/.test(cleaned)) return false; // brackets = system message
+  if (cleaned.includes(':') && cleaned.length > 15) return false; // "STAGE 3: ..." patterns
+  if (cleaned.startsWith('—') || cleaned.endsWith('—')) return false;
+
+  // English ALL CAPS character name (short, no punctuation)
+  if (cleaned === cleaned.toUpperCase() && /[A-Z]/.test(cleaned) && !cleaned.match(/[.:?!]$/) && cleaned.length < 20) {
     return true;
   }
-  // Korean character names: 2-4 chars, standalone (no particles)
-  if (/^[가-힣]{2,4}$/.test(cleaned)) return true;
+  // Korean character names: 2-4 chars, standalone (no particles, no verbs)
+  if (/^[가-힣]{2,4}$/.test(cleaned)) {
+    // Reject common nouns/roles that aren't character names
+    if (/[을를의에서와로]$/.test(cleaned)) return false; // particles
+    if (/[다고며면서]$/.test(cleaned)) return false; // verb endings
+    return true;
+  }
   // Korean inline dialogue format: "설희  (지문) 대사" or "은서  대사"
-  // Name (2-4 Korean chars) + 2+ spaces + parenthetical or dialogue
-  if (/^[가-힣]{2,4}\s{2,}/.test(text)) return true;
+  if (/^[가-힣]{2,4}\s{2,}/.test(text)) {
+    const name = text.match(/^([가-힣]{2,4})\s{2,}/)?.[1];
+    if (name && NOT_CHARACTER_RE.test(name)) return false;
+    return true;
+  }
   // English name with inline dialogue: "RYAN  (sipping) dialogue"
-  if (/^[A-Z][a-z]+\s{2,}/.test(text) || /^[A-Z]{2,}\s{2,}/.test(text)) return true;
+  if (/^[A-Z][a-z]+\s{2,}/.test(text) || /^[A-Z]{2,}\s{2,}/.test(text)) {
+    const name = text.match(/^([A-Za-z]+)\s{2,}/)?.[1];
+    if (name && /^(SUPER|STAGE|PART|FADE|CUT|THE|INT|EXT)$/i.test(name)) return false;
+    return true;
+  }
   return false;
 }
 
