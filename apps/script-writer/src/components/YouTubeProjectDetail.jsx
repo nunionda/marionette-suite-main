@@ -3,6 +3,7 @@ import { ProjectContext } from '../context/ProjectContext';
 import '../styles/ProjectDetail.css';
 import SendToStudioButton from './SendToStudioButton';
 import StageGateChecklist from './StageGateChecklist';
+import PipelineView from './PipelineView';
 
 // Rules
 import youtubeRule from '../.agents/rules/YOUTUBE_ENGINE.md?raw';
@@ -202,7 +203,8 @@ ${getRoleContext()}
     SCRIPT: { label: 'SCRIPT', engine: 'Content Writer', icon: '📝' },
     EDIT: { label: 'POST-PRODUCTION', engine: 'Post-Production Director', icon: '✂️' },
     SEO: { label: 'SEO + THUMBNAIL', engine: 'Growth Strategist', icon: '🔍' },
-    VISION: { label: 'ANALYTICS', engine: 'Channel Analyst', icon: '📊' }
+    VISION: { label: 'ANALYTICS', engine: 'Channel Analyst', icon: '📊' },
+    PIPELINE: { label: 'PIPELINE', engine: 'Production Pipeline', icon: '🔀' }
   };
 
   const generateContent = (tab) => {
@@ -509,7 +511,11 @@ ${baseContext}
 
             {/* Tab Content */}
             <div className="tab-content-area">
-              {activeTab === 'VISION' ? (
+              {activeTab === 'PIPELINE' ? (
+                <div style={{ flex: 1, overflow: 'hidden', minHeight: '500px' }}>
+                  <PipelineView project={project} pipelineData={pipelineData} category={project.category} />
+                </div>
+              ) : activeTab === 'VISION' ? (
                 <AnalyticsDashboard analysisData={pipelineData.analysisData} />
               ) : (
                 <>

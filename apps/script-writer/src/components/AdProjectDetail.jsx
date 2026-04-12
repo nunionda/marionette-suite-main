@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
 import SendToStudioButton from './SendToStudioButton';
 import StageGateChecklist from './StageGateChecklist';
+import PipelineView from './PipelineView';
 import { parseStoryboardFrames } from '../utils/adUtils';
 import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
 import { getStyleGuideForGenre, VISIBILITY_CONSTRAINT } from '../config/visualStyles';
@@ -378,7 +379,8 @@ const AdProjectDetail = ({ project, onBack }) => {
     SCENARIO: { label: 'A/V SCRIPT', engine: 'Production Scriptwriter', icon: '📽️' },
     VISUALS: { label: 'STORYBOARD', engine: 'Storyboard Artist', icon: '🎨' },
     REVIEW: { label: 'COMPLIANCE', engine: 'Brand Strategist', icon: '🔍' },
-    VISION: { label: 'ANALYTICS', engine: 'Campaign Analyst', icon: '📊' }
+    VISION: { label: 'ANALYTICS', engine: 'Campaign Analyst', icon: '📊' },
+    PIPELINE: { label: 'PIPELINE', engine: 'Production Pipeline', icon: '🔀' }
   };
 
   const refineBriefWithRole = async () => {
@@ -948,7 +950,11 @@ const AdProjectDetail = ({ project, onBack }) => {
             })()}
             
             <div style={{ flexGrow: 1, overflowY: 'auto' }}>
-              {activeTab === 'VISION' ? (
+              {activeTab === 'PIPELINE' ? (
+                <div style={{ flex: 1, overflow: 'hidden', minHeight: '500px' }}>
+                  <PipelineView project={project} pipelineData={pipelineData} category={project.category} />
+                </div>
+              ) : activeTab === 'VISION' ? (
                 <AnalyticsDashboard data={pipelineData.analysisData} />
               ) : activeTab === 'TREATMENT' ? (
                 <div className="directors-note-view glass" style={{ padding: '40px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)', whiteSpace: 'pre-wrap', lineHeight: '1.8' }}>

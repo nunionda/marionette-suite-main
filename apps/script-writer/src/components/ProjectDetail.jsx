@@ -17,6 +17,8 @@ import { useAgentEngine } from '../hooks/useAgentEngine';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import SendToStudioButton from './SendToStudioButton';
 import StageGateChecklist from './StageGateChecklist';
+import SceneBreakdownPanel from './SceneBreakdownPanel';
+import PipelineView from './PipelineView';
 
 const GENRE_HINTS = {
   'Thriller/Action': { icon: '🔪', cues: ['Shaky Cam', 'Dutch Tilt', 'Jump Cuts', 'Drones'] },
@@ -333,7 +335,8 @@ const ProjectDetail = ({ project, onBack }) => {
     TREATMENT: { label: 'TREATMENT', engine: 'Scene Writer', icon: '🎬' },
     SCENARIO: { label: 'SCREENPLAY', engine: 'Scene Writer', icon: '🖋️' },
     REVIEW: { label: 'COVERAGE', engine: 'Pitch Master', icon: '⚖️' },
-    VISION: { label: 'ANALYTICS', engine: 'Development Analyst', icon: '📊' }
+    VISION: { label: 'ANALYTICS', engine: 'Development Analyst', icon: '📊' },
+    PIPELINE: { label: 'PIPELINE', engine: 'Production Pipeline', icon: '🔀' }
   };
 
   const tabs = Object.keys(TAB_META);
@@ -565,19 +568,20 @@ const ProjectDetail = ({ project, onBack }) => {
           </div>
 
           <div className="stage-content animate-in" key={activeTab}>
+            {activeTab !== 'PIPELINE' && activeTab !== 'VISION' && (
             <div className="stage-header">
               <h2 className="section-title">
                 {TAB_META[activeTab].engine}
               </h2>
               <div className="stage-actions">
-                <button 
+                <button
                   className={`btn-secondary ${scriptMode === 'REFINE' ? 'active' : ''}`}
                   onClick={() => setScriptMode(scriptMode === 'DRAFT' ? 'REFINE' : 'DRAFT')}
                 >
                   {scriptMode === 'REFINE' ? '⚖️ REFINEMENT MODE' : '⚙️ DRAFT MODE'}
                 </button>
-                <button 
-                  className="btn-primary" 
+                <button
+                  className="btn-primary"
                   onClick={() => generateContent(activeTab)}
                   disabled={isGenerating}
                   style={{ padding: '8px 20px', minWidth: '160px' }}
@@ -586,45 +590,56 @@ const ProjectDetail = ({ project, onBack }) => {
                 </button>
               </div>
             </div>
+            )}
           
 
           {/* 📑 TAB CONTENT AREAS */}
           <div className="tab-pane-container">
             
-            {/* 📋 CONTEXTUAL SIDEBAR: Scene Inventory (Contextual to SCENARIO/STORY/TREATMENT) */}
+            {/* 📋 CONTEXTUAL SIDEBAR: Scene Breakdown (Contextual to SCREENPLAY/TREATMENT) */}
             {(activeTab === 'SCENARIO' || activeTab === 'TREATMENT') && (
               <div className="context-sidebar">
                 <div className="context-sidebar-header">
-                  SCENE INVENTORY
+                  {pipelineData.scenario ? 'SCENE BREAKDOWN' : 'SCENE INVENTORY'}
                 </div>
                 <div className="context-sidebar-content">
-                  {scenes.map((s, i) => {
-                    const id = s.sceneNumber || (i + 1);
-                    const completedScenes = pipelineData.scenario ? pipelineData.scenario.match(/S#(\d+)/g) || [] : [];
-                    const completedIds = new Set(completedScenes.map(s => parseInt(s.replace('S#', ''))));
-                    const isCompleted = completedIds.has(id);
-                    
-                    return (
-                      <div 
-                        key={i} 
-                        className={`inventory-item ${selectedSceneId === id ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
-                        onClick={() => setSelectedSceneId(id)}
-                      >
-                        S#{id} {isCompleted ? '✓' : ''}
-                        <div style={{ fontSize: '0.6rem', opacity: 0.6, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {s.description}
+                  {pipelineData.scenario ? (
+                    <SceneBreakdownPanel
+                      screenplayText={pipelineData.scenario}
+                      projectTitle={project.title}
+                      onSceneClick={(scene) => setSelectedSceneId(scene.number)}
+                    />
+                  ) : (
+                    <>
+                      {scenes.map((s, i) => {
+                        const id = s.sceneNumber || (i + 1);
+                        const completedScenes = pipelineData.scenario ? pipelineData.scenario.match(/S#(\d+)/g) || [] : [];
+                        const completedIds = new Set(completedScenes.map(s => parseInt(s.replace('S#', ''))));
+                        const isCompleted = completedIds.has(id);
+
+                        return (
+                          <div
+                            key={i}
+                            className={`inventory-item ${selectedSceneId === id ? 'active' : ''} ${isCompleted ? 'completed' : ''}`}
+                            onClick={() => setSelectedSceneId(id)}
+                          >
+                            S#{id} {isCompleted ? '✓' : ''}
+                            <div style={{ fontSize: '0.6rem', opacity: 0.6, marginTop: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {s.description}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {scenes.length === 0 && !isOutlineLoading && (
+                        <div style={{ padding: '20px', fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                          No outline found. Execute Treatment to populate.
                         </div>
-                      </div>
-                    );
-                  })}
-                  
-                  {scenes.length === 0 && !isOutlineLoading && (
-                    <div style={{ padding: '20px', fontSize: '0.7rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-                      No outline found. Execute Treatment to populate.
-                    </div>
-                  )}
-                  {isOutlineLoading && (
-                    <div className="status-dot" style={{ margin: '20px auto' }} />
+                      )}
+                      {isOutlineLoading && (
+                        <div className="status-dot" style={{ margin: '20px auto' }} />
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -634,7 +649,30 @@ const ProjectDetail = ({ project, onBack }) => {
             <div className="editor-frame" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
               {/* Concept Inputs removed (now in sidebar) */}
 
-              {activeTab === 'VISION' ? (
+              {activeTab === 'PIPELINE' ? (
+                <div style={{ flex: 1, overflow: 'hidden' }}>
+                  <PipelineView
+                    project={project}
+                    pipelineData={pipelineData}
+                    category={project.category}
+                    onNodeClick={(track, node) => {
+                      // Map design nodes to corresponding tabs
+                      const tabMap = {
+                        script_analysis: 'SCENARIO',
+                        production_breakdown: 'TREATMENT',
+                        visual_world: 'TREATMENT',
+                        character_design: 'ARCHITECTURE',
+                        character_arc: 'ARCHITECTURE',
+                        storyboard: 'SCENARIO',
+                        script_node: 'SCENARIO',
+                        image_prompt: 'SCENARIO',
+                      };
+                      const targetTab = tabMap[node.id];
+                      if (targetTab) setActiveTab(targetTab);
+                    }}
+                  />
+                </div>
+              ) : activeTab === 'VISION' ? (
                 <div style={{ flex: 1, overflowY: 'auto' }}>
                   <AnalyticsDashboard data={pipelineData.analysisData} />
                 </div>

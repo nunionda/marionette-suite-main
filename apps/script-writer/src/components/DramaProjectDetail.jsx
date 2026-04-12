@@ -3,6 +3,7 @@ import { ProjectContext } from '../context/ProjectContext';
 import '../styles/ProjectDetail.css';
 import SendToStudioButton from './SendToStudioButton';
 import StageGateChecklist from './StageGateChecklist';
+import PipelineView from './PipelineView';
 
 // Rules
 import scenarioRule from '../.agents/rules/scenario_writer.md?raw';
@@ -122,7 +123,8 @@ const DramaProjectDetail = ({ project, onBack }) => {
     EPISODES: { label: 'EPISODE ARC', engine: 'Story Room', icon: '🎞️' },
     SCRIPT: { label: 'TELEPLAY', engine: 'Staff Writer', icon: '🖋️' },
     REVIEW: { label: 'BINGE AUDIT', engine: 'Pitch Master', icon: '⚡' },
-    VISION: { label: 'ANALYTICS', engine: 'Series Analyst', icon: '📊' }
+    VISION: { label: 'ANALYTICS', engine: 'Series Analyst', icon: '📊' },
+    PIPELINE: { label: 'PIPELINE', engine: 'Production Pipeline', icon: '🔀' }
   };
 
   const generateContent = (tab) => {
@@ -350,7 +352,11 @@ const DramaProjectDetail = ({ project, onBack }) => {
               </button>
             </div>
 
-            {activeTab === 'VISION' ? (
+            {activeTab === 'PIPELINE' ? (
+              <div style={{ flex: 1, overflow: 'hidden', minHeight: '500px' }}>
+                <PipelineView project={project} pipelineData={pipelineData} category={project.category} />
+              </div>
+            ) : activeTab === 'VISION' ? (
               <AnalyticsDashboard data={pipelineData.analysisData} />
             ) : (
               <textarea
