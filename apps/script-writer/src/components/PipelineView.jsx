@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   PRODUCTION_DESIGN_NODES,
   VIDEO_GENERATION_NODES,
@@ -7,6 +7,7 @@ import {
   VIDEO_PHASES,
   ACTIVE_NODES_BY_CATEGORY,
 } from '../config/productionPipeline';
+import { checkHealth } from '../utils/storyboardApi';
 
 /**
  * PipelineView — Dual-track production pipeline visualization.
@@ -137,7 +138,13 @@ function HandoffArrow({ handoff }) {
 // ─── Main Component ───
 
 const PipelineView = ({ project, pipelineData, category, onNodeClick }) => {
-  const [activeTrack, setActiveTrack] = useState('both'); // 'design' | 'video' | 'both'
+  const [activeTrack, setActiveTrack] = useState('both');
+  const [storyboardServerOnline, setStoryboardServerOnline] = useState(false);
+
+  useEffect(() => {
+    checkHealth().then(setStoryboardServerOnline);
+  }, []);
+
   const activeConfig = ACTIVE_NODES_BY_CATEGORY[category] || ACTIVE_NODES_BY_CATEGORY['Feature Film'];
   const activeDesignIds = new Set(activeConfig.design);
   const activeVideoIds = new Set(activeConfig.video);
@@ -301,12 +308,22 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick }) => {
         borderTop: '1px solid rgba(255,255,255,0.06)',
         display: 'flex',
         justifyContent: 'space-between',
+        alignItems: 'center',
         fontSize: '0.6rem',
         color: 'var(--text-muted)',
         flexShrink: 0,
       }}>
         <span>
           Total: {designStats.complete + videoStats.complete}/{designStats.total + videoStats.total} nodes
+        </span>
+        <span style={{
+          padding: '2px 6px',
+          borderRadius: '3px',
+          background: storyboardServerOnline ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)',
+          color: storyboardServerOnline ? '#4ade80' : '#ef4444',
+          border: `1px solid ${storyboardServerOnline ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)'}`,
+        }}>
+          {storyboardServerOnline ? '● Storyboard Engine Online' : '○ Storyboard Engine Offline'}
         </span>
         <span>
           {Math.round(((designStats.complete + videoStats.complete) / (designStats.total + videoStats.total || 1)) * 100)}% complete
