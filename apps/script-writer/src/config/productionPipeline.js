@@ -64,10 +64,12 @@ export const PRODUCTION_DESIGN_NODES = [
     labelKo: '캐릭터 디자인',
     agent: 'ART_DEPT',
     sub: 'character_designer',
-    description: '캐릭터 외형, 표정, 포즈 시트',
+    description: '기획 컨셉 아트: 캐릭터 외형/표정/포즈 시트 (Iain McCaig, Ralph McQuarrie 등)',
     inputs: ['character_network', 'visual_tone'],
     outputs: ['character_sheets'],
     phase: 'world_building',
+    quality: 'concept',  // concept = 기획 참고용, production = 영화 퀄리티
+    referenceArtists: ['Iain McCaig', 'Ralph McQuarrie', 'Moebius', 'Neville Page'],
   },
   {
     id: 'character_arc',
@@ -88,10 +90,12 @@ export const PRODUCTION_DESIGN_NODES = [
     labelKo: '세트 디자인',
     agent: 'ART_DEPT',
     sub: 'set_designer',
-    description: '주요 로케이션 세트 설계도',
+    description: '기획 컨셉: 주요 로케이션 세트 설계 (Ken Adam, Nathan Crowley 등)',
     inputs: ['location_breakdown', 'visual_tone'],
     outputs: ['set_design_docs', 'floor_plans'],
     phase: 'physical_design',
+    quality: 'concept',
+    referenceArtists: ['Ken Adam', 'Nathan Crowley', 'Rick Carter', 'Hannah Beachler'],
   },
   {
     id: 'set_dressing',
@@ -99,10 +103,11 @@ export const PRODUCTION_DESIGN_NODES = [
     labelKo: '세트 드레싱',
     agent: 'ART_DEPT',
     sub: 'set_decorator',
-    description: '세트 소품 배치, 분위기 연출 디테일',
+    description: '기획 컨셉: 세트 소품 배치, 분위기 연출 디테일',
     inputs: ['set_design_docs', 'visual_tone'],
     outputs: ['dressing_list', 'atmosphere_notes'],
     phase: 'physical_design',
+    quality: 'concept',
   },
   {
     id: 'costume_design',
@@ -110,10 +115,12 @@ export const PRODUCTION_DESIGN_NODES = [
     labelKo: '의상 디자인',
     agent: 'ART_DEPT',
     sub: 'costume_designer',
-    description: '캐릭터별 의상, 시대별/씬별 변화',
+    description: '기획 컨셉: 캐릭터별 의상 바이블 (Colleen Atwood, Ruth E. Carter 등)',
     inputs: ['character_sheets', 'visual_tone', 'scene_list'],
     outputs: ['costume_bible'],
     phase: 'physical_design',
+    quality: 'concept',
+    referenceArtists: ['Colleen Atwood', 'Ruth E. Carter', 'Sandy Powell', 'Eiko Ishioka'],
   },
   {
     id: 'props',
@@ -121,10 +128,12 @@ export const PRODUCTION_DESIGN_NODES = [
     labelKo: '소품 관리',
     agent: 'ART_DEPT',
     sub: 'property_master',
-    description: '핵심 소품 목록, 의미, 연출 계획',
+    description: '기획 컨셉: 핵심 소품 디자인 (Daniel Simon, Annie Atkins 등)',
     inputs: ['breakdown_sheet', 'set_design_docs'],
     outputs: ['prop_list'],
     phase: 'physical_design',
+    quality: 'concept',
+    referenceArtists: ['Daniel Simon', 'Annie Atkins', 'Roger Christian', 'Phil Saunders'],
   },
 
   // ── Phase 4: 프리비즈 (Pre-visualization) ──
@@ -134,10 +143,12 @@ export const PRODUCTION_DESIGN_NODES = [
     labelKo: '스토리보드',
     agent: 'PREVIS',
     sub: 'storyboard_descriptor',
-    description: '주요 씬 프레임별 구도, 카메라 앵글',
+    description: '기획 컨셉: 10 Masters 스타일 프레임별 구도 (봉준호, 리들리 스콧 등)',
     inputs: ['scene_list', 'set_design_docs', 'character_sheets'],
     outputs: ['storyboard_frames'],
     phase: 'previz',
+    quality: 'concept',
+    referenceArtists: ['Bong Joon-ho', 'Ridley Scott', 'Akira Kurosawa', 'Hayao Miyazaki'],
   },
   {
     id: 'shot_list',
@@ -188,17 +199,18 @@ export const VIDEO_GENERATION_NODES = [
     id: 'image_prompt',
     label: 'Image Prompt',
     labelKo: '이미지 프롬프트',
-    description: 'AI 이미지 생성용 시네마틱 프롬프트',
+    description: '포토리얼리스틱 시네마틱 프롬프트 (Track A 컨셉 아트 참고)',
     nodeType: 'imagePromptNode',
-    inputs: ['script_text', 'visual_tone', 'character_sheets'],
+    inputs: ['script_text', 'visual_tone', 'character_sheets', 'concept_art_ref'],
     outputs: ['prompt_text'],
     phase: 'image_gen',
+    note: 'Track A 컨셉 아트를 img2img 참고로 활용하여 일관된 캐릭터/배경 유지',
   },
   {
     id: 'image_gen',
     label: 'Image Generation',
     labelKo: '이미지 생성',
-    description: 'AI 이미지 생성 (Midjourney/DALL-E/Flux)',
+    description: '영화 퀄리티 포토리얼리스틱 이미지 (FLUX/DALL-E)',
     nodeType: 'imageGenNode',
     inputs: ['prompt_text'],
     outputs: ['image_candidates'],
@@ -259,13 +271,17 @@ export const VIDEO_GENERATION_NODES = [
 // ─── 두 트랙의 연결점 (Handoff Points) ───
 // Production Design → Video Generation으로 데이터가 흐르는 지점
 
+// ─── 두 트랙의 연결점 (Handoff Points) ───
+// Track A (컨셉 아트, concept quality) → Track B (포토리얼리스틱, production quality)
+// 컨셉 아트는 img2img 참고 이미지 또는 프롬프트 컨텍스트로 활용
+
 export const TRACK_HANDOFFS = [
-  { from: 'visual_world',     to: 'image_prompt',   data: 'visual_tone',       description: '색감/톤이 이미지 프롬프트에 반영' },
-  { from: 'character_design', to: 'image_prompt',   data: 'character_sheets',  description: '캐릭터 시트가 일관된 캐릭터 생성에 사용' },
-  { from: 'set_design',       to: 'image_prompt',   data: 'set_design_docs',   description: '세트 디자인이 배경 이미지 생성에 반영' },
-  { from: 'costume_design',   to: 'image_prompt',   data: 'costume_bible',     description: '의상 설정이 캐릭터 이미지에 반영' },
-  { from: 'storyboard',       to: 'video_prompt',   data: 'storyboard_frames', description: '스토리보드 구도가 카메라 앵글 결정' },
-  { from: 'shot_list',        to: 'video_prompt',   data: 'shot_list_xlsx',    description: '샷 리스트가 카메라 무빙 결정' },
+  { from: 'visual_world',     to: 'image_prompt',   data: 'visual_tone',       description: '색감/톤 → 포토리얼 프롬프트에 반영',       qualityShift: 'concept → production' },
+  { from: 'character_design', to: 'image_prompt',   data: 'character_sheets',  description: '컨셉 캐릭터 시트 → img2img 참고로 활용',  qualityShift: 'concept → production' },
+  { from: 'set_design',       to: 'image_prompt',   data: 'set_design_docs',   description: '컨셉 세트 디자인 → 배경 이미지 생성 참고', qualityShift: 'concept → production' },
+  { from: 'costume_design',   to: 'image_prompt',   data: 'costume_bible',     description: '컨셉 의상 바이블 → 캐릭터 의상에 반영',    qualityShift: 'concept → production' },
+  { from: 'storyboard',       to: 'video_prompt',   data: 'storyboard_frames', description: '스토리보드 구도 → 카메라 앵글/무빙 결정',   qualityShift: 'concept → production' },
+  { from: 'shot_list',        to: 'video_prompt',   data: 'shot_list_xlsx',    description: '샷 리스트 → 카메라 무빙/렌즈 결정',        qualityShift: 'direct' },
 ];
 
 // ─── Phase 순서 정의 ───
