@@ -6,6 +6,7 @@ import AdProjectDetail from './components/AdProjectDetail';
 import DramaProjectDetail from './components/DramaProjectDetail';
 import YouTubeProjectDetail from './components/YouTubeProjectDetail';
 import ExportRenderView from './components/ExportRenderView';
+import SceneDetailView from './components/SceneDetailView';
 import { ProjectProvider, ProjectContext } from './context/ProjectContext';
 
 function AppContent() {
@@ -13,6 +14,7 @@ function AppContent() {
   const [currentProjectId, setCurrentProjectId] = React.useState(() => {
     return localStorage.getItem('lastProjectId') || null;
   });
+  const [activeSceneId, setActiveSceneId] = React.useState(null);
   // isSyncing: true only while we're waiting for the first projects load
   // Resolves immediately once projects array is populated (or confirmed empty)
   const [isSyncing, setIsSyncing] = React.useState(true);
@@ -61,6 +63,12 @@ function AppContent() {
           <div style={{ width: '32px', height: '32px', border: '2px solid var(--accent-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           RESTORING SESSION...
         </div>
+      ) : activeSceneId && activeProject ? (
+        <SceneDetailView
+          project={activeProject}
+          sceneId={activeSceneId}
+          onBack={() => setActiveSceneId(null)}
+        />
       ) : !activeProject ? (
         <Dashboard onEnterLab={handleEnterLab} />
       ) : isAd ? (
@@ -79,9 +87,10 @@ function AppContent() {
           onBack={handleBack}
         />
       ) : (
-        <ProjectDetail 
-          project={activeProject} 
-          onBack={handleBack} 
+        <ProjectDetail
+          project={activeProject}
+          onBack={handleBack}
+          onSceneOpen={(sceneId) => setActiveSceneId(sceneId)}
         />
       )}
     </div>

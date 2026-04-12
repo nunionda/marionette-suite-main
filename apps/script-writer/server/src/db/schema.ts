@@ -42,6 +42,51 @@ export const projectOutline = sqliteTable("project_outline", {
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
+// ─── Scene/Cut Production Pipeline ───
+
+export const scenes = sqliteTable("scenes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").references(() => projects.id),
+  sceneNumber: integer("scene_number").notNull(),
+  slug: text("slug").notNull(),           // 'sc001'
+  displayId: text("display_id"),          // 'BS_sc001'
+  heading: text("heading"),               // 'S#1. EXT. 싱가포르 국제학교 정문 - 오후'
+  setting: text("setting"),               // 'EXT.'
+  location: text("location"),             // '싱가포르 국제학교 정문'
+  timeOfDay: text("time_of_day"),         // '오후'
+  summary: text("summary"),
+  characters: text("characters"),         // JSON array as text
+  act: integer("act"),                    // 1, 2, 3
+  status: text("status").default("pending"), // pending | in_progress | done
+  cutCount: integer("cut_count").default(0),
+  completedCutCount: integer("completed_cut_count").default(0),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
+export const cuts = sqliteTable("cuts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  sceneId: integer("scene_id").references(() => scenes.id),
+  projectId: integer("project_id").references(() => projects.id),
+  cutNumber: integer("cut_number").notNull(),
+  slug: text("slug").notNull(),           // 'cut001'
+  displayId: text("display_id"),          // 'BS_sc001_cut001'
+  type: text("type"),                     // 'action' | 'dialogue' | 'transition'
+  description: text("description"),       // cut description text
+  status: text("status").default("pending"), // pending | script | image_prompt | image_gen | video | audio | done
+
+  // Node pipeline data (JSON stored as text)
+  scriptText: text("script_text"),
+  imagePrompt: text("image_prompt"),
+  imageUrl: text("image_url"),
+  videoPrompt: text("video_prompt"),
+  videoUrl: text("video_url"),
+  audioUrl: text("audio_url"),
+  thumbnailUrl: text("thumbnail_url"),
+
+  duration: integer("duration").default(4), // seconds
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
 export const loglineIdeas = sqliteTable("logline_ideas", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   content: text("content").notNull(),

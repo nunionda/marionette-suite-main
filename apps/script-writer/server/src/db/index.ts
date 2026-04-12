@@ -47,6 +47,46 @@ sqlite.exec(`
     created_at TEXT DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS scenes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER REFERENCES projects(id),
+    scene_number INTEGER NOT NULL,
+    slug TEXT NOT NULL,
+    display_id TEXT,
+    heading TEXT,
+    setting TEXT,
+    location TEXT,
+    time_of_day TEXT,
+    summary TEXT,
+    characters TEXT,
+    act INTEGER,
+    status TEXT DEFAULT 'pending',
+    cut_count INTEGER DEFAULT 0,
+    completed_cut_count INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS cuts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    scene_id INTEGER REFERENCES scenes(id),
+    project_id INTEGER REFERENCES projects(id),
+    cut_number INTEGER NOT NULL,
+    slug TEXT NOT NULL,
+    display_id TEXT,
+    type TEXT,
+    description TEXT,
+    status TEXT DEFAULT 'pending',
+    script_text TEXT,
+    image_prompt TEXT,
+    image_url TEXT,
+    video_prompt TEXT,
+    video_url TEXT,
+    audio_url TEXT,
+    thumbnail_url TEXT,
+    duration INTEGER DEFAULT 4,
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS logline_ideas (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,

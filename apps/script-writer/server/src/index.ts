@@ -2,8 +2,8 @@ import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { staticPlugin } from "@elysiajs/static";
 import { aiRoutes } from "./ai";
-import { db, projects, loglineIdeas, projectOutline } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { db, projects, loglineIdeas, projectOutline, scenes, cuts } from "./db";
+import { eq, desc, and } from "drizzle-orm";
 import { syncProjectToFileSystem } from "./lib/sync";
 import { addJob, getJob } from "./services/pdfQueue";
 import fs from "fs";
@@ -287,6 +287,104 @@ const app = new Elysia()
       .delete("/loglines/:id", async ({ params: { id } }) => {
         await db.delete(loglineIdeas).where(eq(loglineIdeas.id, parseInt(id)));
         return { success: true };
+      })
+
+      // ─── SCENES ──────────────────────────────────────────────────
+      .get("/projects/:id/scenes", async ({ params: { id } }) => {
+        const rows = await db.select().from(scenes)
+          .where(eq(scenes.projectId, parseInt(id)))
+          .orderBy(scenes.sceneNumber);
+        return { success: true, scenes: rows };
+      })
+      .post("/projects/:id/scenes/parse", async ({ params: { id } }) => {
+        const projectId = parseInt(id);
+        const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+        if (!project?.scenario) return { success: false, error: "No screenplay text" };
+
+        // Delete existing scenes/cuts for this project
+        const existingScenes = await db.select().from(scenes).where(eq(scenes.projectId, projectId));
+        for (const s of existingScenes) {
+          await db.delete(cuts).where(eq(cuts.sceneId, s.id));
+        }
+        await db.delete(scenes).where(eq(scenes.projectId, projectId));
+
+        // Parse screenplay — import dynamically to avoid bundling issues
+        const { parseScreenplayToScenes } = await import("../../src/utils/sceneCutParser.js");
+        const result = parseScreenplayToScenes(project.scenario, { projectTitle: project.title });
+
+        // Insert scenes and cuts
+        for (const s of result.scenes) {
+          const act = s.number / result.scenes.length <= 0.25 ? 1 : s.number / result.scenes.length <= 0.75 ? 2 : 3;
+          const [inserted] = await db.insert(scenes).values({
+            projectId,
+            sceneNumber: s.number,
+            slug: s.slug,
+            displayId: s.displayId,
+            heading: s.heading,
+            setting: s.setting,
+            location: s.location,
+            timeOfDay: s.timeOfDay,
+            summary: s.summary,
+            characters: JSON.stringify(s.characters),
+            act,
+            cutCount: s.cutCount,
+          }).returning();
+
+          for (const c of s.cuts) {
+            await db.insert(cuts).values({
+              sceneId: inserted.id,
+              projectId,
+              cutNumber: c.number,
+              slug: c.slug,
+              displayId: c.displayId,
+              type: c.type,
+              description: c.description,
+              scriptText: c.description,
+            });
+          }
+        }
+
+        return { success: true, stats: result.stats };
+      })
+      .get("/scenes/:sceneId", async ({ params: { sceneId } }) => {
+        const [scene] = await db.select().from(scenes).where(eq(scenes.id, parseInt(sceneId)));
+        if (!scene) return null;
+        const sceneCuts = await db.select().from(cuts)
+          .where(eq(cuts.sceneId, scene.id))
+          .orderBy(cuts.cutNumber);
+        return { ...scene, characters: JSON.parse(scene.characters || "[]"), cuts: sceneCuts };
+      })
+
+      // ─── CUTS ────────────────────────────────────────────────────
+      .get("/cuts/:cutId", async ({ params: { cutId } }) => {
+        const [cut] = await db.select().from(cuts).where(eq(cuts.id, parseInt(cutId)));
+        return cut || null;
+      })
+      .patch("/cuts/:cutId", async ({ params: { cutId }, body }) => {
+        const id = parseInt(cutId);
+        const updates: Record<string, any> = {};
+        const b = body as any;
+        if (b.status !== undefined) updates.status = b.status;
+        if (b.scriptText !== undefined) updates.scriptText = b.scriptText;
+        if (b.imagePrompt !== undefined) updates.imagePrompt = b.imagePrompt;
+        if (b.imageUrl !== undefined) updates.imageUrl = b.imageUrl;
+        if (b.videoPrompt !== undefined) updates.videoPrompt = b.videoPrompt;
+        if (b.videoUrl !== undefined) updates.videoUrl = b.videoUrl;
+        if (b.audioUrl !== undefined) updates.audioUrl = b.audioUrl;
+        if (b.thumbnailUrl !== undefined) updates.thumbnailUrl = b.thumbnailUrl;
+
+        await db.update(cuts).set(updates).where(eq(cuts.id, id));
+        const [updated] = await db.select().from(cuts).where(eq(cuts.id, id));
+
+        // Update scene completed count
+        if (updated && b.status === 'done') {
+          const doneCuts = await db.select().from(cuts)
+            .where(and(eq(cuts.sceneId, updated.sceneId!), eq(cuts.status, 'done')));
+          await db.update(scenes).set({ completedCutCount: doneCuts.length })
+            .where(eq(scenes.id, updated.sceneId!));
+        }
+
+        return { success: true, cut: updated };
       })
   )
   .listen({
