@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
 import '../styles/ProjectDetail.css';
 import SendToStudioButton from './SendToStudioButton';
+import StageGateChecklist from './StageGateChecklist';
 
 // Rules
 import scenarioRule from '../.agents/rules/scenario_writer.md?raw';
@@ -117,11 +118,11 @@ const DramaProjectDetail = ({ project, onBack }) => {
   };
 
   const TAB_META = {
-    BIBLE: { label: 'SERIES BIBLE', engine: 'Series Architect', icon: '📖' },
-    EPISODES: { label: 'EPISODE ARC', engine: 'Arc Designer', icon: '🎞️' },
-    SCRIPT: { label: 'SCRIPT LAB', engine: 'Episode Writer', icon: '🖋️' },
-    REVIEW: { label: 'BINGE AUDIT', engine: 'Hook Auditor', icon: '⚡' },
-    VISION: { label: 'VISION', engine: 'Series Analyst', icon: '📊' }
+    BIBLE: { label: 'SERIES BIBLE', engine: 'Showrunner', icon: '📖' },
+    EPISODES: { label: 'EPISODE ARC', engine: 'Story Room', icon: '🎞️' },
+    SCRIPT: { label: 'TELEPLAY', engine: 'Staff Writer', icon: '🖋️' },
+    REVIEW: { label: 'BINGE AUDIT', engine: 'Pitch Master', icon: '⚡' },
+    VISION: { label: 'ANALYTICS', engine: 'Series Analyst', icon: '📊' }
   };
 
   const generateContent = (tab) => {
@@ -187,9 +188,11 @@ const DramaProjectDetail = ({ project, onBack }) => {
             </div>
           </section>
 
+          <StageGateChecklist project={project} pipelineData={pipelineData} category={project.category} />
+
           <section className="sidebar-section">
             <h4 className="section-title">Production Controls</h4>
-            
+
             <div className="control-group" style={{ marginBottom: '15px' }}>
               <label className="input-label">CREATIVE ROLE</label>
               <div style={{ display: 'flex', gap: '4px' }}>

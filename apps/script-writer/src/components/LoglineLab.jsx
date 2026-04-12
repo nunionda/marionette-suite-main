@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAgentEngine } from '../hooks/useAgentEngine';
 import loglineRule from '../.agents/rules/logline_engine.md?raw';
+import { CATEGORIES, GENRES_BY_CATEGORY } from '../config/projectCategories';
 
 const LoglineLab = () => {
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openRouterApiKey') || '');
   const [inputBrief, setInputBrief] = useState('');
   const [generatedLogline, setGeneratedLogline] = useState('');
   const [savedLoglines, setSavedLoglines] = useState([]);
-  const [category, setCategory] = useState('Movie');
-  const [genre, setGenre] = useState('Thriller');
+  const [category, setCategory] = useState(CATEGORIES[0].id);
+  const [genre, setGenre] = useState(GENRES_BY_CATEGORY[CATEGORIES[0].id][0].id);
 
   // We use useAgentEngine to handle the streaming
   const handleUpdateField = (field, value) => {
@@ -127,20 +128,22 @@ const LoglineLab = () => {
           <div className="form-row">
             <div className="form-group">
               <label>CATEGORY</label>
-              <select className="tactical-select" value={category} onChange={(e) => setCategory(e.target.value)}>
-                <option>Movie</option>
-                <option>Series</option>
-                <option>Commercial</option>
+              <select className="tactical-select" value={category} onChange={(e) => {
+                const newCat = e.target.value;
+                setCategory(newCat);
+                setGenre(GENRES_BY_CATEGORY[newCat][0].id);
+              }}>
+                {CATEGORIES.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
               </select>
             </div>
             <div className="form-group">
               <label>GENRE</label>
               <select className="tactical-select" value={genre} onChange={(e) => setGenre(e.target.value)}>
-                <option>Thriller</option>
-                <option>Drama</option>
-                <option>SF</option>
-                <option>Horror</option>
-                <option>Comedy</option>
+                {(GENRES_BY_CATEGORY[category] || []).map(g => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
               </select>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
 import SendToStudioButton from './SendToStudioButton';
+import StageGateChecklist from './StageGateChecklist';
 import { parseStoryboardFrames } from '../utils/adUtils';
 import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
 import { getStyleGuideForGenre, VISIBILITY_CONSTRAINT } from '../config/visualStyles';
@@ -311,8 +312,6 @@ const AdProjectDetail = ({ project, onBack }) => {
   const [loadingFrames, setLoadingFrames] = useState({});
   const [regenKeys, setRegenKeys] = useState({});
   const [saveStatus, setSaveStatus] = useState('');
-  const [editingTitle, setEditingTitle] = useState(false);
-  const [titleDraft, setTitleDraft] = useState('');
   const [visualBoardMode, setVisualBoardMode] = useState('prompt-only');
   const [sidebarOpen, setSidebarOpen] = useState({ type: true, format: false, platform: false });
 
@@ -373,13 +372,13 @@ const AdProjectDetail = ({ project, onBack }) => {
   };
 
   const TAB_META = {
-    CONCEPT: { label: 'BRIEF', engine: 'Creative Director · Campaign Brief & Strategy', icon: '📋' },
-    ARCHITECTURE: { label: 'COPY', engine: 'Copywriter · Copy Ideation & Messaging', icon: '✍️' },
-    TREATMENT: { label: 'ART DIRECTION', engine: 'Art Director · Visual Treatment & Direction', icon: '📜' },
-    SCENARIO: { label: 'A/V SCRIPT', engine: '📽️ 최종 합본 (A/V Production Script)', icon: '📽️' },
-    VISUALS: { label: 'VISUAL BOARD', engine: '🎨 비주얼 보드 (Image Prompts + Storyboard)', icon: '🎨' },
-    REVIEW: { label: 'AUDIT', engine: '🔍 브랜드 검증 (Brand & Impact Audit)', icon: '🔍' },
-    VISION: { label: 'ANALYTICS', engine: '📊 데이터 분석 (AI Impact Matrix)', icon: '📊' }
+    CONCEPT: { label: 'CREATIVE BRIEF', engine: 'Creative Director', icon: '📋' },
+    ARCHITECTURE: { label: 'COPYWRITING', engine: 'Senior Copywriter', icon: '✍️' },
+    TREATMENT: { label: 'ART DIRECTION', engine: 'Art Director', icon: '📜' },
+    SCENARIO: { label: 'A/V SCRIPT', engine: 'Production Scriptwriter', icon: '📽️' },
+    VISUALS: { label: 'STORYBOARD', engine: 'Storyboard Artist', icon: '🎨' },
+    REVIEW: { label: 'COMPLIANCE', engine: 'Brand Strategist', icon: '🔍' },
+    VISION: { label: 'ANALYTICS', engine: 'Campaign Analyst', icon: '📊' }
   };
 
   const refineBriefWithRole = async () => {
@@ -675,38 +674,7 @@ const AdProjectDetail = ({ project, onBack }) => {
           <span className="header-format-label">AD / COMMERCIAL</span>
         </div>
         <div className="header-title-block">
-          {editingTitle ? (
-            <input
-              className="header-title header-title-input"
-              value={titleDraft}
-              autoFocus
-              onChange={e => setTitleDraft(e.target.value.toUpperCase())}
-              onBlur={async () => {
-                const trimmed = titleDraft.trim();
-                if (trimmed && trimmed !== project.title) {
-                  await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title: trimmed }),
-                  });
-                  project.title = trimmed;
-                }
-                setEditingTitle(false);
-              }}
-              onKeyDown={e => {
-                if (e.key === 'Enter') e.target.blur();
-                if (e.key === 'Escape') { setEditingTitle(false); }
-              }}
-            />
-          ) : (
-            <h1
-              className="header-title"
-              title="클릭하여 이름 변경"
-              onClick={() => { setTitleDraft(project.title); setEditingTitle(true); }}
-            >
-              {project.title}
-            </h1>
-          )}
+          <h1 className="header-title">{project.title}</h1>
         </div>
         <div className="header-right">
           <div className="header-mode-controls">
@@ -750,9 +718,11 @@ const AdProjectDetail = ({ project, onBack }) => {
             </div>
           </section>
 
+          <StageGateChecklist project={project} pipelineData={pipelineData} category={project.category} />
+
           <section className="sidebar-section">
             <h4 className="section-title">Production Controls</h4>
-            
+
             <div className="control-group" style={{ marginBottom: '15px' }}>
               <label className="input-label">CREATIVE ROLE</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>

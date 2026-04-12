@@ -16,6 +16,7 @@ import adRule from '../.agents/rules/AD_ENGINE.md?raw';
 import { useAgentEngine } from '../hooks/useAgentEngine';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import SendToStudioButton from './SendToStudioButton';
+import StageGateChecklist from './StageGateChecklist';
 
 const GENRE_HINTS = {
   'Thriller/Action': { icon: '🔪', cues: ['Shaky Cam', 'Dutch Tilt', 'Jump Cuts', 'Drones'] },
@@ -327,12 +328,12 @@ const ProjectDetail = ({ project, onBack }) => {
   };
 
   const TAB_META = {
-    CONCEPT: { label: 'CONCEPT', engine: 'Logline Engine', icon: '🎯' },
-    ARCHITECTURE: { label: 'ARCHITECTURE', engine: 'Architect AI', icon: '🏛️' },
-    TREATMENT: { label: 'TREATMENT', engine: 'Treatment Engine', icon: '🎬' },
-    SCENARIO: { label: 'SCENARIO', engine: 'Scenario Writer', icon: '🖋️' },
-    REVIEW: { label: 'REVIEW', engine: 'Production Review', icon: '⚖️' },
-    VISION: { label: 'VISION', engine: 'Analytic Engine', icon: '📊' }
+    CONCEPT: { label: 'DEVELOPMENT', engine: 'Story Architect', icon: '🎯' },
+    ARCHITECTURE: { label: 'BIBLE', engine: 'Story Architect', icon: '📖' },
+    TREATMENT: { label: 'TREATMENT', engine: 'Scene Writer', icon: '🎬' },
+    SCENARIO: { label: 'SCREENPLAY', engine: 'Scene Writer', icon: '🖋️' },
+    REVIEW: { label: 'COVERAGE', engine: 'Pitch Master', icon: '⚖️' },
+    VISION: { label: 'ANALYTICS', engine: 'Development Analyst', icon: '📊' }
   };
 
   const tabs = Object.keys(TAB_META);
@@ -405,6 +406,8 @@ const ProjectDetail = ({ project, onBack }) => {
               <div className="badge genre-badge" style={{ fontSize: 'var(--sidebar-badge-fs)' }}>{project.genre}</div>
             </div>
           </section>
+
+          <StageGateChecklist project={project} pipelineData={pipelineData} category={project.category} />
 
           <section className="sidebar-section">
             <h4 className="section-title">Production Controls</h4>

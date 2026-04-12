@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
 import '../styles/ProjectDetail.css';
 import SendToStudioButton from './SendToStudioButton';
+import StageGateChecklist from './StageGateChecklist';
 
 // Rules
 import youtubeRule from '../.agents/rules/YOUTUBE_ENGINE.md?raw';
@@ -35,6 +36,12 @@ const YT_GENRE_HINTS = {
     cues: ['Rule of Three', 'Subversion', 'Callback', 'Escalation'],
     duration: '3-8min',
     hookType: 'Establish premise immediately'
+  },
+  'Short-form': {
+    icon: '📱',
+    cues: ['Loop Design', 'Text Hook', 'Fast Cuts', 'Vertical 9:16'],
+    duration: '15-60s',
+    hookType: 'Pattern Break in first 2 seconds'
   }
 };
 
@@ -59,6 +66,11 @@ const FORMAT_PRESETS = {
     icon: '😂',
     structure: `[0:00-0:15] PREMISE — 상황 즉시 설정\n[0:15-1:00] ESCALATION 1 — 상황 과장 (Rule of Three 첫 번째)\n[1:00-2:30] ESCALATION 2 — 서브플롯 도입\n[2:30-5:00] SUBVERSION — 반전 (Rule of Three 세 번째)\n[5:00-7:30] CALLBACK — 앞 개그 재활용\n[7:30-8:00] TAG + CTA`,
     hookFormula: 'Pattern Interrupt — 즉각적인 상황 과장'
+  },
+  'Short-form': {
+    icon: '📱',
+    structure: `[0:00-0:02] PATTERN BREAK — 스크롤 멈추는 시각적 충격\n[0:02-0:05] HOOK LINE — 한 문장 선언\n[0:05-0:20] CORE — 핵심 포인트 1가지 (빠른 컷)\n[0:20-0:40] PAYOFF — 결과/반전 공개\n[0:40-0:55] LOOP SETUP — 반복 시청 유도 장치\n[0:55-0:60] CTA — 팔로우/좋아요 (텍스트 오버레이)`,
+    hookFormula: 'Pattern Break — 첫 2초 안에 스크롤을 멈추는 시각적 충격'
   }
 };
 
@@ -187,10 +199,10 @@ ${getRoleContext()}
   // --- Tab content generators ---
   const TAB_META = {
     HOOK: { label: 'HOOK LAB', engine: 'Hook Architect', icon: '🪝' },
-    SCRIPT: { label: 'SCRIPT', engine: 'Script Writer', icon: '📝' },
-    EDIT: { label: 'EDIT GUIDE', engine: 'Editor AI', icon: '✂️' },
-    SEO: { label: 'SEO + THUMBNAIL', engine: 'SEO Analyst', icon: '🔍' },
-    VISION: { label: 'ANALYTICS', engine: 'Data Analyst', icon: '📊' }
+    SCRIPT: { label: 'SCRIPT', engine: 'Content Writer', icon: '📝' },
+    EDIT: { label: 'POST-PRODUCTION', engine: 'Post-Production Director', icon: '✂️' },
+    SEO: { label: 'SEO + THUMBNAIL', engine: 'Growth Strategist', icon: '🔍' },
+    VISION: { label: 'ANALYTICS', engine: 'Channel Analyst', icon: '📊' }
   };
 
   const generateContent = (tab) => {
@@ -329,6 +341,8 @@ ${baseContext}
                 ))}
               </div>
             </section>
+
+            <StageGateChecklist project={project} pipelineData={pipelineData} category={project.category} />
 
             <section className="sidebar-section">
               <h4 className="section-title">Production Controls</h4>

@@ -1,46 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/Dashboard.css';
-
-const CATEGORIES = [
-  { id: 'Feature Film', name: '🎥 Feature Film', desc: 'Full-length theatrical screenplay, 3-act structure (90-120p)' },
-  { id: 'Short Film', name: '🎬 Short Film', desc: 'Single theme, high mise-en-scène (5-20p)' },
-  { id: 'Netflix Original', name: '📺 Netflix Original', desc: 'Binge-hook strategy, serialized arcs (8-10 episodes)' },
-  { id: 'Commercial', name: '💼 Commercial / Ad', desc: 'USP-focused, A/V Two-Column format (15-60s)' },
-  { id: 'YouTube', name: '▶️ YouTube / Creator', desc: 'Hook-driven content, retention optimized (3-15 min)' }
-];
-
-const GENRES_BY_CATEGORY = {
-  'Feature Film': [
-    { id: 'Thriller', name: '🔪 Thriller / Action' },
-    { id: 'Drama', name: '🫂 Human Drama' },
-    { id: 'SF', name: '🛸 SF / Mystery' },
-    { id: 'Comedy', name: '🤡 Comedy / Satire' }
-  ],
-  'Short Film': [
-    { id: 'Thriller', name: '🔪 Thriller / Action' },
-    { id: 'Drama', name: '🫂 Human Drama' },
-    { id: 'SF', name: '🛸 SF / Mystery' },
-    { id: 'Comedy', name: '🤡 Comedy / Satire' }
-  ],
-  'Netflix Original': [
-    { id: 'SciFi', name: '🚀 Sci-Fi / Space' },
-    { id: 'Mystery', name: '🕵️ Serial Mystery' },
-    { id: 'Procedural', name: '⚖️ Procedural' },
-    { id: 'Epic', name: '📜 Period / Epic' }
-  ],
-  'Commercial': [
-    { id: 'BrandFilm', name: '✨ Brand Film' },
-    { id: 'ProductDemo', name: '📦 Product Demo' },
-    { id: 'Cinematic', name: '🎥 Cinematic Narrative' },
-    { id: 'Social', name: '📱 Social / Digital' }
-  ],
-  'YouTube': [
-    { id: 'Documentary', name: '🎙️ Mini Documentary' },
-    { id: 'Story', name: '📖 Narrative Story' },
-    { id: 'Educational', name: '📚 Educational / Tutorial' },
-    { id: 'Comedy', name: '😂 Sketch / Comedy' }
-  ]
-};
+import { CATEGORIES, GENRES_BY_CATEGORY } from '../config/projectCategories';
 
 const ProjectCreateModal = ({ isOpen, onClose, onCreate }) => {
   const [title, setTitle] = useState('');
