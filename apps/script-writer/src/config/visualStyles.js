@@ -15,3 +15,6 @@ export const VISUAL_STYLE_GUIDES = {
 export function getStyleGuideForGenre(genre) {
   return VISUAL_STYLE_GUIDES[genre] || VISUAL_STYLE_GUIDES["Default"];
 }
+
+export const VISIBILITY_CONSTRAINT =
+  '[Visibility]: Even in dark/dramatic scenes — use cinematic rim light, edge light, or silhouette light to reveal the subject. Subject must be visible. No pure black featureless frames.';

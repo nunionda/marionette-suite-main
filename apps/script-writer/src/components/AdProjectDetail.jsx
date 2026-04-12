@@ -3,7 +3,7 @@ import { ProjectContext } from '../context/ProjectContext';
 import SendToStudioButton from './SendToStudioButton';
 import { parseStoryboardFrames } from '../utils/adUtils';
 import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
-import { getStyleGuideForGenre } from '../config/visualStyles';
+import { getStyleGuideForGenre, VISIBILITY_CONSTRAINT } from '../config/visualStyles';
 import { 
   getBriefingPrompt, 
   getArchitecturePrompt, 
@@ -84,7 +84,7 @@ const AD_PLATFORM_PRESETS = {
   'OTT':       { icon: '📡', ratio: '16:9',  hook: '3s', skipRule: '플랫폼별 상이',   note: 'TV급 품질 + 디지털 정밀 타겟. 중간 광고 맥락 고려.' },
 };
 
-const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFrames, viewMode = 'prompt', onRunTreatment, editedPrompts = {}, onPromptEdit }) => {
+const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFrames, regenKeys = {}, viewMode = 'prompt', onRunTreatment, editedPrompts = {}, onPromptEdit }) => {
   const frames = parseStoryboardFrames(raw);
 
   if (frames.length === 0) {
@@ -124,13 +124,13 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
             <span style={{ color: 'var(--accent-primary)', fontWeight: 'bold' }}>🛠️ VISUAL DIRECTOR'S WORKBENCH</span>
             <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', opacity: 0.7 }}>Refine prompts, lighting, and camera work here. Generate all assets for production sync.</p>
           </div>
-          <button 
+          <button
             className="tactical-btn"
-            onClick={() => onGenerateAll(frames)}
+            onClick={() => onGenerateAll(frames, true)}
             disabled={isAnyLoading}
             style={{ background: 'var(--accent-primary)', color: 'black' }}
           >
-            {isAnyLoading ? '🔁 LOCALIZING...' : '🎭 GENERATE & LOCALIZE ALL'}
+            {isAnyLoading ? '🔁 GENERATING...' : '🎭 GENERATE ALL (FORCE)'}
           </button>
         </div>
       )}
@@ -153,8 +153,8 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
                       <span>Rendering...</span>
                     </div>
                   ) : imageUrls[frame.number] ? (
-                    <div style={{ position: 'relative', width: '100%', height: '100%' }} className="img-regen-wrapper">
-                      <img src={imageUrls[frame.number]} alt={`Frame ${frame.number}`} className="storyboard-image" />
+                    <div className="img-regen-wrapper">
+                      <img key={regenKeys[frame.number] || 0} src={imageUrls[frame.number]} alt={`Frame ${frame.number}`} className="storyboard-image" />
                       <button
                         className="regen-overlay-btn"
                         onClick={() => onGenerate(frame.number, frame)}
@@ -288,14 +288,20 @@ const AdProjectDetail = ({ project, onBack }) => {
   };
 
   const [loadingFrames, setLoadingFrames] = useState({});
+  const [regenKeys, setRegenKeys] = useState({});
   const [saveStatus, setSaveStatus] = useState('');
   const [visualBoardMode, setVisualBoardMode] = useState('prompt-only');
   const [sidebarOpen, setSidebarOpen] = useState({ type: true, format: false, platform: false });
 
   const outputRef = useRef(null);
   const baseTextRef = useRef('');
+  // Ref that stays in sync with pipelineData.visuals_metadata so async callbacks
+  // (e.g. handleGenerateAllSketches) always read the latest value, not a stale closure.
+  const visualsRef = useRef(pipelineData.visuals_metadata);
 
   useEffect(() => {
+    const parsed = (() => { const v = project.visuals_metadata || project.storyboardImages || project.storyboard_images; if (!v) return {}; if (typeof v === 'string') { try { return JSON.parse(v); } catch { return {}; } } return v; })();
+    visualsRef.current = parsed;
     setPipelineData({
       concept: project.concept || '',
       architecture: project.architecture || '',
@@ -303,7 +309,7 @@ const AdProjectDetail = ({ project, onBack }) => {
       scenario: project.scenario || '',
       review: project.review || '',
       analysisData: (() => { const v = project.analysisData || project.analysis_data; if (!v) return null; if (typeof v === 'string') { try { return JSON.parse(v); } catch { return null; } } return v; })(),
-      visuals_metadata: (() => { const v = project.visuals_metadata || project.storyboardImages || project.storyboard_images; if (!v) return {}; if (typeof v === 'string') { try { return JSON.parse(v); } catch { return {}; } } return v; })()
+      visuals_metadata: parsed
     });
   }, [project]);
 
@@ -419,6 +425,7 @@ const AdProjectDetail = ({ project, onBack }) => {
         `[Panel Annotation]: ${panelTitle}`,
         `[Frame #${frameNumber}]`,
         frameContext,
+        VISIBILITY_CONSTRAINT,
       ].join('\n');
 
       // [PHASE B.6] Visual Director Prompt Refinement (Gemini 2.0)
@@ -479,15 +486,31 @@ const AdProjectDetail = ({ project, onBack }) => {
           console.error("Local localization failed, using external URL", uploadErr);
         }
 
-        const newImages = { ...pipelineData.visuals_metadata, [frameNumber]: url };
+        // Cache-bust local URLs so browser always fetches the freshly generated file
+        // (backend overwrites same filename on every regen, browser would otherwise show cached old image)
+        const displayUrl = url.startsWith('http://localhost') || url.startsWith('http://127.0.0.1')
+          ? `${url}?t=${Date.now()}`
+          : url;
+
+        // Use ref (not stale closure) so batch generation accumulates all frames
+        // Store display URL (with cache buster) in state, clean URL in DB
+        const newImages = { ...visualsRef.current, [frameNumber]: displayUrl };
+        visualsRef.current = newImages;
         setPipelineData(prev => ({ ...prev, visuals_metadata: newImages }));
-        
-        // [PHASE B.6] Final Sync
+        setRegenKeys(prev => ({ ...prev, [frameNumber]: (prev[frameNumber] || 0) + 1 }));
+        setSaveStatus(`✓ Frame #${frameNumber} 생성 완료`);
+        setTimeout(() => setSaveStatus(''), 3000);
+
+        // [PHASE B.6] Final Sync — save clean URL (no cache-buster) to DB
+        const dbImages = { ...newImages, [frameNumber]: url };
         await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ storyboardImages: newImages })
+          body: JSON.stringify({ storyboardImages: dbImages })
         });
+      } else {
+        setSaveStatus(`⚠ Frame #${frameNumber} 생성 실패 — 다시 시도`);
+        setTimeout(() => setSaveStatus(''), 3000);
       }
     } catch (error) {
       console.error("Sketch Gen Error:", error);
@@ -497,19 +520,21 @@ const AdProjectDetail = ({ project, onBack }) => {
     }
   };
 
-  const handleGenerateAllSketches = async (frames) => {
+  const handleGenerateAllSketches = async (frames, forceAll = false) => {
     if (!frames || frames.length === 0) return;
-    
+
     for (const frame of frames) {
-      const currentUrl = pipelineData.visuals_metadata[frame.number];
+      // Read from ref, not stale pipelineData closure, so each iteration sees latest state
+      const currentUrl = visualsRef.current[frame.number];
       const isExternal = currentUrl && !currentUrl.includes(window.location.hostname) && !currentUrl.includes('localhost');
-      
-      // If no image OR it's an external URL, trigger the generation/localization flow
-      if (!currentUrl || isExternal) {
+
+      // Generate if: no image, external URL (needs localization), or forceAll flag
+      if (!currentUrl || isExternal || forceAll) {
         await handleGenerateSketch(frame.number, frame);
       }
     }
-    setSaveStatus('✓ All images localized'); setTimeout(() => setSaveStatus(''), 2500);
+    setSaveStatus(forceAll ? '✓ All images regenerated' : '✓ All images localized');
+    setTimeout(() => setSaveStatus(''), 2500);
   };
 
   const generateContent = (tab) => {
@@ -928,6 +953,7 @@ const AdProjectDetail = ({ project, onBack }) => {
                     onGenerate={handleGenerateSketch}
                     onGenerateAll={handleGenerateAllSketches}
                     loadingFrames={loadingFrames}
+                    regenKeys={regenKeys}
                     viewMode={visualBoardMode}
                     onRunTreatment={() => { setActiveTab('TREATMENT'); generateContent('TREATMENT'); }}
                     editedPrompts={editedPrompts}

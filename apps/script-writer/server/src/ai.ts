@@ -1,8 +1,13 @@
 import { Elysia, t } from "elysia";
 import fs from "fs";
 import path from "path";
+import sharp from "sharp";
 import { syncProjectToFileSystem } from "./lib/sync";
 import { VISUAL_DIRECTOR_SYSTEM_PROMPT } from "./prompts/visualDirector";
+
+// Target storyboard dimensions — always 16:9
+const IMG_W = 800;
+const IMG_H = 450;
 
 const STORYBOARD_DIR = path.join(process.cwd(), "public", "storyboards");
 if (!fs.existsSync(STORYBOARD_DIR)) {
@@ -48,7 +53,14 @@ function buildExportPath(opts: ExportOpts): { dir: string; fileName: string } {
 async function saveImageFromResponse(res: Response, exportOpts?: ExportOpts): Promise<string | null> {
   try {
     const arrayBuffer = await res.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const rawBuffer = Buffer.from(arrayBuffer);
+
+    // Normalize to exactly 800×450 (16:9) so every card renders without bars
+    const normalized = await sharp(rawBuffer)
+      .resize(IMG_W, IMG_H, { fit: "cover", position: "attention" })
+      .jpeg({ quality: 92 })
+      .toBuffer();
+
     let dir: string;
     let fileName: string;
     if (exportOpts) {
@@ -58,7 +70,7 @@ async function saveImageFromResponse(res: Response, exportOpts?: ExportOpts): Pr
       fileName = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
     }
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(path.join(dir, fileName), buffer);
+    fs.writeFileSync(path.join(dir, fileName), normalized);
     const host = process.env.BACKEND_URL || "http://localhost:3006";
     const relativePath = path.relative(path.join(process.cwd(), "public"), path.join(dir, fileName));
     return `${host}/public/${relativePath.replace(/\\/g, "/")}`;
