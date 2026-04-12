@@ -233,27 +233,24 @@ export const aiRoutes = new Elysia()
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(storyboardPrompt);
 
-    // 1. OpenRouter (유료 키 있을 때만)
-    if (KEYS.OPENROUTER) {
-      for (const model of [requestedModel || "black-forest-labs/flux/schnell", "stabilityai/sdxl"]) {
-        try {
-          const result = await callOpenRouterImage(model, storyboardPrompt, KEYS.OPENROUTER) as any;
-          if (result?.data?.[0]?.url) return { data: [{ url: result.data[0].url }] };
-        } catch (err: any) {
-          console.error(`[IMAGE_GEN] OpenRouter ${model}:`, err.message);
-        }
-      }
-    }
+    // Shared headers — Pollinations and proxies sometimes block bare server requests
+    const imageHeaders = {
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
+      "Referer": "https://pollinations.ai/"
+    };
 
-    // 2. Pollinations 무료 모델 체인 (품질순): gptimage → kontext → flux
-    // gptimage(GPT Image Large)와 kontext(FLUX.1 Kontext)는 2026-04-09 무료 전환
-    const pollinationsModels = ['gptimage', 'kontext', 'flux'];
-    for (const model of pollinationsModels) {
-      const timeout = model === 'gptimage' ? 60000 : 40000;
+    // Pollinations 무료 모델 체인 (안정성순): flux → gptimage
+    // kontext는 enter.pollinations.ai 유료 전용 → 제거
+    const pollinationsModels = [
+      { model: 'flux',     timeout: 30000 },
+      { model: 'gptimage', timeout: 50000 },
+    ];
+    for (const { model, timeout } of pollinationsModels) {
       const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=450&model=${model}&nologo=true&seed=${seed}`;
       try {
         console.log(`[IMAGE_GEN] Trying Pollinations model: ${model} (timeout: ${timeout/1000}s)`);
-        const res = await fetch(url, { signal: AbortSignal.timeout(timeout) });
+        const res = await fetch(url, { headers: imageHeaders, signal: AbortSignal.timeout(timeout) });
         const ct = res.headers.get('content-type') || '';
         console.log(`[IMAGE_GEN] ${model} → status=${res.status} content-type=${ct}`);
         if (res.status === 429) { console.warn(`[IMAGE_GEN] Rate limited (429) on ${model}, skipping`); continue; }
@@ -263,14 +260,26 @@ export const aiRoutes = new Elysia()
             console.log(`[IMAGE_GEN] Success with ${model}, saved: ${savedUrl}`);
             return { data: [{ url: savedUrl }] };
           }
+        } else {
+          console.warn(`[IMAGE_GEN] ${model} non-image response (ct=${ct}), skipping`);
         }
       } catch (err: any) {
         console.error(`[IMAGE_GEN] Pollinations ${model} failed:`, err.message);
       }
     }
 
-    // 3. 최후 폴백: URL만 반환 (브라우저에서 직접 로드)
-    return { data: [{ url: `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=450&model=flux&nologo=true&seed=${seed}` }] };
+    // 최후 폴백: 서버에서 직접 다운로드 시도 (flux URL, User-Agent 포함)
+    console.warn("[IMAGE_GEN] All Pollinations models failed — trying last-resort server-side download");
+    const fallbackUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=450&model=flux&nologo=true&seed=${seed + 1}`;
+    const savedFallback = await downloadAndSaveImage(fallbackUrl, exportOpts);
+    if (savedFallback) {
+      console.log("[IMAGE_GEN] Last-resort download succeeded:", savedFallback);
+      return { data: [{ url: savedFallback }] };
+    }
+
+    // 완전 실패: 프론트엔드에 빈 data 반환 (외부 URL 노출하지 않음)
+    console.error("[IMAGE_GEN] All image generation attempts failed");
+    return { data: [] };
   })
   .post("/refine-image-prompt", async ({ body, set }) => {
     const { prompt: rawPrompt } = body as any;

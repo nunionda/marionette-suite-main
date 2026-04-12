@@ -445,42 +445,45 @@ const AdProjectDetail = ({ project, onBack }) => {
       
       if (url) {
         try {
-          // [PHASE B.6] CLIENT-SIDE CANVAS CAPTURE (Bypass Bot detection)
-          // We load the image in the browser, draw it to a canvas, and send base64 to backend
-          const canvasData = await new Promise((resolve) => {
-            const tempImg = new Image();
-            tempImg.crossOrigin = "anonymous";
-            tempImg.onload = () => {
-              const canvas = document.createElement("canvas");
-              canvas.width = tempImg.width;
-              canvas.height = tempImg.height;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(tempImg, 0, 0);
-              resolve(canvas.toDataURL("image/jpeg", 0.95));
-            };
-            tempImg.onerror = () => {
-              console.warn("Canvas capture failed (CORS), falling back to URL proxy");
-              resolve(null);
-            };
-            tempImg.src = url;
-            // Short timeout for canvas
-            setTimeout(() => resolve(null), 10000);
-          });
+          // If server already saved the image locally, skip canvas/proxy — image is ready
+          const isAlreadyLocal = url.startsWith('http://localhost') || url.startsWith('http://127.0.0.1');
+          if (!isAlreadyLocal) {
+            // External URL: try canvas capture first (CORS bypass), then proxy upload
+            const canvasData = await new Promise((resolve) => {
+              const tempImg = new Image();
+              tempImg.crossOrigin = "anonymous";
+              tempImg.onload = () => {
+                const canvas = document.createElement("canvas");
+                canvas.width = tempImg.width;
+                canvas.height = tempImg.height;
+                const ctx = canvas.getContext("2d");
+                ctx.drawImage(tempImg, 0, 0);
+                resolve(canvas.toDataURL("image/jpeg", 0.95));
+              };
+              tempImg.onerror = () => {
+                console.warn("Canvas capture failed (CORS), falling back to URL proxy");
+                resolve(null);
+              };
+              tempImg.src = url;
+              setTimeout(() => resolve(null), 10000);
+            });
 
-          // Send to backend (either base64 or URL)
-          const uploadRes = await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}/upload-image`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(canvasData
-              ? { image: canvasData, projectTitle: project.title, frameNumber }
-              : { url, projectTitle: project.title, frameNumber }
-            )
-          });
-          
-          const uploadData = await uploadRes.json();
-          if (uploadData.success && uploadData.url) {
-            url = uploadData.url;
-            console.log("🚀 Local Asset Created via Canvas/Proxy:", url);
+            const uploadRes = await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}/upload-image`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(canvasData
+                ? { image: canvasData, projectTitle: project.title, frameNumber }
+                : { url, projectTitle: project.title, frameNumber }
+              )
+            });
+
+            const uploadData = await uploadRes.json();
+            if (uploadData.success && uploadData.url) {
+              url = uploadData.url;
+              console.log("🚀 Local Asset Created via Canvas/Proxy:", url);
+            }
+          } else {
+            console.log("✅ Image already saved on server, skipping upload step:", url);
           }
         } catch (uploadErr) {
           console.error("Local localization failed, using external URL", uploadErr);
