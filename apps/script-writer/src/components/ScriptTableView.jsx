@@ -28,10 +28,22 @@ const ScriptTableView = ({ raw }) => {
       }
     }
     
-    // Fallback if no specific tags: look for the first frame structure if it's there
-    if (scenes.length === 0 && text.includes('[FRAME')) {
-       // Maybe they output the treatment format in the scenario tab
-       return [{ number: 'FIX', visual: 'Warning: Scenario data is in Storyboard format. Please re-run SCENARIO engine.', audio: '-' }];
+    // Fallback: parse markdown table format (| time | visual | audio |)
+    if (scenes.length === 0 && text.includes('|')) {
+      const lines = text.split('\n');
+      for (const line of lines) {
+        if (!line.includes('|')) continue;
+        const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+        // Skip header/separator rows
+        if (cells.length < 2) continue;
+        if (cells.every(c => /^[-:\s]+$/.test(c))) continue;
+        if (/영상|VISUAL|visual|시간|TRT|audio|음성/i.test(cells[0] + cells[1])) continue;
+        // cells[0]=time, cells[1]=visual, cells[2]=audio
+        const number = cells[0] || '-';
+        const visual = cells[1] || '';
+        const audio = cells[2] || '-';
+        if (visual) scenes.push({ number, visual, audio });
+      }
     }
     
     if (scenes.length === 0) {

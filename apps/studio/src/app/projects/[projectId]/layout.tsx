@@ -2,16 +2,20 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { fetchProject } from '@/lib/studio/api';
 import { StudioNav } from '@/components/studio/StudioNav';
-import { LayoutGrid, Layers, Bot, BookOpen, Package, KeyRound } from 'lucide-react';
+import { LayoutGrid, Layers, LayoutList, Bot, BookOpen, FileText, Package, KeyRound } from 'lucide-react';
+import type { ProjectCategory } from '@/lib/studio/types';
 
-const TABS = [
-  { key: 'overview',  label: '개요',          icon: LayoutGrid, href: '' },
-  { key: 'scenes',    label: '씬 목록',        icon: Layers,     href: '/scenes' },
-  { key: 'agents',    label: '에이전트',       icon: Bot,        href: '/agents' },
-  { key: 'bible',     label: '프로덕션 바이블', icon: BookOpen,  href: '/bible' },
-  { key: 'delivery',  label: '딜리버리',       icon: Package,    href: '/delivery' },
-  { key: 'vault',     label: 'API 키 보관소',  icon: KeyRound,   href: '/vault' },
-] as const;
+function getTabs(category?: ProjectCategory) {
+  const isYT = category === 'youtube_short';
+  return [
+    { key: 'overview',  label: '개요',                              icon: LayoutGrid,  href: '' },
+    { key: 'scenes',    label: isYT ? '섹션 목록' : '씬 목록',      icon: isYT ? LayoutList : Layers, href: '/scenes' },
+    { key: 'agents',    label: '에이전트',                          icon: Bot,         href: '/agents' },
+    { key: 'bible',     label: isYT ? '스크립트' : '프로덕션 바이블', icon: isYT ? FileText : BookOpen, href: isYT ? '/script' : '/bible' },
+    { key: 'delivery',  label: '딜리버리',                          icon: Package,     href: '/delivery' },
+    { key: 'vault',     label: 'API 키 보관소',                     icon: KeyRound,    href: '/vault' },
+  ];
+}
 
 interface Props {
   children: React.ReactNode;
@@ -48,7 +52,7 @@ export default async function ProjectLayout({ children, params }: Props) {
               {project.title}
             </p>
           </div>
-          {TABS.map(tab => (
+          {getTabs(project.category).map(tab => (
             <Link
               key={tab.key}
               href={`/projects/${projectId}${tab.href}`}

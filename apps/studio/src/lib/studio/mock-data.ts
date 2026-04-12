@@ -1,4 +1,4 @@
-import type { Project, SceneMeta, SceneDetail, CutMeta, Sequence } from './types';
+import type { Project, SceneMeta, SceneDetail, CutMeta, Sequence, SceneStatus } from './types';
 import { makeSceneSlug, makeCutSlug, makeSceneDisplayId, makeCutDisplayId } from './naming';
 
 export const MOCK_PROJECTS: Project[] = [
@@ -40,6 +40,19 @@ export const MOCK_PROJECTS: Project[] = [
     totalCuts: 1780,
     completedCuts: 1780,
     createdAt: '2025-11-01T09:00:00Z',
+  },
+  {
+    id: 'ytc01',
+    initials: 'YTC',
+    title: 'Korean Street Food ASMR #42',
+    category: 'youtube_short',
+    status: 'production',
+    posterUrl: 'https://picsum.photos/seed/ytc01/400/225',
+    totalScenes: 5,       // 5 sections: HOOK / INTRO / MAIN / CTA / OUTRO
+    completedScenes: 2,
+    totalCuts: 15,        // ~3 clips per section
+    completedCuts: 6,
+    createdAt: '2026-04-01T09:00:00Z',
   },
 ];
 
@@ -92,6 +105,40 @@ export function makeMockCuts(projectId: string, initials: string, sceneNumber: n
       thumbnailUrl: status !== 'pending'
         ? `https://picsum.photos/seed/${projectId}-sc${sceneNumber}-cut${n}/320/180`
         : undefined,
+    };
+  });
+}
+
+const YT_SECTIONS = [
+  { type: 'HOOK',  title: 'Hook',  clips: 3, completedClips: 3 },
+  { type: 'INTRO', title: 'Intro', clips: 3, completedClips: 3 },
+  { type: 'MAIN',  title: 'Main Content', clips: 5, completedClips: 0 },
+  { type: 'CTA',   title: 'Call to Action', clips: 2, completedClips: 0 },
+  { type: 'OUTRO', title: 'Outro', clips: 2, completedClips: 0 },
+] as const;
+
+export function makeYouTubeSections(projectId: string): SceneMeta[] {
+  return YT_SECTIONS.map((s, i) => {
+    const n = i + 1;
+    const slug = makeSceneSlug(n);
+    const status: SceneStatus =
+      s.completedClips === s.clips ? 'done'
+      : s.completedClips > 0 ? 'in_progress'
+      : 'pending';
+    return {
+      id: `${projectId}-${slug}`,
+      slug,
+      displayId: `YTC_${slug}`,
+      number: n,
+      sequenceId: `${projectId}-yt`,
+      title: s.title,
+      location: s.type,
+      timeOfDay: '',
+      summary: `${s.type} 섹션 — ${s.clips}개 클립`,
+      coverImageUrl: `https://picsum.photos/seed/${projectId}-${s.type.toLowerCase()}/400/225`,
+      cutCount: s.clips,
+      completedCutCount: s.completedClips,
+      status,
     };
   });
 }

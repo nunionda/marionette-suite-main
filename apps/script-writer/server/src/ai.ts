@@ -9,7 +9,66 @@ if (!fs.existsSync(STORYBOARD_DIR)) {
   fs.mkdirSync(STORYBOARD_DIR, { recursive: true });
 }
 
-async function downloadAndSaveImage(url: string): Promise<string | null> {
+const EXPORT_BASE = path.join(process.cwd(), "public", "export");
+
+function slugify(text: string): string {
+  return text
+    .replace(/[^\x00-\x7F]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getInitials(title: string): string {
+  const letters = title
+    .split(/\s+/)
+    .map(w => w.replace(/[^a-zA-Z]/g, "")[0])
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
+  return letters || "PRJ";
+}
+
+interface ExportOpts {
+  projectId: string | number;
+  projectTitle: string;
+  frameNumber?: string | number;
+}
+
+function buildExportPath(opts: ExportOpts): { dir: string; fileName: string } {
+  const initials = getInitials(opts.projectTitle);
+  const slug = slugify(opts.projectTitle) || `project-${opts.projectId}`;
+  const folderName = `${initials}_${opts.projectId}_${slug}`;
+  const dir = path.join(EXPORT_BASE, folderName);
+  const cn = String(opts.frameNumber ?? "01").padStart(2, "0");
+  const fileName = `${opts.projectId}_S01_C${cn}.jpg`;
+  return { dir, fileName };
+}
+
+async function saveImageFromResponse(res: Response, exportOpts?: ExportOpts): Promise<string | null> {
+  try {
+    const arrayBuffer = await res.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    let dir: string;
+    let fileName: string;
+    if (exportOpts) {
+      ({ dir, fileName } = buildExportPath(exportOpts));
+    } else {
+      dir = STORYBOARD_DIR;
+      fileName = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
+    }
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, fileName), buffer);
+    const host = process.env.BACKEND_URL || "http://localhost:3006";
+    const relativePath = path.relative(path.join(process.cwd(), "public"), path.join(dir, fileName));
+    return `${host}/public/${relativePath.replace(/\\/g, "/")}`;
+  } catch (err) {
+    console.error("[IMAGE_SAVE] Error saving response:", err);
+    return null;
+  }
+}
+
+async function downloadAndSaveImage(url: string, exportOpts?: ExportOpts): Promise<string | null> {
   try {
     const res = await fetch(url, {
       headers: {
@@ -18,13 +77,7 @@ async function downloadAndSaveImage(url: string): Promise<string | null> {
       }
     });
     if (!res.ok) throw new Error(`Failed to fetch image: ${res.status} ${res.statusText}`);
-    const arrayBuffer = await res.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
-    const fileName = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}.jpg`;
-    const filePath = path.join(STORYBOARD_DIR, fileName);
-    fs.writeFileSync(filePath, buffer);
-    const host = process.env.BACKEND_URL || "http://localhost:3006";
-    return `${host}/public/storyboards/${fileName}`;
+    return await saveImageFromResponse(res, exportOpts);
   } catch (err) {
     console.error("[IMAGE_DOWNLOAD] Error saving image:", err);
     return null;
@@ -46,14 +99,21 @@ export const aiRoutes = new Elysia()
   .post("/stream", async ({ body, set }) => {
     const { prompt, system, model: requestedModel, mode = "agent" } = body as any;
     
-    // Provider chain: Gemini Free → Groq → Anthropic (credits) → Mock
-    // OpenRouter is NOT used as default — only as last resort if OPENROUTER_API_KEY is explicitly set
+    // [DEV MODE] 유료 모델 사용 금지. 최종 완성 후 유료 API 활성화 예정.
+    // Provider chain (FREE ONLY): Gemini Free → Groq → OpenRouter free models
+    // Last updated: 2026-04-12 | Next review: 2026-04-19
+    // See: docs/ai-model-policy.md for update schedule and benchmarks
     const fallbackModels = [
       requestedModel || "google/gemini-2.5-flash",
       "google/gemini-2.0-flash-001",
       "google/gemini-2.0-flash-lite-001",
       "groq/llama-3.3-70b-versatile",
-      "anthropic/claude-3-5-haiku",
+      "groq/llama-3.1-8b-instant",                           // separate Groq quota bucket
+      "groq/meta-llama/llama-4-scout-17b-16e-instruct",      // Llama 4 Scout, separate quota
+      "groq/qwen/qwen3-32b",                                 // Qwen 3 32B, separate quota
+      // PAID models (disabled during dev — uncomment after final release):
+      // "anthropic/claude-3-5-haiku",
+      // "openai/gpt-4o-mini",
     ];
 
     for (const currentModel of fallbackModels) {
@@ -80,6 +140,10 @@ export const aiRoutes = new Elysia()
         if ((!response || !response.ok) && KEYS.OPENROUTER) {
           console.log(`[AI_ORCHESTRATOR] Last resort: OpenRouter for ${currentModel}`);
           response = await callOpenRouterStream(currentModel, prompt, system, KEYS.OPENROUTER);
+        }
+
+        if (response && !response.ok) {
+          console.warn(`[AI_ORCHESTRATOR] ${currentModel} responded ${response.status} ${response.statusText}`);
         }
 
         if (response && response.ok) {
@@ -116,35 +180,85 @@ export const aiRoutes = new Elysia()
     })
   })
   .post("/generate-image", async ({ body, set }) => {
-    const { prompt: rawPrompt, model: requestedModel } = body as any;
-    const fallbackModels = [requestedModel || "openai/dall-e-3", "black-forest-labs/flux/schnell", "stabilityai/sdxl"];
+    const { prompt: rawPrompt, model: requestedModel, frameNumber, panelName, projectId, projectTitle } = body as any;
+    const exportOpts: ExportOpts | undefined = (projectId && projectTitle)
+      ? { projectId, projectTitle, frameNumber }
+      : undefined;
 
-    const agencyPrompt = `(Professional Agency Storyboard, Cinematic masterpiece, ARRI Alexa 65, gorgeous lighting, Vogue editorial style, hyper-detailed, 8k resolution, professional color grading, cinematic composition) ${rawPrompt}`;
+    // Extract scene description (after [Frame #N] block if present)
+    const sceneDescMatch = rawPrompt.match(/\[Frame #?\d+\]\s*([\s\S]*)/i) || rawPrompt.match(/\[Scene Description\][:\s]+([\s\S]*)/i);
+    const sceneDesc = (sceneDescMatch ? sceneDescMatch[1] : rawPrompt).trim();
 
-    let finalExternalUrl: string | null = null;
+    // Build panel label — prefer explicit panelName from frontend, fallback to heuristic
+    const panelNum = frameNumber ?? '?';
+    let titleLabel: string;
+    if (panelName && panelName.trim()) {
+      // Use the actual panel name from the storyboard (e.g. "DAWN RISING")
+      titleLabel = panelName.trim().toUpperCase();
+    } else {
+      // Fallback: translate Korean keywords
+      const krToEn: Record<string, string> = {
+        '농구': 'BASKETBALL', '달리기': 'RUNNING', '달리는': 'RUNNING', '나이키': 'NIKE',
+        '헬스장': 'GYM', '트랙': 'TRACK', '코트': 'COURT', '경기장': 'STADIUM',
+        '선수': 'ATHLETE', '여성': 'WOMAN', '남성': 'MAN', '훈련': 'TRAINING',
+        '드리블': 'DRIBBLE', '슬로우': 'SLOW-MO', '카메라': 'CAMERA', '광고': 'AD',
+        '어두운': 'DARK', '새벽': 'DAWN', '도시': 'CITY', '자연': 'NATURE',
+      };
+      const firstWords = sceneDesc.split(/[\s,.\n]+/).slice(0, 5);
+      const translated = firstWords.map((w: string) => krToEn[w.replace(/[^\w가-힣]/g, '')] || null).filter(Boolean);
+      titleLabel = translated.length > 0
+        ? translated.slice(0, 2).join(' ')
+        : sceneDesc.replace(/[^\x00-\x7F]/g, '').trim().split(/\s+/).slice(0, 3).join(' ').toUpperCase() || 'SCENE';
+    }
+    const panelLabel = `PANEL ${panelNum}: ${titleLabel}`;
 
-    for (const currentModel of fallbackModels) {
-      try {
-        if (currentModel.includes("dall-e") && KEYS.OPENAI) {
-          const result = await callDallE3Direct(agencyPrompt, KEYS.OPENAI) as any;
-          if (result?.data?.[0]?.url) { finalExternalUrl = result.data[0].url; break; }
+    // Extract shot type for top-right notes
+    const shotMatches = rawPrompt.match(/\b(INT\.|EXT\.|CLOSE[\s-]UP|WIDE SHOT|TRACKING|DOLLY|PAN UP|RACK FOCUS|ECU|OTS)\b/gi);
+    const shotNotes = shotMatches ? shotMatches.slice(0, 3).join(' / ') : 'CUT TO';
+
+    const storyboardPrompt = `A highly detailed traditional hand-drawn storyboard illustration in a Copic-style alcohol marker and pencil sketch. Rough pencil and charcoal drawing with ink outlines, quick gestural linework, watercolor gray wash, black and white with minimal color tones, professional film storyboard artist style. Bold handwritten text label "${panelLabel}" in top-left corner. Small handwritten shot notes "${shotNotes}" in top-right corner. Scene: ${sceneDesc}`;
+
+    const seed = Math.floor(Math.random() * 1000000);
+    const encodedPrompt = encodeURIComponent(storyboardPrompt);
+
+    // 1. OpenRouter (유료 키 있을 때만)
+    if (KEYS.OPENROUTER) {
+      for (const model of [requestedModel || "black-forest-labs/flux/schnell", "stabilityai/sdxl"]) {
+        try {
+          const result = await callOpenRouterImage(model, storyboardPrompt, KEYS.OPENROUTER) as any;
+          if (result?.data?.[0]?.url) return { data: [{ url: result.data[0].url }] };
+        } catch (err: any) {
+          console.error(`[IMAGE_GEN] OpenRouter ${model}:`, err.message);
         }
-        if (KEYS.OPENROUTER) {
-          const result = await callOpenRouterImage(currentModel, agencyPrompt, KEYS.OPENROUTER) as any;
-          if (result?.data?.[0]?.url) { finalExternalUrl = result.data[0].url; break; }
-        }
-      } catch (err: any) {
-        console.error(`[IMAGE_GEN] Error with ${currentModel}:`, err.message);
       }
     }
 
-    if (finalExternalUrl) {
-      return { data: [{ url: finalExternalUrl }] };
+    // 2. Pollinations 무료 모델 체인 (품질순): gptimage → kontext → flux
+    // gptimage(GPT Image Large)와 kontext(FLUX.1 Kontext)는 2026-04-09 무료 전환
+    const pollinationsModels = ['gptimage', 'kontext', 'flux'];
+    for (const model of pollinationsModels) {
+      const timeout = model === 'gptimage' ? 60000 : 40000;
+      const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=450&model=${model}&nologo=true&seed=${seed}`;
+      try {
+        console.log(`[IMAGE_GEN] Trying Pollinations model: ${model} (timeout: ${timeout/1000}s)`);
+        const res = await fetch(url, { signal: AbortSignal.timeout(timeout) });
+        const ct = res.headers.get('content-type') || '';
+        console.log(`[IMAGE_GEN] ${model} → status=${res.status} content-type=${ct}`);
+        if (res.status === 429) { console.warn(`[IMAGE_GEN] Rate limited (429) on ${model}, skipping`); continue; }
+        if (res.ok && ct.includes('image')) {
+          const savedUrl = await saveImageFromResponse(res, exportOpts);
+          if (savedUrl) {
+            console.log(`[IMAGE_GEN] Success with ${model}, saved: ${savedUrl}`);
+            return { data: [{ url: savedUrl }] };
+          }
+        }
+      } catch (err: any) {
+        console.error(`[IMAGE_GEN] Pollinations ${model} failed:`, err.message);
+      }
     }
 
-    const encodedPrompt = encodeURIComponent(agencyPrompt);
-    const pollinationsUrl = `https://gen.pollinations.ai/image/${encodedPrompt}?width=800&height=450&nologo=true&seed=${Math.floor(Math.random() * 1000000)}`;
-    return { data: [{ url: pollinationsUrl }] };
+    // 3. 최후 폴백: URL만 반환 (브라우저에서 직접 로드)
+    return { data: [{ url: `https://image.pollinations.ai/prompt/${encodedPrompt}?width=800&height=450&model=flux&nologo=true&seed=${seed}` }] };
   })
   .post("/refine-image-prompt", async ({ body, set }) => {
     const { prompt: rawPrompt } = body as any;
@@ -165,7 +279,7 @@ export const aiRoutes = new Elysia()
         const data: any = await response.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) {
-          return { success: true, refinedPrompt: text.trim() };
+          return parseVisualDirectorResponse(text);
         }
         console.warn("[VISUAL_DIRECTOR] Direct Gemini failed, falling back to OpenRouter...");
       }
@@ -194,9 +308,9 @@ export const aiRoutes = new Elysia()
          console.error("[VISUAL_DIRECTOR] OpenRouter Error:", data.error);
          throw new Error(data.error.message || "OpenRouter error");
       }
-      
+
       if (data.choices?.[0]?.message?.content) {
-        return { success: true, refinedPrompt: data.choices[0].message.content.trim() };
+        return parseVisualDirectorResponse(data.choices[0].message.content);
       }
       
       console.warn("[VISUAL_DIRECTOR] Unexpected response structure:", JSON.stringify(data));
@@ -206,6 +320,28 @@ export const aiRoutes = new Elysia()
       return { success: false, error: err.message, prompt: rawPrompt };
     }
   });
+
+// --- VISUAL DIRECTOR RESPONSE PARSER ---
+
+function parseVisualDirectorResponse(text: string): { success: boolean; refinedPrompt: string; sceneBlueprint?: any } {
+  const trimmed = text.trim();
+
+  // Extract PROMPT: line
+  const promptMatch = trimmed.match(/PROMPT:\s*(.+)/s);
+  const refinedPrompt = promptMatch ? promptMatch[1].trim().split('\n')[0].trim() : trimmed;
+
+  // Try to parse JSON blueprint
+  let sceneBlueprint: any = undefined;
+  const jsonMatch = trimmed.match(/```json\s*([\s\S]*?)```/);
+  if (jsonMatch) {
+    try { sceneBlueprint = JSON.parse(jsonMatch[1].trim()); } catch { /* ignore parse errors */ }
+  }
+
+  console.log("[VISUAL_DIRECTOR] Refined prompt:", refinedPrompt.slice(0, 120) + "...");
+  if (sceneBlueprint) console.log("[VISUAL_DIRECTOR] Scene blueprint keys:", Object.keys(sceneBlueprint).join(', '));
+
+  return { success: true, refinedPrompt, sceneBlueprint };
+}
 
 // --- STREAM TRANSFORMERS ---
 
@@ -296,7 +432,7 @@ async function callAnthropicDirect(model: string, prompt: string, system?: strin
   return fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "x-api-key": KEYS.ANTHROPIC, "anthropic-version": "2023-06-01", "content-type": "application/json" },
-    body: JSON.stringify({ model: anthropicModel, max_tokens: 4000, system: system || "You are a creative assistant.", messages: [{ role: "user", content: prompt }], stream: true })
+    body: JSON.stringify({ model: anthropicModel, max_tokens: 8192, system: system || "You are a creative assistant.", messages: [{ role: "user", content: prompt }], stream: true })
   });
 }
 
@@ -316,12 +452,13 @@ async function callDeepSeekDirect(model: string, prompt: string, system?: string
 }
 
 async function callGroqDirect(model: string, prompt: string, system?: string) {
-  const groqModel = model.includes("/") ? model.split("/")[1] : model;
+  // Strip the "groq/" prefix only, preserving org/model format (e.g. "meta-llama/llama-4-scout-...")
+  const groqModel = model.startsWith("groq/") ? model.slice("groq/".length) : model;
   return fetch("https://api.groq.com/openai/v1/chat/completions", { method: "POST", headers: { "Authorization": `Bearer ${KEYS.GROQ}`, "Content-Type": "application/json" }, body: JSON.stringify({ model: groqModel, messages: [{ role: "system", content: system || "You are a creative assistant." }, { role: "user", content: prompt }], stream: true }) });
 }
 
 async function callOpenRouterStream(model: string, prompt: string, system: string | undefined, apiKey: string) {
-  return fetch("https://openrouter.ai/api/v1/chat/completions", { method: "POST", headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ model, messages: [{ role: "system", content: (system || "You are a creative assistant.") + "\n\n[STRICT LANGUAGE RULE]: 반드시 요청받은 언어로 답변하십시오." }, { role: "user", content: prompt }], max_tokens: 1000, stream: true }) });
+  return fetch("https://openrouter.ai/api/v1/chat/completions", { method: "POST", headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }, body: JSON.stringify({ model, messages: [{ role: "system", content: (system || "You are a creative assistant.") + "\n\n[STRICT LANGUAGE RULE]: 반드시 요청받은 언어로 답변하십시오." }, { role: "user", content: prompt }], max_tokens: 4000, stream: true }) });
 }
 
 async function callDallE3Direct(prompt: string, apiKey: string) {

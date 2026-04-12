@@ -45,7 +45,14 @@ const app = new Elysia()
         return project;
       })
       .patch("/projects/:id", async ({ params: { id }, body }) => {
-        const updateData: any = { ...(body as any), updatedAt: new Date() };
+        const updateData: any = { ...(body as any), updated: new Date().toISOString() };
+        // Serialize JSON object fields to strings for SQLite text columns
+        if (updateData.storyboardImages != null && typeof updateData.storyboardImages === 'object') {
+          updateData.storyboardImages = JSON.stringify(updateData.storyboardImages);
+        }
+        if (updateData.analysisData != null && typeof updateData.analysisData === 'object') {
+          updateData.analysisData = JSON.stringify(updateData.analysisData);
+        }
         const [updatedProject] = await db.update(projects)
           .set(updateData)
           .where(eq(projects.id, parseInt(id)))
@@ -163,15 +170,28 @@ const app = new Elysia()
              throw new Error("Received error JSON instead of image from AI");
           }
 
-          const EXPORT_DIR = path.join(process.cwd(), "public", "storyboards");
-          if (!fs.existsSync(EXPORT_DIR)) fs.mkdirSync(EXPORT_DIR, { recursive: true });
-          
-          const fileName = `img_${id}_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
-          const filePath = path.join(EXPORT_DIR, fileName);
+          const { projectTitle, frameNumber } = body as any;
+          let saveDir: string;
+          let fileName: string;
+          if (projectTitle) {
+            // Structured export path: public/export/{INITIALS}_{id}_{slug}/{id}_S01_C{nn}.jpg
+            const initials = projectTitle.split(/\s+/).map((w: string) => w.replace(/[^a-zA-Z]/g, "")[0]).filter(Boolean).join("").toUpperCase() || "PRJ";
+            const slug = projectTitle.replace(/[^\x00-\x7F]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `project-${id}`;
+            const cn = String(frameNumber ?? "01").padStart(2, "0");
+            saveDir = path.join(process.cwd(), "public", "export", `${initials}_${id}_${slug}`);
+            fileName = `${id}_S01_C${cn}.jpg`;
+          } else {
+            saveDir = path.join(process.cwd(), "public", "storyboards");
+            fileName = `img_${id}_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
+          }
+          if (!fs.existsSync(saveDir)) fs.mkdirSync(saveDir, { recursive: true });
+
+          const filePath = path.join(saveDir, fileName);
           fs.writeFileSync(filePath, buffer);
-          
+
           const host = process.env.BACKEND_URL || "http://localhost:3006";
-          return { success: true, url: `${host}/public/storyboards/${fileName}` };
+          const relativePath = path.relative(path.join(process.cwd(), "public"), filePath);
+          return { success: true, url: `${host}/public/${relativePath.replace(/\\/g, "/")}` };
         } catch (err: any) {
           console.error("Upload error:", err.message);
           return { success: false, error: err.message };

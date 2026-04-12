@@ -27,8 +27,9 @@ const AnalyticsDashboard = ({ data }) => {
     ]
   };
 
-  const chartData = data || defaultData;
-  const isLive = !!data;
+  const rawData = typeof data === 'string' ? (() => { try { return JSON.parse(data); } catch { return null; } })() : data;
+  const chartData = rawData || defaultData;
+  const isLive = !!rawData;
 
   return (
     <div className="analytics-dashboard" style={{ padding: '30px', background: 'rgba(0,0,0,0.2)', borderRadius: '12px', minHeight: '600px', position: 'relative' }}>
@@ -88,7 +89,7 @@ const AnalyticsDashboard = ({ data }) => {
             <div style={{ flexGrow: 1, height: '30px', background: 'rgba(255,255,255,0.05)', borderRadius: '15px', overflow: 'hidden', border: '1px solid var(--surface-border)' }}>
               <div 
                 style={{ 
-                  width: `${(chartData.beatProgress[0].completed / chartData.beatProgress[0].total) * 100}%`, 
+                  width: `${chartData.beatProgress?.[0] ? (chartData.beatProgress[0].completed / chartData.beatProgress[0].total) * 100 : 0}%`,
                   height: '100%', 
                   background: 'linear-gradient(90deg, var(--accent-secondary), var(--accent-primary))',
                   boxShadow: '0 0 15px var(--accent-primary)'
@@ -96,7 +97,7 @@ const AnalyticsDashboard = ({ data }) => {
               />
             </div>
             <div style={{ fontSize: '1.5rem', fontWeight: 800 }}>
-              {chartData.beatProgress[0].completed} / {chartData.beatProgress[0].total} <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 300 }}>BEATS FOUND</span>
+              {chartData.beatProgress?.[0]?.completed ?? 0} / {chartData.beatProgress?.[0]?.total ?? 0} <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)', fontWeight: 300 }}>BEATS FOUND</span>
             </div>
           </div>
         </div>

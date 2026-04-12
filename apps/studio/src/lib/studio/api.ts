@@ -10,6 +10,7 @@ import {
   makeMockScenes,
   makeMockSceneDetail,
   makeMockSequences,
+  makeYouTubeSections,
 } from './mock-data';
 import { makeMockAgents } from './agent-mock';
 
@@ -55,19 +56,32 @@ export async function fetchScenes(
   const project = await fetchProject(projectId);
   const initials = project?.initials ?? 'UNK';
 
+  const isYouTube = project?.category === 'youtube_short';
+
   const data = await fetchJSON<SceneListResponse>(
     `${PRODUCTION_API}/api/projects/${projectId}/scenes`,
-    () => ({
-      scenes: makeMockScenes(projectId, initials),
-      sequences: makeMockSequences(projectId),
-      totalCount: 120,
-    }),
+    () => isYouTube
+      ? { scenes: makeYouTubeSections(projectId), sequences: [], totalCount: 5 }
+      : { scenes: makeMockScenes(projectId, initials), sequences: makeMockSequences(projectId), totalCount: 120 },
   );
 
-  let scenes = data.scenes;
-  if (opts.sequenceId) scenes = scenes.filter(s => s.sequenceId === opts.sequenceId);
+  // YouTube 섹션은 항상 5개 고정 구조 — API가 비어있거나 잘못된 형식이어도 목업 구조를 보여줌
+  const effective = (isYouTube && (data.scenes ?? []).length === 0)
+    ? { scenes: makeYouTubeSections(projectId), sequences: [], totalCount: 5 }
+    : data;
+
+  let scenes = effective.scenes ?? [];
+  if (opts.sequenceId) {
+    // YouTube: seq 파라미터 = 섹션 타입(HOOK/INTRO 등) → location 필드로 필터
+    // Film: seq 파라미터 = Act sequenceId → sequenceId 필드로 필터
+    scenes = scenes.filter(s =>
+      isYouTube
+        ? s.location === opts.sequenceId
+        : s.sequenceId === opts.sequenceId,
+    );
+  }
   if (opts.status) scenes = scenes.filter(s => s.status === opts.status);
-  return { ...data, scenes };
+  return { ...effective, scenes };
 }
 
 /* ─── Agents ─── */

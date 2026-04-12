@@ -7,20 +7,22 @@ import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
  * 비즈니스 UseCase (Agent Orchestration Context)를 담당하는 Application 레이어(Custom Hook).
  * 생성 상태(isGenerating), API 에러 핸들링, 그리고 Adapter 호출을 UI 컴포넌트로부터 캡슐화합니다.
  */
-export const useAgentEngine = (apiKey, onUpdateField) => {
+export const useAgentEngine = (apiKey, onUpdateField, onError) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStatus, setGenerationStatus] = useState('');
+  const [generationError, setGenerationError] = useState('');
 
   const executeAgent = async (systemPrompt, userPrompt, targetField, isAppend = false, statusLabel = 'Processing...') => {
-    // Note: Backend now handles API key via proxy. 
-    // apiKey is preserved here for backward compatibility if needed by the adapter, 
+    // Note: Backend now handles API key via proxy.
+    // apiKey is preserved here for backward compatibility if needed by the adapter,
     // but the engine no longer blocks execution if it's missing.
 
     setIsGenerating(true);
     setGenerationStatus(statusLabel);
-    
+    setGenerationError('');
+
     let accumulatedText = '';
-    
+
     await OpenRouterAdapter.streamChatCompletion(
       apiKey,
       systemPrompt,
@@ -31,10 +33,11 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
         // Use functional update or pass the incremental chunk if handled by higher level
         onUpdateField(targetField, accumulatedText, isAppend);
       },
-      // onError
+      // onError — set error state, do NOT write to content field
       (errorMessage) => {
-        onUpdateField(targetField, `Error generating content: ${errorMessage}`, isAppend);
         console.error("Agent Engine Error:", errorMessage);
+        setGenerationError(errorMessage);
+        if (onError) onError(errorMessage);
       },
       // onComplete
       async () => {
@@ -61,5 +64,5 @@ export const useAgentEngine = (apiKey, onUpdateField) => {
     setGenerationStatus('');
   };
 
-  return { executeAgent, isGenerating, generationStatus };
+  return { executeAgent, isGenerating, generationStatus, generationError };
 };

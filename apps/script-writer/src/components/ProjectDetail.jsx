@@ -11,6 +11,7 @@ import reviewRule from '../.agents/rules/production_review.md?raw';
 import genreRules from '../.agents/rules/genres.md?raw';
 import categoryRules from '../.agents/rules/categories.md?raw';
 import clicheRules from '../.agents/rules/cliche_strategy.md?raw';
+import adRule from '../.agents/rules/AD_ENGINE.md?raw';
 
 import { useAgentEngine } from '../hooks/useAgentEngine';
 import AnalyticsDashboard from './AnalyticsDashboard';
@@ -74,6 +75,7 @@ const ProjectDetail = ({ project, onBack }) => {
   // Advanced Narrative Controls
   const [bingeHookEnabled, setBingeHookEnabled] = useState(project.isNetflixStandard || false);
   const [clicheSubversionIntensity, setClicheSubversionIntensity] = useState(5); // 1-10
+  const [saveStatus, setSaveStatus] = useState('');
 
   const outputRef = useRef(null);
   const baseTextRef = useRef(''); // To store text before appending
@@ -131,6 +133,8 @@ const ProjectDetail = ({ project, onBack }) => {
 
   // 1. Instantiate Application Layer (Engine Hook)
   const { executeAgent, isGenerating, generationStatus } = useAgentEngine(apiKey, handleDataChange);
+  const handleBriefChange = (_field, value) => setBriefingResult(value);
+  const { executeAgent: executeBriefAgent } = useAgentEngine(apiKey, handleBriefChange);
 
   // 2. Manage View Side Effects (Auto-Scroll)
   useEffect(() => {
@@ -145,18 +149,19 @@ const ProjectDetail = ({ project, onBack }) => {
   };
 
   const saveToContext = () => {
-    updateProject(project.id, { 
-      ...pipelineData, 
-      conceptBrief, 
-      conceptDirection 
+    updateProject(project.id, {
+      ...pipelineData,
+      conceptBrief,
+      conceptDirection
     });
-    alert("Project Data Saved!");
+    setSaveStatus('SAVED ✓');
+    setTimeout(() => setSaveStatus(''), 2000);
   };
 
   const getRoleContext = () => `\n[Creative Role]: ${creativeRole}\n[Output Language]: ${language}\n`;
 
   const refineBriefWithRole = async () => {
-    if (!conceptBrief) return alert("Please enter a basic brief first.");
+    if (!conceptBrief) { setSaveStatus('⚠ Enter a brief first'); setTimeout(() => setSaveStatus(''), 2000); return; }
     setIsOptimizingBrief(true);
     setBriefingResult(null);
     
@@ -168,11 +173,7 @@ const ProjectDetail = ({ project, onBack }) => {
     마지막에 반드시 ### [REFINED BRIEF] 태그 뒤에 수정된 최종 기획안을 포함하세요.`;
 
     try {
-      let fullResponse = "";
-      await executeAgent(prompt, (chunk) => {
-        fullResponse += chunk;
-        setBriefingResult(fullResponse);
-      }, 'concept', false, 'Synthesizing Creative Brief...');
+      await executeBriefAgent(architectRule, prompt, 'brief', false, 'Synthesizing Creative Brief...');
     } catch (error) {
       console.error("Briefing Error:", error);
     } finally {
@@ -194,7 +195,7 @@ const ProjectDetail = ({ project, onBack }) => {
   // Agent UseCase Triggers
   const generateConcept = () => {
     if (!conceptBrief.trim()) {
-      alert("⚠️ 아이디어 및 주제를 먼저 입력해주세요.");
+      setSaveStatus('⚠ 아이디어를 먼저 입력하세요'); setTimeout(() => setSaveStatus(''), 2000);
       return;
     }
     
@@ -233,7 +234,7 @@ const ProjectDetail = ({ project, onBack }) => {
   }, [pipelineData.treatment]);
 
   const generateArchitecture = () => {
-    if (!pipelineData.concept) { alert("Please generate the Concept first."); return; }
+    if (!pipelineData.concept) { setSaveStatus('⚠ Generate CONCEPT first'); setTimeout(() => setSaveStatus(''), 2000); return; }
     const standardRules = PRODUCTION_STANDARDS[productionStandard].rules;
     
     executeAgent(
@@ -246,7 +247,7 @@ const ProjectDetail = ({ project, onBack }) => {
   };
 
   const generateTreatment = () => {
-    if (!pipelineData.architecture) { alert("Please generate Architecture first."); return; }
+    if (!pipelineData.architecture) { setSaveStatus('⚠ Generate ARCHITECTURE first'); setTimeout(() => setSaveStatus(''), 2000); return; }
     
     const isExpanding = scenes.length > 0;
     const prompt = isExpanding 
@@ -257,7 +258,7 @@ const ProjectDetail = ({ project, onBack }) => {
   };
 
   const generateScenario = () => {
-    if (!pipelineData.treatment) { alert("Please generate Treatment first."); return; }
+    if (!pipelineData.treatment) { setSaveStatus('⚠ Generate TREATMENT first'); setTimeout(() => setSaveStatus(''), 2000); return; }
     
     const standardRules = PRODUCTION_STANDARDS[productionStandard].rules;
     const styleContext = activeTab === 'SCENARIO' ? `\n[Dialogue Density]: ${styleIntensity}/10\n` : '';
@@ -302,7 +303,7 @@ const ProjectDetail = ({ project, onBack }) => {
   };
 
   const generateReview = () => {
-    if (!pipelineData.scenario) { alert("Please generate Scenario first."); return; }
+    if (!pipelineData.scenario) { setSaveStatus('⚠ Generate SCENARIO first'); setTimeout(() => setSaveStatus(''), 2000); return; }
     const prompt = `Full Screenplay Segment:\n${pipelineData.scenario}\n\n이 시나리오가 실제 영화로 제작될 때의 실현 가능성, 예산 효율성, 상업적 매력을 제작자 및 투자자 관점에서 'Brutally Honest'하게 분석하세요. 특히 Robert McKee의 '대항 세력 감사(Antagonism Audit)'를 포함하여 서사적 깊이를 검증하세요.
     [IMPORTANT]: 분석 완료 시 마지막에 반드시 아래 JSON 형식을 [ANALYSIS_JSON] 태그와 함께 포함하세요.
     [ANALYSIS_JSON] 
@@ -312,6 +313,17 @@ const ProjectDetail = ({ project, onBack }) => {
       "beatProgress": [{"completed": 8, "total": 15}]
     }`;
     executeAgent(reviewRule, prompt, 'review', false, 'Performing Production Audit...');
+  };
+
+  const generateContent = (tab) => {
+    switch (tab) {
+      case 'CONCEPT': return generateConcept();
+      case 'ARCHITECTURE': return generateArchitecture();
+      case 'TREATMENT': return generateTreatment();
+      case 'SCENARIO': return generateScenario();
+      case 'REVIEW': return generateReview();
+      default: break;
+    }
   };
 
   const TAB_META = {
@@ -331,41 +343,42 @@ const ProjectDetail = ({ project, onBack }) => {
         className={`project-detail ${project.category === 'Commercial' ? 'ad-theme' : 'drama-theme'} ${isGenerating ? 'orchestration-active' : ''} ${zenMode ? 'is-zen' : ''}`}
       >
       {/* 🏙️ STUDIO HEADER: Operational Status & Global Meta */}
-      <header className="detail-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="back-btn" onClick={onBack} style={{ fontSize: '0.8rem', letterSpacing: '1px', cursor: 'pointer', opacity: 0.7 }}>← BACK TO DASHBOARD</div>
-        <div style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '2.2rem', margin: '0', letterSpacing: '2px' }}>{project.title.toUpperCase()}</h1>
-          <span className="badge category-badge" style={{ letterSpacing: '1.2px', fontWeight: 700 }}>🎞️ {project.category.toUpperCase()} PRODUCTION</span>
+      <header className="detail-header">
+        <div className="header-left">
+          <div className="back-btn" onClick={onBack}>← BACK</div>
+          <span className="header-format-label">{project.category.toUpperCase()}</span>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <SendToStudioButton
-            scriptWriterProjectId={project.id}
-            scriptData={pipelineData}
-          />
-          <button className="tactical-btn" onClick={saveToContext}>💾 SAVE PROJECT</button>
+        <div className="header-title-block">
+          <h1 className="header-title">{project.title}</h1>
+        </div>
+        <div className="header-right">
+          <div className="header-mode-controls">
+            <button
+              className={`mode-btn ${zenMode ? 'active' : ''}`}
+              onClick={() => setZenMode(!zenMode)}
+              title="Zen Mode"
+            >
+              {zenMode ? 'EXIT ZEN' : 'ZEN'}
+            </button>
+            <input
+              type="password"
+              className="key-input-inline"
+              placeholder="OpenRouter API Key"
+              value={apiKey}
+              onChange={(e) => saveApiKey(e.target.value)}
+            />
+          </div>
+          <div className="header-divider" />
+          <div className="header-save-controls">
+            <SendToStudioButton
+              scriptWriterProjectId={project.id}
+              scriptData={pipelineData}
+            />
+            <button className="tactical-btn" onClick={saveToContext}>SAVE</button>
+            {saveStatus && <span className="save-toast">{saveStatus}</span>}
+          </div>
         </div>
       </header>
-
-      <div className="orchestration-controls">
-        <div className="input-group-row">
-          <span className="input-label">📡 OPENROUTER</span>
-          <input 
-            type="password" 
-            className="key-input"
-            value={apiKey} 
-            onChange={(e) => saveApiKey(e.target.value)} 
-          />
-        </div>
-        <div className="header-actions">
-          <button 
-            className={`btn-secondary ${zenMode ? 'active' : ''}`}
-            onClick={() => setZenMode(!zenMode)}
-            title="Spatial Zen Mode"
-          >
-            {zenMode ? '📡 EXIT ZEN' : '🪐 ZEN MODE'}
-          </button>
-        </div>
-      </div>
 
       {/* 🛰️ AI PROGRESS OVERLAY (Cinematic) */}
       <div className={`status-indicator-bar ${isGenerating ? 'active' : ''}`} />
@@ -464,13 +477,19 @@ const ProjectDetail = ({ project, onBack }) => {
             {activeTab === 'SCENARIO' ? (
               <>
                 <div className="control-group">
-                  <label className="input-label">DIALOGUE DENSITY</label>
-                  <input 
-                    type="range" min="1" max="10" 
+                  <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <span>DIALOGUE DENSITY</span>
+                    <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>{styleIntensity}/10</span>
+                  </label>
+                  <input
+                    type="range" min="1" max="10"
                     value={styleIntensity}
                     onChange={(e) => setStyleIntensity(parseInt(e.target.value))}
                     className="range-input"
                   />
+                  <span style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>
+                    {styleIntensity <= 3 ? 'Minimal — action-driven' : styleIntensity <= 7 ? 'Balanced — subtext & action' : 'Dense — dialogue-heavy'}
+                  </span>
                 </div>
               </>
             ) : (
@@ -532,9 +551,9 @@ const ProjectDetail = ({ project, onBack }) => {
         <main className="studio-main">
           <div className="tabs">
             {tabs.map(tab => (
-              <div 
-                key={tab} 
-                className={`tab ${activeTab === tab ? 'active' : ''}`}
+              <div
+                key={tab}
+                className={`tab ${activeTab === tab ? 'active' : ''} ${pipelineData[tab.toLowerCase()]?.length > 50 ? 'has-content' : ''}`}
                 onClick={() => setActiveTab(tab)}
               >
                 {TAB_META[tab].icon} {TAB_META[tab].label}
@@ -570,7 +589,7 @@ const ProjectDetail = ({ project, onBack }) => {
           <div className="tab-pane-container">
             
             {/* 📋 CONTEXTUAL SIDEBAR: Scene Inventory (Contextual to SCENARIO/STORY/TREATMENT) */}
-            {(activeTab === 'SCENARIO' || activeTab === 'STORY' || activeTab === 'TREATMENT') && (
+            {(activeTab === 'SCENARIO' || activeTab === 'TREATMENT') && (
               <div className="context-sidebar">
                 <div className="context-sidebar-header">
                   SCENE INVENTORY
@@ -621,10 +640,10 @@ const ProjectDetail = ({ project, onBack }) => {
                   <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '1px' }}>
                     [ SYSTEM_OUTPUT_STREAM :: {activeTab} ]
                   </div>
-                  <textarea 
+                  <textarea
                     ref={outputRef}
                     className={activeTab === 'SCENARIO' ? 'script-view' : 'logline-editor'}
-                    style={{ 
+                    style={{
                       flex: 1,
                       backgroundColor: activeTab === 'SCENARIO' ? 'white' : 'rgba(0,0,0,0.3)',
                       color: activeTab === 'SCENARIO' ? '#111' : 'var(--text-primary)',
@@ -632,6 +651,7 @@ const ProjectDetail = ({ project, onBack }) => {
                       border: '1px solid var(--border-subtle)',
                       borderRadius: '4px'
                     }}
+                    placeholder={`[ ${activeTab} ] 아래 IDEA BRIEF를 입력하고 GENERATE를 눌러 시작하세요.`}
                     value={pipelineData[activeTab.toLowerCase()]}
                     onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
                     disabled={isGenerating}

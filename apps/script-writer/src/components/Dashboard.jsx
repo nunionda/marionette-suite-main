@@ -4,34 +4,59 @@ import ProjectCreateModal from './ProjectCreateModal';
 import LoglineLab from './LoglineLab';
 import '../styles/Dashboard.css';
 
-const ProjectCard = ({ project, onEnter }) => (
-  <div className="project-card glass hover-glow">
-    <div className="project-card-header">
-      <div>
+const CATEGORY_META = {
+  'Feature Film':      { color: '#C3A05A', label: 'FEATURE FILM' },
+  'Short Film':        { color: '#06B6D4', label: 'SHORT FILM' },
+  'Netflix Original':  { color: '#E50914', label: 'DRAMA' },
+  'Commercial':        { color: '#F97316', label: 'COMMERCIAL' },
+  'YouTube':           { color: '#FF4444', label: 'YOUTUBE' },
+};
+
+const ProjectCard = ({ project, onEnter, onDelete }) => {
+  const meta = CATEGORY_META[project.category] || { color: '#8B5CF6', label: project.category };
+  return (
+    <div className="project-card glass hover-glow" style={{ '--cat-color': meta.color, borderLeft: `3px solid ${meta.color}` }}>
+      {/* Top strip: category badge + status + delete */}
+      <div className="card-top-strip">
+        <span className="card-cat-badge" style={{ background: `${meta.color}22`, color: meta.color, border: `1px solid ${meta.color}44` }}>
+          {meta.label}
+        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="card-status-badge">{project.status || 'ACTIVE'}</span>
+          <button
+            className="delete-card-btn"
+            onClick={() => { if (window.confirm(`Delete "${project.title}"?`)) onDelete(project.id); }}
+            title="Delete Project"
+          >✕</button>
+        </div>
+      </div>
+
+      {/* Title area — fixed 2-line clamp */}
+      <div className="card-title-area">
         <h3 className="project-title">{project.title}</h3>
         <span className="project-genre">{project.genre}</span>
       </div>
-      <div className="card-badge category">{project.category}</div>
-      <span className="badge production">{project.status || 'Active'}</span>
-    </div>
-    <p className="project-logline">{project.logline || 'Logline pending generation...'}</p>
-    <div className="card-footer">
-      <div className="progress-bar-container">
-        <div className="progress-bar-fill" style={{ width: `${project.progress || 0}%` }}></div>
+
+      {/* Logline — 3-line clamp */}
+      <p className="project-logline">{project.logline || 'Logline pending generation...'}</p>
+
+      {/* Footer */}
+      <div className="card-footer">
+        <div className="progress-bar-container">
+          <div className="progress-bar-fill" style={{ width: `${project.progress || 0}%`, background: meta.color }}></div>
+        </div>
+        <div className="card-meta-row">
+          <span style={{ color: meta.color }}>PROGRESS {project.progress || 0}%</span>
+          <span className="card-updated">{project.updated || 'Just now'}</span>
+        </div>
       </div>
-      <div className="meta" style={{ marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-        <span style={{color: 'var(--accent-secondary)'}}>PROGRESS: {project.progress || 0}%</span>
-        <span>{project.updated || 'Just now'}</span>
-      </div>
+
+      <button className="tactical-btn full-width" onClick={() => onEnter(project.id)}>
+        ENTER SCRIPT LAB
+      </button>
     </div>
-    <button 
-      className="tactical-btn full-width" 
-      onClick={() => onEnter(project.id)}
-    >
-      ENTER SCRIPT LAB
-    </button>
-  </div>
-);
+  );
+};
 
 const Dashboard = ({ onEnterLab }) => {
   const { projects, addProject, deleteProject } = useContext(ProjectContext);
@@ -44,6 +69,7 @@ const Dashboard = ({ onEnterLab }) => {
     if (cat === 'Short Film') return 'SHORT';
     if (cat === 'Netflix Original') return 'DRAMA';
     if (cat === 'Commercial') return 'AD';
+    if (cat === 'YouTube') return 'YOUTUBE';
     return 'OTHER';
   };
 
@@ -71,22 +97,6 @@ const Dashboard = ({ onEnterLab }) => {
       <section className="hero-section">
         <div className="hero-overlay"></div>
         <div className="hero-content glass-dark">
-          <div className="header-top-nav">
-            <div className="main-nav-tabs">
-              <button 
-                className={`nav-tab ${activeMainTab === 'PRODUCTIONS' ? 'active' : ''}`}
-                onClick={() => setActiveMainTab('PRODUCTIONS')}
-              >
-                PRODUCTIONS
-              </button>
-              <button 
-                className={`nav-tab ${activeMainTab === 'LOGLINE_LAB' ? 'active' : ''}`}
-                onClick={() => setActiveMainTab('LOGLINE_LAB')}
-              >
-                LOGLINE LAB
-              </button>
-            </div>
-          </div>
           <div className="brand gradient-text cinematic-title">AI CINEMA LAB</div>
           <h1 className="hero-headline">Engineer the Perfect Screenplay</h1>
           <p className="hero-subtext">
@@ -96,6 +106,20 @@ const Dashboard = ({ onEnterLab }) => {
           <button className="tactical-btn massive-btn glow-effect" onClick={() => setIsModalOpen(true)}>
             + INITIATE NEW SCENARIO
           </button>
+          <div className="main-nav-tabs hero-nav-tabs">
+            <button
+              className={`nav-tab ${activeMainTab === 'PRODUCTIONS' ? 'active' : ''}`}
+              onClick={() => setActiveMainTab('PRODUCTIONS')}
+            >
+              PRODUCTIONS
+            </button>
+            <button
+              className={`nav-tab ${activeMainTab === 'LOGLINE_LAB' ? 'active' : ''}`}
+              onClick={() => setActiveMainTab('LOGLINE_LAB')}
+            >
+              LOGLINE LAB
+            </button>
+          </div>
         </div>
       </section>
 
@@ -108,13 +132,13 @@ const Dashboard = ({ onEnterLab }) => {
             ACTIVE <span style={{ fontWeight: 800, color: 'var(--accent-primary)' }}>PRODUCTIONS</span>
           </h2>
           <div className="category-tabs">
-            {['ALL', 'FEATURE', 'SHORT', 'DRAMA', 'AD'].map(tab => (
-              <button 
+            {['ALL', 'FEATURE', 'SHORT', 'DRAMA', 'AD', 'YOUTUBE'].map(tab => (
+              <button
                 key={tab}
                 className={`category-tab ${filterTab === tab ? 'active' : ''}`}
                 onClick={() => setFilterTab(tab)}
               >
-                {tab === 'FEATURE' ? '장편' : tab === 'SHORT' ? '단편' : tab === 'DRAMA' ? '드라마' : tab === 'AD' ? '광고' : '전체'}
+                {tab === 'FEATURE' ? '장편' : tab === 'SHORT' ? '단편' : tab === 'DRAMA' ? '드라마' : tab === 'AD' ? '광고' : tab === 'YOUTUBE' ? '▶ 유튜브' : '전체'}
               </button>
             ))}
           </div>
@@ -127,16 +151,7 @@ const Dashboard = ({ onEnterLab }) => {
         ) : (
           <div className="bulletin-grid">
             {filteredProjects.map(p => (
-              <div key={p.id} style={{ position: 'relative' }}>
-                 <button 
-                    className="delete-card-btn"
-                    onClick={() => { if(window.confirm(`Delete the project: ${p.title}?`)) deleteProject(p.id) }}
-                    title="Delete Project"
-                  >
-                    ✕
-                  </button>
-                 <ProjectCard project={p} onEnter={onEnterLab} />
-              </div>
+              <ProjectCard key={p.id} project={p} onEnter={onEnterLab} onDelete={deleteProject} />
             ))}
           </div>
         )}

@@ -22,13 +22,19 @@ export function ProjectCard({ project }: Props) {
     >
       {/* Poster */}
       <div className="relative aspect-[2/3] bg-[var(--studio-bg-elevated)] overflow-hidden">
-        <Image
-          src={project.posterUrl}
-          alt={project.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
-        />
+        {project.posterUrl ? (
+          <Image
+            src={project.posterUrl}
+            alt={project.title}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 25vw, 20vw"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center text-[var(--studio-text-dim)] text-[32px] font-bold opacity-20">
+            {project.initials}
+          </div>
+        )}
         {/* Status badge overlay */}
         <div className="absolute top-2 left-2">
           <StatusBadge status={project.status === 'production' ? 'in_progress' : project.status === 'post' ? 'done' : 'pending'} />

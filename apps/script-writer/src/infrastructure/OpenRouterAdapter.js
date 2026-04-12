@@ -58,11 +58,11 @@ export class OpenRouterAdapter {
     }
   }
   
-  static async generateImage(prompt) {
+  static async generateImage(prompt, frameNumber, panelName, projectId, projectTitle) {
     const response = await fetch('http://127.0.0.1:3006/api/ai/generate-image', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt })
+      body: JSON.stringify({ prompt, frameNumber, panelName, projectId, projectTitle })
     });
 
     if (!response.ok) {

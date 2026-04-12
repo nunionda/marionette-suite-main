@@ -26,7 +26,7 @@ export default function SendToStudioButton({ scriptWriterProjectId, scriptData }
     try {
       const res = await fetch(`${STUDIO_API}/api/projects`);
       const data = await res.json();
-      setStudioProjects(data.projects || []);
+      setStudioProjects(Array.isArray(data) ? data : (data.projects || []));
       setSelectedId(localStorage.getItem(STORAGE_KEY) || '');
     } catch {
       setStudioProjects([]);

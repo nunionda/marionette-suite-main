@@ -28,6 +28,8 @@ const DramaProjectDetail = ({ project, onBack }) => {
   const [bingeHookIntensity, setBingeHookIntensity] = useState(8);
   const [creativeRole, setCreativeRole] = useState('DIRECTOR'); // DIRECTOR, WRITER, PRODUCER
   const [language, setLanguage] = useState('KO'); // KO, EN
+  const [ottPlatform, setOttPlatform] = useState('Netflix');
+  const [saveStatus, setSaveStatus] = useState('');
   
   const [isOptimizingBrief, setIsOptimizingBrief] = useState(false);
   const [briefingResult, setBriefingResult] = useState(null);
@@ -63,16 +65,27 @@ const DramaProjectDetail = ({ project, onBack }) => {
   };
 
   const { executeAgent, isGenerating } = useAgentEngine(apiKey, handleDataChange);
+  const handleBriefChange = (_field, value) => setBriefingResult(value);
+  const { executeAgent: executeBriefAgent } = useAgentEngine(apiKey, handleBriefChange);
 
   const saveToContext = () => {
     updateProject(project.id, { ...pipelineData, conceptBrief: seriesConcept });
-    alert("Series Data Saved!");
+    setSaveStatus('SAVED ✓');
+    setTimeout(() => setSaveStatus(''), 2000);
   };
 
-  const getRoleContext = () => `\n[Creative Role]: ${creativeRole}\n[Output Language]: ${language}\n`;
+  const OTT_PLATFORMS = {
+    Netflix:   { color: '#E50914' },
+    'Disney+': { color: '#113CCF' },
+    'Apple TV+': { color: '#555555' },
+    Wavve:     { color: '#0078FF' },
+    TVING:     { color: '#FF153C' },
+  };
+
+  const getRoleContext = () => `\n[Creative Role]: ${creativeRole}\n[Output Language]: ${language}\n[OTT Platform]: ${ottPlatform}\n`;
 
   const refineBriefWithRole = async () => {
-    if (!seriesConcept) return alert("Please enter a basic logline first.");
+    if (!seriesConcept) return;
     setIsOptimizingBrief(true);
     setBriefingResult(null);
     
@@ -84,11 +97,7 @@ const DramaProjectDetail = ({ project, onBack }) => {
     마지막에 반드시 ### [REFINED BRIEF] 태그 뒤에 수정된 최종 기획안을 포함하세요.`;
 
     try {
-      let fullResponse = "";
-      await executeAgent(prompt, (chunk) => {
-        fullResponse += chunk;
-        setBriefingResult(fullResponse);
-      }, 'bible', false, 'Synthesizing Series Vision...');
+      await executeBriefAgent(architectRule, prompt, 'brief', false, 'Synthesizing Series Vision...');
     } catch (error) {
       console.error("Briefing Error:", error);
     } finally {
@@ -146,18 +155,24 @@ const DramaProjectDetail = ({ project, onBack }) => {
   return (
     <div className="studio-root">
       <div className="project-detail drama-theme">
-      <header className="detail-header" style={{ marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div className="back-btn" onClick={onBack} style={{ fontSize: '0.8rem', letterSpacing: '1px', cursor: 'pointer', opacity: 0.7 }}>← BACK TO DASHBOARD</div>
-        <div style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '2.5rem', margin: '0', letterSpacing: '2px' }}>{project.title.toUpperCase()}</h1>
-          <span className="badge category-badge" style={{ background: '#E50914', color: 'white', letterSpacing: '1.2px', fontWeight: 700 }}>📺 NETFLIX ORIGINAL SERIES</span>
+      <header className="detail-header">
+        <div className="header-left">
+          <div className="back-btn" onClick={onBack}>← BACK</div>
+          <span className="header-format-label" style={{ color: OTT_PLATFORMS[ottPlatform]?.color || '#E50914' }}>{ottPlatform.toUpperCase()}</span>
         </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <SendToStudioButton
-            scriptWriterProjectId={project.id}
-            scriptData={pipelineData}
-          />
-          <button className="tactical-btn" onClick={saveToContext}>💾 SAVE SEASON</button>
+        <div className="header-title-block">
+          <h1 className="header-title">{project.title}</h1>
+        </div>
+        <div className="header-right">
+          <div className="header-divider" />
+          <div className="header-save-controls">
+            <SendToStudioButton
+              scriptWriterProjectId={project.id}
+              scriptData={pipelineData}
+            />
+            <button className="tactical-btn" onClick={saveToContext}>SAVE</button>
+            {saveStatus && <span className="save-toast">{saveStatus}</span>}
+          </div>
         </div>
       </header>
 
@@ -167,7 +182,7 @@ const DramaProjectDetail = ({ project, onBack }) => {
           <section className="sidebar-section">
             <h4 className="section-title">Narrative Vitals</h4>
             <div className="vitals-row">
-              <div className="badge category-badge" style={{ background: '#E50914', color: 'white', border: 'none', fontSize: 'var(--sidebar-badge-fs)' }}>Netflix Series</div>
+              <div className="badge category-badge" style={{ background: OTT_PLATFORMS[ottPlatform]?.color || '#E50914', color: 'white', border: 'none', fontSize: 'var(--sidebar-badge-fs)' }}>{ottPlatform} Series</div>
               <div className="badge genre-badge" style={{ fontSize: 'var(--sidebar-badge-fs)' }}>{project.genre}</div>
             </div>
           </section>
@@ -208,18 +223,34 @@ const DramaProjectDetail = ({ project, onBack }) => {
             </div>
 
             <div className="control-group" style={{ marginBottom: '15px' }}>
-              <label className="input-label">EPISODE SELECTOR (1-10)</label>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '4px' }}>
-                {[...Array(10)].map((_, i) => (
-                  <button 
-                    key={i+1}
-                    onClick={() => setSelectedEpisode(i+1)}
-                    className={`btn-secondary ${selectedEpisode === i+1 ? 'active' : ''}`}
-                    style={{ padding: '6px 0', fontSize: 'var(--sidebar-btn-fs)' }}
+              <label className="input-label">OTT PLATFORM</label>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+                {Object.entries(OTT_PLATFORMS).map(([key, val]) => (
+                  <button
+                    key={key}
+                    onClick={() => setOttPlatform(key)}
+                    className={`btn-secondary ${ottPlatform === key ? 'active' : ''}`}
+                    style={{ flex: 1, minWidth: '45%', fontSize: 'var(--sidebar-btn-fs)', borderColor: ottPlatform === key ? val.color : undefined }}
                   >
-                    E{i+1}
+                    {key}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            <div className="control-group" style={{ marginBottom: '15px' }}>
+              <label className="input-label">EPISODE</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button onClick={() => setSelectedEpisode(e => Math.max(1, e - 1))} className="btn-secondary" style={{ padding: '4px 8px' }}>◀</button>
+                <select
+                  value={selectedEpisode}
+                  onChange={(e) => setSelectedEpisode(parseInt(e.target.value))}
+                  className="logline-editor"
+                  style={{ flex: 1, padding: '4px', minHeight: 'auto', fontSize: 'var(--sidebar-btn-fs)', textAlign: 'center', cursor: 'pointer' }}
+                >
+                  {[...Array(10)].map((_, i) => <option key={i+1} value={i+1}>EP. {i+1}</option>)}
+                </select>
+                <button onClick={() => setSelectedEpisode(e => Math.min(10, e + 1))} className="btn-secondary" style={{ padding: '4px 8px' }}>▶</button>
               </div>
             </div>
 
@@ -290,12 +321,12 @@ const DramaProjectDetail = ({ project, onBack }) => {
         </aside>
 
         {/* 🎬 STAGE CONTROLLER (Tabbed Content) */}
-        <main className="studio-main" style={{ flex: 1, minHeight: '800px', display: 'flex', flexDirection: 'column' }}>
+        <main className="studio-main">
           <div className="tabs" style={{ marginBottom: '20px' }}>
             {Object.keys(TAB_META).map(tab => (
               <div 
                 key={tab} 
-                className={`tab ${activeTab === tab ? 'active' : ''}`}
+                className={`tab ${activeTab === tab ? 'active' : ''} ${pipelineData[tab.toLowerCase()]?.length > 50 ? 'has-content' : ''}`}
                 onClick={() => setActiveTab(tab)}
               >
                 {TAB_META[tab].icon} {TAB_META[tab].label}
@@ -303,11 +334,11 @@ const DramaProjectDetail = ({ project, onBack }) => {
             ))}
           </div>
 
-          <div style={{ flexGrow: 1, position: 'relative' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <div className="output-frame">
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', flexShrink: 0 }}>
               <span style={{ color: '#E50914', fontSize: '0.9rem', fontWeight: 'bold' }}>{TAB_META[activeTab].engine} :: EPISODE {selectedEpisode}</span>
-              <button 
-                className="tactical-btn" 
+              <button
+                className="tactical-btn"
                 onClick={() => generateContent(activeTab)}
                 disabled={isGenerating}
                 style={{ background: '#E50914', color: 'white', border: 'none' }}
@@ -315,21 +346,16 @@ const DramaProjectDetail = ({ project, onBack }) => {
                 {isGenerating ? 'Orchestrating...' : `⚡ RUN ${TAB_META[activeTab].label}`}
               </button>
             </div>
-            
+
             {activeTab === 'VISION' ? (
               <AnalyticsDashboard data={pipelineData.analysisData} />
             ) : (
-              <textarea 
+              <textarea
                 ref={outputRef}
-                className="drama-editor"
+                className={activeTab === 'SCRIPT' ? 'script-view' : 'logline-editor'}
                 value={pipelineData[activeTab.toLowerCase()]}
                 onChange={(e) => handleDataChange(activeTab.toLowerCase(), e.target.value)}
-                style={{ 
-                  width: '100%', height: 'calc(100% - 40px)', background: 'white', 
-                  color: '#111', padding: '60px 80px', border: '1px solid var(--surface-border)',
-                  lineHeight: '1.8', fontSize: '1.1rem', resize: 'none',
-                  fontFamily: activeTab === 'SCRIPT' ? "'Courier Prime', monospace" : 'inherit'
-                }}
+                style={{ lineHeight: '1.8', fontSize: '1rem', boxSizing: 'border-box' }}
               />
             )}
           </div>

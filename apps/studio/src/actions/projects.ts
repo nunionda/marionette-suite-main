@@ -69,7 +69,13 @@ export async function startPipeline(projectId: string, steps: string[]) {
     });
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || "Failed to start pipeline");
+      const detail = errorData.detail;
+      const msg = typeof detail === 'string'
+        ? detail
+        : Array.isArray(detail)
+          ? detail.map((d: { msg?: string }) => d.msg ?? JSON.stringify(d)).join(', ')
+          : 'Failed to start pipeline';
+      throw new Error(msg);
     }
     return await response.json();
   } catch (error) {

@@ -3,6 +3,8 @@ export const VISUAL_STYLE_GUIDES = {
   "ProductDemo": "Bright, punchy colors, energetic dynamic composition, clean commercial lighting, crisp foreground details, macro lens",
   "Cinematic": "Epic cinematic masterpiece, sweeping landscapes, heavy color grading, evocative lighting, 35mm film look",
   "Social": "Authentic, UGC style, iPhone 14 Pro camera, natural daylight, candid and approachable lifestyle aesthetic",
+  "Performance": "Clean product-focused, before/after split screen, bold typography overlay, bright studio lighting, direct comparison",
+  "Testimonial": "Authentic documentary style, shallow depth of field, natural window light, warm tones, handheld feel, real people",
   "Manifesto": "Epic cinematic masterpiece, sweeping landscapes, emotionally heavy color grading, evocative lighting",
   "Default": "Professional Agency Storyboard, Cinematic masterpiece, gorgeous lighting, premium editorial style"
 };

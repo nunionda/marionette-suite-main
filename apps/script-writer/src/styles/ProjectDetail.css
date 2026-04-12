@@ -19,15 +19,15 @@
 }
 
 .project-detail {
-  padding: 20px;
-  max-width: 1600px;
-  min-height: 100vh;
+  padding: 0;
+  width: 100%;
+  height: 100vh;
   margin: 0 auto;
   background-color: transparent;
   color: var(--text-primary);
   display: flex;
   flex-direction: column;
-  overflow: visible;
+  overflow: hidden;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   box-sizing: border-box;
@@ -55,16 +55,122 @@
 }
 
 .detail-header {
-  height: 60px;
+  min-height: 60px;
+  height: auto;
   border-bottom: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
+  padding: 12px 24px;
   background: var(--bg-secondary);
   position: relative;
   z-index: 1000;
   flex-shrink: 0;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.sidebar-section {
+  margin-bottom: 20px;
+}
+
+/* ── Unified Header Layout ───────────────────────── */
+.header-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.header-format-label {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding-left: 2px;
+}
+
+.header-title-block {
+  flex: 1;
+  text-align: center;
+  min-width: 0;
+  padding: 0 16px;
+}
+
+.header-title {
+  font-size: clamp(1rem, 2.2vw, 1.6rem);
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-primary);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.header-mode-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mode-btn {
+  padding: 5px 10px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.mode-btn:hover,
+.mode-btn.active {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.key-input-inline {
+  width: 130px;
+  padding: 5px 8px;
+  font-size: 0.7rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 4px;
+  color: var(--text-muted);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.key-input-inline:focus {
+  border-color: var(--accent-primary);
+}
+
+.header-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.header-save-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .header-meta {
@@ -129,6 +235,29 @@
   overflow-y: auto;
   position: relative;
   background: radial-gradient(circle at top right, rgba(139, 92, 246, 0.03), transparent 40%);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Output frame — fills remaining height in studio-main after tabs/controls */
+.output-frame {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.output-frame textarea {
+  flex: 1;
+  min-height: 250px;
+  resize: vertical;
+}
+
+/* Film stage-content needs flex:1 so tab-pane-container can stretch */
+.stage-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .tabs {
@@ -798,15 +927,102 @@
 .storyboard-visual-placeholder::after {
   content: 'SCENE PREVIEW';
   font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.08);
   letter-spacing: 2px;
   position: absolute;
   z-index: 0;
+  pointer-events: none;
+}
+
+/* Generate 버튼 — 프레임 중앙 CTA */
+.gen-visual-btn {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 28px;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1.5px solid var(--accent-primary);
+  border-radius: 8px;
+  color: var(--accent-primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  cursor: pointer;
+  transition: background 0.18s, box-shadow 0.18s, transform 0.12s;
+  text-transform: uppercase;
+  box-shadow: 0 0 18px rgba(0, 255, 136, 0.12);
+  backdrop-filter: blur(4px);
+}
+
+.gen-visual-btn::before {
+  content: '🎨';
+  font-size: 1.6rem;
+}
+
+.gen-visual-btn:hover {
+  background: rgba(0, 255, 136, 0.12);
+  box-shadow: 0 0 28px rgba(0, 255, 136, 0.3);
+  transform: scale(1.04);
+}
+
+.gen-visual-btn:active {
+  transform: scale(0.97);
+}
+
+/* Regen 버튼 — 이미지 위 항상 보이는 오버레이 */
+.regen-overlay-btn {
+  position: absolute !important;
+  bottom: 8px !important;
+  right: 8px !important;
+  top: auto !important;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.82) !important;
+  border: 1px solid rgba(0, 255, 136, 0.4) !important;
+  border-radius: 6px !important;
+  color: var(--accent-primary) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  padding: 5px 10px !important;
+  cursor: pointer !important;
+  opacity: 0.55 !important;
+  transition: opacity 0.2s, box-shadow 0.2s !important;
+  z-index: 10 !important;
+  backdrop-filter: blur(4px);
+}
+
+.img-regen-wrapper:hover .regen-overlay-btn {
+  opacity: 1 !important;
+  box-shadow: 0 0 12px rgba(0, 255, 136, 0.3) !important;
 }
 
 .storyboard-visual-placeholder img {
   position: relative;
   z-index: 1;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.img-regen-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+}
+
+.img-regen-wrapper:hover .regen-overlay-btn {
+  opacity: 1 !important;
 }
 
 .storyboard-frame-number {
@@ -982,4 +1198,32 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ── Tab content indicator dot ─────────────────────────────── */
+.tab.has-content::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: #10B981;
+  border-radius: 50%;
+  margin-left: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* ── Save toast feedback ────────────────────────────────────── */
+.save-toast {
+  color: #10B981;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  transition: opacity 0.3s;
+}
+
+textarea::placeholder {
+  color: rgba(255,255,255,0.2);
+  font-style: italic;
+  letter-spacing: 0.5px;
 }

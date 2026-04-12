@@ -1,5 +1,6 @@
 /* ─── Project ─── */
 export type ProjectStatus = 'development' | 'production' | 'post';
+export type ProjectCategory = 'film' | 'drama_series' | 'commercial' | 'youtube_short' | 'custom';
 
 export interface Project {
   id: string;
@@ -7,6 +8,7 @@ export interface Project {
   title: string;
   titleKo?: string;
   status: ProjectStatus;
+  category?: ProjectCategory;
   posterUrl: string;
   totalScenes: number;
   completedScenes: number;

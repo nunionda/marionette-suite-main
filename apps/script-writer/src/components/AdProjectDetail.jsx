@@ -1,5 +1,6 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import { ProjectContext } from '../context/ProjectContext';
+import SendToStudioButton from './SendToStudioButton';
 import { parseStoryboardFrames } from '../utils/adUtils';
 import { OpenRouterAdapter } from '../infrastructure/OpenRouterAdapter';
 import { getStyleGuideForGenre } from '../config/visualStyles';
@@ -25,20 +26,90 @@ import ScriptTableView from './ScriptTableView';
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3006';
 
 const AD_GENRE_HINTS = {
-  'BrandFilm': { icon: '✨', name: 'Brand Film', cues: ['Cinematic', 'Emotional', 'Poetic', 'Manifesto'] },
-  'ProductDemo': { icon: '📦', name: 'Product Demo', cues: ['Hard Sell', 'USP', 'X-Ray View', 'Tech Specs'] },
-  'Cinematic': { icon: '🎥', name: 'Cinematic Narrative', cues: ['Storytelling', 'Subtle Branding', 'High Mise-en-scène', 'Character Driven'] },
-  'Social': { icon: '🤳', name: 'Social / Digital', cues: ['UGC Style', 'Fast Pace', 'Vertical-ready', 'Hook-first'] }
+  'BrandFilm':    { icon: '✨', name: 'Brand Film',          cues: ['Cinematic', 'Emotional', 'Manifesto', 'Brand DNA'],       copyTone: '시적·철학적 VO',  visualRef: 'Apple / Nike / Patagonia' },
+  'ProductDemo':  { icon: '📦', name: 'Product Demo',        cues: ['Hard Sell', 'USP', 'Feature Reveal', 'Before/After'],    copyTone: '직접·기능 중심',  visualRef: 'Dyson / Samsung Tech' },
+  'Cinematic':    { icon: '🎥', name: 'Cinematic Narrative', cues: ['Character Arc', 'Subtle Branding', 'High Mise-en-scène', 'Emotion First'], copyTone: '내러티브 VO',    visualRef: 'Johnnie Walker / Google' },
+  'Social':       { icon: '🤳', name: 'Social / Digital',    cues: ['UGC Style', 'Hook-first', 'Pattern Interrupt', 'Native Feel'], copyTone: '구어체·직접 대화', visualRef: 'TikTok Native / Instagram Reel' },
+  'Performance':  { icon: '🎯', name: 'Performance / DR',    cues: ['Problem→Solution', 'Urgency', 'Social Proof', 'Hard CTA'], copyTone: '설득·행동 유도',  visualRef: 'Direct Response / Infomercial' },
+  'Testimonial':  { icon: '🗣️', name: 'Testimonial / UGC',  cues: ['Real People', 'Authentic', 'Before/After', 'Word-of-Mouth'], copyTone: '진정성·구어',    visualRef: 'Dove Real Beauty / Airbnb' },
 };
 
-const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFrames, viewMode = 'prompt' }) => {
+// 포맷 프리셋 (지속시간 기반 AIDA 타임라인)
+const AD_FORMAT_PRESETS = {
+  '15s': {
+    icon: '⚡',
+    label: '15s Sprint',
+    desc: 'TV CM · Pre-roll 비스킵',
+    structure: `[0:00-0:03] HOOK — 시각적 충격 / 제품 즉시 노출\n[0:03-0:10] USP — 핵심 혜택 1가지만\n[0:10-0:15] CTA — 브랜드 + 슬로건`,
+    aida: 'A→D→A (압축형)',
+    cuts: '7-10 cuts',
+    copyRule: '헤드라인 1줄 + 슬로건만. VO 없거나 최소화.',
+  },
+  '30s': {
+    icon: '🎬',
+    label: '30s Classic',
+    desc: '표준 TV · YouTube',
+    structure: `[0:00-0:03] HOOK — 스크롤 스탑 / 감각적 오프닝\n[0:03-0:10] PROBLEM — 공감 포인트 / 페인 노출\n[0:10-0:22] SOLUTION — 제품/브랜드 변화 연출\n[0:22-0:27] PROOF — 결과 / 비포애프터\n[0:27-0:30] CTA — 슬로건 + 로고 Lock-up`,
+    aida: 'A→I→D→A (정석)',
+    cuts: '15-20 cuts',
+    copyRule: 'VO 또는 자막 카피 3-5줄. 감성과 기능 균형.',
+  },
+  '60s': {
+    icon: '📽️',
+    label: '60s Story',
+    desc: '온라인 전용 · OTT',
+    structure: `[0:00-0:05] HOOK — 강렬한 시작 / 질문 던지기\n[0:05-0:20] SETUP — 캐릭터/상황 설정\n[0:20-0:40] CONFLICT — 갈등/문제 심화\n[0:40-0:52] RESOLUTION — 브랜드가 해결\n[0:52-0:58] EMOTIONAL PEAK — 감정 클라이맥스\n[0:58-1:00] CTA — 브랜드 메시지`,
+    aida: 'A→I→D→A (스토리 확장)',
+    cuts: '30-40 cuts',
+    copyRule: '내러티브 VO 가능. 캐릭터 대사 허용. 감성 우선.',
+  },
+  'BrandFilm': {
+    icon: '🏆',
+    label: 'Brand Film 2-3min',
+    desc: '유튜브 롱폼 · 시네마',
+    structure: `[0:00-0:15] MANIFESTO — 브랜드 세계관 선언\n[0:15-1:00] ACT 1 — 현실/문제 정의 (날것의 현실)\n[1:00-2:00] ACT 2 — 브랜드 철학 전개 (Why We Exist)\n[2:00-2:40] ACT 3 — 변화/희망 (Transformation)\n[2:40-3:00] RESOLUTION — 브랜드 약속 + 슬로건`,
+    aida: '매니페스토 서사 (영화적 구조)',
+    cuts: '60-80 cuts',
+    copyRule: '철학적 VO 필수. 시적 언어. 제품 직접 언급 최소화.',
+  },
+};
+
+// 플랫폼 프리셋
+const AD_PLATFORM_PRESETS = {
+  'TV':        { icon: '📺', ratio: '16:9',  hook: '3s', skipRule: '없음 (완주 필수)', note: '최고 화질·사운드 보장. 감성 최대치.' },
+  'YouTube':   { icon: '▶️', ratio: '16:9',  hook: '5s', skipRule: '5s 후 스킵 가능', note: '5초 안에 브랜드 노출 필수. 썸네일 영향 없음.' },
+  'Instagram': { icon: '📸', ratio: '9:16',  hook: '1s', skipRule: '즉시 스킵',        note: '세로형 필수. 무음 재생 대비 자막 필수.' },
+  'TikTok':    { icon: '🎵', ratio: '9:16',  hook: '1s', skipRule: '즉시 스킵',        note: 'Native 느낌 필수. 트렌딩 오디오. UGC 질감.' },
+  'Cinema':    { icon: '🎞️', ratio: '2.39:1', hook: '없음', skipRule: '없음 (캡티브)',  note: '최대 프레스티지. 사운드 설계 극대화. 브랜드 임팩트.' },
+  'OTT':       { icon: '📡', ratio: '16:9',  hook: '3s', skipRule: '플랫폼별 상이',   note: 'TV급 품질 + 디지털 정밀 타겟. 중간 광고 맥락 고려.' },
+};
+
+const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFrames, viewMode = 'prompt', onRunTreatment, editedPrompts = {}, onPromptEdit }) => {
   const frames = parseStoryboardFrames(raw);
 
   if (frames.length === 0) {
     return (
       <div style={{ padding: '40px', color: 'var(--text-dim)', textAlign: 'center', background: 'rgba(0,0,0,0.2)', borderRadius: '8px' }}>
-        <p style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Director's Note is empty or not yet structured.</p>
-        <p style={{ fontSize: '0.9rem' }}>Please run the [TREATMENT] engine to generate the frame-by-frame structure first.</p>
+        <p style={{ fontSize: '1.2rem', marginBottom: '10px' }}>Art Direction is empty or not yet structured.</p>
+        <p style={{ fontSize: '0.9rem', marginBottom: '24px' }}>프레임별 구조를 생성하려면 ART DIRECTION 엔진을 실행해야 합니다.</p>
+        {onRunTreatment && (
+          <button
+            onClick={onRunTreatment}
+            style={{
+              padding: '12px 28px',
+              background: 'var(--accent-primary)',
+              color: 'black',
+              border: 'none',
+              borderRadius: '6px',
+              fontWeight: 'bold',
+              fontSize: '0.95rem',
+              cursor: 'pointer',
+              letterSpacing: '0.5px',
+            }}
+          >
+            📜 TREATMENT 엔진 실행
+          </button>
+        )}
       </div>
     );
   }
@@ -69,30 +140,45 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
           const handleCopy = () => {
              if (frame.sketchPrompt) {
                navigator.clipboard.writeText(frame.sketchPrompt);
-               alert(`Prompt for Frame ${frame.number} copied!`);
              }
           };
 
           return (
             <div key={index} className={`storyboard-card ${viewMode}`}>
               {viewMode !== 'prompt-only' && (
-                <div className="storyboard-visual-placeholder">
-                  {imageUrls[frame.number] ? (
-                    <img src={imageUrls[frame.number]} alt={`Frame ${frame.number}`} className="storyboard-image" />
-                  ) : loadingFrames[frame.number] ? (
+                <div className="storyboard-visual-placeholder" style={{ position: 'relative' }}>
+                  {loadingFrames[frame.number] ? (
                     <div className="gen-loading">
                       <div className="spinner"></div>
                       <span>Rendering...</span>
                     </div>
+                  ) : imageUrls[frame.number] ? (
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }} className="img-regen-wrapper">
+                      <img src={imageUrls[frame.number]} alt={`Frame ${frame.number}`} className="storyboard-image" />
+                      <button
+                        className="regen-overlay-btn"
+                        onClick={() => onGenerate(frame.number, frame)}
+                        title="Re-generate"
+                        style={{
+                          position: 'absolute', top: '6px', right: '6px',
+                          background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.3)',
+                          borderRadius: '4px', color: '#fff', fontSize: '0.7rem',
+                          padding: '3px 7px', cursor: 'pointer', opacity: 0,
+                          transition: 'opacity 0.2s', zIndex: 10,
+                        }}
+                      >↻ 재생성</button>
+                    </div>
                   ) : (
-                    <button 
+                    <button
                       className="gen-visual-btn"
                       onClick={() => onGenerate(frame.number, frame.sketchPrompt)}
                     >
                       🎨 Generate
                     </button>
                   )}
-                  <span className="storyboard-frame-number">#{frame.number}</span>
+                  <span className="storyboard-frame-number">
+                    #{frame.number}{frame.panelName ? ` · ${frame.panelName}` : ''}
+                  </span>
                 </div>
               )}
               
@@ -100,7 +186,14 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
                 {(viewMode === 'prompt' || viewMode === 'prompt-only') ? (
                   <>
                     <div className="card-header-row">
-                      <span className="frame-tag">FRAME #{frame.number}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        <span className="frame-tag">FRAME #{frame.number}</span>
+                        {frame.panelName && (
+                          <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '1.5px', color: 'var(--accent-primary)', textTransform: 'uppercase', opacity: 0.9 }}>
+                            {frame.panelName}
+                          </span>
+                        )}
+                      </div>
                       <div className="meta-row" style={{ display: 'flex', gap: '12px' }}>
                         <div>
                           <span className="storyboard-label" style={{ fontSize: '0.6rem' }}>Lighting</span>
@@ -117,10 +210,19 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
                     <span className="storyboard-label">Cinematic Logic</span>
                     <p className="storyboard-text small" style={{ marginBottom: '15px', color: 'var(--text-primary)' }}>{frame.visual}</p>
                     
-                    <span className="storyboard-label">Architected Prompt</span>
-                    <div className="prompt-block">
-                      {frame.sketchPrompt || 'Processing prompt...'}
-                    </div>
+                    <span className="storyboard-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      Architected Prompt
+                      {editedPrompts[frame.number] !== undefined && editedPrompts[frame.number] !== frame.sketchPrompt && (
+                        <span style={{ fontSize: '0.6rem', color: 'var(--accent-primary)', fontWeight: 700, letterSpacing: '0.5px' }}>✏ EDITED</span>
+                      )}
+                    </span>
+                    <textarea
+                      className="prompt-block"
+                      value={editedPrompts[frame.number] !== undefined ? editedPrompts[frame.number] : (frame.sketchPrompt || '')}
+                      onChange={e => onPromptEdit && onPromptEdit(frame.number, e.target.value)}
+                      placeholder="Enter image generation prompt..."
+                      style={{ resize: 'vertical', minHeight: '80px', width: '100%', boxSizing: 'border-box', background: 'transparent', color: 'var(--accent-secondary)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '4px', fontFamily: 'inherit', fontSize: '0.82rem', lineHeight: '1.6', cursor: 'text' }}
+                    />
                   </>
                 ) : (
                   <>
@@ -141,15 +243,18 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
 const AdProjectDetail = ({ project, onBack }) => {
   const { updateProject } = useContext(ProjectContext);
   const [activeTab, setActiveTab] = useState(() => {
-    return localStorage.getItem(`activeTab_${project.id}`) || 'CONCEPT';
+    const stored = localStorage.getItem(`activeTab_${project.id}`);
+    const validTabs = ['CONCEPT', 'ARCHITECTURE', 'TREATMENT', 'SCENARIO', 'VISUALS', 'REVIEW', 'VISION'];
+    return (stored && validTabs.includes(stored)) ? stored : 'CONCEPT';
   });
   const [zenMode, setZenMode] = useState(false);
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openRouterApiKey') || '');
   
-  const [adDuration, setAdDuration] = useState(project.adDuration || '30s');
-  const [adType, setAdType] = useState(project.genre || 'Brand Film');
-  const [creativeRole, setCreativeRole] = useState('CD'); // CD, Copywriter, Art Director
-  const [language, setLanguage] = useState('KO'); // KO, EN
+  const [adFormat, setAdFormat] = useState(project.adFormat || project.adDuration || '30s');
+  const [adPlatform, setAdPlatform] = useState(project.adPlatform || 'TV');
+  const [adType, setAdType] = useState(project.genre || 'BrandFilm');
+  const [creativeRole, setCreativeRole] = useState('CD');
+  const [language, setLanguage] = useState('KO');
   
   const [pipelineData, setPipelineData] = useState({
     concept: project.concept || '',
@@ -157,8 +262,8 @@ const AdProjectDetail = ({ project, onBack }) => {
     treatment: project.treatment || '',
     scenario: project.scenario || '',
     review: project.review || '',
-    analysisData: project.analysisData || null,
-    visuals_metadata: project.visuals_metadata || project.storyboardImages || project.storyboard_images || {}
+    analysisData: (() => { const v = project.analysisData; if (!v) return null; if (typeof v === 'string') { try { return JSON.parse(v); } catch { return null; } } return v; })(),
+    visuals_metadata: (() => { const v = project.visuals_metadata || project.storyboardImages || project.storyboard_images; if (!v) return {}; if (typeof v === 'string') { try { return JSON.parse(v); } catch { return {}; } } return v; })()
   });
 
   const [conceptBrief, setConceptBrief] = useState(project.conceptBrief || '');
@@ -170,7 +275,22 @@ const AdProjectDetail = ({ project, onBack }) => {
   const [proposedDraft, setProposedDraft] = useState(null);
   const [isDrafting, setIsDrafting] = useState(false);
 
+  const [editedPrompts, setEditedPrompts] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(`editedPrompts_${project.id}`) || '{}'); } catch { return {}; }
+  });
+
+  const handlePromptEdit = (frameNumber, value) => {
+    setEditedPrompts(prev => {
+      const next = { ...prev, [frameNumber]: value };
+      localStorage.setItem(`editedPrompts_${project.id}`, JSON.stringify(next));
+      return next;
+    });
+  };
+
   const [loadingFrames, setLoadingFrames] = useState({});
+  const [saveStatus, setSaveStatus] = useState('');
+  const [visualBoardMode, setVisualBoardMode] = useState('prompt-only');
+  const [sidebarOpen, setSidebarOpen] = useState({ type: true, format: false, platform: false });
 
   const outputRef = useRef(null);
   const baseTextRef = useRef('');
@@ -182,8 +302,8 @@ const AdProjectDetail = ({ project, onBack }) => {
       treatment: project.treatment || '',
       scenario: project.scenario || '',
       review: project.review || '',
-      analysisData: project.analysisData || project.analysis_data || null,
-      visuals_metadata: project.visuals_metadata || project.storyboardImages || project.storyboard_images || {}
+      analysisData: (() => { const v = project.analysisData || project.analysis_data; if (!v) return null; if (typeof v === 'string') { try { return JSON.parse(v); } catch { return null; } } return v; })(),
+      visuals_metadata: (() => { const v = project.visuals_metadata || project.storyboardImages || project.storyboard_images; if (!v) return {}; if (typeof v === 'string') { try { return JSON.parse(v); } catch { return {}; } } return v; })()
     });
   }, [project]);
 
@@ -202,33 +322,39 @@ const AdProjectDetail = ({ project, onBack }) => {
     setProposedDraft(value);
   };
 
-  const { executeAgent, isGenerating } = useAgentEngine(apiKey, handleDataChange);
-  const { executeAgent: executeDraftAgent, isGenerating: isDraftGenerating } = useAgentEngine(apiKey, handleDraftChange);
+  const handleAgentError = (msg) => { setSaveStatus(`⚠ ${msg}`); setTimeout(() => setSaveStatus(''), 4000); };
+  const { executeAgent, isGenerating } = useAgentEngine(apiKey, handleDataChange, handleAgentError);
+  const { executeAgent: executeDraftAgent, isGenerating: isDraftGenerating } = useAgentEngine(apiKey, handleDraftChange, handleAgentError);
+  const handleBriefChange = (_field, value) => setBriefingResult(value);
+  const { executeAgent: executeBriefAgent } = useAgentEngine(apiKey, handleBriefChange, handleAgentError);
 
   const saveToContext = () => {
-    updateProject(project.id, { 
-      ...pipelineData, 
-      adDuration, 
-      genre: adType, 
-      conceptBrief, 
-      conceptDirection 
+    updateProject(project.id, {
+      ...pipelineData,
+      storyboardImages: pipelineData.visuals_metadata,
+      adFormat,
+      adPlatform,
+      adDuration: adFormat,
+      genre: adType,
+      conceptBrief,
+      conceptDirection
     });
-    alert("Campaign Data & Storyboard Saved!");
+    setSaveStatus('SAVED ✓');
+    setTimeout(() => setSaveStatus(''), 2000);
   };
 
   const TAB_META = {
-    CONCEPT: { label: 'BRIEF', engine: '📝 캠페인 기획안 (Campaign Brief)', icon: '📋' },
-    ARCHITECTURE: { label: 'COPY', engine: '✍️ 카피 시안 (Ideation / Copy)', icon: '✍️' },
-    TREATMENT: { label: "DIRECTOR'S NOTE", engine: "📜 연출 의도 (Creative Direction / Note)", icon: '📜' },
+    CONCEPT: { label: 'BRIEF', engine: 'Creative Director · Campaign Brief & Strategy', icon: '📋' },
+    ARCHITECTURE: { label: 'COPY', engine: 'Copywriter · Copy Ideation & Messaging', icon: '✍️' },
+    TREATMENT: { label: 'ART DIRECTION', engine: 'Art Director · Visual Treatment & Direction', icon: '📜' },
     SCENARIO: { label: 'A/V SCRIPT', engine: '📽️ 최종 합본 (A/V Production Script)', icon: '📽️' },
-    VISUALS: { label: 'IMAGE PROMPT', engine: '🎨 비주얼 디렉터 (Visual Director Workspace)', icon: '🎨' },
-    STORYBOARD: { label: 'STORYBOARD', engine: '🎞️ 시네마틱 보드 (Final Storyboard)', icon: '🎞️' },
+    VISUALS: { label: 'VISUAL BOARD', engine: '🎨 비주얼 보드 (Image Prompts + Storyboard)', icon: '🎨' },
     REVIEW: { label: 'AUDIT', engine: '🔍 브랜드 검증 (Brand & Impact Audit)', icon: '🔍' },
     VISION: { label: 'ANALYTICS', engine: '📊 데이터 분석 (AI Impact Matrix)', icon: '📊' }
   };
 
   const refineBriefWithRole = async () => {
-    if (!conceptBrief) return alert("Please enter a basic brief first.");
+    if (!conceptBrief) { setSaveStatus('⚠ Enter brief first'); setTimeout(() => setSaveStatus(''), 2000); return; }
     setIsOptimizingBrief(true);
     setBriefingResult(null); // Reset previous result
     
@@ -240,14 +366,10 @@ const AdProjectDetail = ({ project, onBack }) => {
 [Note]: As CD, your task is to SYNTHESIZE these inputs into the final Brief/Strategy.
 ` : '';
 
-    const prompt = getRefinementPrompt(conceptBrief, creativeRole, language, contextInfo);
+    const prompt = getRefinementPrompt(conceptBrief, creativeRole, language, contextInfo, { duration: adFormat, platform: adPlatform, adType });
 
     try {
-      let fullResponse = "";
-      await executeAgent(prompt, (chunk) => {
-        fullResponse += chunk;
-        setBriefingResult(fullResponse);
-      });
+      await executeBriefAgent(adRule, prompt, 'brief', false, 'Refining Brief...');
     } catch (error) {
       console.error("Briefing Error:", error);
     } finally {
@@ -267,14 +389,28 @@ const AdProjectDetail = ({ project, onBack }) => {
     setBriefingResult(null);
   };
 
-  const handleGenerateSketch = async (frameNumber, rawPrompt) => {
-    if (!rawPrompt) return alert("No sketch prompt available for this frame. Regenerate Storyboard.");
-    
+  const handleGenerateSketch = async (frameNumber, frameOrPrompt) => {
+    // Accept either a full frame object or a raw string (backward compat)
+    const frame = typeof frameOrPrompt === 'object' ? frameOrPrompt : { sketchPrompt: frameOrPrompt };
+    // Use user-edited prompt if available, otherwise fall back to parsed value
+    const editedPrompt = editedPrompts[frameNumber];
+    const effectiveFrame = editedPrompt ? { ...frame, sketchPrompt: editedPrompt } : frame;
+    const rawPrompt = effectiveFrame.sketchPrompt || effectiveFrame.visual || '';
+    if (!rawPrompt) { setSaveStatus('⚠ No prompt — regenerate Storyboard'); setTimeout(() => setSaveStatus(''), 2500); return; }
+
     setLoadingFrames(prev => ({ ...prev, [frameNumber]: true }));
     try {
-      // Dynamic Prompt Injection (CD Orchestrator)
+      // Build rich structured context from all frame fields
       const styleGuide = getStyleGuideForGenre(adType);
-      const enrichedPrompt = `[Campaign Tone]: ${conceptDirection}\n[Visual Style Guide]: ${styleGuide}\n[Scene Description]: ${rawPrompt}`;
+      const frameContext = [
+        effectiveFrame.panelName   && `[Panel Name]: ${effectiveFrame.panelName}`,
+        effectiveFrame.visual      && `[Visual]: ${effectiveFrame.visual}`,
+        effectiveFrame.lighting    && `[Lighting]: ${effectiveFrame.lighting}`,
+        effectiveFrame.camera      && `[Camera]: ${effectiveFrame.camera}`,
+        effectiveFrame.mood        && `[Mood]: ${effectiveFrame.mood}`,
+        effectiveFrame.sketchPrompt && effectiveFrame.sketchPrompt !== effectiveFrame.visual && `[Director Note]: ${effectiveFrame.sketchPrompt}`,
+      ].filter(Boolean).join('\n');
+      const enrichedPrompt = `[Campaign Tone]: ${conceptDirection}\n[Visual Style Guide]: ${styleGuide}\n[Frame #${frameNumber}]\n${frameContext}`;
 
       // [PHASE B.6] Visual Director Prompt Refinement (Gemini 2.0)
       let finalPrompt = enrichedPrompt;
@@ -288,7 +424,7 @@ const AdProjectDetail = ({ project, onBack }) => {
         console.warn("Visual Director refinement failed, using enriched prompt", refineErr);
       }
 
-      const result = await OpenRouterAdapter.generateImage(finalPrompt);
+      const result = await OpenRouterAdapter.generateImage(finalPrompt, frameNumber, frame.panelName, project.id, project.title);
       let url = result.data?.[0]?.url;
       
       if (url) {
@@ -319,7 +455,10 @@ const AdProjectDetail = ({ project, onBack }) => {
           const uploadRes = await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}/upload-image`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(canvasData ? { image: canvasData } : { url })
+            body: JSON.stringify(canvasData
+              ? { image: canvasData, projectTitle: project.title, frameNumber }
+              : { url, projectTitle: project.title, frameNumber }
+            )
           });
           
           const uploadData = await uploadRes.json();
@@ -338,12 +477,12 @@ const AdProjectDetail = ({ project, onBack }) => {
         await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ storyboard_images: newImages })
+          body: JSON.stringify({ storyboardImages: newImages })
         });
       }
     } catch (error) {
       console.error("Sketch Gen Error:", error);
-      alert("Failed to draw sketch: " + error.message);
+      setSaveStatus('⚠ Sketch failed'); setTimeout(() => setSaveStatus(''), 2000);
     } finally {
       setLoadingFrames(prev => ({ ...prev, [frameNumber]: false }));
     }
@@ -358,40 +497,50 @@ const AdProjectDetail = ({ project, onBack }) => {
       
       // If no image OR it's an external URL, trigger the generation/localization flow
       if (!currentUrl || isExternal) {
-        await handleGenerateSketch(frame.number, frame.sketchPrompt);
+        await handleGenerateSketch(frame.number, frame);
       }
     }
-    alert("All images localized and saved to project folder!");
+    setSaveStatus('✓ All images localized'); setTimeout(() => setSaveStatus(''), 2500);
   };
 
   const generateContent = (tab) => {
-    // RESET LOGIC: Move to non-destructive pattern. 
-    // We only clear if the user explicitly Accepts a new draft.
-    setBriefingResult(null); 
+    setBriefingResult(null);
     setProposedDraft(null);
     setIsDrafting(true);
 
     const isCD = creativeRole === 'CD';
-    const roleContext = `\n[Role]: ${creativeRole}\n[Language]: ${language}\n[Ad Type]: ${adType}\n[Duration]: ${adDuration}\n[Category]: Commercial\n`;
+    const formatPreset = AD_FORMAT_PRESETS[adFormat];
+    const platformPreset = AD_PLATFORM_PRESETS[adPlatform];
+    const opts = {
+      duration: adFormat,
+      platform: adPlatform,
+      adType,
+      formatStructure: formatPreset?.structure || '',
+    };
+    const roleContext = `\n[Role]: ${creativeRole}\n[Language]: ${language}\n[Ad Type]: ${adType}\n[Duration]: ${adFormat}\n[Platform]: ${adPlatform} (${platformPreset?.ratio || '16:9'}, hook ${platformPreset?.hook || '3s'})\n[Category]: Commercial\n[Format Structure]:\n${formatPreset?.structure || 'N/A'}\n`;
     const fullSystemPrompt = `${adRule}\n\n[SPECIFIC STANDARDS]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}`;
 
     let prompt = "";
     let target = tab.toLowerCase();
 
     if (tab === 'CONCEPT') {
-      prompt = getBriefingPrompt(conceptBrief, roleContext);
+      prompt = getBriefingPrompt(conceptBrief, roleContext, opts);
     } else if (tab === 'ARCHITECTURE') {
-      prompt = getArchitecturePrompt(pipelineData, roleContext, isCD);
+      prompt = getArchitecturePrompt(pipelineData, roleContext, isCD, opts);
     } else if (tab === 'TREATMENT') {
       const visualContext = pipelineData.architecture || pipelineData.concept || conceptBrief;
-      prompt = getTreatmentPrompt(visualContext, roleContext);
+      prompt = getTreatmentPrompt(visualContext, roleContext, opts);
     } else if (tab === 'SCENARIO') {
-      prompt = getScenarioPrompt(pipelineData.treatment, roleContext);
+      prompt = getScenarioPrompt(pipelineData.treatment, roleContext, opts);
     } else if (tab === 'REVIEW') {
-      prompt = getReviewPrompt(pipelineData.scenario, roleContext);
+      prompt = getReviewPrompt(pipelineData.scenario, roleContext, opts);
     }
 
-    executeDraftAgent(fullSystemPrompt, prompt, target);
+    if (tab === 'REVIEW') {
+      executeAgent(fullSystemPrompt, prompt, 'review');
+    } else {
+      executeDraftAgent(fullSystemPrompt, prompt, target);
+    }
   };
 
   const applyDraft = () => {
@@ -400,6 +549,20 @@ const AdProjectDetail = ({ project, onBack }) => {
     setPipelineData(prev => ({ ...prev, [target]: proposedDraft }));
     setProposedDraft(null);
     setIsDrafting(false);
+  };
+
+  const applyDraftText = (text) => {
+    const target = activeTab.toLowerCase();
+    setPipelineData(prev => ({ ...prev, [target]: text }));
+    setProposedDraft(null);
+    setIsDrafting(false);
+  };
+
+  const parseCopyVariations = (text) => {
+    // Split on variation headers: ## 시안 N, **시안 N**, 시안 N:, Option N, --- separators
+    const parts = text.split(/(?=(?:#{1,3}\s*시안\s*\d|#{1,3}\s*Option\s*\d|\*\*시안\s*\d|\*\*Option\s*\d|^시안\s*\d|^Option\s*\d))/m)
+      .map(s => s.trim()).filter(Boolean);
+    return parts.length >= 2 ? parts : null;
   };
 
   const discardDraft = () => {
@@ -419,7 +582,7 @@ const AdProjectDetail = ({ project, onBack }) => {
     } catch (err) {
       console.error(err);
       setExportStatus('failed');
-      alert("Failed to start export.");
+      setSaveStatus('⚠ Export failed'); setTimeout(() => setSaveStatus(''), 2000);
     }
   };
 
@@ -435,7 +598,7 @@ const AdProjectDetail = ({ project, onBack }) => {
         } else if (data.job?.status === 'failed') {
           clearInterval(interval);
           setExportStatus(null);
-          alert("Export failed: " + data.job.error);
+          setSaveStatus('⚠ Export failed'); setTimeout(() => setSaveStatus(''), 2000);
         } else {
           setExportStatus(data.job?.status || 'processing');
         }
@@ -451,36 +614,37 @@ const AdProjectDetail = ({ project, onBack }) => {
       <div className={`project-detail ad-theme ${isGenerating || isDraftGenerating ? 'orchestration-active' : ''} ${zenMode ? 'is-zen' : ''}`}>
       {/* 🏙️ STUDIO HEADER */}
       <header className="detail-header">
-        <div className="header-meta">
-          <div className="back-btn" onClick={onBack}>← EXIT STUDIO</div>
-          <div className="project-title-mini">PROJECT: {project.title}</div>
-          <div className="badge status-badge">{project.status || 'PRODUCTION'}</div>
+        <div className="header-left">
+          <div className="back-btn" onClick={onBack}>← BACK</div>
+          <span className="header-format-label">AD / COMMERCIAL</span>
         </div>
-
-        <div className="orchestration-controls">
-          <div className="input-group-row">
-            <span className="input-label">📡 OPENROUTER</span>
-            <input 
-              type="password" 
-              className="key-input"
-              value={apiKey} 
-              onChange={(e) => setApiKey(e.target.value)} 
+        <div className="header-title-block">
+          <h1 className="header-title">{project.title}</h1>
+        </div>
+        <div className="header-right">
+          <div className="header-mode-controls">
+            <button
+              className={`mode-btn ${zenMode ? 'active' : ''}`}
+              onClick={() => setZenMode(!zenMode)}
+            >
+              {zenMode ? 'EXIT ZEN' : 'ZEN'}
+            </button>
+            <input
+              type="password"
+              className="key-input-inline"
+              placeholder="OpenRouter API Key"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
             />
           </div>
-          <div className="header-actions">
-            <button 
-              className={`btn-secondary ${zenMode ? 'active' : ''}`}
-              onClick={() => setZenMode(!zenMode)}
-              title="Spatial Zen Mode"
-            >
-              {zenMode ? '📡 EXIT ZEN' : '🪐 ZEN MODE'}
-            </button>
+          <div className="header-divider" />
+          <div className="header-save-controls">
             <button className="btn-secondary" onClick={handleExportPDF} disabled={exportStatus !== null}>
-              {exportStatus ? `⏳ Exporting...` : '📄 EXPORT PDF'}
+              {exportStatus ? 'Exporting...' : 'PDF'}
             </button>
-            <button className="btn-primary" onClick={saveToContext}>
-              SAVE CAMPAIGN
-            </button>
+            <SendToStudioButton scriptWriterProjectId={project.id} scriptData={pipelineData} />
+            <button className="tactical-btn" onClick={saveToContext}>SAVE</button>
+            {saveStatus && <span className="save-toast">{saveStatus}</span>}
           </div>
         </div>
       </header>
@@ -504,15 +668,20 @@ const AdProjectDetail = ({ project, onBack }) => {
             
             <div className="control-group" style={{ marginBottom: '15px' }}>
               <label className="input-label">CREATIVE ROLE</label>
-              <div style={{ display: 'flex', gap: '4px' }}>
-                {['CD', 'COPY', 'ART'].map(role => (
-                  <button 
-                    key={role}
-                    onClick={() => setCreativeRole(role)}
-                    className={`btn-secondary ${creativeRole === role ? 'active' : ''}`}
-                    style={{ flex: 1, fontSize: 'var(--sidebar-btn-fs)' }}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                {[
+                  { id: 'CD',   label: 'Creative Director', sub: 'Brief & Strategy' },
+                  { id: 'COPY', label: 'Copywriter',        sub: 'Copy & Messaging' },
+                  { id: 'ART',  label: 'Art Director',      sub: 'Visual Direction' },
+                ].map(({ id, label, sub }) => (
+                  <button
+                    key={id}
+                    onClick={() => setCreativeRole(id)}
+                    className={`btn-secondary ${creativeRole === id ? 'active' : ''}`}
+                    style={{ width: '100%', textAlign: 'left', padding: '6px 10px', lineHeight: 1.3 }}
                   >
-                    {role}
+                    <span style={{ display: 'block', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.5px' }}>{label}</span>
+                    <span style={{ display: 'block', fontSize: '0.62rem', opacity: 0.55, fontWeight: 400 }}>{sub}</span>
                   </button>
                 ))}
               </div>
@@ -534,31 +703,71 @@ const AdProjectDetail = ({ project, onBack }) => {
               </div>
             </div>
 
-            <div className="control-group">
-              <label className="input-label">AD TYPE</label>
-              <select 
-                value={adType} 
-                onChange={(e) => setAdType(e.target.value)}
-                className="logline-editor"
-                style={{ fontSize: '0.8rem', padding: '8px', minHeight: 'auto' }}
-              >
-                {Object.keys(AD_GENRE_HINTS).map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
-            </div>
+            {[
+              { key: 'type', label: 'AD TYPE', selectedLabel: `${AD_GENRE_HINTS[adType]?.icon} ${AD_GENRE_HINTS[adType]?.name}` },
+              { key: 'format', label: 'FORMAT', selectedLabel: `${AD_FORMAT_PRESETS[adFormat]?.icon} ${AD_FORMAT_PRESETS[adFormat]?.label}` },
+              { key: 'platform', label: 'PLATFORM', selectedLabel: adPlatform },
+            ].map(({ key, label, selectedLabel }) => (
+              <div key={key} className="control-group" style={{ marginBottom: '15px' }}>
+                <button
+                  onClick={() => setSidebarOpen(prev => ({ ...prev, [key]: !prev[key] }))}
+                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0, marginBottom: '6px' }}
+                >
+                  <label className="input-label" style={{ marginBottom: 0, cursor: 'pointer' }}>{label}</label>
+                  <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
+                    {sidebarOpen[key] ? '▲' : selectedLabel}
+                  </span>
+                </button>
+                {sidebarOpen[key] && key === 'type' && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                    {Object.entries(AD_GENRE_HINTS).map(([k, hint]) => (
+                      <button key={k} onClick={() => setAdType(k)} className={`btn-secondary ${adType === k ? 'active' : ''}`}
+                        style={{ justifyContent: 'flex-start', fontSize: 'var(--sidebar-btn-fs)', textAlign: 'left', padding: '5px 8px' }}>
+                        {hint.icon} {hint.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {sidebarOpen[key] && key === 'format' && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {Object.entries(AD_FORMAT_PRESETS).map(([k, preset]) => (
+                      <button key={k} onClick={() => setAdFormat(k)} className={`btn-secondary ${adFormat === k ? 'active' : ''}`}
+                        style={{ flex: 1, fontSize: 'var(--sidebar-btn-fs)', minWidth: '45%', padding: '5px 6px' }}>
+                        {preset.icon} {preset.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {sidebarOpen[key] && key === 'platform' && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {Object.entries(AD_PLATFORM_PRESETS).map(([k, preset]) => (
+                      <button key={k} onClick={() => setAdPlatform(k)} className={`btn-secondary ${adPlatform === k ? 'active' : ''}`}
+                        style={{ flex: 1, fontSize: 'var(--sidebar-btn-fs)', minWidth: '30%', padding: '5px 6px' }}>
+                        {preset.icon} {k}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
 
-            <div className="genre-tactics" style={{ marginTop: '15px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-               <div style={{ fontSize: 'var(--sidebar-badge-fs)', color: 'var(--accent-primary)', marginBottom: '5px' }}>
-                 {AD_GENRE_HINTS[adType]?.icon} {adType.toUpperCase()} TACTICS
-               </div>
-               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                 {AD_GENRE_HINTS[adType]?.cues.map(cue => (
-                   <span key={cue} style={{ fontSize: 'var(--sidebar-badge-fs)', padding: '2px 5px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', color: 'var(--text-muted)' }}>
-                     #{cue}
-                   </span>
-                 ))}
-               </div>
+            <div style={{ padding: '8px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: 'var(--sidebar-badge-fs)', color: 'var(--accent-primary)', marginBottom: '4px' }}>
+                {AD_GENRE_HINTS[adType]?.icon} {adType.toUpperCase()} · {AD_FORMAT_PRESETS[adFormat]?.label} · {adPlatform}
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3px', marginBottom: '6px' }}>
+                {AD_GENRE_HINTS[adType]?.cues?.map(cue => (
+                  <span key={cue} style={{ fontSize: 'var(--sidebar-badge-fs)', padding: '1px 4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px', color: 'var(--text-muted)' }}>
+                    #{cue}
+                  </span>
+                ))}
+              </div>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', lineHeight: '1.5', whiteSpace: 'pre-line' }}>
+                {AD_FORMAT_PRESETS[adFormat]?.structure || ''}
+              </div>
+              <div style={{ marginTop: '4px', fontSize: '0.6rem', color: 'var(--text-dim)' }}>
+                📐 {AD_PLATFORM_PRESETS[adPlatform]?.ratio} · Hook {AD_PLATFORM_PRESETS[adPlatform]?.hook}
+              </div>
             </div>
           </section>
 
@@ -631,7 +840,7 @@ const AdProjectDetail = ({ project, onBack }) => {
               <span style={{ color: 'var(--accent-primary)', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '1px' }}>
                 {TAB_META[activeTab].engine}
               </span>
-              {(activeTab !== 'VISUALS' && activeTab !== 'STORYBOARD' && activeTab !== 'VISION') && (
+              {(activeTab !== 'VISUALS' && activeTab !== 'VISION') && (
                 <button 
                   className="btn-primary" 
                   onClick={() => generateContent(activeTab)}
@@ -643,18 +852,43 @@ const AdProjectDetail = ({ project, onBack }) => {
               )}
             </div>
 
-            {proposedDraft && (
-              <div className="briefing-assistant" style={{ position: 'absolute', top: '50px', right: '0', left: '0', zIndex: 100, maxHeight: '80%', overflowY: 'auto', border: '1px solid var(--accent-primary)', background: '#0a0a0a', padding: '20px' }}>
-                <h4 style={{ color: 'var(--accent-primary)', marginTop: 0, fontSize: '0.9rem' }}>✨ AI Proposed Draft ({TAB_META[activeTab].label})</h4>
-                <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', marginBottom: '20px' }}>
-                  {proposedDraft}
+            {proposedDraft && (() => {
+              const variations = activeTab === 'ARCHITECTURE' ? parseCopyVariations(proposedDraft) : null;
+              return (
+                <div className="briefing-assistant" style={{ position: 'absolute', top: '50px', right: '0', left: '0', zIndex: 100, maxHeight: '80%', display: 'flex', flexDirection: 'column', border: '1px solid var(--accent-primary)', background: '#0a0a0a', padding: '20px' }}>
+                  <h4 style={{ color: 'var(--accent-primary)', marginTop: 0, fontSize: '0.9rem', flexShrink: 0 }}>
+                    ✨ AI Proposed Draft ({TAB_META[activeTab].label})
+                    {variations && <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '8px' }}>— 시안 {variations.length}개 생성됨. 원하는 시안을 선택하세요.</span>}
+                  </h4>
+                  {variations ? (
+                    <div style={{ display: 'flex', gap: '12px', flex: 1, overflowX: 'auto', overflowY: 'hidden', marginBottom: '10px' }}>
+                      {variations.map((v, i) => (
+                        <div key={i} style={{ flex: '0 0 300px', display: 'flex', flexDirection: 'column', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '6px', padding: '12px', background: 'rgba(255,255,255,0.03)' }}>
+                          <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.82rem', flex: 1, overflowY: 'auto', lineHeight: 1.6 }}>
+                            {v}
+                          </div>
+                          <button
+                            className="btn-primary"
+                            onClick={() => applyDraftText(v)}
+                            style={{ marginTop: '10px', flexShrink: 0, padding: '6px 12px', fontSize: '0.8rem' }}
+                          >
+                            ✓ 시안 {i + 1} 선택
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', flex: 1, overflowY: 'auto', marginBottom: '10px' }}>
+                      {proposedDraft}
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', gap: '10px', flexShrink: 0 }}>
+                    {!variations && <button className="btn-primary" onClick={applyDraft}>Adopt & Overwrite</button>}
+                    <button className="btn-secondary" onClick={discardDraft}>Discard</button>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button className="btn-primary" onClick={applyDraft}>Adopt & Overwrite</button>
-                  <button className="btn-secondary" onClick={discardDraft}>Discard</button>
-                </div>
-              </div>
-            )}
+              );
+            })()}
             
             <div style={{ flexGrow: 1, overflowY: 'auto' }}>
               {activeTab === 'VISION' ? (
@@ -666,23 +900,31 @@ const AdProjectDetail = ({ project, onBack }) => {
               ) : activeTab === 'SCENARIO' ? (
                 <ScriptTableView raw={pipelineData.scenario} />
               ) : activeTab === 'VISUALS' ? (
-                <StoryboardView 
-                  raw={pipelineData.treatment} 
-                  imageUrls={pipelineData.visuals_metadata}
-                  onGenerate={handleGenerateSketch}
-                  onGenerateAll={handleGenerateAllSketches}
-                  loadingFrames={loadingFrames}
-                  viewMode="prompt-only"
-                />
-              ) : activeTab === 'STORYBOARD' ? (
-                <StoryboardView 
-                  raw={pipelineData.treatment} 
-                  imageUrls={pipelineData.visuals_metadata}
-                  onGenerate={handleGenerateSketch}
-                  onGenerateAll={handleGenerateAllSketches}
-                  loadingFrames={loadingFrames}
-                  viewMode="result"
-                />
+                <div>
+                  <div style={{ display: 'flex', gap: '4px', marginBottom: '16px' }}>
+                    {[{ id: 'prompt-only', label: '🎨 Image Prompts' }, { id: 'result', label: '🎞️ Storyboard' }].map(({ id, label }) => (
+                      <button
+                        key={id}
+                        onClick={() => setVisualBoardMode(id)}
+                        className={`btn-secondary ${visualBoardMode === id ? 'active' : ''}`}
+                        style={{ fontSize: '0.75rem', padding: '5px 12px' }}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                  <StoryboardView
+                    raw={pipelineData.treatment}
+                    imageUrls={pipelineData.visuals_metadata}
+                    onGenerate={handleGenerateSketch}
+                    onGenerateAll={handleGenerateAllSketches}
+                    loadingFrames={loadingFrames}
+                    viewMode={visualBoardMode}
+                    onRunTreatment={() => { setActiveTab('TREATMENT'); generateContent('TREATMENT'); }}
+                    editedPrompts={editedPrompts}
+                    onPromptEdit={handlePromptEdit}
+                  />
+                </div>
               ) : (
                 <textarea 
                   ref={outputRef}
