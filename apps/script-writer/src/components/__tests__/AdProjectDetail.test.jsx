@@ -27,12 +27,12 @@ describe('AdProjectDetail Component', () => {
     expect(screen.getByText(/Test Project/i)).toBeInTheDocument();
   });
 
-  it('shows the output language toggle', () => {
+  it('shows the narrative vitals sidebar section', () => {
     render(
       <ProjectContext.Provider value={mockContextValue}>
         <AdProjectDetail project={mockProject} />
       </ProjectContext.Provider>
     );
-    expect(screen.getByText(/OUTPUT LANGUAGE/i)).toBeInTheDocument();
+    expect(screen.getByText(/Narrative Vitals/i)).toBeInTheDocument();
   });
 });

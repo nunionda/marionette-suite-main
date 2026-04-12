@@ -84,7 +84,7 @@ const AD_PLATFORM_PRESETS = {
   'OTT':       { icon: '📡', ratio: '16:9',  hook: '3s', skipRule: '플랫폼별 상이',   note: 'TV급 품질 + 디지털 정밀 타겟. 중간 광고 맥락 고려.' },
 };
 
-const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFrames, regenKeys = {}, viewMode = 'prompt', onRunTreatment, editedPrompts = {}, onPromptEdit }) => {
+const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFrames, regenKeys = {}, viewMode = 'prompt', onRunTreatment, editedPrompts = {}, onPromptEdit, onOpenFolder }) => {
   const frames = parseStoryboardFrames(raw);
 
   if (frames.length === 0) {
@@ -167,6 +167,27 @@ const StoryboardView = ({ raw, imageUrls, onGenerate, onGenerateAll, loadingFram
                           transition: 'opacity 0.2s', zIndex: 10,
                         }}
                       >↻ 재생성</button>
+                      {onOpenFolder && imageUrls[frame.number].includes('localhost') && (
+                        <button
+                          className="folder-open-btn"
+                          onClick={() => onOpenFolder(imageUrls[frame.number])}
+                          title="파일 위치 열기"
+                          style={{
+                            position: 'absolute', bottom: '6px', left: '6px',
+                            background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.2)',
+                            borderRadius: '4px', color: 'rgba(255,255,255,0.7)', fontSize: '0.65rem',
+                            padding: '2px 6px', cursor: 'pointer', zIndex: 10,
+                            display: 'flex', alignItems: 'center', gap: '4px',
+                            fontFamily: 'monospace', letterSpacing: '0',
+                          }}
+                        >
+                          📁 {(() => {
+                            const url = imageUrls[frame.number].replace(/\?.*$/, '');
+                            const m = url.match(/\/public\/export\/([^/]+)\//);
+                            return m ? m[1] : 'export';
+                          })()}
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <button
@@ -290,6 +311,8 @@ const AdProjectDetail = ({ project, onBack }) => {
   const [loadingFrames, setLoadingFrames] = useState({});
   const [regenKeys, setRegenKeys] = useState({});
   const [saveStatus, setSaveStatus] = useState('');
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [titleDraft, setTitleDraft] = useState('');
   const [visualBoardMode, setVisualBoardMode] = useState('prompt-only');
   const [sidebarOpen, setSidebarOpen] = useState({ type: true, format: false, platform: false });
 
@@ -504,13 +527,9 @@ const AdProjectDetail = ({ project, onBack }) => {
         setSaveStatus(`✓ Frame #${frameNumber} 생성 완료`);
         setTimeout(() => setSaveStatus(''), 3000);
 
-        // [PHASE B.6] Final Sync — save clean URL (no cache-buster) to DB
+        // [PHASE B.6] Final Sync — save clean URL (no cache-buster) to DB + update context
         const dbImages = { ...newImages, [frameNumber]: url };
-        await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ storyboardImages: dbImages })
-        });
+        await updateProject(project.id, { storyboardImages: dbImages });
       } else {
         setSaveStatus(`⚠ Frame #${frameNumber} 생성 실패 — 다시 시도`);
         setTimeout(() => setSaveStatus(''), 3000);
@@ -656,7 +675,38 @@ const AdProjectDetail = ({ project, onBack }) => {
           <span className="header-format-label">AD / COMMERCIAL</span>
         </div>
         <div className="header-title-block">
-          <h1 className="header-title">{project.title}</h1>
+          {editingTitle ? (
+            <input
+              className="header-title header-title-input"
+              value={titleDraft}
+              autoFocus
+              onChange={e => setTitleDraft(e.target.value.toUpperCase())}
+              onBlur={async () => {
+                const trimmed = titleDraft.trim();
+                if (trimmed && trimmed !== project.title) {
+                  await fetch(`http://${window.location.hostname}:3006/api/projects/${project.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: trimmed }),
+                  });
+                  project.title = trimmed;
+                }
+                setEditingTitle(false);
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') e.target.blur();
+                if (e.key === 'Escape') { setEditingTitle(false); }
+              }}
+            />
+          ) : (
+            <h1
+              className="header-title"
+              title="클릭하여 이름 변경"
+              onClick={() => { setTitleDraft(project.title); setEditingTitle(true); }}
+            >
+              {project.title}
+            </h1>
+          )}
         </div>
         <div className="header-right">
           <div className="header-mode-controls">
@@ -961,6 +1011,9 @@ const AdProjectDetail = ({ project, onBack }) => {
                     onRunTreatment={() => { setActiveTab('TREATMENT'); generateContent('TREATMENT'); }}
                     editedPrompts={editedPrompts}
                     onPromptEdit={handlePromptEdit}
+                    onOpenFolder={async (imgUrl) => {
+                      await fetch(`http://${window.location.hostname}:3006/api/open-folder?path=${encodeURIComponent(imgUrl)}`);
+                    }}
                   />
                 </div>
               ) : (

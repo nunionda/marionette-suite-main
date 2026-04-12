@@ -110,6 +110,18 @@
   color: var(--text-primary);
 }
 
+.header-title-input {
+  font: inherit;
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--text-primary);
+  outline: none;
+  text-align: center;
+  padding: 0;
+  cursor: text;
+}
+
 .header-right {
   display: flex;
   align-items: center;

@@ -23,7 +23,7 @@ describe('parseStoryboardFrames Utility', () => {
     expect(frames).toHaveLength(2);
     expect(frames[0].number).toBe('1');
     expect(frames[0].visual).toBe('A futuristic cityscape at dusk.');
-    expect(frames[0].genPrompt).toBe('A detailed cyberpunk city with neon lights, 8k resolution.');
+    expect(frames[0].sketchPrompt).toBe('A detailed cyberpunk city with neon lights, 8k resolution.');
     const complexRaw = `
 ### **[FRAME 1: 0-3s] - Attention**
 - **Visual**: 슬로우 모션. 테니스 공이 라켓 스위트 스팟에 정확히 맞는 순간.
@@ -35,7 +35,7 @@ describe('parseStoryboardFrames Utility', () => {
     const complexFrames = parseStoryboardFrames(complexRaw);
     expect(complexFrames).toHaveLength(1);
     expect(complexFrames[0].number).toBe('1');
-    expect(complexFrames[0].genPrompt).toBe('Extreme Slow motion of a tennis ball hitting a racket, backlight, high-speed camera, detailed texture, dramatic lighting, tension, hyper-realistic.');
+    expect(complexFrames[0].sketchPrompt).toBe('Extreme Slow motion of a tennis ball hitting a racket, backlight, high-speed camera, detailed texture, dramatic lighting, tension, hyper-realistic.');
   });
 
   it('returns empty array for invalid input', () => {

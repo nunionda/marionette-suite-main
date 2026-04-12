@@ -174,14 +174,14 @@ const app = new Elysia()
           let saveDir: string;
           let fileName: string;
           if (projectTitle) {
-            // Structured export path: public/export/{INITIALS}_{id}_{slug}/{id}_S01_C{nn}.jpg
+            // Structured path: public/storyboard/images/{INITIALS}_{id}_{slug}/{id}_S01_C{nn}.jpg
             const initials = projectTitle.split(/\s+/).map((w: string) => w.replace(/[^a-zA-Z]/g, "")[0]).filter(Boolean).join("").toUpperCase() || "PRJ";
             const slug = projectTitle.replace(/[^\x00-\x7F]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `project-${id}`;
             const cn = String(frameNumber ?? "01").padStart(2, "0");
-            saveDir = path.join(process.cwd(), "public", "export", `${initials}_${id}_${slug}`);
+            saveDir = path.join(process.cwd(), "public", "storyboard", "images", `${initials}_${id}_${slug}`);
             fileName = `${id}_S01_C${cn}.jpg`;
           } else {
-            saveDir = path.join(process.cwd(), "public", "storyboards");
+            saveDir = path.join(process.cwd(), "public", "storyboard", "images");
             fileName = `img_${id}_${Date.now()}_${Math.floor(Math.random() * 1000)}.jpg`;
           }
           if (!fs.existsSync(saveDir)) fs.mkdirSync(saveDir, { recursive: true });
@@ -200,6 +200,21 @@ const app = new Elysia()
       .delete("/projects/:id", async ({ params: { id } }) => {
         await db.delete(projects).where(eq(projects.id, parseInt(id)));
         return { success: true };
+      })
+      .get("/open-folder", async ({ query }) => {
+        const urlPath = decodeURIComponent((query as any).path || '');
+        if (!urlPath) return { success: false, error: 'No path provided' };
+        // Strip URL prefix and cache buster, then get directory
+        const cleaned = urlPath.replace(/^https?:\/\/[^/]+/, '').replace(/\?.*$/, '').replace(/^\/public\//, '');
+        const publicRoot = path.resolve(process.cwd(), 'public');
+        const absDir = path.resolve(publicRoot, path.dirname(cleaned));
+        // Guard against path traversal outside public/
+        if (!absDir.startsWith(publicRoot + path.sep) && absDir !== publicRoot) {
+          return { success: false, error: 'Invalid path' };
+        }
+        if (!fs.existsSync(absDir)) return { success: false, error: 'Folder not found', path: absDir };
+        await Bun.$`open ${absDir}`;
+        return { success: true, path: absDir };
       })
       .post("/projects/:id/export", async ({ params: { id } }) => {
         const jobId = addJob(id);

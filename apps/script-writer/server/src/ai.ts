@@ -9,12 +9,12 @@ import { VISUAL_DIRECTOR_SYSTEM_PROMPT } from "./prompts/visualDirector";
 const IMG_W = 800;
 const IMG_H = 450;
 
-const STORYBOARD_DIR = path.join(process.cwd(), "public", "storyboards");
+const STORYBOARD_DIR = path.join(process.cwd(), "public", "storyboard", "images");
 if (!fs.existsSync(STORYBOARD_DIR)) {
   fs.mkdirSync(STORYBOARD_DIR, { recursive: true });
 }
 
-const EXPORT_BASE = path.join(process.cwd(), "public", "export");
+const EXPORT_BASE = path.join(process.cwd(), "public", "storyboard", "images");
 
 function slugify(text: string): string {
   return text
@@ -197,18 +197,16 @@ export const aiRoutes = new Elysia()
       ? { projectId, projectTitle, frameNumber }
       : undefined;
 
-    // Extract scene description (after [Frame #N] block if present)
+    // Always build the storyboard prompt from the structured enrichedPrompt fields
+    // (Visual Director pass-through was removed — server template produces better Pollinations results)
     const sceneDescMatch = rawPrompt.match(/\[Frame #?\d+\]\s*([\s\S]*)/i) || rawPrompt.match(/\[Scene Description\][:\s]+([\s\S]*)/i);
     const sceneDesc = (sceneDescMatch ? sceneDescMatch[1] : rawPrompt).trim();
 
-    // Build panel label — prefer explicit panelName from frontend, fallback to heuristic
     const panelNum = frameNumber ?? '?';
     let titleLabel: string;
     if (panelName && panelName.trim()) {
-      // Use the actual panel name from the storyboard (e.g. "DAWN RISING")
       titleLabel = panelName.trim().toUpperCase();
     } else {
-      // Fallback: translate Korean keywords
       const krToEn: Record<string, string> = {
         '농구': 'BASKETBALL', '달리기': 'RUNNING', '달리는': 'RUNNING', '나이키': 'NIKE',
         '헬스장': 'GYM', '트랙': 'TRACK', '코트': 'COURT', '경기장': 'STADIUM',
@@ -223,12 +221,10 @@ export const aiRoutes = new Elysia()
         : sceneDesc.replace(/[^\x00-\x7F]/g, '').trim().split(/\s+/).slice(0, 3).join(' ').toUpperCase() || 'SCENE';
     }
     const panelLabel = `PANEL ${panelNum}: ${titleLabel}`;
-
-    // Extract shot type for top-right notes
     const shotMatches = rawPrompt.match(/\b(INT\.|EXT\.|CLOSE[\s-]UP|WIDE SHOT|TRACKING|DOLLY|PAN UP|RACK FOCUS|ECU|OTS)\b/gi);
     const shotNotes = shotMatches ? shotMatches.slice(0, 3).join(' / ') : 'CUT TO';
 
-    const storyboardPrompt = `A highly detailed traditional hand-drawn storyboard illustration in a Copic-style alcohol marker and pencil sketch. Rough pencil and charcoal drawing with ink outlines, quick gestural linework, watercolor gray wash, black and white with minimal color tones, professional film storyboard artist style. Bold handwritten text label "${panelLabel}" in top-left corner. Small handwritten shot notes "${shotNotes}" in top-right corner. Scene: ${sceneDesc}`;
+    const storyboardPrompt = `Dark cinematic storyboard illustration, Copic alcohol marker and brushpen technique on cream card stock. Layered alcohol marker strokes — multiple dark passes building rich near-black shadow zones with visible marker stroke direction and feathered bleed edges. Warm cream paper substrate showing through at highlight zones and mid-tones, characteristic alcohol marker bleed-through effect. Crisp brushpen ink outlines over marker base, bold confident linework with slight ink feathering. ONE vivid crimson red alcohol marker accent applied exclusively to hero product detail — all other elements cool dark grey and black marker. Dramatic single spotlight backlight rendered as paper white lifting through dark marker layers, white ink or gouache for rim highlights. Dynamic motion blur marker strokes conveying speed. Ink splatter details. Black border frame. Handwritten panel label "${panelLabel}" top center, shot notes "${shotNotes}" top right in small caps. Nike/Wieden+Kennedy agency pre-vis board. Scene: ${sceneDesc}`;
 
     const seed = Math.floor(Math.random() * 1000000);
     const encodedPrompt = encodeURIComponent(storyboardPrompt);
