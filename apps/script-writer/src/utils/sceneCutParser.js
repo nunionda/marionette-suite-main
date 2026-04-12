@@ -24,7 +24,7 @@ const TRANSITION_RE = /^(FADE IN:|FADE OUT\.|CUT\s+TO\b|디졸브|암전)/i;
  * @returns {{ scenes: Array, stats: object }}
  */
 export function parseScreenplayToScenes(text, options = {}) {
-  const { projectTitle = 'Untitled', maxDialoguePerCut = 6 } = options;
+  const { projectTitle = 'Untitled' } = options;
   const initials = projectTitle
     .split(/\s+/)
     .map(w => (w[0] || '').toUpperCase())
@@ -52,10 +52,37 @@ export function parseScreenplayToScenes(text, options = {}) {
         characters: new Set(),
       };
     } else if (current) {
-      current.lines.push({ text: trimmed, type: classifyLine(trimmed, lines) });
+      const prevType = current.lines.length > 0 ? current.lines[current.lines.length - 1].type : null;
+      let type;
+
       if (isCharacterLine(trimmed)) {
+        // Check if it's inline dialogue format (e.g. "설희  대사내용")
+        const hasInlineDialogue = /^[가-힣]{2,4}\s{2,}.+/.test(trimmed) || /^[A-Z][a-zA-Z]+\s{2,}.+/.test(trimmed);
+        if (hasInlineDialogue) {
+          // Split into character + dialogue
+          const charName = extractCharacterName(trimmed);
+          const dialogueText = extractDialogueText(trimmed);
+          current.characters.add(charName);
+          current.lines.push({ text: charName, type: 'character' });
+          if (dialogueText && dialogueText !== charName) {
+            current.lines.push({ text: dialogueText, type: 'dialogue' });
+          }
+          continue; // already pushed, skip the push below
+        }
+        type = 'character';
         current.characters.add(trimmed.replace(/\s*\(.*?\)\s*/g, '').trim());
+      } else if (prevType === 'character' || prevType === 'dialogue' || prevType === 'parenthetical') {
+        if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
+          type = 'parenthetical';
+        } else if (TRANSITION_RE.test(trimmed)) {
+          type = 'transition';
+        } else {
+          type = 'dialogue';
+        }
+      } else {
+        type = classifyLine(trimmed);
       }
+      current.lines.push({ text: trimmed, type });
     }
   }
   if (current) rawScenes.push(current);
@@ -65,7 +92,7 @@ export function parseScreenplayToScenes(text, options = {}) {
     const sceneNum = idx + 1;
     const slug = `sc${String(sceneNum).padStart(3, '0')}`;
     const displayId = `${initials}_${slug}`;
-    const cuts = splitIntoCuts(raw.lines, sceneNum, initials, maxDialoguePerCut);
+    const cuts = splitIntoCuts(raw.lines, sceneNum, initials);
 
     return {
       number: sceneNum,
@@ -113,64 +140,129 @@ function classifyLine(text) {
 
 function isCharacterLine(text) {
   const cleaned = text.replace(/\s*\(.*?\)\s*/g, '').trim();
+  // English ALL CAPS character name
   if (cleaned === cleaned.toUpperCase() && /[A-Z]/.test(cleaned) && !cleaned.match(/[.:?!]$/) && cleaned.length < 30) {
     return true;
   }
-  // Korean character names: 2-4 chars, no particles
+  // Korean character names: 2-4 chars, standalone (no particles)
   if (/^[가-힣]{2,4}$/.test(cleaned)) return true;
+  // Korean inline dialogue format: "설희  (지문) 대사" or "은서  대사"
+  // Name (2-4 Korean chars) + 2+ spaces + parenthetical or dialogue
+  if (/^[가-힣]{2,4}\s{2,}/.test(text)) return true;
+  // English name with inline dialogue: "RYAN  (sipping) dialogue"
+  if (/^[A-Z][a-z]+\s{2,}/.test(text) || /^[A-Z]{2,}\s{2,}/.test(text)) return true;
   return false;
 }
 
-// ─── Cut splitting ───
+// Extract character name from inline dialogue format
+function extractCharacterName(text) {
+  // Korean: "설희  (지문) 대사" → "설희"
+  const koMatch = text.match(/^([가-힣]{2,4})\s{2,}/);
+  if (koMatch) return koMatch[1];
+  // English: "RYAN  (sipping) dialogue" → "RYAN"
+  const enMatch = text.match(/^([A-Z][a-zA-Z]+)\s{2,}/);
+  if (enMatch) return enMatch[1].toUpperCase();
+  return text.replace(/\s*\(.*?\)\s*/g, '').trim();
+}
 
-function splitIntoCuts(lineObjs, sceneNum, initials, maxDialogue) {
-  const groups = [[]];
-  let dialogueCount = 0;
+// Extract dialogue text from inline format
+function extractDialogueText(text) {
+  // "설희  (지문) 대사" → "대사"
+  const match = text.match(/^[가-힣A-Za-z]+\s{2,}(?:\(.*?\)\s*)?(.+)$/);
+  return match ? match[1].trim() : text;
+}
+
+// ─── Cut splitting ───
+// 업계 기준 (나무위키/StudioBinder/MasterClass):
+//   - 장편영화: 100씬 × 평균 12~25컷 = 1,200~2,500 컷
+//   - 지문(action): 마침표(.) 하나 = 최소 1컷 (카메라 앵글/구도 변화)
+//   - 대사(dialogue): 인물 대사 1턴 = 1컷 (화자 전환 = 리버스 샷)
+//   - 전환(transition): CUT TO, INSERT, POV 등 = 명시적 컷 경계
+//   - 괄호 지문(parenthetical): 동일 컷 내 연기 지시 (컷 분리 안 함)
+
+function splitIntoCuts(lineObjs, sceneNum, initials) {
+  const cuts = [];
+  let cutNum = 0;
+  let lastSpeaker = '';
+  let isInDialogue = false;
+
+  const pushCut = (text, type) => {
+    cutNum++;
+    cuts.push({
+      number: cutNum,
+      slug: `cut${String(cutNum).padStart(3, '0')}`,
+      displayId: `${initials}_sc${String(sceneNum).padStart(3, '0')}_cut${String(cutNum).padStart(3, '0')}`,
+      description: text.length > 200 ? text.slice(0, 197) + '...' : text,
+      type,
+      lineCount: 1,
+    });
+  };
 
   for (const obj of lineObjs) {
+    const text = obj.text.trim();
+    if (!text) continue;
+
+    // Transition = explicit cut boundary
     if (obj.type === 'transition') {
-      if (groups[groups.length - 1].length > 0) groups.push([]);
-      groups[groups.length - 1].push(obj);
-      groups.push([]);
-      dialogueCount = 0;
+      pushCut(text, 'transition');
+      isInDialogue = false;
+      lastSpeaker = '';
       continue;
     }
 
-    if (obj.type === 'character' && dialogueCount >= maxDialogue) {
-      groups.push([]);
-      dialogueCount = 0;
+    // Character name = start of dialogue turn
+    if (obj.type === 'character') {
+      const speaker = text.replace(/\s*\(.*?\)\s*/g, '').trim();
+      lastSpeaker = speaker;
+      isInDialogue = true;
+      continue; // character line itself is not a cut — the dialogue that follows is
     }
 
-    // Count dialogue-like lines (lines following character lines)
-    if (obj.type !== 'character' && obj.type !== 'transition' && obj.type !== 'parenthetical') {
-      dialogueCount++;
+    // Parenthetical = stage direction within same cut, skip
+    if (obj.type === 'parenthetical') {
+      continue;
     }
 
-    groups[groups.length - 1].push(obj);
+    // Dialogue line = 1 cut per dialogue turn (speaker's full speech)
+    if (isInDialogue && lastSpeaker) {
+      pushCut(`[${lastSpeaker}] ${text}`, 'dialogue');
+      // Stay in dialogue mode — next character line will set new speaker
+      // But if next line is action, isInDialogue will be reset below
+      continue;
+    }
+
+    // Action line = split by sentences (each sentence ≈ 1 shot)
+    isInDialogue = false;
+    lastSpeaker = '';
+
+    // Split action text by sentence boundaries (마침표, 온점)
+    const sentences = text
+      .split(/(?<=[.。!?])\s*/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    if (sentences.length === 0) continue;
+
+    for (const sentence of sentences) {
+      // Skip very short fragments (under 5 chars, likely artifacts)
+      if (sentence.length < 5) continue;
+      pushCut(sentence, 'action');
+    }
   }
 
-  const nonEmpty = groups.filter(g => g.length > 0);
-  if (nonEmpty.length === 0) {
+  // Ensure at least 1 cut per scene
+  if (cuts.length === 0) {
     return [{
       number: 1,
       slug: 'cut001',
       displayId: `${initials}_sc${String(sceneNum).padStart(3, '0')}_cut001`,
-      description: '(empty scene)',
+      description: '(establishing shot)',
+      type: 'action',
       lineCount: 0,
     }];
   }
 
-  return nonEmpty.map((group, i) => {
-    const cutNum = i + 1;
-    const desc = group.map(l => l.text).join(' ');
-    return {
-      number: cutNum,
-      slug: `cut${String(cutNum).padStart(3, '0')}`,
-      displayId: `${initials}_sc${String(sceneNum).padStart(3, '0')}_cut${String(cutNum).padStart(3, '0')}`,
-      description: desc.length > 200 ? desc.slice(0, 197) + '...' : desc,
-      lineCount: group.length,
-    };
-  });
+  return cuts;
 }
 
 function buildSummary(lineObjs) {
