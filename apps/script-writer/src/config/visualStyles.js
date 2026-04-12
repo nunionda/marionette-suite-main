@@ -1,12 +1,15 @@
+// Campaign visual tone guides — fed as context into the Visual Director prompt engine.
+// These describe the EMOTIONAL / COMPOSITIONAL direction, NOT the rendering style.
+// Rendering style (hand-drawn storyboard illustration) is fixed in visualDirector.ts.
 export const VISUAL_STYLE_GUIDES = {
-  "BrandFilm": "High-contrast cinematic, anamorphic lens, moody and dramatic lighting, Arri Alexa 65, film grain",
-  "ProductDemo": "Bright, punchy colors, energetic dynamic composition, clean commercial lighting, crisp foreground details, macro lens",
-  "Cinematic": "Epic cinematic masterpiece, sweeping landscapes, heavy color grading, evocative lighting, 35mm film look",
-  "Social": "Authentic, UGC style, iPhone 14 Pro camera, natural daylight, candid and approachable lifestyle aesthetic",
-  "Performance": "Clean product-focused, before/after split screen, bold typography overlay, bright studio lighting, direct comparison",
-  "Testimonial": "Authentic documentary style, shallow depth of field, natural window light, warm tones, handheld feel, real people",
-  "Manifesto": "Epic cinematic masterpiece, sweeping landscapes, emotionally heavy color grading, evocative lighting",
-  "Default": "Professional Agency Storyboard, Cinematic masterpiece, gorgeous lighting, premium editorial style"
+  "BrandFilm": "High-tension emotional narrative, protagonist silhouetted against an epic horizon, deep theatrical staging, heavy shadow contrast, quiet before the storm atmosphere",
+  "ProductDemo": "Bold graphic product hero framing, athlete at peak motion frozen mid-action, explosive kinetic energy, high-contrast punchy composition, product details ultra-visible",
+  "Cinematic": "Epic wide-angle environmental storytelling, lone protagonist dwarfed by vast landscape, sweeping depth of field, cinematic scale and grandeur",
+  "Social": "Intimate candid human moment, close-to-subject warmth, natural ambient light flooding in, authentic unposed energy, relatable everyday scene",
+  "Performance": "Split-second peak-action explosion, athlete at absolute maximum effort, sport-specific technical precision, raw physical power and velocity",
+  "Testimonial": "Quiet introspective character study, direct vulnerable eye contact, intimate medium close-up, warm window light casting soft shadow, real unfiltered emotion",
+  "Manifesto": "Collective cultural movement, crowd energy rising to a single figure, hero emerging from mass, iconic triumphant moment, historic scale",
+  "Default": "Atmospheric brand campaign staging, strong character presence, layered compositional depth, brand-forward visual hierarchy, dramatic lighting mood"
 };
 
 export function getStyleGuideForGenre(genre) {

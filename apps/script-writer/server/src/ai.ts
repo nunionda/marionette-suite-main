@@ -284,7 +284,37 @@ export const aiRoutes = new Elysia()
         console.warn("[VISUAL_DIRECTOR] Direct Gemini failed, falling back to OpenRouter...");
       }
 
-      // 2. Fallback to OpenRouter (if credits allow)
+      // 2. Fallback to Groq (free tier, llama-3.3-70b)
+      if (KEYS.GROQ) {
+        console.log("[VISUAL_DIRECTOR] Attempting Groq API...");
+        try {
+          const groqResponse = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${KEYS.GROQ}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              model: "llama-3.3-70b-versatile",
+              messages: [
+                { role: "system", content: VISUAL_DIRECTOR_SYSTEM_PROMPT },
+                { role: "user", content: rawPrompt }
+              ],
+              temperature: 0.7,
+              max_tokens: 2048
+            })
+          });
+          const groqData: any = await groqResponse.json();
+          if (groqData.choices?.[0]?.message?.content) {
+            return parseVisualDirectorResponse(groqData.choices[0].message.content);
+          }
+          console.warn("[VISUAL_DIRECTOR] Groq returned empty, trying OpenRouter...", groqData.error?.message);
+        } catch (groqErr: any) {
+          console.warn("[VISUAL_DIRECTOR] Groq failed:", groqErr.message);
+        }
+      }
+
+      // 3. Last resort: OpenRouter (if credits allow)
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {

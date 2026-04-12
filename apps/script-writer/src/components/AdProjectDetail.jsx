@@ -404,13 +404,22 @@ const AdProjectDetail = ({ project, onBack }) => {
       const styleGuide = getStyleGuideForGenre(adType);
       const frameContext = [
         effectiveFrame.panelName   && `[Panel Name]: ${effectiveFrame.panelName}`,
-        effectiveFrame.visual      && `[Visual]: ${effectiveFrame.visual}`,
+        effectiveFrame.visual      && `[Visual Description]: ${effectiveFrame.visual}`,
         effectiveFrame.lighting    && `[Lighting]: ${effectiveFrame.lighting}`,
-        effectiveFrame.camera      && `[Camera]: ${effectiveFrame.camera}`,
-        effectiveFrame.mood        && `[Mood]: ${effectiveFrame.mood}`,
+        effectiveFrame.camera      && `[Camera Angle]: ${effectiveFrame.camera}`,
+        effectiveFrame.mood        && `[Mood/Emotion]: ${effectiveFrame.mood}`,
         effectiveFrame.sketchPrompt && effectiveFrame.sketchPrompt !== effectiveFrame.visual && `[Director Note]: ${effectiveFrame.sketchPrompt}`,
       ].filter(Boolean).join('\n');
-      const enrichedPrompt = `[Campaign Tone]: ${conceptDirection}\n[Visual Style Guide]: ${styleGuide}\n[Frame #${frameNumber}]\n${frameContext}`;
+      const panelTitle = effectiveFrame.panelName
+        ? `PANEL ${frameNumber}: ${effectiveFrame.panelName.toUpperCase()}`
+        : `PANEL ${frameNumber}`;
+      const enrichedPrompt = [
+        `[Campaign Tone]: ${conceptDirection}`,
+        `[Visual Style Guide]: ${styleGuide}`,
+        `[Panel Annotation]: ${panelTitle}`,
+        `[Frame #${frameNumber}]`,
+        frameContext,
+      ].join('\n');
 
       // [PHASE B.6] Visual Director Prompt Refinement (Gemini 2.0)
       let finalPrompt = enrichedPrompt;
