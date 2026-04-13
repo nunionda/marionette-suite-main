@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getFormatForProject, getPreviewSize } from '../utils/videoFormats';
 
 /**
  * SceneDetailView — Scene 1개의 전체 컷 파이프라인을 시각화.
@@ -6,7 +7,8 @@ import React, { useState, useEffect } from 'react';
  * 각 컷은 6단계 노드 파이프라인:
  *   Script → Image Prompt → Image Gen → Video Prompt → Video Gen → Audio → Done
  *
- * 비트세이비어 S#1: 45컷, 설희+은서, 싱가포르 국제학교
+ * 프로젝트 카테고리(YouTube/Film/Ad 등)에 따라
+ * 이미지/비디오 프리뷰 비율이 자동 조정됨 (16:9, 9:16, 2.39:1 등)
  */
 
 const CUT_STATUSES = ['pending', 'script', 'image_prompt', 'image_gen', 'video', 'audio', 'done'];
@@ -59,7 +61,7 @@ function CutCard({ cut, isSelected, onClick }) {
   );
 }
 
-function CutNodePipeline({ cut, onUpdate }) {
+function CutNodePipeline({ cut, onUpdate, previewSize }) {
   if (!cut) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
       ← 컷을 선택하면 노드 파이프라인이 표시됩니다
@@ -151,11 +153,11 @@ function CutNodePipeline({ cut, onUpdate }) {
                 </div>
                 {node.isMedia ? (
                   value ? (
-                    <div style={{ borderRadius: '6px', overflow: 'hidden', background: '#111', maxWidth: '480px' }}>
+                    <div style={{ borderRadius: '6px', overflow: 'hidden', background: '#111', maxWidth: previewSize?.maxWidth || '480px' }}>
                       {node.field.includes('image') ? (
-                        <img src={value} alt={node.label} style={{ width: '100%', maxHeight: '280px', objectFit: 'contain' }} />
+                        <img src={value} alt={node.label} style={{ width: '100%', maxHeight: previewSize?.maxHeight || '280px', objectFit: 'contain', aspectRatio: previewSize?.aspectRatio }} />
                       ) : node.field.includes('video') ? (
-                        <video src={value} controls style={{ width: '100%', maxHeight: '240px', background: '#000' }} />
+                        <video src={value} controls style={{ width: '100%', maxHeight: previewSize?.maxHeight || '240px', background: '#000', aspectRatio: previewSize?.aspectRatio }} />
                       ) : (
                         <audio src={value} controls style={{ width: '100%' }} />
                       )}
@@ -207,6 +209,10 @@ const SceneDetailView = ({ project, sceneId, onBack }) => {
     }
   };
 
+  // 프로젝트 카테고리에 맞는 프리뷰 사이즈 — Hooks는 early return 전에 선언
+  const formatPreset = useMemo(() => getFormatForProject(project?.category, project?.genre), [project?.category, project?.genre]);
+  const previewSize = useMemo(() => getPreviewSize(formatPreset), [formatPreset]);
+
   useEffect(() => { fetchScene(); }, [sceneId]);
 
   if (loading) return <div style={{ padding: '40px', color: 'var(--text-muted)' }}>Loading scene...</div>;
@@ -235,6 +241,9 @@ const SceneDetailView = ({ project, sceneId, onBack }) => {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ fontSize: '0.5rem', padding: '2px 6px', borderRadius: '3px', background: 'rgba(200,168,85,0.1)', border: '1px solid rgba(200,168,85,0.2)', color: 'var(--gold)' }}>
+            {formatPreset?.label || '16:9'}
+          </span>
           <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>
             {completedCuts}/{totalCuts} done
           </div>
@@ -263,7 +272,7 @@ const SceneDetailView = ({ project, sceneId, onBack }) => {
 
         {/* Right: Node pipeline editor */}
         <div style={{ flex: 1, overflow: 'hidden' }}>
-          <CutNodePipeline cut={selectedCut} onUpdate={fetchScene} />
+          <CutNodePipeline cut={selectedCut} onUpdate={fetchScene} previewSize={previewSize} />
         </div>
       </div>
     </div>

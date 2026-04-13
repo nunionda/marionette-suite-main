@@ -7,6 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
+import { clampToFluxResolution, type VideoFormatPreset } from './videoFormats';
 
 const POLLINATIONS_BASE = 'https://image.pollinations.ai/prompt';
 const STORYBOARD_DIR = path.join(process.cwd(), 'public', 'storyboard', 'images');
@@ -29,8 +30,14 @@ export async function generateImage(prompt: string, options: {
   seed?: number;
   model?: string;
   cutId?: string;
+  formatPreset?: VideoFormatPreset;
 } = {}): Promise<ImageGenResult> {
-  const { width = 1024, height = 576, seed, model = 'flux', cutId } = options;
+  // formatPreset이 있으면 FLUX 호환 해상도로 자동 변환
+  const fluxSize = options.formatPreset
+    ? clampToFluxResolution(options.formatPreset)
+    : { width: options.width ?? 1024, height: options.height ?? 576 };
+  const { seed, model = 'flux', cutId } = options;
+  const { width, height } = fluxSize;
 
   try {
     // Shorten prompt for URL (Pollinations has URL length limits)

@@ -8,6 +8,8 @@ import { syncProjectToFileSystem } from "./lib/sync";
 import { addJob, getJob } from "./services/pdfQueue";
 import { analyzeScript, analyzeProduction } from "./services/analysisEngine";
 import { generateImage, buildCinematicPrompt, generateImageCandidates } from "./services/imageGenerator";
+import { generateVideo, buildVideoPrompt } from "./services/videoGenerator";
+import { getFormatForProject } from "./services/videoFormats";
 import { generateTTS } from "./services/audioGenerator";
 import { getProviderStatus, getProvidersByType, setProviderEnabled } from "./services/providers";
 import fs from "fs";
@@ -628,7 +630,8 @@ const app = new Elysia()
 
             if (nodeId === 'image_gen') {
               const prompt = b.prompt || b.description || '';
-              const result = await generateImage(prompt);
+              const formatPreset = getFormatForProject(b.category || '', b.format || '', b.platform || '');
+              const result = await generateImage(prompt, { cutId: b.cutId, formatPreset });
               const imageUrls = result.imageUrl ? [result.imageUrl] : [];
               await db.update(productionAssets).set({
                 status: result.success ? 'done' : 'error',
@@ -772,12 +775,9 @@ const app = new Elysia()
             return { prompt, cameraMove };
           },
           video_gen: async () => {
-            // Pollinations also supports video via text-to-video
             const prompt = b.prompt || b.description || '';
-            const encodedPrompt = encodeURIComponent(prompt);
-            // Pollinations video endpoint (experimental)
-            const videoUrl = `https://video.pollinations.ai/generate?prompt=${encodedPrompt}&model=fast-svd`;
-            return { videoUrl, provider: 'pollinations-video', note: 'Experimental — may not be available' };
+            const result = await generateVideo(prompt, { cutId: b.cutId });
+            return { ...result, note: 'Experimental — may not be available' };
           },
           final_cut: async () => {
             // Assembly — gather all assets for this cut
@@ -875,7 +875,8 @@ const app = new Elysia()
 
               // Execute the step inline (reuse existing logic)
               if (step === 'image_gen') {
-                const imgResult = await generateImage(payload.prompt);
+                const formatPreset = getFormatForProject(project?.category || '', project?.genre || '');
+                const imgResult = await generateImage(payload.prompt, { cutId: String(cut.id), formatPreset });
                 if (imgResult.success && imgResult.imageUrl) {
                   await db.update(cuts).set({ imageUrl: imgResult.imageUrl }).where(eq(cuts.id, cut.id));
                 }
@@ -892,16 +893,16 @@ const app = new Elysia()
                 cutResult.steps[step] = { success: true, prompt };
               } else if (step === 'video_prompt') {
                 const desc = cut.description || cut.scriptText || '';
-                const cameraMove = 'slow zoom in';
-                const prompt = `Cinematic video: ${desc}. Camera: ${cameraMove}. Smooth motion, 24fps, film look, shallow DOF.`;
+                const prompt = buildVideoPrompt({ description: desc });
                 await db.update(cuts).set({ videoPrompt: prompt }).where(eq(cuts.id, cut.id));
                 cutResult.steps[step] = { success: true, prompt };
               } else if (step === 'video_gen') {
                 const videoPrompt = cut.videoPrompt || cut.description || '';
-                const encodedPrompt = encodeURIComponent(videoPrompt);
-                const videoUrl = `https://video.pollinations.ai/generate?prompt=${encodedPrompt}&model=fast-svd`;
-                await db.update(cuts).set({ videoUrl }).where(eq(cuts.id, cut.id));
-                cutResult.steps[step] = { success: true, videoUrl };
+                const videoResult = await generateVideo(videoPrompt, { cutId: String(cut.id) });
+                if (videoResult.success && videoResult.videoUrl) {
+                  await db.update(cuts).set({ videoUrl: videoResult.videoUrl }).where(eq(cuts.id, cut.id));
+                }
+                cutResult.steps[step] = { success: videoResult.success, videoUrl: videoResult.videoUrl };
               } else {
                 cutResult.steps[step] = { success: true, skipped: cut.type !== 'dialogue' && step === 'audio_gen' };
               }
