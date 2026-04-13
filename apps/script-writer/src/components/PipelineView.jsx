@@ -34,13 +34,17 @@ function computeNodeStatus(nodeId, pipelineData, project, dbStatus) {
     // Track A: Production Design
     script_analysis:      () => !!(pipelineData.scenario || pipelineData.treatment),
     production_breakdown: () => !!(pipelineData.treatment),
+    lookbook:             () => !!(project.analysisData?.lookbook),
     visual_world:         () => !!(project.analysisData?.artDirection || pipelineData.treatment),
+    color_script:         () => !!(project.analysisData?.colorScript),
     character_design:     () => !!(project.analysisData?.characterSheets),
     character_arc:        () => !!(pipelineData.architecture),
     set_design:           () => !!(project.analysisData?.setDesign),
     set_dressing:         () => !!(project.analysisData?.setDressing),
     costume_design:       () => !!(project.analysisData?.costumeDesign),
+    makeup_hair:          () => !!(project.analysisData?.makeupHair),
     props:                () => !!(project.analysisData?.propList),
+    graphic_design:       () => !!(project.analysisData?.graphicDesign),
     storyboard:           () => !!(pipelineData.visuals_metadata && Object.keys(pipelineData.visuals_metadata || {}).length > 0),
     shot_list:            () => !!(project.analysisData?.shotList),
     art_bible:            () => !!(project.analysisData?.artBible),
@@ -73,10 +77,11 @@ function PhaseHeader({ phase }) {
       padding: '4px 10px',
       fontSize: '0.6rem',
       fontWeight: 700,
-      color: phase.color,
-      letterSpacing: '1px',
+      color: 'var(--gold)',
+      fontFamily: 'var(--font-mono)',
+      letterSpacing: '2px',
       textTransform: 'uppercase',
-      borderBottom: `2px solid ${phase.color}30`,
+      borderBottom: '1px solid rgba(200, 168, 85, 0.15)',
       marginBottom: '6px',
     }}>
       {phase.icon} {phase.labelKo}
@@ -86,9 +91,9 @@ function PhaseHeader({ phase }) {
 
 function PipelineNode({ node, status, isActive, onClick }) {
   const statusConfig = {
-    complete: { bg: 'rgba(74,222,128,0.15)', border: 'rgba(74,222,128,0.4)', icon: '✅', color: '#4ade80' },
-    in_progress: { bg: 'rgba(251,191,36,0.15)', border: 'rgba(251,191,36,0.4)', icon: '🔄', color: '#fbbf24' },
-    empty: { bg: 'rgba(255,255,255,0.03)', border: 'rgba(255,255,255,0.08)', icon: '⬜', color: 'var(--text-muted)' },
+    complete: { bg: 'rgba(39,174,96,0.08)', border: 'rgba(39,174,96,0.25)', icon: '✅', color: 'var(--status-ok)' },
+    in_progress: { bg: 'rgba(226,160,53,0.08)', border: 'rgba(226,160,53,0.25)', icon: '🔄', color: 'var(--status-warn)' },
+    empty: { bg: 'rgba(255,255,255,0.01)', border: 'var(--border)', icon: '⬜', color: 'var(--text-dim)' },
   };
   const s = statusConfig[status] || statusConfig.empty;
 
@@ -120,7 +125,7 @@ function PipelineNode({ node, status, isActive, onClick }) {
         <span style={{ fontSize: '0.7rem' }}>{s.icon}</span>
       </div>
       {node.sub && (
-        <div style={{ fontSize: '0.55rem', color: s.color, marginTop: '4px', fontFamily: 'monospace' }}>
+        <div style={{ fontSize: '0.55rem', color: s.color, marginTop: '4px', fontFamily: 'var(--font-mono)' }}>
           {node.agent}.{node.sub}
         </div>
       )}
@@ -136,9 +141,9 @@ function HandoffArrow({ handoff }) {
       gap: '6px',
       padding: '4px 10px',
       fontSize: '0.55rem',
-      color: '#a78bfa',
+      color: 'var(--gold)',
     }}>
-      <span style={{ color: '#8b5cf6' }}>⤳</span>
+      <span style={{ color: 'var(--gold)' }}>⤳</span>
       <span>{handoff.description}</span>
     </div>
   );
@@ -230,7 +235,7 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey
             <div style={{
               fontSize: '0.7rem',
               fontWeight: 700,
-              color: '#8b5cf6',
+              color: 'var(--gold)',
               letterSpacing: '2px',
               marginBottom: '12px',
               display: 'flex',
@@ -272,7 +277,7 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey
             <div style={{
               fontSize: '0.7rem',
               fontWeight: 700,
-              color: '#f59e0b',
+              color: 'var(--gold-dim)',
               letterSpacing: '2px',
               marginBottom: '12px',
               display: 'flex',
@@ -315,7 +320,7 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey
                 border: '1px solid rgba(139,92,246,0.15)',
                 borderRadius: '8px',
               }}>
-                <div style={{ fontSize: '0.6rem', fontWeight: 600, color: '#a78bfa', marginBottom: '6px', letterSpacing: '1px' }}>
+                <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--gold)', marginBottom: '6px', letterSpacing: '1px' }}>
                   HANDOFF POINTS (Design → Video)
                 </div>
                 {TRACK_HANDOFFS.map(h => (
@@ -345,7 +350,7 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey
           padding: '2px 6px',
           borderRadius: '3px',
           background: storyboardServerOnline ? 'rgba(74,222,128,0.15)' : 'rgba(239,68,68,0.15)',
-          color: storyboardServerOnline ? '#4ade80' : '#ef4444',
+          color: storyboardServerOnline ? 'var(--status-ok)' : 'var(--status-error)',
           border: `1px solid ${storyboardServerOnline ? 'rgba(74,222,128,0.3)' : 'rgba(239,68,68,0.3)'}`,
         }}>
           {storyboardServerOnline ? '● Storyboard Engine Online' : '○ Storyboard Engine Offline'}

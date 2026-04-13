@@ -226,7 +226,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
                   <div style={{
                     position: 'absolute', top: '12px', right: '12px',
                     width: '8px', height: '8px', borderRadius: '50%',
-                    background: isDone ? '#22c55e' : isActive ? '#8b5cf6' : 'rgba(255,255,255,0.1)',
+                    background: isDone ? 'var(--status-ok)' : isActive ? 'var(--gold)' : 'rgba(255,255,255,0.1)',
                   }} />
                   {/* Connection arrow */}
                   {i < steps.length - 1 && (
@@ -262,7 +262,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
         <section style={{ opacity: productionReady ? 1 : 0.4, pointerEvents: productionReady ? 'auto' : 'none' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div>
-              <h2 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '2px', color: '#f59e0b', margin: 0 }}>
+              <h2 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '2px', color: 'var(--gold)', margin: 0 }}>
                 PHASE 2
               </h2>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '4px 0 0' }}>
@@ -275,7 +275,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
                   {sceneStats.doneCuts}/{sceneStats.totalCuts} cuts
                 </span>
                 <div style={{ width: '120px', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px' }}>
-                  <div style={{ width: `${productionProgress}%`, height: '100%', background: '#f59e0b', borderRadius: '2px', transition: 'width 0.3s' }} />
+                  <div style={{ width: `${productionProgress}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px', transition: 'width 0.3s' }} />
                 </div>
               </div>
             )}
@@ -301,7 +301,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
                 시나리오를 씬/컷으로 파싱하고 파이프라인 진행 상태를 관리합니다.
               </div>
               {sceneStats && (
-                <div style={{ fontSize: '0.7rem', color: '#f59e0b' }}>
+                <div style={{ fontSize: '0.7rem', color: 'var(--gold)' }}>
                   {sceneStats.scenes} scenes · {sceneStats.totalCuts} cuts
                 </div>
               )}
@@ -327,7 +327,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
               <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '12px' }}>
                 ReactFlow 기반 컷별 파이프라인 에디터. 이미지/비디오/오디오 생성 노드를 관리합니다.
               </div>
-              <div style={{ fontSize: '0.6rem', color: '#8b5cf6' }}>localhost:3001</div>
+              <div style={{ fontSize: '0.6rem', color: 'var(--gold)' }}>localhost:3001</div>
             </div>
 
             {/* Card: Pipeline Overview */}
@@ -350,20 +350,20 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
               {pipelineProgress ? (
                 <div style={{ fontSize: '0.6rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ color: '#8b5cf6' }}>Design {pipelineProgress.designDone}/{pipelineProgress.designTotal}</span>
-                    <span style={{ color: '#f59e0b' }}>Video {pipelineProgress.videoDone}/{pipelineProgress.videoTotal}</span>
+                    <span style={{ color: 'var(--gold)' }}>Design {pipelineProgress.designDone}/{pipelineProgress.designTotal}</span>
+                    <span style={{ color: 'var(--gold)' }}>Video {pipelineProgress.videoDone}/{pipelineProgress.videoTotal}</span>
                   </div>
                   <div style={{ display: 'flex', gap: '2px', height: '3px' }}>
                     <div style={{ flex: 12, background: 'rgba(139,92,246,0.15)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ width: `${(pipelineProgress.designDone / 12) * 100}%`, height: '100%', background: '#8b5cf6', borderRadius: '2px' }} />
+                      <div style={{ width: `${(pipelineProgress.designDone / 12) * 100}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px' }} />
                     </div>
                     <div style={{ flex: 8, background: 'rgba(245,158,11,0.15)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ width: `${(pipelineProgress.videoDone / 8) * 100}%`, height: '100%', background: '#f59e0b', borderRadius: '2px' }} />
+                      <div style={{ width: `${(pipelineProgress.videoDone / 8) * 100}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px' }} />
                     </div>
                   </div>
                 </div>
               ) : (
-                <div style={{ fontSize: '0.6rem', color: '#22c55e' }}>GS STAGE GATE G1</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--status-ok)' }}>GS STAGE GATE G1</div>
               )}
             </div>
           </div>

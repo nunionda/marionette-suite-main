@@ -271,7 +271,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
             <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)', width: '12px' }}>{styleIntensity}</span>
           </div>
           <span style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
-          {saveStatus && <span style={{ fontSize: '0.65rem', color: '#22c55e' }}>{saveStatus}</span>}
+          {saveStatus && <span style={{ fontSize: '0.65rem', color: 'var(--status-ok)' }}>{saveStatus}</span>}
           <button onClick={saveToContext} style={{
             padding: '6px 16px', fontSize: '0.7rem', fontWeight: 600,
             background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
@@ -308,7 +308,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
               {/* Status dot */}
               <span style={{
                 width: '6px', height: '6px', borderRadius: '50%', flexShrink: 0,
-                background: status === 'complete' ? '#22c55e' : status === 'draft' ? '#f59e0b' : 'rgba(255,255,255,0.15)',
+                background: status === 'complete' ? 'var(--status-ok)' : status === 'draft' ? 'var(--gold)' : 'rgba(255,255,255,0.15)',
               }} />
               <span style={{ letterSpacing: '0.5px' }}>{s.num}</span>
               <span>{s.label}</span>
@@ -363,7 +363,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
                     padding: '6px 12px', fontSize: '0.65rem', fontWeight: 600,
                     background: scriptMode === 'REFINE' ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)',
                     border: `1px solid ${scriptMode === 'REFINE' ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.08)'}`,
-                    borderRadius: '4px', color: scriptMode === 'REFINE' ? '#f59e0b' : 'var(--text-dim)',
+                    borderRadius: '4px', color: scriptMode === 'REFINE' ? 'var(--gold)' : 'var(--text-dim)',
                     cursor: 'pointer',
                   }}
                 >
@@ -389,7 +389,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
           {/* Dependency warning */}
           {!depMet && depField && (
             <div style={{
-              padding: '12px 24px', fontSize: '0.7rem', color: '#f59e0b',
+              padding: '12px 24px', fontSize: '0.7rem', color: 'var(--gold)',
               background: 'rgba(245,158,11,0.05)', borderBottom: '1px solid rgba(245,158,11,0.1)',
             }}>
               ⚠ {STEP_CONFIG[depField].label} 단계를 먼저 완료해야 합니다.
@@ -398,7 +398,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
                 style={{
                   marginLeft: '8px', padding: '2px 8px', fontSize: '0.65rem',
                   background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
-                  borderRadius: '3px', color: '#f59e0b', cursor: 'pointer',
+                  borderRadius: '3px', color: 'var(--gold)', cursor: 'pointer',
                 }}
               >
                 → {STEP_CONFIG[depField].label}로 이동
@@ -427,7 +427,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
           {/* Producer Note (Refine mode) */}
           {activeStep === 'scenario' && scriptMode === 'REFINE' && (
             <div style={{ padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)', flexShrink: 0 }}>
-              <div style={{ fontSize: '0.6rem', color: '#f59e0b', letterSpacing: '1px', marginBottom: '6px' }}>
+              <div style={{ fontSize: '0.6rem', color: 'var(--gold)', letterSpacing: '1px', marginBottom: '6px' }}>
                 DIRECTOR'S NOTE {selectedSceneId ? `(S#${selectedSceneId})` : '(전체)'}
               </div>
               <textarea

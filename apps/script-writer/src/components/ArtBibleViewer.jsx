@@ -63,14 +63,14 @@ const ArtBibleViewer = ({ projectId, project, onBack }) => {
             ← Back
           </button>
           <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{project?.title}</span>
-          <span style={{ fontSize: '0.65rem', color: '#ef4444', letterSpacing: '1px' }}>ART BIBLE</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--gold)', letterSpacing: '1px' }}>ART BIBLE</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>
             {completedSections.length}/{totalSections} sections
           </span>
           <div style={{ width: '100px', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px' }}>
-            <div style={{ width: `${progress}%`, height: '100%', background: '#ef4444', borderRadius: '2px' }} />
+            <div style={{ width: `${progress}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px' }} />
           </div>
           <button
             onClick={() => {
@@ -82,7 +82,7 @@ const ArtBibleViewer = ({ projectId, project, onBack }) => {
               background: completedSections.length > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)',
               border: `1px solid ${completedSections.length > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.08)'}`,
               borderRadius: '4px',
-              color: completedSections.length > 0 ? '#ef4444' : 'var(--text-dim)',
+              color: completedSections.length > 0 ? 'var(--gold)' : 'var(--text-dim)',
               cursor: completedSections.length > 0 ? 'pointer' : 'not-allowed',
             }}
           >
@@ -123,7 +123,7 @@ const ArtBibleViewer = ({ projectId, project, onBack }) => {
                 <span style={{ flex: 1 }}>{section.label}</span>
                 <span style={{
                   width: '6px', height: '6px', borderRadius: '50%',
-                  background: isDone ? '#22c55e' : 'rgba(255,255,255,0.1)',
+                  background: isDone ? 'var(--status-ok)' : 'rgba(255,255,255,0.1)',
                 }} />
               </button>
             );
@@ -178,7 +178,7 @@ function OverviewGrid({ sections, pipelineData, onSelect, project }) {
               <div style={{ fontSize: '0.8rem', fontWeight: 600, marginBottom: '4px' }}>{section.label}</div>
               <div style={{
                 fontSize: '0.6rem',
-                color: isDone ? '#22c55e' : 'var(--text-dim)',
+                color: isDone ? 'var(--status-ok)' : 'var(--text-dim)',
                 fontWeight: isDone ? 600 : 400,
               }}>
                 {isDone ? '✓ Complete' : '— Not started'}
@@ -218,7 +218,7 @@ function SectionDetail({ section, asset, onBack }) {
           <h2 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0 }}>{section.label}</h2>
           <span style={{
             fontSize: '0.6rem', fontWeight: 600,
-            color: isDone ? '#22c55e' : 'var(--text-dim)',
+            color: isDone ? 'var(--status-ok)' : 'var(--text-dim)',
           }}>
             {isDone ? '✓ Complete' : '— Not generated yet'}
           </span>
@@ -292,7 +292,7 @@ function AnalysisSummary({ data }) {
           <div style={{ fontSize: '0.65rem', fontWeight: 600, color: 'var(--text-dim)', letterSpacing: '1px', marginBottom: '6px' }}>CHARACTERS</div>
           {data.characters.slice(0, 10).map(c => (
             <div key={c.name} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-              <span style={{ color: c.type === 'lead' ? '#a78bfa' : '#888' }}>{c.name}</span>
+              <span style={{ color: c.type === 'lead' ? 'var(--gold)' : '#888' }}>{c.name}</span>
               <span style={{ color: 'var(--text-dim)', fontSize: '0.65rem' }}>{c.sceneCount} scenes · {c.type}</span>
             </div>
           ))}

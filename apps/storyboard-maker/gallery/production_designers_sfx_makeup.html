@@ -80,7 +80,14 @@
     </div>
   </div>
 </div>
+<script src="gallery-api.js"></script>
 <script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
 const DESIGNERS = [
   {
     id: 'rick_baker', rank: '01', name: 'Rick Baker (릭 베이커)',
@@ -357,7 +364,7 @@ function prevImage() { if (!currentArtist || currentArtist.images.length === 0) 
 function nextImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length; selectImage(currentImageIdx); }
 function openModal() { const sel = document.getElementById('modalStyle'); if (sel.options.length <= 1) { DESIGNERS.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`; sel.appendChild(opt); }); } document.getElementById('modalOverlay').classList.add('show'); document.getElementById('modalScene').focus(); if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id; }
 function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
-function handleGenerate() { const scene = document.getElementById('modalScene').value; const style = document.getElementById('modalStyle').value; if (!scene.trim()) { alert('Description is required.'); return; } closeModal(); setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`); setTimeout(() => { setStatus('ready', 'Generation complete.'); }, 2000); }
+function handleGenerate() { const scene = document.getElementById('modalScene').value; const style = document.getElementById('modalStyle').value; if (!scene.trim()) { alert('Description is required.'); return; } closeModal(); setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`); generateConcept('sfx_makeup', { description: scene, style }).then(data => { if (data.success && data.url) { showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`); setStatus('ready', 'Generation complete ✓'); } else { setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`); } }).catch(err => { setStatus('ready', `API error: ${err.message}`); }); }
 function setStatus(state, text) { document.getElementById('statusDot').className = 'status-dot ' + state; document.getElementById('statusText').textContent = text; }
 document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return; if (e.key === 'ArrowLeft') prevImage(); if (e.key === 'ArrowRight') nextImage(); if (e.key === 'g' || e.key === 'G') openModal(); if (e.key === 'Escape') closeModal(); const num = parseInt(e.key); if (!isNaN(num)) { const idx = num === 0 ? 9 : num - 1; if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id); } });
 document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });

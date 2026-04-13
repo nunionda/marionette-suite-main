@@ -53,7 +53,7 @@ const ProjectCard = ({ project, onEnter, onDelete }) => {
           <div style={{ display: 'flex', gap: '8px', fontSize: '0.6rem', color: 'var(--text-dim)', marginTop: '4px' }}>
             <span>{project.totalScenes} scenes</span>
             <span>{project.totalCuts} cuts</span>
-            {project.completedCuts > 0 && <span style={{ color: '#22c55e' }}>{project.completedCuts} done</span>}
+            {project.completedCuts > 0 && <span style={{ color: 'var(--status-ok)' }}>{project.completedCuts} done</span>}
           </div>
         )}
       </div>

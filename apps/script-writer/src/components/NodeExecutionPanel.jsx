@@ -55,6 +55,19 @@ const STYLE_BY_NODE = {
     { id: 'lindy_hemming', label: 'Lindy Hemming', desc: 'Dark Knight 조커 의상, 007 시리즈 오스카 수상' },
     { id: 'arianne_phillips', label: 'Arianne Phillips', desc: 'Once Upon a Time/Kingsman 시대극+현대 융합' },
   ],
+  // 분장/헤어 디자인: 할리우드 10대 분장 아티스트
+  makeup_hair: [
+    { id: 'rick_baker', label: 'Rick Baker', desc: 'An American Werewolf/Men in Black 7회 오스카' },
+    { id: 'kazuhiro_tsuji', label: 'Kazuhiro Tsuji', desc: 'Darkest Hour 게리 올드만→처칠 변신 오스카' },
+    { id: 've_neill', label: 'Ve Neill', desc: 'Beetlejuice/Mrs. Doubtfire/Pirates 3회 오스카' },
+    { id: 'greg_nicotero', label: 'Greg Nicotero', desc: 'Walking Dead/Kill Bill 특수분장 제작' },
+    { id: 'kazu_hiro', label: 'Kazu Hiro', desc: 'Bombshell 초사실주의 실리콘 프로스테틱' },
+    { id: 'stan_winston', label: 'Stan Winston', desc: 'Terminator/Jurassic Park/Predator 레전드' },
+    { id: 'dick_smith', label: 'Dick Smith', desc: 'The Exorcist/Amadeus 특수분장의 대부' },
+    { id: 'joel_harlow', label: 'Joel Harlow', desc: 'Star Trek/Pirates 크리처 분장 전문' },
+    { id: 'mike_elizalde', label: 'Mike Elizalde', desc: "Spectral/Pan's Labyrinth 크리처 전문" },
+    { id: 'neill_gorton', label: 'Neill Gorton', desc: 'Doctor Who/Saving Private Ryan 프로스테틱' },
+  ],
   // 소품 디자인: 할리우드 10대 소품/프랍 디자이너
   props: [
     { id: 'daniel_simon', label: 'Daniel Simon', desc: 'Tron Legacy/Captain America 미래 차량+메카닉' },
@@ -68,6 +81,18 @@ const STYLE_BY_NODE = {
     { id: 'period_authentic', label: 'Period Authentic', desc: '시대극 고증 소품 — 역사적 정확성' },
     { id: 'fantasy_ornate', label: 'Fantasy Ornate', desc: '판타지 장식 소품 — 정교한 디테일' },
   ],
+};
+
+// ─── Gallery page mapping for design nodes ───
+const NODE_GALLERY_MAP = {
+  character_design: 'concept_designers_character.html',
+  set_design: 'production_designers_set.html',
+  costume_design: 'production_designers_costume.html',
+  makeup_hair: 'production_designers_sfx_makeup.html',
+  props: 'concept_designers_props.html',
+  storyboard: 'Famous_Storyboard_Artists_Reference.html',
+  visual_world: 'concept_designers_environment.html',
+  lookbook: 'concept_designers_environment.html',
 };
 
 // 스토리보드 노드는 storyboard-concept-maker 서버에서 스타일을 가져옴 (연출가 스타일)
@@ -86,6 +111,47 @@ function getNodeStyles(nodeId) {
 }
 
 const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
+  const hasGallery = !!(node && NODE_GALLERY_MAP[node.id]);
+  const [viewMode, setViewMode] = useState('execute'); // 'execute' | 'gallery'
+
+  // Listen for postMessage from gallery iframe
+  useEffect(() => {
+    if (viewMode !== 'gallery' || !node || !projectId) return;
+    const handler = (event) => {
+      if (event.data?.type !== 'gallery-generation-result') return;
+      const { payload } = event.data;
+      if (!payload?.success) return;
+      // Save gallery result to pipeline DB
+      fetch(`/api/projects/${projectId}/pipeline/${node.id}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phase: node.phase,
+          track: track || 'design',
+          style: payload.style,
+          description: payload.description,
+          inputData: { description: payload.description, style: payload.style, source: 'gallery' },
+          provider: 'storyboard-gallery',
+        }),
+      })
+        .then(r => r.json())
+        .then(d => {
+          if (d.success) {
+            // Reload result
+            fetch(`/api/projects/${projectId}/pipeline/${node.id}`)
+              .then(r => r.json())
+              .then(reloaded => {
+                if (reloaded.asset) setResult(reloaded.asset);
+                setHistory(reloaded.history || []);
+              });
+          }
+        })
+        .catch(() => {});
+    };
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [viewMode, node?.id, projectId]);
+
   // Use node-specific styles if available, otherwise fetch from storyboard server
   const nodeSpecificStyles = getNodeStyles(node?.id);
   const [style, setStyle] = useState(nodeSpecificStyles?.[0]?.id || 'bong');
@@ -141,7 +207,7 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
   if (!node) return null;
 
   const isDesignNode = track === 'design';
-  const hasImageApi = ['character_design', 'set_design', 'costume_design', 'props', 'storyboard'].includes(node.id);
+  const hasImageApi = ['character_design', 'set_design', 'costume_design', 'makeup_hair', 'props', 'storyboard', 'lookbook', 'visual_world'].includes(node.id);
   const isAnalysisNode = ['script_analysis', 'production_breakdown'].includes(node.id);
 
   const handleExecute = async () => {
@@ -182,27 +248,61 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
   const imageUrls = result?.imageUrls || [];
   const outputData = result?.outputData;
 
+  const panelWidth = viewMode === 'gallery' ? '900px' : '420px';
+  const galleryPage = NODE_GALLERY_MAP[node?.id];
+  const galleryUrl = galleryPage
+    ? `/gallery/${galleryPage}?embed=true&project=${encodeURIComponent(project?.title || '')}&nodeId=${node.id}`
+    : null;
+
   return (
     <div style={{
       position: 'fixed', top: 0, right: 0, bottom: 0,
-      width: '420px', background: '#0d0d0d',
-      borderLeft: '1px solid rgba(255,255,255,0.08)',
+      width: panelWidth, background: 'var(--bg-floor)',
+      borderLeft: '1px solid var(--border)',
       zIndex: 1000, display: 'flex', flexDirection: 'column',
       boxShadow: '-4px 0 20px rgba(0,0,0,0.5)',
+      transition: 'width 0.3s ease',
     }}>
       {/* Header */}
       <div style={{
-        padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.06)',
+        padding: '16px 20px', borderBottom: '1px solid var(--border)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         flexShrink: 0,
       }}>
-        <div>
-          <div style={{ fontSize: '0.6rem', color: isDesignNode ? '#8b5cf6' : '#f59e0b', fontWeight: 600, letterSpacing: '1px' }}>
-            {node.agent || track.toUpperCase()} · {node.phase}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div>
+            <div style={{ fontSize: '0.6rem', color: 'var(--gold)', fontFamily: 'var(--font-mono)', fontWeight: 500, letterSpacing: '1px' }}>
+              {node.agent || track.toUpperCase()} · {node.phase}
+            </div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 700, marginTop: '2px' }}>
+              {node.labelKo || node.label}
+            </div>
           </div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 700, marginTop: '2px' }}>
-            {node.labelKo || node.label}
-          </div>
+          {/* Gallery / Execute mode toggle */}
+          {hasGallery && (
+            <div style={{ display: 'flex', gap: '2px', marginLeft: '8px' }}>
+              <button
+                onClick={() => setViewMode('execute')}
+                style={{
+                  padding: '4px 10px', fontSize: '0.6rem', fontWeight: viewMode === 'execute' ? 700 : 400,
+                  background: viewMode === 'execute' ? 'var(--gold-subtle)' : 'transparent',
+                  border: `1px solid ${viewMode === 'execute' ? 'var(--gold-dim)' : 'var(--border)'}`,
+                  borderRadius: '4px 0 0 4px', cursor: 'pointer',
+                  color: viewMode === 'execute' ? 'var(--gold)' : 'var(--text-dim)',
+                }}
+              >⚡ Execute</button>
+              <button
+                onClick={() => setViewMode('gallery')}
+                style={{
+                  padding: '4px 10px', fontSize: '0.6rem', fontWeight: viewMode === 'gallery' ? 700 : 400,
+                  background: viewMode === 'gallery' ? 'var(--gold-subtle)' : 'transparent',
+                  border: `1px solid ${viewMode === 'gallery' ? 'var(--gold-dim)' : 'var(--border)'}`,
+                  borderRadius: '0 4px 4px 0', cursor: 'pointer',
+                  color: viewMode === 'gallery' ? 'var(--gold)' : 'var(--text-dim)',
+                }}
+              >🎨 Gallery</button>
+            </div>
+          )}
         </div>
         <button onClick={onClose} style={{
           background: 'none', border: 'none', color: 'var(--text-dim, #888)',
@@ -210,7 +310,24 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
         }}>✕</button>
       </div>
 
-      {/* Content — scrollable */}
+      {/* Gallery mode — iframe */}
+      {viewMode === 'gallery' && galleryUrl && (
+        <div style={{ flex: 1, position: 'relative' }}>
+          <iframe
+            src={galleryUrl}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              background: '#06060a',
+            }}
+            title={`${node.label} Gallery`}
+          />
+        </div>
+      )}
+
+      {/* Execute mode — scrollable content */}
+      {viewMode === 'execute' && (
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
         {/* Description */}
         <div style={{ fontSize: '0.7rem', color: 'var(--text-dim, #888)', marginBottom: '16px', lineHeight: 1.5 }}>
@@ -225,7 +342,7 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
             background: result.status === 'done' ? 'rgba(34,197,94,0.1)' : 'rgba(245,158,11,0.1)',
             border: `1px solid ${result.status === 'done' ? 'rgba(34,197,94,0.3)' : 'rgba(245,158,11,0.3)'}`,
             fontSize: '0.6rem', fontWeight: 600,
-            color: result.status === 'done' ? '#22c55e' : '#f59e0b',
+            color: result.status === 'done' ? 'var(--status-ok)' : 'var(--status-warn)',
           }}>
             {result.status === 'done' ? '✓ COMPLETE' : result.status?.toUpperCase()}
           </div>
@@ -244,10 +361,10 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
                   onClick={() => setStyle(s.id)}
                   style={{
                     padding: '6px 8px', fontSize: '0.62rem', textAlign: 'left',
-                    background: style === s.id ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${style === s.id ? 'rgba(139,92,246,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                    background: style === s.id ? 'var(--gold-subtle)' : 'rgba(255,255,255,0.02)',
+                    border: `1px solid ${style === s.id ? 'var(--gold-dim)' : 'rgba(255,255,255,0.06)'}`,
                     borderRadius: '4px', cursor: 'pointer',
-                    color: style === s.id ? '#a78bfa' : 'var(--text-dim, #888)',
+                    color: style === s.id ? 'var(--gold)' : 'var(--text-dim, #888)',
                   }}
                 >
                   <div style={{ fontWeight: 600 }}>{s.label}</div>
@@ -284,8 +401,8 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
           disabled={executing}
           style={{
             width: '100%', padding: '12px', fontSize: '0.8rem', fontWeight: 700,
-            background: executing ? 'rgba(255,255,255,0.06)' : (isDesignNode ? '#8b5cf6' : '#f59e0b'),
-            color: executing ? 'var(--text-dim)' : '#000',
+            background: executing ? 'rgba(255,255,255,0.06)' : 'var(--gold)',
+            color: executing ? 'var(--text-dim)' : 'var(--bg-floor)',
             border: 'none', borderRadius: '8px', cursor: executing ? 'wait' : 'pointer',
             letterSpacing: '0.5px', marginBottom: '20px',
           }}
@@ -298,7 +415,7 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
           <div style={{
             padding: '10px', marginBottom: '16px', fontSize: '0.7rem',
             background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)',
-            borderRadius: '6px', color: '#ef4444',
+            borderRadius: '6px', color: 'var(--status-error)',
           }}>
             ⚠ {error}
           </div>
@@ -338,7 +455,7 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
                 {/* Top characters */}
                 {outputData.characters?.slice(0, 5).map(c => (
                   <div key={c.name} style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.04)', fontSize: '0.65rem' }}>
-                    <span style={{ color: c.type === 'lead' ? '#a78bfa' : '#888' }}>{c.name}</span>
+                    <span style={{ color: c.type === 'lead' ? 'var(--gold)' : '#888' }}>{c.name}</span>
                     <span style={{ color: 'var(--text-dim)' }}>{c.sceneCount} scenes · {c.type}</span>
                   </div>
                 ))}
@@ -378,6 +495,7 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
           </div>
         )}
       </div>
+      )}
     </div>
   );
 };
@@ -385,12 +503,16 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
 function generateAutoDescription(node, project) {
   if (!project) return '';
   switch (node.id) {
+    case 'lookbook': return `${project.title}의 룩북 — 톤, 색감, 조명, 참조 이미지 무드보드`;
+    case 'visual_world': return `${project.title}의 비주얼 톤 & 색감 정의`;
+    case 'color_script': return `${project.title}의 씬별 감정-색감 변화 컬러 스크립트`;
     case 'character_design': return `${project.title}의 주요 캐릭터 컨셉 디자인`;
     case 'set_design': return `${project.title}의 주요 로케이션 세트 컨셉`;
     case 'costume_design': return `${project.title}의 캐릭터별 의상 디자인`;
+    case 'makeup_hair': return `${project.title}의 캐릭터별 분장/헤어 디자인`;
     case 'props': return `${project.title}의 핵심 소품 디자인`;
+    case 'graphic_design': return `${project.title}의 작품 내 그래픽 프랍 (신문/간판/로고 등)`;
     case 'storyboard': return `${project.title}의 주요 씬 스토리보드`;
-    case 'visual_world': return `${project.title}의 비주얼 톤 & 색감 정의`;
     default: return '';
   }
 }

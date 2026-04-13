@@ -10,6 +10,10 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:3006',
         changeOrigin: true
+      },
+      '/gallery': {
+        target: 'http://127.0.0.1:3006',
+        changeOrigin: true
       }
     }
   }

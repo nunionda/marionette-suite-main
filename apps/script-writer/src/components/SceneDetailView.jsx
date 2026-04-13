@@ -13,11 +13,11 @@ const CUT_STATUSES = ['pending', 'script', 'image_prompt', 'image_gen', 'video',
 const STATUS_CONFIG = {
   pending:      { label: 'Pending',       icon: '⬜', color: '#6b7280', progress: 0 },
   script:       { label: 'Script',        icon: '📝', color: '#3b82f6', progress: 16 },
-  image_prompt: { label: 'Img Prompt',    icon: '✏️', color: '#8b5cf6', progress: 33 },
+  image_prompt: { label: 'Img Prompt',    icon: '✏️', color: 'var(--gold)', progress: 33 },
   image_gen:    { label: 'Image Gen',     icon: '🖼️', color: '#a855f7', progress: 50 },
-  video:        { label: 'Video Gen',     icon: '🎬', color: '#f59e0b', progress: 66 },
+  video:        { label: 'Video Gen',     icon: '🎬', color: 'var(--gold)', progress: 66 },
   audio:        { label: 'Audio',         icon: '🔊', color: '#10b981', progress: 83 },
-  done:         { label: 'Done',          icon: '✅', color: '#22c55e', progress: 100 },
+  done:         { label: 'Done',          icon: '✅', color: 'var(--status-ok)', progress: 100 },
 };
 
 function CutCard({ cut, isSelected, onClick }) {
@@ -30,7 +30,7 @@ function CutCard({ cut, isSelected, onClick }) {
       style={{
         padding: '8px 10px',
         background: isSelected ? 'rgba(139,92,246,0.12)' : 'rgba(255,255,255,0.02)',
-        border: `1px solid ${isSelected ? 'rgba(139,92,246,0.4)' : 'rgba(255,255,255,0.06)'}`,
+        border: `1px solid ${isSelected ? 'var(--gold-dim)' : 'rgba(255,255,255,0.06)'}`,
         borderRadius: '6px',
         cursor: 'pointer',
         transition: 'all 0.15s',
@@ -100,10 +100,10 @@ function CutNodePipeline({ cut, onUpdate }) {
   return (
     <div style={{ padding: '16px', height: '100%', overflowY: 'auto' }}>
       {/* Cut header */}
-      <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', borderRadius: '8px' }}>
+      <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(139,92,246,0.08)', border: '1px solid var(--gold-subtle)', borderRadius: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <span style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: 'monospace', color: '#a78bfa' }}>{cut.displayId}</span>
+            <span style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--gold)' }}>{cut.displayId}</span>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '8px' }}>{cut.type} · {cut.duration}s</span>
           </div>
           <span style={{ fontSize: '0.65rem', padding: '2px 8px', borderRadius: '4px', background: `${STATUS_CONFIG[cut.status]?.color}20`, color: STATUS_CONFIG[cut.status]?.color, border: `1px solid ${STATUS_CONFIG[cut.status]?.color}40` }}>
@@ -137,13 +137,13 @@ function CutNodePipeline({ cut, onUpdate }) {
                 borderRadius: '6px',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 600, color: isCurrent ? '#a78bfa' : 'var(--text-muted)', letterSpacing: '0.5px' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 600, color: isCurrent ? 'var(--gold)' : 'var(--text-muted)', letterSpacing: '0.5px' }}>
                     {node.label.toUpperCase()}
                   </span>
                   {isCurrent && (
                     <button
                       onClick={() => handleStatusAdvance(CUT_STATUSES[statusIdx + 1])}
-                      style={{ fontSize: '0.6rem', padding: '2px 8px', background: 'rgba(139,92,246,0.2)', border: '1px solid rgba(139,92,246,0.4)', borderRadius: '4px', color: '#a78bfa', cursor: 'pointer' }}
+                      style={{ fontSize: '0.6rem', padding: '2px 8px', background: 'var(--gold-subtle)', border: '1px solid var(--gold-dim)', borderRadius: '4px', color: 'var(--gold)', cursor: 'pointer' }}
                     >
                       ▶ Next
                     </button>
@@ -239,7 +239,7 @@ const SceneDetailView = ({ project, sceneId, onBack }) => {
             {completedCuts}/{totalCuts} done
           </div>
           <div style={{ width: '100px', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
-            <div style={{ height: '100%', width: `${totalCuts > 0 ? (completedCuts / totalCuts * 100) : 0}%`, background: '#22c55e', borderRadius: '2px' }} />
+            <div style={{ height: '100%', width: `${totalCuts > 0 ? (completedCuts / totalCuts * 100) : 0}%`, background: 'var(--status-ok)', borderRadius: '2px' }} />
           </div>
         </div>
       </div>

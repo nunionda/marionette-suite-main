@@ -117,7 +117,7 @@ export default function SendToStudioButton({ scriptWriterProjectId, scriptData }
             )}
 
             {status === 'ok' && (
-              <p style={{ color: '#4ade80', fontSize: '0.85rem', marginBottom: '12px' }}>
+              <p style={{ color: 'var(--status-ok)', fontSize: '0.85rem', marginBottom: '12px' }}>
                 ✅ Studio로 내보내기 완료!
               </p>
             )}

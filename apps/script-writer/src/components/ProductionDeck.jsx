@@ -89,10 +89,11 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
     { key: 'storyboard',  label: 'Storyboard',    icon: '📐' },
     { key: 'artbible',    label: 'Art Bible',      icon: '📕' },
     { key: 'analytics',   label: 'Analytics',      icon: '📊' },
+    { key: 'references',  label: 'References',     icon: '🎨' },
   ];
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-color, #0a0a0a)' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-floor)' }}>
       {/* ── Top Bar ── */}
       <header style={{
         padding: '10px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -105,7 +106,7 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
           </button>
           <span style={{ color: 'rgba(255,255,255,0.15)' }}>|</span>
           <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>{project.title}</span>
-          <span style={{ fontSize: '0.65rem', color: '#f59e0b', letterSpacing: '1px' }}>PRODUCTION</span>
+          <span style={{ fontSize: '0.65rem', color: 'var(--gold)', letterSpacing: '1px' }}>PRODUCTION</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {stats && (
@@ -118,7 +119,7 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
             style={{
               padding: '6px 14px', fontSize: '0.7rem', fontWeight: 600,
               background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)',
-              borderRadius: '4px', color: '#a78bfa', cursor: 'pointer',
+              borderRadius: '4px', color: 'var(--gold)', cursor: 'pointer',
             }}
           >
             🔀 Open Studio
@@ -138,7 +139,7 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
             style={{
               padding: '10px 20px', fontSize: '0.72rem', fontWeight: activeView === tab.key ? 700 : 500,
               background: 'none', border: 'none',
-              borderBottom: activeView === tab.key ? '2px solid #f59e0b' : '2px solid transparent',
+              borderBottom: activeView === tab.key ? '2px solid var(--gold)' : '2px solid transparent',
               color: activeView === tab.key ? 'var(--text-main)' : 'var(--text-dim)',
               cursor: 'pointer', fontFamily: 'inherit',
             }}
@@ -226,6 +227,20 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
             <AnalyticsDashboard data={pipelineData.analysisData} />
           </div>
         )}
+        {activeView === 'references' && (
+          <div style={{ height: '100%', position: 'relative' }}>
+            <iframe
+              src="/gallery/index.html?embed=true"
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                background: '#06060a',
+              }}
+              title="Visual Reference Library"
+            />
+          </div>
+        )}
       </div>
     </div>
   );
@@ -267,7 +282,7 @@ function ScenesView({ scenes, stats, loading, parsing, hasScreenplay, onParse, o
             disabled={parsing}
             style={{
               padding: '12px 32px', fontSize: '0.8rem', fontWeight: 700,
-              background: '#f59e0b', color: '#000', border: 'none',
+              background: 'var(--gold)', color: '#000', border: 'none',
               borderRadius: '8px', cursor: 'pointer',
             }}
           >
@@ -286,9 +301,9 @@ function ScenesView({ scenes, stats, loading, parsing, hasScreenplay, onParse, o
         display: 'flex', alignItems: 'center', gap: '24px', flexShrink: 0,
       }}>
         <div style={{ display: 'flex', gap: '16px', fontSize: '0.7rem', color: 'var(--text-dim)' }}>
-          <span><strong style={{ color: '#f59e0b' }}>{stats?.scenes || 0}</strong> Scenes</span>
-          <span><strong style={{ color: '#f59e0b' }}>{stats?.totalCuts || 0}</strong> Cuts</span>
-          <span><strong style={{ color: '#f59e0b' }}>{stats?.characters || 0}</strong> Characters</span>
+          <span><strong style={{ color: 'var(--gold)' }}>{stats?.scenes || 0}</strong> Scenes</span>
+          <span><strong style={{ color: 'var(--gold)' }}>{stats?.totalCuts || 0}</strong> Cuts</span>
+          <span><strong style={{ color: 'var(--gold)' }}>{stats?.characters || 0}</strong> Characters</span>
         </div>
         <div style={{ flex: 1 }} />
         {/* Act filter */}
@@ -302,8 +317,8 @@ function ScenesView({ scenes, stats, loading, parsing, hasScreenplay, onParse, o
         </div>
         <button onClick={onParse} disabled={parsing} style={{
           padding: '4px 12px', fontSize: '0.6rem', fontWeight: 600,
-          background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)',
-          borderRadius: '4px', color: '#f59e0b', cursor: 'pointer',
+          background: 'var(--gold-subtle)', border: '1px solid rgba(245,158,11,0.2)',
+          borderRadius: '4px', color: 'var(--gold)', cursor: 'pointer',
         }}>
           {parsing ? '...' : '↻ Re-parse'}
         </button>
@@ -344,7 +359,7 @@ function ScenesView({ scenes, stats, loading, parsing, hasScreenplay, onParse, o
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--text-main)' }}>
                     {scene.displayId || scene.display_id || scene.slug}
                   </span>
-                  <span style={{ fontSize: '0.55rem', padding: '2px 6px', borderRadius: '3px', background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }}>
+                  <span style={{ fontSize: '0.55rem', padding: '2px 6px', borderRadius: '3px', background: 'var(--gold-subtle)', color: 'var(--gold)' }}>
                     {cutCount} cuts
                   </span>
                 </div>
@@ -369,18 +384,18 @@ function ScenesView({ scenes, stats, loading, parsing, hasScreenplay, onParse, o
 
                 {/* Progress bar */}
                 <div style={{ height: '3px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', position: 'relative' }}>
-                  <div style={{ height: '100%', width: `${progress}%`, background: progress === 100 ? '#22c55e' : '#f59e0b', borderRadius: '2px' }} />
+                  <div style={{ height: '100%', width: `${progress}%`, background: progress === 100 ? 'var(--status-ok)' : 'var(--gold)', borderRadius: '2px' }} />
                   {batchingSceneId === scene.id && (
                     <div style={{
                       position: 'absolute', top: 0, left: 0, right: 0, height: '100%',
-                      background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)',
+                      background: 'linear-gradient(90deg, transparent, var(--gold), transparent)',
                       animation: 'shimmer 1.5s infinite',
                       borderRadius: '2px',
                     }} />
                   )}
                 </div>
                 {batchingSceneId === scene.id && batchProgress && (
-                  <div style={{ fontSize: '0.5rem', color: '#f59e0b', marginTop: '4px', textAlign: 'center', fontWeight: 600 }}>
+                  <div style={{ fontSize: '0.5rem', color: 'var(--gold)', marginTop: '4px', textAlign: 'center', fontWeight: 600 }}>
                     ⚡ {batchProgress.current}/{batchProgress.total} cuts processing...
                   </div>
                 )}
@@ -391,8 +406,8 @@ function ScenesView({ scenes, stats, loading, parsing, hasScreenplay, onParse, o
                     onClick={(e) => { e.stopPropagation(); onBatchExecute?.(scene); }}
                     style={{
                       fontSize: '0.5rem', padding: '2px 8px', fontWeight: 600,
-                      background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)',
-                      borderRadius: '3px', color: '#f59e0b', cursor: 'pointer',
+                      background: 'var(--gold-subtle)', border: '1px solid rgba(245,158,11,0.25)',
+                      borderRadius: '3px', color: 'var(--gold)', cursor: 'pointer',
                     }}
                   >
                     ⚡ Generate
@@ -415,7 +430,7 @@ function filterBtnStyle(isActive) {
     padding: '4px 10px', fontSize: '0.6rem', fontWeight: 600,
     background: isActive ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)',
     border: `1px solid ${isActive ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.08)'}`,
-    borderRadius: '4px', color: isActive ? '#f59e0b' : 'var(--text-dim)',
+    borderRadius: '4px', color: isActive ? 'var(--gold)' : 'var(--text-dim)',
     cursor: 'pointer',
   };
 }

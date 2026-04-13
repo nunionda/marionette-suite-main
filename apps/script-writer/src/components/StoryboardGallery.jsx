@@ -252,7 +252,7 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : frame.status === 'error' ? (
-                    <span style={{ fontSize: '0.7rem', color: '#ef4444' }}>⚠ Generation failed</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--status-error)' }}>⚠ Generation failed</span>
                   ) : (
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
                       {generating ? '⏳' : '—'}
@@ -269,7 +269,7 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
                     <span style={{
                       fontSize: '0.5rem', padding: '1px 6px', borderRadius: '3px',
                       background: frame.status === 'done' ? 'rgba(34,197,94,0.1)' : 'rgba(255,255,255,0.04)',
-                      color: frame.status === 'done' ? '#22c55e' : 'var(--text-dim)',
+                      color: frame.status === 'done' ? 'var(--status-ok)' : 'var(--text-dim)',
                     }}>
                       {frame.status}
                     </span>

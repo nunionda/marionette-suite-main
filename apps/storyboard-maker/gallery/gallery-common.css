@@ -574,3 +574,9 @@ kbd {
 @media (max-width: 768px) {
   .mobile-tabs { display: flex; }
 }
+
+/* ─── Embed Mode (when loaded inside ProductionDeck iframe) ─── */
+body.embed-mode .gallery-nav { display: none !important; }
+body.embed-mode .topbar { padding-top: 6px; }
+body.embed-mode .layout { height: calc(100vh - 56px); }
+body.embed-mode .mobile-tabs { display: none !important; }

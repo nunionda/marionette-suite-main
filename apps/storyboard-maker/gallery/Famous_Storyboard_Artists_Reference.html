@@ -112,7 +112,14 @@
   </div>
 </div>
 
+<script src="gallery-api.js"></script>
 <script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
 const ARTISTS = [
   {
     id: 'kurosawa', rank: '01', name: '黒澤 明 (Akira Kurosawa)',
@@ -545,17 +552,18 @@ function handleGenerate() {
   closeModal();
   setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
 
-  // Build CLI command hint
-  const cmd = style === 'all'
-    ? `python3 main.py compare --scene "${scene}"`
-    : `python3 main.py generate --scene "${scene}" --style ${style}`;
-
-  console.log('Run:', cmd);
-
-  // Simulate generation (in real use, this would call the Python backend)
-  setTimeout(() => {
-    setStatus('ready', `Generation complete. Run in terminal: ${cmd}`);
-  }, 2000);
+  generateConcept('storyboard', { description: scene, style, camera, mood })
+    .then(data => {
+      if (data.success && data.url) {
+        showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`);
+        setStatus('ready', 'Generation complete ✓');
+      } else {
+        setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`);
+      }
+    })
+    .catch(err => {
+      setStatus('ready', `API error: ${err.message}`);
+    });
 }
 
 function setStatus(state, text) {

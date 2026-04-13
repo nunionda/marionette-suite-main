@@ -102,7 +102,14 @@
   </div>
 </div>
 
+<script src="gallery-api.js"></script>
 <script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
 const DESIGNERS = [
   {
     id: 'ken_adam', rank: '01', name: 'Ken Adam (켄 아담)',
@@ -571,13 +578,19 @@ function handleGenerate() {
   if (!scene.trim()) { alert('Set description is required.'); return; }
   closeModal();
   setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
-  const cmd = style === 'all'
-    ? `python3 main.py compare --type set --scene "${scene}"`
-    : `python3 main.py generate --type set --scene "${scene}" --style ${style}`;
-  console.log('Run:', cmd);
-  setTimeout(() => {
-    setStatus('ready', `Generation complete. Run in terminal: ${cmd}`);
-  }, 2000);
+
+  generateConcept('set', { description: scene, style, pose: camera, mood })
+    .then(data => {
+      if (data.success && data.url) {
+        showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`);
+        setStatus('ready', 'Generation complete ✓');
+      } else {
+        setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`);
+      }
+    })
+    .catch(err => {
+      setStatus('ready', `API error: ${err.message}`);
+    });
 }
 
 function setStatus(state, text) {

@@ -17,9 +17,13 @@ const GATE_DEFINITIONS = {
     items: [
       { id: 'script_analysis', label: 'Script Analysis', nodeId: 'script_analysis' },
       { id: 'production_breakdown', label: 'Production Breakdown', nodeId: 'production_breakdown' },
+      { id: 'lookbook', label: 'Lookbook / Mood Board', nodeId: 'lookbook' },
+      { id: 'color_script', label: 'Color Script', nodeId: 'color_script' },
       { id: 'character_design', label: 'Character Design', nodeId: 'character_design' },
       { id: 'set_design', label: 'Set Design', nodeId: 'set_design' },
       { id: 'costume_design', label: 'Costume Design', nodeId: 'costume_design' },
+      { id: 'makeup_hair', label: 'Makeup & Hair', nodeId: 'makeup_hair' },
+      { id: 'graphic_design', label: 'Graphic Design', nodeId: 'graphic_design' },
       { id: 'storyboard', label: 'Storyboard', nodeId: 'storyboard' },
       { id: 'shot_list', label: 'Shot List', nodeId: 'shot_list' },
       { id: 'art_bible', label: 'Art Bible', nodeId: 'art_bible' },
@@ -115,10 +119,10 @@ const StageGateChecklist = ({ project, pipelineData, category }) => {
           return (
             <button key={g} onClick={() => setActiveGate(g)} style={{
               flex: 1, padding: '4px 0', fontSize: '0.55rem', fontWeight: activeGate === g ? 700 : 500,
-              background: activeGate === g ? 'rgba(139,92,246,0.15)' : 'transparent',
-              border: `1px solid ${activeGate === g ? 'rgba(139,92,246,0.3)' : 'rgba(255,255,255,0.06)'}`,
+              background: activeGate === g ? 'var(--gold-subtle)' : 'transparent',
+              border: `1px solid ${activeGate === g ? 'var(--gold-dim)' : 'rgba(255,255,255,0.06)'}`,
               borderRadius: '3px', cursor: 'pointer',
-              color: pct === 100 ? '#22c55e' : activeGate === g ? '#a78bfa' : 'var(--text-muted, #888)',
+              color: pct === 100 ? 'var(--status-ok)' : activeGate === g ? 'var(--gold)' : 'var(--text-muted, #888)',
             }}>
               {g} {pct === 100 ? '✓' : pct > 0 ? `${pct}%` : ''}
             </button>
@@ -132,9 +136,9 @@ const StageGateChecklist = ({ project, pipelineData, category }) => {
           fontSize: '0.65rem',
           padding: '2px 8px',
           borderRadius: '4px',
-          background: (activeReadiness?.percent || 0) === 100 ? 'rgba(74,222,128,0.2)' : 'rgba(251,146,60,0.2)',
-          color: (activeReadiness?.percent || 0) === 100 ? '#4ade80' : '#fb923c',
-          border: `1px solid ${(activeReadiness?.percent || 0) === 100 ? 'rgba(74,222,128,0.4)' : 'rgba(251,146,60,0.4)'}`,
+          background: (activeReadiness?.percent || 0) === 100 ? 'rgba(39,174,96,0.1)' : 'rgba(226,160,53,0.1)',
+          color: (activeReadiness?.percent || 0) === 100 ? 'var(--status-ok)' : 'var(--status-warn)',
+          border: `1px solid ${(activeReadiness?.percent || 0) === 100 ? 'rgba(39,174,96,0.25)' : 'rgba(226,160,53,0.25)'}`,
         }}>
           {(activeReadiness?.percent || 0) === 100 ? 'READY' : `${activeReadiness?.percent || 0}%`}
         </span>
@@ -152,8 +156,8 @@ const StageGateChecklist = ({ project, pipelineData, category }) => {
           height: '100%',
           width: `${activeReadiness?.percent || 0}%`,
           background: (activeReadiness?.percent || 0) === 100
-            ? 'linear-gradient(90deg, #4ade80, #22c55e)'
-            : 'linear-gradient(90deg, #fb923c, #f97316)',
+            ? 'linear-gradient(90deg, var(--status-ok), var(--status-ok))'
+            : 'linear-gradient(90deg, var(--status-warn), var(--status-warn))',
           borderRadius: '2px',
           transition: 'width 0.3s ease',
         }} />
@@ -173,7 +177,7 @@ const StageGateChecklist = ({ project, pipelineData, category }) => {
             </span>
             <span style={{
               fontSize: '0.6rem',
-              color: item.status === 'complete' ? '#4ade80' : 'var(--text-muted)',
+              color: item.status === 'complete' ? 'var(--status-ok)' : 'var(--text-muted)',
             }}>
               {statusLabel(item.status)}
             </span>
@@ -247,7 +251,7 @@ function ProviderStatusPanel() {
       {Object.entries(providers).map(([type, info]) => (
         <div key={type} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.6rem', padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
           <span style={{ color: 'var(--text-dim, #888)' }}>{typeLabels[type] || type}</span>
-          <span style={{ color: '#a78bfa', fontWeight: 600 }}>{info.active}</span>
+          <span style={{ color: 'var(--gold)', fontWeight: 600 }}>{info.active}</span>
         </div>
       ))}
     </div>

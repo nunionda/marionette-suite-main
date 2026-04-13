@@ -66,8 +66,8 @@ const SceneBreakdownPanel = ({ screenplayText, projectTitle, projectId, onSceneC
       }}>
         {[
           { label: 'ACT 1', count: stats.actBreakdown.act1, color: '#3b82f6' },
-          { label: 'ACT 2', count: stats.actBreakdown.act2, color: '#f59e0b' },
-          { label: 'ACT 3', count: stats.actBreakdown.act3, color: '#ef4444' },
+          { label: 'ACT 2', count: stats.actBreakdown.act2, color: 'var(--gold)' },
+          { label: 'ACT 3', count: stats.actBreakdown.act3, color: 'var(--status-error)' },
         ].map(act => (
           <div
             key={act.label}
@@ -120,7 +120,7 @@ const SceneBreakdownPanel = ({ screenplayText, projectTitle, projectId, onSceneC
                 padding: '1px 6px',
                 borderRadius: '3px',
                 background: 'rgba(139,92,246,0.15)',
-                color: '#a78bfa',
+                color: 'var(--gold)',
                 border: '1px solid rgba(139,92,246,0.3)',
               }}>
                 {scene.cutCount} cuts

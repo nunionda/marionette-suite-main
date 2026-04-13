@@ -977,6 +977,40 @@ const app = new Elysia()
         }
       })
   )
+  // ─── Gallery static files (storyboard-maker gallery pages) ───
+  .get("/gallery/*", async ({ params, set }) => {
+    const requestedPath = (params as any)['*'] || 'index.html';
+    const galleryDir = path.resolve(__dirname, '../../../storyboard-maker/gallery');
+    const filePath = path.join(galleryDir, requestedPath);
+
+    // Security: prevent path traversal
+    if (!filePath.startsWith(galleryDir)) {
+      set.status = 403;
+      return 'Forbidden';
+    }
+
+    const file = Bun.file(filePath);
+    if (await file.exists()) {
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeTypes: Record<string, string> = {
+        '.html': 'text/html; charset=utf-8',
+        '.css': 'text/css; charset=utf-8',
+        '.js': 'application/javascript; charset=utf-8',
+        '.json': 'application/json; charset=utf-8',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.svg': 'image/svg+xml',
+        '.webp': 'image/webp',
+        '.woff2': 'font/woff2',
+      };
+      set.headers['Content-Type'] = mimeTypes[ext] || 'application/octet-stream';
+      return file;
+    }
+
+    set.status = 404;
+    return 'Gallery file not found';
+  })
   .listen({
     port: 3006,
     hostname: "0.0.0.0"
