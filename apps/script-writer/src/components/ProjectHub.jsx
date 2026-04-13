@@ -82,6 +82,29 @@ function useSceneStats(projectId) {
 const ProjectHub = ({ project, onBack, onNavigate }) => {
   const steps = getSteps(project.category);
   const sceneStats = useSceneStats(project.id);
+  const [pipelineProgress, setPipelineProgress] = useState(null);
+
+  useEffect(() => {
+    if (!project?.id) return;
+    fetch(`/api/projects/${project.id}/pipeline`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.success && d.nodes) {
+          const nodes = Object.values(d.nodes);
+          const design = nodes.filter(n => n.track === 'design');
+          const video = nodes.filter(n => n.track === 'video');
+          const designDone = design.filter(n => n.status === 'done').length;
+          const videoDone = video.filter(n => n.status === 'done').length;
+          setPipelineProgress({
+            designDone, designTotal: 12,
+            videoDone, videoTotal: 8,
+            totalDone: designDone + videoDone,
+            totalNodes: 20,
+          });
+        }
+      })
+      .catch(() => {});
+  }, [project?.id]);
 
   // Calculate writing phase progress
   const completedSteps = steps.filter(s => getStepStatus(project, s.field) === 'complete').length;
@@ -324,9 +347,24 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
               <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '12px' }}>
                 프로덕션 디자인 / 비디오 생성 듀얼 트랙 진행 현황과 GS Stage Gate 체크리스트.
               </div>
-              <div style={{ fontSize: '0.6rem', color: '#22c55e' }}>
-                GS STAGE GATE G1
-              </div>
+              {pipelineProgress ? (
+                <div style={{ fontSize: '0.6rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                    <span style={{ color: '#8b5cf6' }}>Design {pipelineProgress.designDone}/{pipelineProgress.designTotal}</span>
+                    <span style={{ color: '#f59e0b' }}>Video {pipelineProgress.videoDone}/{pipelineProgress.videoTotal}</span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '2px', height: '3px' }}>
+                    <div style={{ flex: 12, background: 'rgba(139,92,246,0.15)', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div style={{ width: `${(pipelineProgress.designDone / 12) * 100}%`, height: '100%', background: '#8b5cf6', borderRadius: '2px' }} />
+                    </div>
+                    <div style={{ flex: 8, background: 'rgba(245,158,11,0.15)', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div style={{ width: `${(pipelineProgress.videoDone / 8) * 100}%`, height: '100%', background: '#f59e0b', borderRadius: '2px' }} />
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.6rem', color: '#22c55e' }}>GS STAGE GATE G1</div>
+              )}
             </div>
           </div>
         </section>

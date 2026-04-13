@@ -220,8 +220,38 @@ const StageGateChecklist = ({ project, pipelineData, category }) => {
           {xml}
         </pre>
       )}
+      {/* Provider Status */}
+      <ProviderStatusPanel />
     </section>
   );
 };
+
+function ProviderStatusPanel() {
+  const [providers, setProviders] = useState(null);
+  useEffect(() => {
+    fetch('/api/providers')
+      .then(r => r.json())
+      .then(d => { if (d.success) setProviders(d.providers); })
+      .catch(() => {});
+  }, []);
+
+  if (!providers) return null;
+
+  const typeLabels = { image: '🖼️ Image', video: '🎬 Video', audio: '🔊 Audio', text: '📝 Text' };
+
+  return (
+    <div style={{ marginTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px' }}>
+      <div style={{ fontSize: '0.6rem', fontWeight: 600, letterSpacing: '1px', color: 'var(--text-muted, #888)', marginBottom: '6px' }}>
+        AI PROVIDERS
+      </div>
+      {Object.entries(providers).map(([type, info]) => (
+        <div key={type} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.6rem', padding: '3px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+          <span style={{ color: 'var(--text-dim, #888)' }}>{typeLabels[type] || type}</span>
+          <span style={{ color: '#a78bfa', fontWeight: 600 }}>{info.active}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default StageGateChecklist;
