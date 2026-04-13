@@ -91,6 +91,17 @@ const app = new Elysia()
           let buffer: Buffer | null = null;
 
           if (url) {
+            // SSRF 방지: 허용된 호스트만 fetch 가능
+            const ALLOWED_HOSTS = ['image.pollinations.ai', 'video.pollinations.ai', 'pollinations.ai'];
+            let parsedUrl: URL;
+            try {
+              parsedUrl = new URL(url);
+            } catch {
+              throw new Error('Invalid URL');
+            }
+            if (!ALLOWED_HOSTS.includes(parsedUrl.hostname)) {
+              throw new Error(`URL host not allowed: ${parsedUrl.hostname}`);
+            }
             console.log(`[BACKEND_PROXY] Attempting download: ${url}`);
             try {
               const res = await fetch(url, {
@@ -198,9 +209,11 @@ const app = new Elysia()
           let saveDir: string;
           let fileName: string;
           if (projectTitle) {
+            // Path traversal 방지: 경로 구분자 및 특수문자 제거
+            const safeTitle = String(projectTitle).replace(/[/\\:*?"<>|.\x00-\x1f]/g, "_").slice(0, 80);
             // Structured path: public/storyboard/images/{INITIALS}_{id}_{slug}/{id}_S01_C{nn}.jpg
-            const initials = projectTitle.split(/\s+/).map((w: string) => w.replace(/[^a-zA-Z]/g, "")[0]).filter(Boolean).join("").toUpperCase() || "PRJ";
-            const slug = projectTitle.replace(/[^\x00-\x7F]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `project-${id}`;
+            const initials = safeTitle.split(/\s+/).map((w: string) => w.replace(/[^a-zA-Z]/g, "")[0]).filter(Boolean).join("").toUpperCase() || "PRJ";
+            const slug = safeTitle.replace(/[^\x00-\x7F]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || `project-${id}`;
             const cn = String(frameNumber ?? "01").padStart(2, "0");
             saveDir = path.join(process.cwd(), "public", "storyboard", "images", `${initials}_${id}_${slug}`);
             fileName = `${id}_S01_C${cn}.jpg`;
