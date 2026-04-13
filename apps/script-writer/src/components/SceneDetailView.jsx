@@ -151,11 +151,11 @@ function CutNodePipeline({ cut, onUpdate }) {
                 </div>
                 {node.isMedia ? (
                   value ? (
-                    <div style={{ borderRadius: '4px', overflow: 'hidden', background: '#000' }}>
+                    <div style={{ borderRadius: '6px', overflow: 'hidden', background: '#111' }}>
                       {node.field.includes('image') ? (
-                        <img src={value} alt={node.label} style={{ width: '100%', maxHeight: '200px', objectFit: 'contain' }} />
+                        <img src={value} alt={node.label} style={{ width: '100%', maxHeight: '320px', objectFit: 'contain' }} />
                       ) : node.field.includes('video') ? (
-                        <video src={value} controls style={{ width: '100%', maxHeight: '200px' }} />
+                        <video src={value} controls style={{ width: '100%', maxHeight: '280px', background: '#000' }} />
                       ) : (
                         <audio src={value} controls style={{ width: '100%' }} />
                       )}
