@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
+import { ProjectContext } from '../context/ProjectContext';
 
 /**
  * ProjectHub — Phase-based project overview.
@@ -10,7 +11,7 @@ import React, { useState, useEffect } from 'react';
  * Each phase card links to its own sub-page.
  */
 
-const STUDIO_URL = 'http://localhost:3001';
+/* Studio URL removed — all features integrated into Hub */
 
 /* ─── Phase 1: Writing Steps ─── */
 const WRITING_STEPS = {
@@ -79,10 +80,21 @@ function useSceneStats(projectId) {
 }
 
 /* ─── Main Component ─── */
+const IDEA_PLACEHOLDERS = {
+  'Feature Film': '영화 아이디어를 자유롭게 입력하세요... (장르, 주인공, 핵심 갈등)',
+  'Short Film': '단편영화 아이디어를 입력하세요... (테마, 메시지, 분위기)',
+  'Netflix Original': '시리즈 아이디어를 입력하세요... (장르, 세계관, 핵심 갈등, 에피소드 구조)',
+  'Commercial': '광고 크리에이티브 브리프를 입력하세요... (브랜드, 제품, 타겟, 톤앤매너)',
+  'YouTube': '영상 아이디어를 입력하세요... (주제, 후킹 포인트, 타겟 시청자)',
+};
+
 const ProjectHub = ({ project, onBack, onNavigate }) => {
+  const { updateProject } = useContext(ProjectContext);
   const steps = getSteps(project.category);
   const sceneStats = useSceneStats(project.id);
   const [pipelineProgress, setPipelineProgress] = useState(null);
+  const [conceptBrief, setConceptBrief] = useState(project.conceptBrief || '');
+  const [briefSaved, setBriefSaved] = useState(false);
 
   useEffect(() => {
     if (!project?.id) return;
@@ -118,7 +130,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
     : 0;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-color, #0a0a0a)', color: 'var(--text-main, #f0f0f0)' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-floor)', color: 'var(--text-main, #f0f0f0)' }}>
       {/* ── Header ── */}
       <header style={{
         padding: '16px 32px',
@@ -159,7 +171,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
         <section style={{ marginBottom: '48px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <div>
-              <h2 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '2px', color: 'var(--accent-primary, #00d4ff)', margin: 0 }}>
+              <h2 style={{ fontSize: '0.75rem', fontWeight: 700, letterSpacing: '2px', color: 'var(--gold)', margin: 0 }}>
                 PHASE 1
               </h2>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 700, margin: '4px 0 0' }}>
@@ -171,13 +183,13 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
                 {completedSteps}/{steps.length} 완료
               </span>
               <div style={{ width: '120px', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px' }}>
-                <div style={{ width: `${writingProgress}%`, height: '100%', background: 'var(--accent-primary, #00d4ff)', borderRadius: '2px', transition: 'width 0.3s' }} />
+                <div style={{ width: `${writingProgress}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px', transition: 'width 0.3s' }} />
               </div>
               <button
                 onClick={() => onNavigate('writing')}
                 style={{
                   padding: '8px 20px', fontSize: '0.75rem', fontWeight: 600,
-                  background: 'var(--accent-primary, #00d4ff)', color: '#000',
+                  background: 'var(--gold)', color: '#000',
                   border: 'none', borderRadius: '6px', cursor: 'pointer',
                   letterSpacing: '0.5px',
                 }}
@@ -200,8 +212,8 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
                   style={{
                     flex: 1,
                     padding: '16px',
-                    background: isDone ? 'rgba(34,197,94,0.06)' : isActive ? 'rgba(139,92,246,0.06)' : 'rgba(255,255,255,0.02)',
-                    border: `1px solid ${isDone ? 'rgba(34,197,94,0.2)' : isActive ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.06)'}`,
+                    background: isDone ? 'rgba(34,197,94,0.06)' : isActive ? 'rgba(200,168,85,0.06)' : 'rgba(255,255,255,0.02)',
+                    border: `1px solid ${isDone ? 'rgba(34,197,94,0.2)' : isActive ? 'rgba(200,168,85,0.15)' : 'rgba(255,255,255,0.06)'}`,
                     borderRadius: '8px',
                     cursor: 'pointer',
                     transition: 'all 0.2s',
@@ -281,15 +293,44 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
             )}
           </div>
 
-          {/* Production Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-            {/* Card: Scene/Cut Management */}
+          {/* Production Cards — 제작 워크플로우 순서: 기획 → 관리 → 편집 → 분석 */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+            {/* Card 1: 프로덕션 디자인 기획 (PRIMARY — 첫 번째 행동) */}
+            <div
+              onClick={() => onNavigate('pipeline')}
+              style={{
+                padding: '24px',
+                background: 'var(--gold-subtle)',
+                border: '1px solid rgba(200,168,85,0.2)',
+                borderRadius: '10px',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <div style={{ fontSize: '1.5rem', marginBottom: '12px' }}>🎨</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>프로덕션 디자인 기획</div>
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '12px' }}>
+                룩북 → 비주얼 세계관 → 캐릭터/세트/의상 → 스토리보드. 16노드 디자인 파이프라인을 순서대로 실행합니다.
+              </div>
+              {pipelineProgress ? (
+                <div style={{ fontSize: '0.65rem' }}>
+                  <span style={{ color: 'var(--gold)' }}>Design {pipelineProgress.designDone}/{pipelineProgress.designTotal}</span>
+                  <div style={{ height: '3px', background: 'rgba(200,168,85,0.1)', borderRadius: '2px', marginTop: '6px', overflow: 'hidden' }}>
+                    <div style={{ width: `${pipelineProgress.designTotal > 0 ? (pipelineProgress.designDone / pipelineProgress.designTotal) * 100 : 0}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px' }} />
+                  </div>
+                </div>
+              ) : (
+                <div style={{ fontSize: '0.6rem', color: 'var(--gold)' }}>→ 시작하기</div>
+              )}
+            </div>
+
+            {/* Card 2: 씬/컷 관리 */}
             <div
               onClick={() => onNavigate('production')}
               style={{
                 padding: '24px',
-                background: 'rgba(245,158,11,0.04)',
-                border: '1px solid rgba(245,158,11,0.15)',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--border)',
                 borderRadius: '10px',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
@@ -298,7 +339,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
               <div style={{ fontSize: '1.5rem', marginBottom: '12px' }}>🎬</div>
               <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>씬/컷 관리</div>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '12px' }}>
-                시나리오를 씬/컷으로 파싱하고 파이프라인 진행 상태를 관리합니다.
+                시나리오를 씬/컷으로 파싱하고 스토리보드/비디오 생성 상태를 관리합니다.
               </div>
               {sceneStats && (
                 <div style={{ fontSize: '0.7rem', color: 'var(--gold)' }}>
@@ -306,14 +347,16 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Card: Node Editor (Studio) */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            {/* Card 3: 컷 편집기 (Hub 내부) */}
             <div
-              onClick={() => window.open(`${STUDIO_URL}/projects/${project.id}`, '_blank')}
+              onClick={() => onNavigate('production')}
               style={{
                 padding: '24px',
-                background: 'rgba(139,92,246,0.04)',
-                border: '1px solid rgba(139,92,246,0.15)',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--border)',
                 borderRadius: '10px',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
@@ -321,49 +364,41 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
             >
               <div style={{ fontSize: '1.5rem', marginBottom: '12px' }}>🔀</div>
               <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>
-                Node Editor
-                <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)', marginLeft: '6px' }}>↗ Studio</span>
+                컷 편집기
               </div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '12px' }}>
-                ReactFlow 기반 컷별 파이프라인 에디터. 이미지/비디오/오디오 생성 노드를 관리합니다.
+              <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', lineHeight: 1.5 }}>
+                컷별 6-node 파이프라인 에디터. 스크립트/이미지/비디오/오디오 노드를 세부 편집합니다.
               </div>
-              <div style={{ fontSize: '0.6rem', color: 'var(--gold)' }}>localhost:3001</div>
             </div>
 
-            {/* Card: Pipeline Overview */}
+            {/* Card 4: Pipeline 분석 & Stage Gate */}
             <div
               onClick={() => onNavigate('pipeline')}
               style={{
                 padding: '24px',
-                background: 'rgba(34,197,94,0.04)',
-                border: '1px solid rgba(34,197,94,0.15)',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid var(--border)',
                 borderRadius: '10px',
                 cursor: 'pointer',
                 transition: 'all 0.2s',
               }}
             >
               <div style={{ fontSize: '1.5rem', marginBottom: '12px' }}>📊</div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Pipeline & Analytics</div>
+              <div style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '6px' }}>Pipeline 분석</div>
               <div style={{ fontSize: '0.65rem', color: 'var(--text-dim)', lineHeight: 1.5, marginBottom: '12px' }}>
-                프로덕션 디자인 / 비디오 생성 듀얼 트랙 진행 현황과 GS Stage Gate 체크리스트.
+                듀얼 트랙 진행 현황, GS Stage Gate 체크리스트, 레퍼런스 갤러리.
               </div>
               {pipelineProgress ? (
                 <div style={{ fontSize: '0.6rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ color: 'var(--gold)' }}>Design {pipelineProgress.designDone}/{pipelineProgress.designTotal}</span>
                     <span style={{ color: 'var(--gold)' }}>Video {pipelineProgress.videoDone}/{pipelineProgress.videoTotal}</span>
                   </div>
-                  <div style={{ display: 'flex', gap: '2px', height: '3px' }}>
-                    <div style={{ flex: 12, background: 'rgba(139,92,246,0.15)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ width: `${(pipelineProgress.designDone / 12) * 100}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px' }} />
-                    </div>
-                    <div style={{ flex: 8, background: 'rgba(245,158,11,0.15)', borderRadius: '2px', overflow: 'hidden' }}>
-                      <div style={{ width: `${(pipelineProgress.videoDone / 8) * 100}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px' }} />
-                    </div>
+                  <div style={{ height: '3px', background: 'rgba(200,168,85,0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                    <div style={{ width: `${pipelineProgress.videoTotal > 0 ? (pipelineProgress.videoDone / pipelineProgress.videoTotal) * 100 : 0}%`, height: '100%', background: 'var(--gold)', borderRadius: '2px' }} />
                   </div>
                 </div>
               ) : (
-                <div style={{ fontSize: '0.6rem', color: 'var(--status-ok)' }}>GS STAGE GATE G1</div>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)' }}>GS STAGE GATE</div>
               )}
             </div>
           </div>

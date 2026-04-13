@@ -8,8 +8,6 @@ import { parseScreenplayToScenes } from '../utils/sceneCutParser';
  * Replaces the simple SCENE INVENTORY with a real breakdown
  * that matches studio's SceneMeta/CutMeta structure.
  */
-const STUDIO_URL = 'http://localhost:3001';
-
 const SceneBreakdownPanel = ({ screenplayText, projectTitle, projectId, onSceneClick }) => {
   const breakdown = useMemo(() => {
     if (!screenplayText || screenplayText.length < 50) return null;
@@ -100,13 +98,7 @@ const SceneBreakdownPanel = ({ screenplayText, projectTitle, projectId, onSceneC
               cursor: 'pointer',
               transition: 'background 0.15s',
             }}
-            onClick={() => {
-              if (projectId) {
-                window.open(`${STUDIO_URL}/projects/${projectId}/scenes/${scene.slug}`, '_blank');
-              } else {
-                onSceneClick?.(scene);
-              }
-            }}
+            onClick={() => onSceneClick?.(scene)}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
           >
@@ -119,9 +111,9 @@ const SceneBreakdownPanel = ({ screenplayText, projectTitle, projectId, onSceneC
                 fontSize: '0.55rem',
                 padding: '1px 6px',
                 borderRadius: '3px',
-                background: 'rgba(139,92,246,0.15)',
+                background: 'var(--gold-subtle)',
                 color: 'var(--gold)',
-                border: '1px solid rgba(139,92,246,0.3)',
+                border: '1px solid rgba(200,168,85,0.3)',
               }}>
                 {scene.cutCount} cuts
               </span>
@@ -166,7 +158,7 @@ const SceneBreakdownPanel = ({ screenplayText, projectTitle, projectId, onSceneC
                     flex: 1,
                     height: '3px',
                     borderRadius: '1px',
-                    background: 'rgba(139,92,246,0.3)',
+                    background: 'rgba(200,168,85,0.3)',
                     maxWidth: '30px',
                   }}
                 />

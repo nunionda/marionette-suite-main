@@ -316,8 +316,8 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey
               <div style={{
                 marginTop: '16px',
                 padding: '10px',
-                background: 'rgba(139,92,246,0.05)',
-                border: '1px solid rgba(139,92,246,0.15)',
+                background: 'rgba(200,168,85,0.04)',
+                border: '1px solid rgba(200,168,85,0.15)',
                 borderRadius: '8px',
               }}>
                 <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--gold)', marginBottom: '6px', letterSpacing: '1px' }}>

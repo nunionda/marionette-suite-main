@@ -88,7 +88,7 @@
 .projects-section {
   padding: 60px 5%;
   flex-grow: 1;
-  background-color: var(--bg-dark);
+  background-color: var(--bg-floor);
 }
 
 .section-header {
@@ -188,8 +188,8 @@
 .generation-result {
   margin-top: 30px;
   padding: 20px;
-  background: rgba(139, 92, 246, 0.05);
-  border-left: 4px solid var(--accent-primary);
+  background: var(--gold-subtle, rgba(200, 168, 85, 0.06));
+  border-left: 4px solid var(--gold);
   border-radius: 4px;
 }
 

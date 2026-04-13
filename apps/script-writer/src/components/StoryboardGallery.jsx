@@ -139,7 +139,7 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
   }
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-color, #0a0a0a)' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-floor)' }}>
       {/* Header */}
       <header style={{
         padding: '10px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)',

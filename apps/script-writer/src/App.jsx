@@ -97,8 +97,8 @@ function AppContent() {
   return (
     <div className="App">
       {isSyncing && currentProjectId ? (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a', color: 'var(--accent-primary)', gap: '16px', letterSpacing: '3px', fontSize: '0.8rem' }}>
-          <div style={{ width: '32px', height: '32px', border: '2px solid var(--accent-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-floor)', color: 'var(--gold)', gap: '16px', letterSpacing: '3px', fontSize: '0.8rem' }}>
+          <div style={{ width: '32px', height: '32px', border: '2px solid var(--gold)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           RESTORING SESSION...
         </div>
       ) : !activeProject ? (
@@ -109,13 +109,14 @@ function AppContent() {
           <WritingRoom
             project={activeProject}
             onBack={handleBackToHub}
+            onNavigate={handleNavigate}
             initialStep={subPageParam}
           />
         ) : subPage === 'production' ? (
           <ProductionDeck
             project={activeProject}
             onBack={handleBackToHub}
-            initialView="scenes"
+            initialView="pipeline"
           />
         ) : subPage === 'pipeline' ? (
           <ProductionDeck

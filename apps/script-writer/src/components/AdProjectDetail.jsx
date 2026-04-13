@@ -914,7 +914,7 @@ const AdProjectDetail = ({ project, onBack }) => {
             {proposedDraft && (() => {
               const variations = activeTab === 'ARCHITECTURE' ? parseCopyVariations(proposedDraft) : null;
               return (
-                <div className="briefing-assistant" style={{ position: 'absolute', top: '50px', right: '0', left: '0', zIndex: 100, maxHeight: '80%', display: 'flex', flexDirection: 'column', border: '1px solid var(--accent-primary)', background: '#0a0a0a', padding: '20px' }}>
+                <div className="briefing-assistant" style={{ position: 'absolute', top: '50px', right: '0', left: '0', zIndex: 100, maxHeight: '80%', display: 'flex', flexDirection: 'column', border: '1px solid var(--accent-primary)', background: 'var(--bg-floor)', padding: '20px' }}>
                   <h4 style={{ color: 'var(--accent-primary)', marginTop: 0, fontSize: '0.9rem', flexShrink: 0 }}>
                     ✨ AI Proposed Draft ({TAB_META[activeTab].label})
                     {variations && <span style={{ fontWeight: 400, opacity: 0.6, marginLeft: '8px' }}>— 시안 {variations.length}개 생성됨. 원하는 시안을 선택하세요.</span>}

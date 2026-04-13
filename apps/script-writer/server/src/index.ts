@@ -887,7 +887,19 @@ const app = new Elysia()
               } else if (step === 'image_prompt') {
                 const prompt = buildCinematicPrompt(payload);
                 await db.update(cuts).set({ imagePrompt: prompt }).where(eq(cuts.id, cut.id));
-                cutResult.steps[step] = { success: true };
+                cutResult.steps[step] = { success: true, prompt };
+              } else if (step === 'video_prompt') {
+                const desc = cut.description || cut.scriptText || '';
+                const cameraMove = 'slow zoom in';
+                const prompt = `Cinematic video: ${desc}. Camera: ${cameraMove}. Smooth motion, 24fps, film look, shallow DOF.`;
+                await db.update(cuts).set({ videoPrompt: prompt }).where(eq(cuts.id, cut.id));
+                cutResult.steps[step] = { success: true, prompt };
+              } else if (step === 'video_gen') {
+                const videoPrompt = cut.videoPrompt || cut.description || '';
+                const encodedPrompt = encodeURIComponent(videoPrompt);
+                const videoUrl = `https://video.pollinations.ai/generate?prompt=${encodedPrompt}&model=fast-svd`;
+                await db.update(cuts).set({ videoUrl }).where(eq(cuts.id, cut.id));
+                cutResult.steps[step] = { success: true, videoUrl };
               } else {
                 cutResult.steps[step] = { success: true, skipped: cut.type !== 'dialogue' && step === 'audio_gen' };
               }

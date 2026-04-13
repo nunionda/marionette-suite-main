@@ -5,23 +5,21 @@ import AnalyticsDashboard from './AnalyticsDashboard';
 import NodeExecutionPanel from './NodeExecutionPanel';
 import StoryboardGallery from './StoryboardGallery';
 import ArtBibleViewer from './ArtBibleViewer';
+import SceneDetailView from './SceneDetailView';
 
 /**
  * ProductionDeck — Production management sub-page.
  *
- * Three sections:
- *   1. Scene/Cut Overview (with parse + stats)
+ * Sections:
+ *   1. Scene/Cut Overview (with parse + stats) → SceneDetailView drill-down
  *   2. Pipeline View (Design/Video dual-track)
- *   3. Analytics & GS Stage Gate
- *
- * Scene clicks open studio(:3001) in new tab.
+ *   3. Storyboard / Art Bible / References / Analytics
  */
 
-const STUDIO_URL = 'http://localhost:3001';
-
 const ProductionDeck = ({ project, onBack, initialView }) => {
-  const [activeView, setActiveView] = useState(initialView || 'scenes');
+  const [activeView, setActiveView] = useState(initialView || 'pipeline');
   const [selectedNode, setSelectedNode] = useState(null); // { node, track }
+  const [selectedSceneId, setSelectedSceneId] = useState(null); // drill-down into SceneDetailView
   const [pipelineRefreshKey, setPipelineRefreshKey] = useState(0);
   const [batchingSceneId, setBatchingSceneId] = useState(null);
   const [batchProgress, setBatchProgress] = useState(null); // { current, total, scene }
@@ -79,17 +77,17 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
     }
   };
 
-  const openSceneInStudio = (scene) => {
-    window.open(`${STUDIO_URL}/projects/${project.id}/scenes/${scene.slug}`, '_blank');
+  const openSceneDetail = (scene) => {
+    setSelectedSceneId(scene.id);
   };
 
   const VIEW_TABS = [
-    { key: 'scenes',      label: 'Scenes / Cuts', icon: '🎬' },
     { key: 'pipeline',    label: 'Pipeline',      icon: '🔀' },
     { key: 'storyboard',  label: 'Storyboard',    icon: '📐' },
+    { key: 'scenes',      label: 'Scenes / Cuts', icon: '🎬' },
     { key: 'artbible',    label: 'Art Bible',      icon: '📕' },
-    { key: 'analytics',   label: 'Analytics',      icon: '📊' },
     { key: 'references',  label: 'References',     icon: '🎨' },
+    { key: 'analytics',   label: 'Analytics',      icon: '📊' },
   ];
 
   return (
@@ -114,16 +112,6 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
               {stats.scenes} scenes · {stats.totalCuts} cuts · {stats.doneCuts} done
             </span>
           )}
-          <button
-            onClick={() => window.open(`${STUDIO_URL}/projects/${project.id}`, '_blank')}
-            style={{
-              padding: '6px 14px', fontSize: '0.7rem', fontWeight: 600,
-              background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)',
-              borderRadius: '4px', color: 'var(--gold)', cursor: 'pointer',
-            }}
-          >
-            🔀 Open Studio
-          </button>
         </div>
       </header>
 
@@ -135,7 +123,7 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
         {VIEW_TABS.map(tab => (
           <button
             key={tab.key}
-            onClick={() => setActiveView(tab.key)}
+            onClick={() => { setActiveView(tab.key); setSelectedSceneId(null); }}
             style={{
               padding: '10px 20px', fontSize: '0.72rem', fontWeight: activeView === tab.key ? 700 : 500,
               background: 'none', border: 'none',
@@ -151,7 +139,13 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
 
       {/* ── Content ── */}
       <div style={{ flex: 1, overflow: 'hidden' }}>
-        {activeView === 'scenes' && (
+        {activeView === 'scenes' && selectedSceneId ? (
+          <SceneDetailView
+            project={project}
+            sceneId={selectedSceneId}
+            onBack={() => setSelectedSceneId(null)}
+          />
+        ) : activeView === 'scenes' && (
           <ScenesView
             scenes={scenes}
             stats={stats}
@@ -159,7 +153,7 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
             parsing={parsing}
             hasScreenplay={!!project.scenario}
             onParse={parseScreenplay}
-            onSceneClick={openSceneInStudio}
+            onSceneClick={openSceneDetail}
             onBatchExecute={async (scene) => {
               setBatchingSceneId(scene.id);
               setBatchProgress({ current: 0, total: Math.min(scene.cutCount || scene.cut_count || 5, 5), scene: scene.display_id || scene.slug });
@@ -412,8 +406,8 @@ function ScenesView({ scenes, stats, loading, parsing, hasScreenplay, onParse, o
                   >
                     ⚡ Generate
                   </button>
-                  <span style={{ fontSize: '0.5rem', color: 'rgba(139,92,246,0.5)' }}>
-                    Studio ↗
+                  <span style={{ fontSize: '0.5rem', color: 'var(--text-dim)' }}>
+                    컷 편집 →
                   </span>
                 </div>
               </div>

@@ -462,7 +462,7 @@ const ProjectDetail = ({ project, onBack }) => {
             </div>
 
             <div className="genre-tactics" style={{ marginTop: '15px', padding: '10px', background: 'rgba(255,255,255,0.02)', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.05)' }}>
-               <div style={{ fontSize: 'var(--sidebar-badge-fs)', color: 'var(--accent-primary)', marginBottom: '5px' }}>
+               <div style={{ fontSize: 'var(--sidebar-badge-fs)', color: 'var(--gold)', marginBottom: '5px' }}>
                  {GENRE_HINTS[project.genre]?.icon} {project.genre?.toUpperCase()} TACTICS
                </div>
                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
@@ -485,7 +485,7 @@ const ProjectDetail = ({ project, onBack }) => {
                 <div className="control-group">
                   <label className="input-label" style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>DIALOGUE DENSITY</span>
-                    <span style={{ color: 'var(--accent-primary)', fontWeight: 700 }}>{styleIntensity}/10</span>
+                    <span style={{ color: 'var(--gold)', fontWeight: 700 }}>{styleIntensity}/10</span>
                   </label>
                   <input
                     type="range" min="1" max="10"
@@ -537,8 +537,8 @@ const ProjectDetail = ({ project, onBack }) => {
             />
 
             {briefingResult && (
-              <div className="briefing-assistant" style={{ marginTop: '10px', border: '1px solid var(--accent-primary)', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', padding: '10px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--accent-primary)', fontWeight: 'bold', marginBottom: '8px' }}>
+              <div className="briefing-assistant" style={{ marginTop: '10px', border: '1px solid var(--gold)', borderRadius: '4px', background: 'rgba(0,0,0,0.5)', padding: '10px' }}>
+                <div style={{ fontSize: '0.75rem', color: 'var(--gold)', fontWeight: 'bold', marginBottom: '8px' }}>
                   🧠 {creativeRole} AI Insight
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-primary)', marginBottom: '10px', maxHeight: '150px', overflowY: 'auto' }}>

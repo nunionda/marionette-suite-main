@@ -5,17 +5,17 @@ import LoglineLab from './LoglineLab';
 import '../styles/Dashboard.css';
 
 const CATEGORY_META = {
-  'Feature Film':      { color: '#C3A05A', label: 'FEATURE FILM' },
-  'Short Film':        { color: '#06B6D4', label: 'SHORT FILM' },
+  'Feature Film':      { color: '#C8A855', label: 'FEATURE FILM' },
+  'Short Film':        { color: '#A89260', label: 'SHORT FILM' },
   'Netflix Original':  { color: '#E50914', label: 'DRAMA' },
-  'Commercial':        { color: '#F97316', label: 'COMMERCIAL' },
-  'YouTube':           { color: '#FF4444', label: 'YOUTUBE' },
+  'Commercial':        { color: '#D4A843', label: 'COMMERCIAL' },
+  'YouTube':           { color: '#CC4444', label: 'YOUTUBE' },
 };
 
 const ProjectCard = ({ project, onEnter, onDelete }) => {
-  const meta = CATEGORY_META[project.category] || { color: '#8B5CF6', label: project.category };
+  const meta = CATEGORY_META[project.category] || { color: 'var(--gold)', label: project.category };
   return (
-    <div className="project-card glass hover-glow" style={{ '--cat-color': meta.color, borderLeft: `3px solid ${meta.color}` }}>
+    <div className="project-card glass hover-glow" style={{ '--cat-color': meta.color }}>
       {/* Top strip: category badge + status + delete */}
       <div className="card-top-strip">
         <span className="card-cat-badge" style={{ background: `${meta.color}22`, color: meta.color, border: `1px solid ${meta.color}44` }}>

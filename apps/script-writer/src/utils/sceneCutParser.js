@@ -31,6 +31,12 @@ export function parseScreenplayToScenes(text, options = {}) {
     .join('')
     .slice(0, 5) || 'PRJ';
 
+  // ─── A/V Script detection (markdown table format) ───
+  // Commercial/YouTube scripts use: | 시간 | Visual | Audio |
+  if (isAVScriptTable(text)) {
+    return parseAVScriptTable(text, initials);
+  }
+
   const lines = text.split('\n');
   const rawScenes = [];
   let current = null;
@@ -290,4 +296,93 @@ function splitIntoCuts(lineObjs, sceneNum, initials) {
 function buildSummary(lineObjs) {
   const actions = lineObjs.filter(l => l.type === 'action').map(l => l.text).join(' ');
   return actions.length > 150 ? actions.slice(0, 147) + '...' : actions;
+}
+
+// ─── A/V Script Table Parser ───
+// Parses markdown table format: | 시간 | Visual | Audio |
+// Each row = 1 cut, entire script = 1 scene (commercial/YouTube are single-scene)
+
+function isAVScriptTable(text) {
+  // Detect markdown table with time + visual columns
+  return /\|\s*시간\s*\|/.test(text) || /\|\s*\d+:\d+/.test(text);
+}
+
+function parseAVScriptTable(text, initials) {
+  const lines = text.split('\n');
+  const cuts = [];
+  let cutNum = 0;
+
+  for (const line of lines) {
+    // Skip header row and separator row
+    if (/\|\s*시간\s*\|/.test(line)) continue;
+    if (/\|[-\s]+\|/.test(line)) continue;
+
+    // Parse data rows: | time | visual | audio |
+    const cells = line.split('|').map(c => c.trim()).filter(c => c.length > 0);
+    if (cells.length < 2) continue;
+
+    const timeCode = cells[0] || '';
+    const visual = (cells[1] || '').replace(/<br>/g, ' ').replace(/\*\*/g, '').replace(/\[카메라 앵글:\s*/g, '[').trim();
+    const audio = (cells[2] || '').replace(/<br>/g, ' ').replace(/\*\*/g, '').trim();
+
+    if (!timeCode.match(/\d+:\d+/)) continue; // Must have timecode
+
+    cutNum++;
+
+    // Extract VO text for dialogue detection
+    const voMatch = audio.match(/VO:\s*"?([^"]+)"?/);
+    const hasVO = voMatch && voMatch[1] && !voMatch[1].includes('없음');
+    const type = hasVO ? 'dialogue' : 'action';
+
+    // Build description from visual + audio
+    let description = visual;
+    if (hasVO) description += ` — VO: "${voMatch[1]}"`;
+
+    // Parse duration from timecode
+    const timeMatch = timeCode.match(/(\d+):(\d+)\s*-\s*(\d+):(\d+)/);
+    let duration = 4;
+    if (timeMatch) {
+      const start = parseInt(timeMatch[1]) * 60 + parseInt(timeMatch[2]);
+      const end = parseInt(timeMatch[3]) * 60 + parseInt(timeMatch[4]);
+      duration = end - start;
+    }
+
+    cuts.push({
+      number: cutNum,
+      slug: `cut${String(cutNum).padStart(3, '0')}`,
+      displayId: `${initials}_sc001_cut${String(cutNum).padStart(3, '0')}`,
+      description: description.length > 200 ? description.slice(0, 197) + '...' : description,
+      type,
+      lineCount: 1,
+      duration,
+      timeCode,
+      audioNote: audio,
+    });
+  }
+
+  // Wrap all cuts in a single scene
+  const scene = {
+    number: 1,
+    slug: 'sc001',
+    displayId: `${initials}_sc001`,
+    heading: 'A/V SCRIPT',
+    setting: '',
+    location: 'Various',
+    timeOfDay: '',
+    characters: [],
+    summary: cuts.slice(0, 3).map(c => c.description).join('. ').slice(0, 150),
+    cuts,
+    cutCount: cuts.length,
+  };
+
+  return {
+    scenes: [scene],
+    stats: {
+      totalScenes: 1,
+      totalCuts: cuts.length,
+      totalCharacters: 0,
+      estimatedMinutes: Math.round(cuts.reduce((s, c) => s + (c.duration || 4), 0) / 60),
+      actBreakdown: { act1: 1, act2: 0, act3: 0 },
+    },
+  };
 }

@@ -9,14 +9,25 @@ export const projects = sqliteTable("projects", {
   logline: text("logline"),
   progress: integer("progress").default(0),
 
-  // Pipeline stages
+  // Pipeline stages (shared)
   concept: text("concept"),
   architecture: text("architecture"),
   treatment: text("treatment"),
   scenario: text("scenario"),
   review: text("review"),
+  conceptBrief: text("concept_brief"),       // User's initial idea input
   analysisData: text("analysis_data"),       // JSON stored as text
   storyboardImages: text("storyboard_images"), // JSON stored as text
+
+  // Netflix/Drama fields
+  bible: text("bible"),                      // Series bible
+  episodes: text("episodes"),               // Episode arc
+  script: text("script"),                   // Teleplay / main script
+
+  // YouTube fields
+  hook: text("hook"),                        // Hook lab
+  edit: text("edit"),                        // Post-production cue sheet
+  seo: text("seo"),                          // SEO package
 
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
   updated: text("updated_at").$defaultFn(() => new Date().toISOString()),

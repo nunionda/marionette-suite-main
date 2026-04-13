@@ -9,10 +9,16 @@ import reviewRule from '../.agents/rules/production_review.md?raw';
 import genreRules from '../.agents/rules/genres.md?raw';
 import categoryRules from '../.agents/rules/categories.md?raw';
 import clicheRules from '../.agents/rules/cliche_strategy.md?raw';
+import adRule from '../.agents/rules/AD_ENGINE.md?raw';
+import youtubeRule from '../.agents/rules/YOUTUBE_ENGINE.md?raw';
 
 import { useAgentEngine } from '../hooks/useAgentEngine';
 import SceneBreakdownPanel from './SceneBreakdownPanel';
 import AnalyticsDashboard from './AnalyticsDashboard';
+import AdControlPanel from './writing/AdControlPanel';
+import YouTubeControlPanel from './writing/YouTubeControlPanel';
+import DramaControlPanel from './writing/DramaControlPanel';
+import { getBriefingPrompt, getArchitecturePrompt, getTreatmentPrompt, getScenarioPrompt, getReviewPrompt } from '../infrastructure/adOrchestrator';
 
 /**
  * WritingRoom — Focused screenplay development sub-page.
@@ -89,7 +95,7 @@ const PRODUCTION_STANDARDS = {
   'INDIE_NOIR': { label: 'Indie Noir', rules: 'Experimental structure, heavy subtext, low-key lighting descriptions.' },
 };
 
-const WritingRoom = ({ project, onBack, initialStep }) => {
+const WritingRoom = ({ project, onBack, onNavigate, initialStep }) => {
   const { updateProject } = useContext(ProjectContext);
   const { steps: STEP_CONFIG, order: STEP_ORDER } = getStepConfig(project.category);
   const [activeStep, setActiveStep] = useState(initialStep || STEP_ORDER[0]);
@@ -119,6 +125,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
   const [apiKey] = useState(import.meta.env.VITE_OPENROUTER_API_KEY || localStorage.getItem('openRouterApiKey') || '');
   const [saveStatus, setSaveStatus] = useState('');
   const [conceptBrief, setConceptBrief] = useState(project.conceptBrief || '');
+  const [categoryConfig, setCategoryConfig] = useState({});
 
   const outputRef = useRef(null);
   const baseTextRef = useRef('');
@@ -174,52 +181,107 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
   const generateStep = () => {
     const cfg = STEP_CONFIG[activeStep];
     if (!cfg) return;
-    const standardRules = PRODUCTION_STANDARDS[productionStandard].rules;
     const field = cfg.field;
+    const cat = project.category;
 
     // First step: needs concept brief
     if (STEP_ORDER.indexOf(activeStep) === 0) {
       if (!conceptBrief.trim()) { setSaveStatus('아이디어를 먼저 입력하세요'); setTimeout(() => setSaveStatus(''), 2000); return; }
-      executeAgent(cfg.rule, `[Production Standard]: ${standardRules}${getRoleContext()}\n[Category]: ${project.category}\n[Creative Brief]: ${conceptBrief}\n\n[Task]: ${cfg.label}을 작성하세요.`, field, false, `${cfg.label}...`);
-      return;
     }
 
-    // Dependency check
+    // Dependency check (skip for first step)
     const depField = cfg.requires;
     if (depField && (!pipelineData[depField] || pipelineData[depField].length < 50)) return;
 
-    // Screenplay/Script/Teleplay step (main writing step — typically step 3 or 4)
+    // ── Commercial: adOrchestrator prompts + AD_ENGINE rule ──
+    if (cat === 'Commercial') {
+      const cc = categoryConfig;
+      const roleContext = `\n[Role]: ${cc.creativeRole || 'CD'}\n[Language]: KO\n[Ad Type]: ${cc.adType || 'Cinematic'}\n[Duration]: ${cc.adFormat || '30s'}\n[Platform]: ${cc.adPlatform || 'YouTube'} (${cc.platformRatio || '16:9'}, hook ${cc.platformHook || '3s'})\n[Category]: Commercial\n[Format Structure]:\n${cc.formatStructure || ''}\n`;
+      const fullSystem = `${adRule}\n\n[STANDARDS]\n${categoryRules}\n\n[GENRE]\n${genreRules}`;
+      const opts = { duration: cc.adFormat, platform: cc.adPlatform, adType: cc.adType, formatStructure: cc.formatStructure };
+      let prompt = '';
+      if (activeStep === 'concept') prompt = getBriefingPrompt(conceptBrief, roleContext, opts);
+      else if (activeStep === 'architecture') prompt = getArchitecturePrompt(pipelineData, roleContext, cc.creativeRole === 'CD', opts);
+      else if (activeStep === 'treatment') prompt = getTreatmentPrompt(pipelineData.architecture || pipelineData.concept || conceptBrief, roleContext, opts);
+      else if (activeStep === 'scenario') prompt = getScenarioPrompt(pipelineData.treatment, roleContext, opts);
+      else if (activeStep === 'review') prompt = getReviewPrompt(pipelineData.scenario, roleContext, opts);
+      else prompt = `${roleContext}\n[Previous]: ${(pipelineData[depField] || '').slice(0, 3000)}\n\n[Task]: ${cfg.label}을 작성하세요.`;
+      executeAgent(fullSystem, prompt, field, false, `${cfg.label}...`);
+      return;
+    }
+
+    // ── YouTube: YOUTUBE_ENGINE rule + format/hook context ──
+    if (cat === 'YouTube') {
+      const cc = categoryConfig;
+      const roleContext = `\n[Creator Role]: CREATOR\n[Output Language]: KO\n[Target Format]: ${cc.format || 'Mini Documentary'}\n[Target 30s Retention]: ${cc.retention || 60}%\n[Target Audience]: ${cc.targetAudience || '미지정'}\n`;
+      const formatContext = `\n[Hook Formula]: ${cc.hookFormula || ''}\n[Structure]:\n${cc.formatStructure || ''}\n`;
+      const fullSystem = `${youtubeRule}\n\n[STANDARDS]\n${categoryRules}`;
+      if (STEP_ORDER.indexOf(activeStep) === 0) {
+        executeAgent(fullSystem, `[Task]: YouTube ${cfg.label}을 작성하세요.${roleContext}${formatContext}\n[Creative Brief]: ${conceptBrief}`, field, false, `${cfg.label}...`);
+      } else if (['seo'].includes(activeStep)) {
+        executeAgent(fullSystem, `[Task]: YouTube ${cfg.label}을 작성하세요.${roleContext}\n[Full Content]:\n${(pipelineData[depField] || '').slice(0, 5000)}\n\n분석 후 제목/설명/태그/썸네일 전략을 제안하세요.\n[ANALYSIS_JSON]\n{"emotionalArc":[],"characterMap":[],"beatProgress":[]}`, field, false, `${cfg.label}...`);
+      } else {
+        const prev = pipelineData[depField] || '';
+        executeAgent(fullSystem, `[Task]: YouTube ${cfg.label}을 작성하세요.${roleContext}${formatContext}\n[Previous (${STEP_CONFIG[depField]?.label || depField})]: ${prev.slice(0, 3000)}`, field, false, `${cfg.label}...`);
+      }
+      return;
+    }
+
+    // ── Netflix/Drama: OTT + episode + binge hook context ──
+    if (cat === 'Netflix Original') {
+      const cc = categoryConfig;
+      const roleContext = `\n[Creative Role]: ${cc.creativeRole || 'DIRECTOR'}\n[Output Language]: KO\n[OTT Platform]: ${cc.ottPlatform || 'Netflix'}\n[Episode]: ${cc.episode || 1}/10\n[Binge-Hook Intensity]: ${cc.bingeHook || 8}/10\n`;
+      const fullSystem = `${scenarioRule}\n\n[SERIES RULES]\n${categoryRules}\n\n[GENRE MODULE]\n${genreRules}`;
+      if (STEP_ORDER.indexOf(activeStep) === 0) {
+        executeAgent(fullSystem, `[Task]: Series Bible 작성.${roleContext}\n[Concept]: ${conceptBrief}\n\n대서사시의 세계관, 주요 인물 시즌 아크, 톤앤매너를 설계하세요.`, field, false, `${cfg.label}...`);
+      } else if (activeStep === 'episodes') {
+        executeAgent(fullSystem, `[Task]: 10-Episode Arc (15-Beat Framework).${roleContext}\n[Bible]: ${(pipelineData.bible || '').slice(0, 3000)}\n\n각 에피소드를 15비트로 세분화하고 Binge-Hook 지점을 명확히 하세요.`, field, false, `${cfg.label}...`);
+      } else if (activeStep === 'script') {
+        baseTextRef.current = pipelineData[field] ? (pipelineData[field].trim() + '\n\n') : '';
+        executeAgent(fullSystem, `[Task]: Episode ${cc.episode || 1} 집필.${roleContext}\n[Arc]: ${(pipelineData.episodes || '').slice(0, 2000)}\n\n오프닝부터 주요 씬 5개를 INT./EXT. 포함하여 집필하세요.`, field, true, 'Drafting...');
+        return;
+      } else if (activeStep === 'review') {
+        executeAgent(fullSystem, `[Task]: Binge-Watch Audit.${roleContext}\n[Script]: ${(pipelineData.script || '').slice(0, 5000)}\n\n관객이 즉시 '다음 화' 버튼을 누를 확률을 분석하세요.\n[ANALYSIS_JSON]\n{"emotionalArc":[],"characterMap":[],"beatProgress":[]}`, field, false, `${cfg.label}...`);
+      } else {
+        executeAgent(fullSystem, `${roleContext}\n[Previous]: ${(pipelineData[depField] || '').slice(0, 3000)}\n\n[Task]: ${cfg.label}을 작성하세요.`, field, false, `${cfg.label}...`);
+      }
+      return;
+    }
+
+    // ── Film / Short Film: 기존 로직 ──
+    const standardRules = PRODUCTION_STANDARDS[productionStandard].rules;
+
+    if (STEP_ORDER.indexOf(activeStep) === 0) {
+      executeAgent(cfg.rule, `[Production Standard]: ${standardRules}${getRoleContext()}\n[Category]: ${cat}\n[Creative Brief]: ${conceptBrief}\n\n[Task]: ${cfg.label}을 작성하세요.`, field, false, `${cfg.label}...`);
+      return;
+    }
+
     const isMainScript = ['scenario', 'script'].includes(activeStep);
     if (isMainScript) {
       const prevContent = pipelineData[depField] || '';
-      const genreContext = `\n[Genre]: ${project.genre}\n[Category]: ${project.category}\n[Standard]: ${standardRules}\n[Dialogue Density]: ${styleIntensity}/10${getRoleContext()}`;
+      const genreContext = `\n[Genre]: ${project.genre}\n[Category]: ${cat}\n[Standard]: ${standardRules}\n[Dialogue Density]: ${styleIntensity}/10${getRoleContext()}`;
       const fullSystemPrompt = `${cfg.rule}\n\n[STANDARDS]\n${categoryRules}\n\n[GENRE]\n${genreRules}\n\n[CLICHE]\n${clicheRules}\n\n[PRODUCTION]\n${standardRules}`;
-
       if (scriptMode === 'REFINE') {
         const targetScene = selectedSceneId ? `S#${selectedSceneId}` : '전체';
         executeAgent(fullSystemPrompt, `[Mode]: REFINEMENT (${targetScene})${genreContext}\n[Feedback]:\n${producerNote}\n\n[Current Script]:\n${pipelineData[field]}\n\n[Task]: 피드백을 반영하여 수정하세요.`, field, false, 'Refining...');
         return;
       }
-
       baseTextRef.current = pipelineData[field] ? (pipelineData[field].trim() + '\n\n') : '';
       const lastSceneMatch = pipelineData[field] ? pipelineData[field].match(/S#(\d+)/g) : null;
       const nextSceneNum = lastSceneMatch ? parseInt(lastSceneMatch[lastSceneMatch.length - 1].replace('S#', '')) + 1 : 1;
-
       executeAgent(fullSystemPrompt, `[Mode]: INCREMENTAL DRAFTING${genreContext}\n[Next Scene]: S#${nextSceneNum}\n[Context]:\n기존:\n${pipelineData[field] ? pipelineData[field].slice(-1000) : '없음'}\n\n구조:\n${prevContent.slice(0, 2000)}\n\n[Task]: S#${nextSceneNum}부터 집필하세요.`, field, true, 'Drafting...');
       return;
     }
 
-    // Review/Coverage/Audit step (last step typically)
     const isReview = ['review', 'seo'].includes(activeStep);
     if (isReview) {
       const mainContent = pipelineData[depField] || '';
-      executeAgent(cfg.rule, `Full Content:\n${mainContent}\n\n${project.category} 기준으로 분석하세요.\n[ANALYSIS_JSON]\n{"emotionalArc":[],"characterMap":[],"beatProgress":[]}`, field, false, `${cfg.label}...`);
+      executeAgent(cfg.rule, `Full Content:\n${mainContent}\n\n${cat} 기준으로 분석하세요.\n[ANALYSIS_JSON]\n{"emotionalArc":[],"characterMap":[],"beatProgress":[]}`, field, false, `${cfg.label}...`);
       return;
     }
 
-    // Generic middle steps (architecture, treatment, episodes, edit, etc.)
     const prevContent = pipelineData[depField] || '';
-    executeAgent(cfg.rule, `[Production Standard]: ${standardRules}${getRoleContext()}\n[Previous Stage (${STEP_CONFIG[depField]?.label || depField})]: ${prevContent.slice(0, 3000)}\n\n[Task]: ${cfg.label}을 작성하세요. ${project.category} 표준을 준수하세요.`, field, false, `${cfg.label}...`);
+    executeAgent(cfg.rule, `[Production Standard]: ${standardRules}${getRoleContext()}\n[Previous Stage (${STEP_CONFIG[depField]?.label || depField})]: ${prevContent.slice(0, 3000)}\n\n[Task]: ${cfg.label}을 작성하세요. ${cat} 표준을 준수하세요.`, field, false, `${cfg.label}...`);
   };
 
   const cfg = STEP_CONFIG[activeStep];
@@ -238,7 +300,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
   };
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-color, #0a0a0a)' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-floor)' }}>
       {/* ── Top Bar ── */}
       <header style={{
         padding: '10px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)',
@@ -254,22 +316,24 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
           <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>WRITING ROOM</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {/* Production Controls */}
-          <select value={language} onChange={e => setLanguage(e.target.value)} style={selectStyle}>
-            <option value="KO">KO</option>
-            <option value="EN">EN</option>
-          </select>
-          <select value={productionStandard} onChange={e => setProductionStandard(e.target.value)} style={selectStyle}>
-            {Object.entries(PRODUCTION_STANDARDS).map(([k, v]) => (
-              <option key={k} value={k}>{v.label}</option>
-            ))}
-          </select>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>Style</span>
-            <input type="range" min="1" max="10" value={styleIntensity} onChange={e => setStyleIntensity(Number(e.target.value))}
-              style={{ width: '50px', height: '3px', accentColor: 'var(--accent-primary)' }} />
-            <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)', width: '12px' }}>{styleIntensity}</span>
-          </div>
+          {/* Film/Short: Production Controls */}
+          {(project.category === 'Feature Film' || project.category === 'Short Film') && (<>
+            <select value={language} onChange={e => setLanguage(e.target.value)} style={selectStyle}>
+              <option value="KO">KO</option>
+              <option value="EN">EN</option>
+            </select>
+            <select value={productionStandard} onChange={e => setProductionStandard(e.target.value)} style={selectStyle}>
+              {Object.entries(PRODUCTION_STANDARDS).map(([k, v]) => (
+                <option key={k} value={k}>{v.label}</option>
+              ))}
+            </select>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>Style</span>
+              <input type="range" min="1" max="10" value={styleIntensity} onChange={e => setStyleIntensity(Number(e.target.value))}
+                style={{ width: '50px', height: '3px', accentColor: 'var(--accent-primary)' }} />
+              <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)', width: '12px' }}>{styleIntensity}</span>
+            </div>
+          </>)}
           <span style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
           {saveStatus && <span style={{ fontSize: '0.65rem', color: 'var(--status-ok)' }}>{saveStatus}</span>}
           <button onClick={saveToContext} style={{
@@ -281,6 +345,30 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
           </button>
         </div>
       </header>
+
+      {/* Production 전환 CTA — 메인 스크립트가 완성되었을 때 표시 */}
+      {(project.scenario || project.script || pipelineData.scenario || pipelineData.script) && onNavigate && (
+        <div style={{
+          padding: '8px 24px',
+          background: 'var(--gold-subtle)',
+          borderBottom: '1px solid rgba(200,168,85,0.15)',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        }}>
+          <span style={{ fontSize: '0.7rem', color: 'var(--gold)' }}>
+            ✓ 시나리오 완성 — 프로덕션 디자인 기획을 시작할 수 있습니다
+          </span>
+          <button
+            onClick={() => onNavigate('pipeline')}
+            style={{
+              padding: '6px 16px', fontSize: '0.65rem', fontWeight: 700,
+              background: 'var(--gold)', color: 'var(--bg-floor)',
+              border: 'none', borderRadius: '4px', cursor: 'pointer',
+            }}
+          >
+            → 프로덕션 시작
+          </button>
+        </div>
+      )}
 
       {/* ── Step Navigation (horizontal stepper) ── */}
       <nav style={{
@@ -298,7 +386,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
               onClick={() => setActiveStep(key)}
               style={{
                 flex: 1, padding: '12px 8px',
-                background: 'none', border: 'none', borderBottom: isActive ? '2px solid var(--accent-primary, #00d4ff)' : '2px solid transparent',
+                background: 'none', border: 'none', borderBottom: isActive ? '2px solid var(--gold)' : '2px solid transparent',
                 color: isActive ? 'var(--text-main)' : 'var(--text-dim)',
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                 fontFamily: 'inherit', fontSize: '0.72rem', fontWeight: isActive ? 700 : 500,
@@ -317,11 +405,22 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
         })}
       </nav>
 
+      {/* ── Category Control Panel ── */}
+      {project.category === 'Commercial' && (
+        <AdControlPanel onConfigChange={setCategoryConfig} initialConfig={categoryConfig} />
+      )}
+      {project.category === 'YouTube' && (
+        <YouTubeControlPanel onConfigChange={setCategoryConfig} initialConfig={categoryConfig} />
+      )}
+      {project.category === 'Netflix Original' && (
+        <DramaControlPanel onConfigChange={setCategoryConfig} initialConfig={categoryConfig} />
+      )}
+
       {/* ── Main Content ── */}
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
         {/* Left: Scene sidebar (only for Treatment/Screenplay) */}
-        {(activeStep === 'scenario' || activeStep === 'treatment') && pipelineData.scenario && (
+        {(['scenario', 'treatment', 'script'].includes(activeStep)) && (pipelineData.scenario || pipelineData.script) && (
           <aside style={{
             width: '280px', borderRight: '1px solid rgba(255,255,255,0.06)',
             overflow: 'hidden', flexShrink: 0, display: 'flex', flexDirection: 'column',
@@ -331,7 +430,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
             </div>
             <div style={{ flex: 1, overflowY: 'auto' }}>
               <SceneBreakdownPanel
-                screenplayText={pipelineData.scenario}
+                screenplayText={pipelineData.scenario || pipelineData.script}
                 projectTitle={project.title}
                 projectId={project.id}
                 onSceneClick={(scene) => setSelectedSceneId(scene.number)}
@@ -348,7 +447,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexShrink: 0,
           }}>
             <div>
-              <div style={{ fontSize: '0.65rem', color: 'var(--accent-primary, #00d4ff)', fontWeight: 600, letterSpacing: '1px', marginBottom: '2px' }}>
+              <div style={{ fontSize: '0.65rem', color: 'var(--gold)', fontWeight: 600, letterSpacing: '1px', marginBottom: '2px' }}>
                 {cfg.engine.toUpperCase()}
               </div>
               <div style={{ fontSize: '0.9rem', fontWeight: 700 }}>
@@ -375,7 +474,7 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
                 disabled={isGenerating || !depMet}
                 style={{
                   padding: '8px 20px', fontSize: '0.72rem', fontWeight: 700,
-                  background: depMet ? 'var(--accent-primary, #00d4ff)' : 'rgba(255,255,255,0.06)',
+                  background: depMet ? 'var(--gold)' : 'rgba(255,255,255,0.06)',
                   color: depMet ? '#000' : 'var(--text-dim)',
                   border: 'none', borderRadius: '6px', cursor: depMet ? 'pointer' : 'not-allowed',
                   letterSpacing: '0.5px',
@@ -406,17 +505,22 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
             </div>
           )}
 
-          {/* Concept Brief input (only for step 1) */}
-          {activeStep === 'concept' && (
+          {/* Idea Brief input (first step of any category) */}
+          {STEP_ORDER.indexOf(activeStep) === 0 && (
             <div style={{ padding: '12px 24px', borderBottom: '1px solid rgba(255,255,255,0.04)', flexShrink: 0 }}>
-              <div style={{ fontSize: '0.6rem', color: 'var(--text-dim)', letterSpacing: '1px', marginBottom: '6px' }}>IDEA BRIEF</div>
+              <div style={{ fontSize: '0.6rem', color: 'var(--gold)', letterSpacing: '1px', marginBottom: '6px' }}>IDEA BRIEF</div>
               <textarea
                 value={conceptBrief}
                 onChange={(e) => setConceptBrief(e.target.value)}
-                placeholder="영화 아이디어를 자유롭게 입력하세요..."
+                placeholder={
+                  project.category === 'YouTube' ? '영상 아이디어를 입력하세요... (주제, 후킹 포인트, 타겟 시청자)' :
+                  project.category === 'Commercial' ? '광고 크리에이티브 브리프를 입력하세요... (브랜드, 제품, 타겟, 톤앤매너)' :
+                  project.category === 'Netflix Original' ? '시리즈 아이디어를 입력하세요... (장르, 세계관, 핵심 갈등, 에피소드 구조)' :
+                  '영화 아이디어를 자유롭게 입력하세요...'
+                }
                 style={{
                   width: '100%', minHeight: '80px', resize: 'vertical',
-                  background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)',
+                  background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(200,168,85,0.15)',
                   borderRadius: '6px', padding: '10px', fontSize: '0.8rem',
                   color: 'var(--text-main)', fontFamily: 'inherit', lineHeight: 1.6,
                 }}

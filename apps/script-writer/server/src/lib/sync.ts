@@ -31,6 +31,11 @@ export const syncProjectToFileSystem = async (project: any) => {
       { name: "script.md", content: project.scenario || "" },
       { name: "characters.json", content: JSON.stringify(project.characters || {}, null, 2) },
       { name: "metadata.json", content: JSON.stringify({
+        id: project.id,
+        title: project.title,
+        category: project.category,
+        genre: project.genre,
+        status: project.status,
         storyboardImages: project.storyboardImages || {},
         analysisData: project.analysisData || null,
         conceptBrief: project.conceptBrief || "",

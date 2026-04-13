@@ -29,7 +29,7 @@ function CutCard({ cut, isSelected, onClick }) {
       onClick={onClick}
       style={{
         padding: '8px 10px',
-        background: isSelected ? 'rgba(139,92,246,0.12)' : 'rgba(255,255,255,0.02)',
+        background: isSelected ? 'rgba(200,168,85,0.1)' : 'rgba(255,255,255,0.02)',
         border: `1px solid ${isSelected ? 'var(--gold-dim)' : 'rgba(255,255,255,0.06)'}`,
         borderRadius: '6px',
         cursor: 'pointer',
@@ -100,7 +100,7 @@ function CutNodePipeline({ cut, onUpdate }) {
   return (
     <div style={{ padding: '16px', height: '100%', overflowY: 'auto' }}>
       {/* Cut header */}
-      <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(139,92,246,0.08)', border: '1px solid var(--gold-subtle)', borderRadius: '8px' }}>
+      <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(200,168,85,0.06)', border: '1px solid var(--gold-subtle)', borderRadius: '8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
             <span style={{ fontSize: '0.85rem', fontWeight: 700, fontFamily: 'monospace', color: 'var(--gold)' }}>{cut.displayId}</span>
@@ -128,12 +128,12 @@ function CutNodePipeline({ cut, onUpdate }) {
             <div key={node.key} style={{ opacity: isActive ? 1 : 0.4 }}>
               {/* Connection arrow */}
               {i > 0 && (
-                <div style={{ textAlign: 'center', color: 'rgba(139,92,246,0.3)', fontSize: '0.7rem', margin: '2px 0' }}>↓</div>
+                <div style={{ textAlign: 'center', color: 'rgba(200,168,85,0.3)', fontSize: '0.7rem', margin: '2px 0' }}>↓</div>
               )}
               <div style={{
                 padding: '10px 12px',
-                background: isCurrent ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.02)',
-                border: `1px solid ${isCurrent ? 'rgba(139,92,246,0.3)' : 'rgba(255,255,255,0.06)'}`,
+                background: isCurrent ? 'rgba(200,168,85,0.06)' : 'rgba(255,255,255,0.02)',
+                border: `1px solid ${isCurrent ? 'rgba(200,168,85,0.3)' : 'rgba(255,255,255,0.06)'}`,
                 borderRadius: '6px',
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -217,7 +217,7 @@ const SceneDetailView = ({ project, sceneId, onBack }) => {
   const totalCuts = scene.cuts?.length || 0;
 
   return (
-    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary, #0a0a0a)' }}>
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-floor)' }}>
       {/* Header */}
       <div style={{
         padding: '12px 20px',
