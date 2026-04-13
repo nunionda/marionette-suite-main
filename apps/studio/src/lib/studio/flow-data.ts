@@ -81,36 +81,108 @@ export function buildInitialEdges(cutSlug: string): Edge[] {
   }));
 }
 
-/* ── Backend persistence ── */
+/* ── Backend persistence (script-writer :3006) ── */
 const BACKEND_URL =
   typeof window !== 'undefined'
-    ? (process.env.NEXT_PUBLIC_PRODUCTION_API_URL ?? 'http://localhost:3005')
-    : 'http://localhost:3005';
+    ? (process.env.NEXT_PUBLIC_PRODUCTION_API_URL ?? 'http://localhost:3006')
+    : 'http://localhost:3006';
 
+/**
+ * Extract pipeline-relevant fields from ReactFlow nodes → flat DB fields.
+ * Maps node data to the PATCH /api/cuts/:cutId payload.
+ */
+function extractCutPatchFromNodes(cutSlug: string, nodes: Node[]): Record<string, string | undefined> {
+  const find = (type: string) => nodes.find(n => n.id === `${cutSlug}-${type}`)?.data as Record<string, unknown> | undefined;
+  const scriptData = find('scriptNode');
+  const imgPromptData = find('imagePromptNode');
+  const imgGenData = find('imageGenNode');
+  const vidPromptData = find('videoPromptNode');
+  const vidGenData = find('videoGenNode');
+  const audioData = find('audioNode');
+  return {
+    scriptText: scriptData?.script as string | undefined,
+    imagePrompt: imgPromptData?.prompt as string | undefined,
+    imageUrl: (imgGenData?.imageUrls as string[] | undefined)?.[0],
+    videoPrompt: vidPromptData?.prompt as string | undefined,
+    videoUrl: vidGenData?.videoUrl as string | undefined,
+    audioUrl: audioData?.audioUrl as string | undefined,
+  };
+}
+
+/**
+ * Save node pipeline data to script-writer backend.
+ * Uses PATCH /api/cuts/:cutId with flat fields.
+ */
 export async function saveNodeGraphToBackend(
   projectId: string,
   cutSlug: string,
   nodes: Node[],
   edges: Edge[],
+  cutId?: string,
 ): Promise<void> {
-  const serialisedNodes = nodes.map(({ id, type, position, data }) => ({ id, type, position, data }));
-  const serialisedEdges = edges.map(({ id, source, target, animated, style }) => ({ id, source, target, animated, style }));
-  await fetch(`${BACKEND_URL}/api/projects/${projectId}/cuts/${cutSlug}/graph`, {
-    method: 'PUT',
+  if (!cutId) return; // Need DB id to save
+  const patch = extractCutPatchFromNodes(cutSlug, nodes);
+  await fetch(`${BACKEND_URL}/api/cuts/${cutId}`, {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ nodes: serialisedNodes, edges: serialisedEdges }),
+    body: JSON.stringify(patch),
   });
 }
 
+/**
+ * Load cut pipeline data from script-writer backend and return as node data overrides.
+ * Returns a map of nodeId → data overrides for buildInitialNodes.
+ */
 export async function loadNodeGraphFromBackend(
   projectId: string,
   cutSlug: string,
+  cutId?: string,
 ): Promise<{ nodes: Node[]; edges: Edge[] } | null> {
+  if (!cutId) return null;
   try {
-    const res = await fetch(`${BACKEND_URL}/api/projects/${projectId}/cuts/${cutSlug}/graph`);
+    const res = await fetch(`${BACKEND_URL}/api/cuts/${cutId}`);
     if (!res.ok) return null;
-    const data = (await res.json()) as { nodes: Node[]; edges: Edge[] };
-    return { nodes: data.nodes, edges: data.edges };
+    const cut = await res.json();
+    if (!cut) return null;
+    // Return null to signal "use buildInitialNodes with DB data" — handled by caller
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Load cut data from backend and return as savedData map for buildInitialNodes.
+ */
+export async function loadCutDataFromBackend(cutId: string): Promise<Record<string, Record<string, unknown>> | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/cuts/${cutId}`);
+    if (!res.ok) return null;
+    const cut = await res.json();
+    if (!cut) return null;
+    const cutSlug = cut.slug ?? '';
+    const data: Record<string, Record<string, unknown>> = {};
+    if (cut.scriptText ?? cut.script_text) {
+      data[`${cutSlug}-scriptNode`] = { script: cut.scriptText ?? cut.script_text };
+    }
+    if (cut.imagePrompt ?? cut.image_prompt) {
+      data[`${cutSlug}-imagePromptNode`] = { prompt: cut.imagePrompt ?? cut.image_prompt, style: 'photorealistic' };
+    }
+    if (cut.imageUrl ?? cut.image_url) {
+      const url = cut.imageUrl ?? cut.image_url;
+      data[`${cutSlug}-imageGenNode`] = { provider: 'Pollinations', status: 'done', imageUrls: [url] };
+      data[`${cutSlug}-imagePickNode`] = { selectedIndex: 0, imageUrls: [url] };
+    }
+    if (cut.videoPrompt ?? cut.video_prompt) {
+      data[`${cutSlug}-videoPromptNode`] = { prompt: cut.videoPrompt ?? cut.video_prompt, cameraMove: '' };
+    }
+    if (cut.videoUrl ?? cut.video_url) {
+      data[`${cutSlug}-videoGenNode`] = { provider: 'Runway', status: 'done', videoUrl: cut.videoUrl ?? cut.video_url };
+    }
+    if (cut.audioUrl ?? cut.audio_url) {
+      data[`${cutSlug}-audioNode`] = { text: cut.scriptText ?? cut.script_text ?? '', voice: 'ko-KR-Standard-A', status: 'done', audioUrl: cut.audioUrl ?? cut.audio_url };
+    }
+    return Object.keys(data).length > 0 ? data : null;
   } catch {
     return null;
   }

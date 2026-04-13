@@ -2,10 +2,13 @@ import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { staticPlugin } from "@elysiajs/static";
 import { aiRoutes } from "./ai";
-import { db, projects, loglineIdeas, projectOutline, scenes, cuts } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { db, projects, loglineIdeas, projectOutline, scenes, cuts, productionAssets } from "./db";
+import { eq, desc, and, sql, count } from "drizzle-orm";
 import { syncProjectToFileSystem } from "./lib/sync";
 import { addJob, getJob } from "./services/pdfQueue";
+import { analyzeScript, analyzeProduction } from "./services/analysisEngine";
+import { generateImage, buildCinematicPrompt, generateImageCandidates } from "./services/imageGenerator";
+import { generateTTS } from "./services/audioGenerator";
 import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
@@ -27,7 +30,25 @@ const app = new Elysia()
       .group("/ai", (app) => app.use(aiRoutes))
       .get("/projects", async () => {
         const allProjects = await db.select().from(projects);
-        return { projects: allProjects };
+        // Enrich with scene/cut aggregate counts for studio compatibility
+        const enriched = await Promise.all(allProjects.map(async (p) => {
+          const sceneRows = await db.select({
+            total: count(),
+            done: sql<number>`sum(case when ${scenes.status} = 'done' then 1 else 0 end)`,
+          }).from(scenes).where(eq(scenes.projectId, p.id));
+          const cutRows = await db.select({
+            total: count(),
+            done: sql<number>`sum(case when ${cuts.status} = 'done' then 1 else 0 end)`,
+          }).from(cuts).where(eq(cuts.projectId, p.id));
+          return {
+            ...p,
+            totalScenes: sceneRows[0]?.total ?? 0,
+            completedScenes: sceneRows[0]?.done ?? 0,
+            totalCuts: cutRows[0]?.total ?? 0,
+            completedCuts: cutRows[0]?.done ?? 0,
+          };
+        }));
+        return { projects: enriched };
       })
       .post("/projects", async ({ body }) => {
         const [newProject] = await db.insert(projects).values(body).returning();
@@ -294,7 +315,33 @@ const app = new Elysia()
         const rows = await db.select().from(scenes)
           .where(eq(scenes.projectId, parseInt(id)))
           .orderBy(scenes.sceneNumber);
-        return { success: true, scenes: rows };
+        // Build sequences (act-based grouping) for studio compatibility
+        const actGroups: Record<number, { count: number; done: number }> = {};
+        for (const r of rows) {
+          const act = r.act ?? 1;
+          if (!actGroups[act]) actGroups[act] = { count: 0, done: 0 };
+          actGroups[act].count++;
+          if (r.status === 'done') actGroups[act].done++;
+        }
+        const sequences = Object.entries(actGroups).map(([act, g]) => ({
+          id: `act-${act}`,
+          number: Number(act),
+          title: `Act ${act}`,
+          projectId: id,
+          sceneCount: g.count,
+          completedSceneCount: g.done,
+        }));
+        // Parse characters JSON and attach first cut's image as cover
+        const parsed = await Promise.all(rows.map(async (r) => {
+          const [firstCut] = await db.select().from(cuts)
+            .where(and(eq(cuts.sceneId, r.id), eq(cuts.cutNumber, 1)));
+          return {
+            ...r,
+            characters: JSON.parse(r.characters || '[]'),
+            coverImageUrl: firstCut?.imageUrl || firstCut?.thumbnailUrl || null,
+          };
+        }));
+        return { scenes: parsed, sequences, totalCount: rows.length };
       })
       .post("/projects/:id/scenes/parse", async ({ params: { id } }) => {
         const projectId = parseInt(id);
@@ -354,6 +401,16 @@ const app = new Elysia()
           .orderBy(cuts.cutNumber);
         return { ...scene, characters: JSON.parse(scene.characters || "[]"), cuts: sceneCuts };
       })
+      // Slug-based scene lookup for studio (routes use slugs like 'sc001')
+      .get("/projects/:id/scenes/by-slug/:slug", async ({ params: { id, slug } }) => {
+        const [scene] = await db.select().from(scenes)
+          .where(and(eq(scenes.projectId, parseInt(id)), eq(scenes.slug, slug)));
+        if (!scene) return null;
+        const sceneCuts = await db.select().from(cuts)
+          .where(eq(cuts.sceneId, scene.id))
+          .orderBy(cuts.cutNumber);
+        return { ...scene, characters: JSON.parse(scene.characters || "[]"), cuts: sceneCuts };
+      })
 
       // ─── CUTS ────────────────────────────────────────────────────
       .get("/cuts/:cutId", async ({ params: { cutId } }) => {
@@ -385,6 +442,473 @@ const app = new Elysia()
         }
 
         return { success: true, cut: updated };
+      })
+
+      // ─── PRODUCTION PIPELINE ─────────────────────────────────
+      // Get all pipeline node states for a project
+      .get("/projects/:id/pipeline", async ({ params: { id } }) => {
+        const projectId = parseInt(id);
+        const assets = await db.select().from(productionAssets)
+          .where(eq(productionAssets.projectId, projectId))
+          .orderBy(productionAssets.createdAt);
+        // Group by nodeId, return latest per node
+        const byNode: Record<string, any> = {};
+        for (const a of assets) {
+          byNode[a.nodeId] = {
+            ...a,
+            outputData: a.outputData ? JSON.parse(a.outputData) : null,
+            imageUrls: a.imageUrls ? JSON.parse(a.imageUrls) : [],
+            inputData: a.inputData ? JSON.parse(a.inputData) : null,
+          };
+        }
+        return { success: true, nodes: byNode };
+      })
+      // Get a specific node's result
+      .get("/projects/:id/pipeline/:nodeId", async ({ params: { id, nodeId } }) => {
+        const rows = await db.select().from(productionAssets)
+          .where(and(eq(productionAssets.projectId, parseInt(id)), eq(productionAssets.nodeId, nodeId)))
+          .orderBy(desc(productionAssets.createdAt));
+        if (rows.length === 0) return { success: true, asset: null };
+        const a = rows[0];
+        return {
+          success: true,
+          asset: {
+            ...a,
+            outputData: a.outputData ? JSON.parse(a.outputData) : null,
+            imageUrls: a.imageUrls ? JSON.parse(a.imageUrls) : [],
+            inputData: a.inputData ? JSON.parse(a.inputData) : null,
+          },
+          history: rows.map(r => ({ id: r.id, status: r.status, style: r.style, createdAt: r.createdAt })),
+        };
+      })
+      // Execute a pipeline node
+      .post("/projects/:id/pipeline/:nodeId/execute", async ({ params: { id, nodeId }, body }) => {
+        const projectId = parseInt(id);
+        const b = body as any;
+
+        // Create or update asset record
+        const existing = await db.select().from(productionAssets)
+          .where(and(eq(productionAssets.projectId, projectId), eq(productionAssets.nodeId, nodeId)));
+
+        const assetData = {
+          projectId,
+          nodeId,
+          phase: b.phase || 'unknown',
+          track: b.track || 'design',
+          status: 'generating' as const,
+          inputData: b.inputData ? JSON.stringify(b.inputData) : null,
+          style: b.style || null,
+          provider: b.provider || 'pollinations',
+          updatedAt: new Date().toISOString(),
+        };
+
+        let assetId: number;
+        if (existing.length > 0) {
+          await db.update(productionAssets).set(assetData).where(eq(productionAssets.id, existing[0].id));
+          assetId = existing[0].id;
+        } else {
+          const [inserted] = await db.insert(productionAssets).values(assetData).returning();
+          assetId = inserted.id;
+        }
+
+        // For design nodes with storyboard API: execute immediately
+        const STORYBOARD_API = process.env.STORYBOARD_API_URL || 'http://localhost:3007';
+        const apiMap: Record<string, string> = {
+          character_design: '/api/character',
+          set_design: '/api/environment',
+          costume_design: '/api/costume',
+          props: '/api/props',
+          storyboard: '/api/generate',
+        };
+
+        const apiEndpoint = apiMap[nodeId];
+        if (apiEndpoint) {
+          try {
+            const res = await fetch(`${STORYBOARD_API}${apiEndpoint}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                description: b.description || b.inputData?.description || '',
+                style: b.style || 'bong',
+                project: b.project || 'Untitled',
+                scene: b.scene || b.description || '',
+              }),
+            });
+            const result = await res.json();
+            // Build image URL: prefer explicit url, then construct from path
+            let imgUrl = result.url || result.image_url || null;
+            if (!imgUrl && result.path) {
+              const filename = result.path.split('/').pop();
+              imgUrl = `${STORYBOARD_API}/output/${filename}`;
+            }
+            const imageUrls = imgUrl ? [imgUrl] : (result.images || []);
+            await db.update(productionAssets).set({
+              status: result.success !== false ? 'done' : 'error',
+              outputData: JSON.stringify(result),
+              imageUrls: JSON.stringify(imageUrls),
+              errorMessage: result.error || null,
+              updatedAt: new Date().toISOString(),
+            }).where(eq(productionAssets.id, assetId));
+            return { success: true, assetId, result: { ...result, imageUrl: imgUrl } };
+          } catch (e: any) {
+            await db.update(productionAssets).set({
+              status: 'error',
+              errorMessage: e.message,
+              updatedAt: new Date().toISOString(),
+            }).where(eq(productionAssets.id, assetId));
+            return { success: false, error: e.message };
+          }
+        }
+
+        // ─── Analysis nodes: run locally ───
+        if (nodeId === 'script_analysis' || nodeId === 'production_breakdown') {
+          try {
+            const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+            if (!project?.scenario) {
+              await db.update(productionAssets).set({ status: 'error', errorMessage: 'No screenplay text' }).where(eq(productionAssets.id, assetId));
+              return { success: false, error: 'No screenplay text available' };
+            }
+
+            if (nodeId === 'script_analysis') {
+              const result = await analyzeScript(project.scenario, project.title);
+              await db.update(productionAssets).set({
+                status: 'done',
+                outputData: JSON.stringify(result),
+                updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+              return { success: true, assetId, result: { characters: result.characters.length, locations: result.locations.length, stats: result.stats } };
+            }
+
+            if (nodeId === 'production_breakdown') {
+              // Requires script_analysis to have run first
+              const [analysisAsset] = await db.select().from(productionAssets)
+                .where(and(eq(productionAssets.projectId, projectId), eq(productionAssets.nodeId, 'script_analysis'), eq(productionAssets.status, 'done')));
+              if (!analysisAsset?.outputData) {
+                await db.update(productionAssets).set({ status: 'error', errorMessage: 'Run script_analysis first' }).where(eq(productionAssets.id, assetId));
+                return { success: false, error: 'Run script_analysis first' };
+              }
+              const analysisResult = JSON.parse(analysisAsset.outputData);
+              const breakdown = await analyzeProduction(analysisResult);
+              await db.update(productionAssets).set({
+                status: 'done',
+                outputData: JSON.stringify(breakdown),
+                updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+              return { success: true, assetId, result: { locations: breakdown.uniqueLocations, shootingDays: breakdown.estimatedShootingDays, nightScenes: breakdown.nightScenes } };
+            }
+          } catch (e: any) {
+            await db.update(productionAssets).set({ status: 'error', errorMessage: e.message }).where(eq(productionAssets.id, assetId));
+            return { success: false, error: e.message };
+          }
+        }
+
+        // ─── Video pipeline nodes ───
+        if (nodeId === 'image_prompt' || nodeId === 'image_gen' || nodeId === 'audio_gen') {
+          try {
+            if (nodeId === 'image_prompt') {
+              // Generate cinematic prompt from cut description
+              const prompt = buildCinematicPrompt({
+                description: b.description || '',
+                characters: b.characters,
+                location: b.location,
+                timeOfDay: b.timeOfDay,
+                visualTone: b.visualTone,
+                cameraAngle: b.cameraAngle,
+              });
+              await db.update(productionAssets).set({
+                status: 'done',
+                outputData: JSON.stringify({ prompt }),
+                updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+              return { success: true, assetId, result: { prompt } };
+            }
+
+            if (nodeId === 'image_gen') {
+              const prompt = b.prompt || b.description || '';
+              const result = await generateImage(prompt);
+              const imageUrls = result.imageUrl ? [result.imageUrl] : [];
+              await db.update(productionAssets).set({
+                status: result.success ? 'done' : 'error',
+                outputData: JSON.stringify(result),
+                imageUrls: JSON.stringify(imageUrls),
+                errorMessage: result.error || null,
+                updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+
+              // Also update the cut's image_url if cutId provided
+              if (result.success && result.imageUrl && b.cutId) {
+                await db.update(cuts).set({ imageUrl: result.imageUrl }).where(eq(cuts.id, parseInt(b.cutId)));
+              }
+
+              return { success: result.success, assetId, result };
+            }
+
+            if (nodeId === 'audio_gen') {
+              const text = b.text || b.description || '';
+              const result = await generateTTS(text, { lang: b.lang || 'ko' });
+              await db.update(productionAssets).set({
+                status: result.success ? 'done' : 'error',
+                outputData: JSON.stringify(result),
+                errorMessage: result.error || null,
+                updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+
+              // Update cut's audio_url if cutId provided
+              if (result.success && result.audioUrl && b.cutId) {
+                await db.update(cuts).set({ audioUrl: result.audioUrl }).where(eq(cuts.id, parseInt(b.cutId)));
+              }
+
+              return { success: result.success, assetId, result };
+            }
+          } catch (e: any) {
+            await db.update(productionAssets).set({ status: 'error', errorMessage: e.message }).where(eq(productionAssets.id, assetId));
+            return { success: false, error: e.message };
+          }
+        }
+
+        // ─── Text-based design nodes (generate structured data from screenplay) ───
+        const textNodeHandlers: Record<string, () => Promise<any>> = {
+          visual_world: async () => {
+            const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+            const scenario = project?.scenario || '';
+            // Extract visual tone from screenplay context
+            const locations = scenario.match(/(?:INT\.|EXT\.)[^\n]+/g) || [];
+            const uniqueLocations = [...new Set(locations.map(l => l.trim()))].slice(0, 10);
+            return {
+              colorPalette: b.colorPalette || 'Cold blue-gray with warm amber accents, high contrast noir lighting',
+              visualTone: b.visualTone || 'Tech-noir thriller: metallic surfaces, screen glow, urban density',
+              lightingStyle: 'Low-key with motivated sources, neon accents in night scenes',
+              cameraLanguage: 'Handheld intimacy for dialogue, locked-off symmetry for tension',
+              referenceLocations: uniqueLocations,
+              moodKeywords: ['tension', 'paranoia', 'isolation', 'digital claustrophobia', 'neon noir'],
+            };
+          },
+          character_arc: async () => {
+            // Use script_analysis data if available
+            const [analysisAsset] = await db.select().from(productionAssets)
+              .where(and(eq(productionAssets.projectId, projectId), eq(productionAssets.nodeId, 'script_analysis'), eq(productionAssets.status, 'done')));
+            const analysis = analysisAsset?.outputData ? JSON.parse(analysisAsset.outputData) : null;
+            const chars = analysis?.characters?.filter((c: any) => c.type === 'lead' || c.type === 'supporting') || [];
+            return {
+              characters: chars.map((c: any) => ({
+                name: c.name,
+                type: c.type,
+                sceneCount: c.sceneCount,
+                arc: {
+                  act1: `${c.name} 소개 및 일상 (씬 1~${Math.floor(c.sceneCount * 0.25)})`,
+                  act2: `${c.name} 갈등 심화 및 변화 (씬 ${Math.floor(c.sceneCount * 0.25)}~${Math.floor(c.sceneCount * 0.75)})`,
+                  act3: `${c.name} 최종 결단 및 결말 (씬 ${Math.floor(c.sceneCount * 0.75)}~${c.sceneCount})`,
+                },
+                motivation: `Driven by internal conflict across ${c.sceneCount} scenes`,
+                transformation: 'Character evolution through escalating stakes',
+              })),
+            };
+          },
+          set_dressing: async () => {
+            const [analysisAsset] = await db.select().from(productionAssets)
+              .where(and(eq(productionAssets.projectId, projectId), eq(productionAssets.nodeId, 'script_analysis'), eq(productionAssets.status, 'done')));
+            const analysis = analysisAsset?.outputData ? JSON.parse(analysisAsset.outputData) : null;
+            const locations = analysis?.locations?.slice(0, 8) || [];
+            return {
+              locations: locations.map((loc: any) => ({
+                name: loc.name,
+                setting: loc.setting,
+                frequency: loc.frequency,
+                dressingNotes: `${loc.setting === 'INT.' ? 'Interior' : 'Exterior'} — ${loc.name}: props, furniture, and atmosphere details TBD`,
+                atmosphereKeywords: loc.setting === 'INT.' ? ['enclosed', 'artificial light', 'detailed props'] : ['natural light', 'weather', 'wide scope'],
+              })),
+            };
+          },
+          shot_list: async () => {
+            // Generate shot list from scene/cut data
+            const sceneRows = await db.select().from(scenes)
+              .where(eq(scenes.projectId, projectId)).orderBy(scenes.sceneNumber).limit(10);
+            const shotList = [];
+            for (const scene of sceneRows) {
+              const cutRows = await db.select().from(cuts)
+                .where(eq(cuts.sceneId, scene.id)).orderBy(cuts.cutNumber).limit(5);
+              for (const cut of cutRows) {
+                shotList.push({
+                  scene: scene.displayId || scene.slug,
+                  cut: cut.displayId || cut.slug,
+                  type: cut.type,
+                  description: (cut.description || '').slice(0, 60),
+                  cameraAngle: cut.type === 'dialogue' ? 'Medium Close-Up' : 'Wide Shot',
+                  lens: cut.type === 'dialogue' ? '85mm' : '24mm',
+                  movement: cut.type === 'action' ? 'Tracking' : 'Static',
+                  duration: `${cut.duration || 4}s`,
+                });
+              }
+            }
+            return { shots: shotList, totalShots: shotList.length };
+          },
+          art_bible: async () => {
+            // Compile all design node results
+            const allAssets = await db.select().from(productionAssets)
+              .where(and(eq(productionAssets.projectId, projectId), eq(productionAssets.track, 'design'), eq(productionAssets.status, 'done')));
+            const compiled: Record<string, any> = {};
+            for (const asset of allAssets) {
+              compiled[asset.nodeId] = {
+                status: asset.status,
+                data: asset.outputData ? JSON.parse(asset.outputData) : null,
+                images: asset.imageUrls ? JSON.parse(asset.imageUrls) : [],
+                style: asset.style,
+                createdAt: asset.createdAt,
+              };
+            }
+            return { compiledSections: Object.keys(compiled).length, totalSections: 11, sections: compiled };
+          },
+          image_pick: async () => {
+            // Image selection — just marks the selected image
+            return { selectedIndex: b.selectedIndex ?? 0, imageUrl: b.imageUrl || null };
+          },
+          video_prompt: async () => {
+            const description = b.description || '';
+            const cameraMove = b.cameraMove || 'slow zoom in';
+            const prompt = `Cinematic video: ${description}. Camera: ${cameraMove}. Smooth motion, 24fps, film look, shallow DOF.`;
+            return { prompt, cameraMove };
+          },
+          video_gen: async () => {
+            // Pollinations also supports video via text-to-video
+            const prompt = b.prompt || b.description || '';
+            const encodedPrompt = encodeURIComponent(prompt);
+            // Pollinations video endpoint (experimental)
+            const videoUrl = `https://video.pollinations.ai/generate?prompt=${encodedPrompt}&model=fast-svd`;
+            return { videoUrl, provider: 'pollinations-video', note: 'Experimental — may not be available' };
+          },
+          final_cut: async () => {
+            // Assembly — gather all assets for this cut
+            const cutId = b.cutId ? parseInt(b.cutId) : null;
+            if (!cutId) return { error: 'cutId required' };
+            const [cut] = await db.select().from(cuts).where(eq(cuts.id, cutId));
+            return {
+              cutId,
+              displayId: cut?.displayId || cut?.slug,
+              imageUrl: cut?.imageUrl || null,
+              videoUrl: cut?.videoUrl || null,
+              audioUrl: cut?.audioUrl || null,
+              status: (cut?.imageUrl && cut?.audioUrl) ? 'ready_for_review' : 'missing_assets',
+              approved: false,
+            };
+          },
+        };
+
+        const handler = textNodeHandlers[nodeId];
+        if (handler) {
+          try {
+            const result = await handler();
+            await db.update(productionAssets).set({
+              status: 'done',
+              outputData: JSON.stringify(result),
+              updatedAt: new Date().toISOString(),
+            }).where(eq(productionAssets.id, assetId));
+            return { success: true, assetId, result };
+          } catch (e: any) {
+            await db.update(productionAssets).set({ status: 'error', errorMessage: e.message, updatedAt: new Date().toISOString() }).where(eq(productionAssets.id, assetId));
+            return { success: false, error: e.message };
+          }
+        }
+
+        // Unknown node — return pending
+        return { success: true, assetId, status: 'pending', message: `Node ${nodeId} not recognized` };
+      })
+
+      // ─── BATCH EXECUTION: Run pipeline for a scene's cuts ─────
+      .post("/projects/:id/scenes/:sceneId/batch-execute", async ({ params: { id, sceneId }, body }) => {
+        const projectId = parseInt(id);
+        const sid = parseInt(sceneId);
+        const b = body as any;
+        const steps = b.steps || ['image_prompt', 'image_gen', 'audio_gen']; // default pipeline steps
+        const maxCuts = b.maxCuts || 10;
+
+        // Get scene and its cuts
+        const [scene] = await db.select().from(scenes).where(eq(scenes.id, sid));
+        if (!scene) return { success: false, error: 'Scene not found' };
+
+        const sceneCuts = await db.select().from(cuts)
+          .where(eq(cuts.sceneId, sid))
+          .orderBy(cuts.cutNumber)
+          .limit(maxCuts);
+
+        // Load character design reference for consistency
+        const [charDesignAsset] = await db.select().from(productionAssets)
+          .where(and(eq(productionAssets.projectId, projectId), eq(productionAssets.nodeId, 'character_design'), eq(productionAssets.status, 'done')));
+        const charRefImages = charDesignAsset?.imageUrls ? JSON.parse(charDesignAsset.imageUrls) : [];
+        const characterRef = charRefImages.length > 0 ? charRefImages[0] : undefined;
+
+        const results: any[] = [];
+
+        for (const cut of sceneCuts) {
+          const cutResult: Record<string, any> = { cutId: cut.id, slug: cut.slug, steps: {} };
+
+          for (const step of steps) {
+            try {
+              let payload: any = {
+                phase: step.includes('image') ? 'image_gen' : step.includes('video') ? 'video_gen' : 'audio',
+                track: 'video',
+                cutId: String(cut.id),
+              };
+
+              if (step === 'image_prompt') {
+                payload.description = cut.description || cut.scriptText || '';
+                payload.location = scene.location || '';
+                payload.timeOfDay = scene.timeOfDay || '';
+                const chars = scene.characters ? JSON.parse(scene.characters) : [];
+                payload.characters = chars;
+              } else if (step === 'image_gen') {
+                // Build prompt from cut description + character reference
+                const prompt = buildCinematicPrompt({
+                  description: cut.description || cut.scriptText || '',
+                  location: scene.location || '',
+                  timeOfDay: scene.timeOfDay || '',
+                  characters: scene.characters ? JSON.parse(scene.characters) : [],
+                  characterRef,
+                });
+                payload.prompt = prompt;
+              } else if (step === 'audio_gen') {
+                payload.text = cut.scriptText || cut.description || '';
+                payload.lang = 'ko';
+              }
+
+              // Execute the step inline (reuse existing logic)
+              if (step === 'image_gen') {
+                const imgResult = await generateImage(payload.prompt);
+                if (imgResult.success && imgResult.imageUrl) {
+                  await db.update(cuts).set({ imageUrl: imgResult.imageUrl }).where(eq(cuts.id, cut.id));
+                }
+                cutResult.steps[step] = { success: imgResult.success, imageUrl: imgResult.imageUrl };
+              } else if (step === 'audio_gen' && cut.type === 'dialogue') {
+                const audioResult = await generateTTS(payload.text, { lang: 'ko' });
+                if (audioResult.success && audioResult.audioUrl) {
+                  await db.update(cuts).set({ audioUrl: audioResult.audioUrl }).where(eq(cuts.id, cut.id));
+                }
+                cutResult.steps[step] = { success: audioResult.success };
+              } else if (step === 'image_prompt') {
+                const prompt = buildCinematicPrompt(payload);
+                await db.update(cuts).set({ imagePrompt: prompt }).where(eq(cuts.id, cut.id));
+                cutResult.steps[step] = { success: true };
+              } else {
+                cutResult.steps[step] = { success: true, skipped: cut.type !== 'dialogue' && step === 'audio_gen' };
+              }
+            } catch (e: any) {
+              cutResult.steps[step] = { success: false, error: e.message };
+            }
+          }
+
+          results.push(cutResult);
+        }
+
+        // Update scene status
+        const doneCutCount = await db.select({ c: count() }).from(cuts)
+          .where(and(eq(cuts.sceneId, sid), eq(cuts.status, 'done')));
+
+        return {
+          success: true,
+          scene: scene.displayId || scene.slug,
+          processedCuts: results.length,
+          totalCuts: scene.cutCount,
+          results,
+        };
       })
   )
   .listen({

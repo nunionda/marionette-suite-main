@@ -30,8 +30,9 @@ import {
   loadNodeData,
   saveNodeData,
   saveNodeGraphToBackend,
-  loadNodeGraphFromBackend,
+  loadCutDataFromBackend,
 } from '@/lib/studio/flow-data';
+import { generateCutImage, generateCutAudio } from '@/lib/studio/pipeline-client';
 
 // nodeTypes MUST be defined outside the component to prevent React Flow edge flicker
 const nodeTypes = {
@@ -54,6 +55,7 @@ interface Props {
   projectId: string;
   sceneSlug: string;
   cutSlug: string;
+  cutId?: string;
   script: string;
   displayId: string;
   prevCut: Cut | null;
@@ -66,6 +68,7 @@ export function CutNodeEditor({
   projectId,
   sceneSlug,
   cutSlug,
+  cutId,
   script,
   displayId,
   prevCut,
@@ -102,24 +105,30 @@ export function CutNodeEditor({
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
         // Edges are deterministic from cutSlug — no stale closure risk
-        void saveNodeGraphToBackend(projectId, cutSlug, latestNodes, buildInitialEdges(cutSlug));
+        void saveNodeGraphToBackend(projectId, cutSlug, latestNodes, buildInitialEdges(cutSlug), cutId);
       }, 1500);
     },
-    [projectId, cutSlug],
+    [projectId, cutSlug, cutId],
   );
 
-  // On mount: try backend first, fall back to localStorage
+  // On mount: load pipeline data from script-writer backend, fall back to localStorage
   useEffect(() => {
-    loadNodeGraphFromBackend(projectId, cutSlug).then((remote) => {
-      if (remote && remote.nodes.length > 0) {
-        setNodes(remote.nodes);
-        setEdges(remote.edges);
-      }
-    });
+    if (cutId) {
+      loadCutDataFromBackend(cutId).then((dbData) => {
+        if (dbData) {
+          const refreshed = buildInitialNodes(cutSlug, displayId, script, dbData);
+          const savedPositions = loadNodePositions(cutSlug);
+          const positioned = savedPositions
+            ? refreshed.map(n => ({ ...n, position: savedPositions[n.id] ?? n.position }))
+            : refreshed;
+          setNodes(positioned);
+        }
+      });
+    }
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [projectId, cutSlug, setNodes, setEdges]);
+  }, [projectId, cutSlug, cutId, displayId, script, setNodes]);
 
   const handleNodesChange: OnNodesChange = useCallback(
     (changes) => {
@@ -147,6 +156,34 @@ export function CutNodeEditor({
     },
     [setNodes, cutSlug, scheduleBackendSave]
   );
+
+  // Pipeline execution: inject onGenerate callbacks into node data
+  useEffect(() => {
+    if (!cutId) return;
+    setNodes((nds) =>
+      nds.map((n) => {
+        if (n.type === 'imageGenNode') {
+          return { ...n, data: { ...n.data, onGenerate: async () => {
+            const promptNode = nds.find(nd => nd.type === 'imagePromptNode');
+            const prompt = (promptNode?.data as any)?.prompt || script;
+            const result = await generateCutImage(projectId, cutId, prompt);
+            if (result.success && result.result?.imageUrl) {
+              handleNodeDataChange(`${cutSlug}-imageGenNode`, { status: 'done', imageUrls: [result.result.imageUrl] });
+            }
+          }}};
+        }
+        if (n.type === 'audioNode') {
+          return { ...n, data: { ...n.data, onGenerate: async (text: string) => {
+            const result = await generateCutAudio(projectId, cutId, text || script);
+            if (result.success && result.result?.audioUrl) {
+              handleNodeDataChange(`${cutSlug}-audioNode`, { status: 'done', audioUrl: result.result.audioUrl });
+            }
+          }}};
+        }
+        return n;
+      })
+    );
+  }, [cutId, projectId, cutSlug, script, setNodes]);
 
   const onNodeClick = useCallback((_: React.MouseEvent, node: Node) => {
     setSelectedNodeId(node.id);

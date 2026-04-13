@@ -94,6 +94,26 @@ sqlite.exec(`
     category TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS production_assets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id INTEGER REFERENCES projects(id),
+    node_id TEXT NOT NULL,
+    phase TEXT NOT NULL,
+    track TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    input_data TEXT,
+    output_data TEXT,
+    image_urls TEXT,
+    file_urls TEXT,
+    style TEXT,
+    provider TEXT,
+    error_message TEXT,
+    cut_id INTEGER REFERENCES cuts(id),
+    scene_id INTEGER REFERENCES scenes(id),
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 // Seed default projects if DB is empty

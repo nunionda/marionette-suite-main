@@ -1,29 +1,44 @@
 import React, { useState, useContext } from 'react';
 import './styles/Theme.css';
 import Dashboard from './components/Dashboard';
+import ProjectHub from './components/ProjectHub';
+import WritingRoom from './components/WritingRoom';
+import ProductionDeck from './components/ProductionDeck';
 import ProjectDetail from './components/ProjectDetail';
 import AdProjectDetail from './components/AdProjectDetail';
 import DramaProjectDetail from './components/DramaProjectDetail';
 import YouTubeProjectDetail from './components/YouTubeProjectDetail';
 import ExportRenderView from './components/ExportRenderView';
-import SceneDetailView from './components/SceneDetailView';
 import { ProjectProvider, ProjectContext } from './context/ProjectContext';
+
+/**
+ * App routing — state-based page navigation.
+ *
+ * Flow:
+ *   Dashboard → ProjectHub (phase overview)
+ *                ├── WritingRoom (screenplay development, 5 steps)
+ *                ├── ProductionDeck (scene/cut management + pipeline)
+ *                └── ProjectDetail (legacy flat view, for Ad/Drama/YouTube)
+ *
+ * Feature Film / Short Film projects use the new hub+sub-page flow.
+ * Other categories (Ad, Drama, YouTube) keep their existing detail views.
+ */
 
 function AppContent() {
   const { projects } = useContext(ProjectContext);
   const [currentProjectId, setCurrentProjectId] = React.useState(() => {
     return localStorage.getItem('lastProjectId') || null;
   });
-  const [activeSceneId, setActiveSceneId] = React.useState(null);
-  // isSyncing: true only while we're waiting for the first projects load
-  // Resolves immediately once projects array is populated (or confirmed empty)
+  // Sub-page navigation: null = hub, 'writing' = WritingRoom, 'production' = ProductionDeck, 'pipeline' = ProductionDeck(pipeline), 'legacy' = old ProjectDetail
+  const [subPage, setSubPage] = useState(null);
+  const [subPageParam, setSubPageParam] = useState(null); // e.g. initial step key
+
   const [isSyncing, setIsSyncing] = React.useState(true);
 
   React.useEffect(() => {
     if (projects.length > 0) {
       setIsSyncing(false);
     } else {
-      // Backend returned 0 projects OR fetch hasn't completed yet — give a short grace window
       const timer = setTimeout(() => setIsSyncing(false), 300);
       return () => clearTimeout(timer);
     }
@@ -37,24 +52,38 @@ function AppContent() {
     if (!renderProject && !isSyncing) {
       return <div style={{ color: "white" }}>Project Not Found for Export</div>;
     }
-    if (!renderProject) return null; // wait while syncing
+    if (!renderProject) return null;
     return <ExportRenderView project={renderProject} />;
   }
 
   const handleEnterLab = (id) => {
     setCurrentProjectId(id);
+    setSubPage(null);
+    setSubPageParam(null);
     localStorage.setItem('lastProjectId', id);
   };
 
   const activeProject = projects.find(p => String(p.id) === String(currentProjectId));
-  
+
   const handleBack = () => {
     setCurrentProjectId(null);
+    setSubPage(null);
+    setSubPageParam(null);
     localStorage.removeItem('lastProjectId');
   };
-  const isAd = activeProject?.category === 'Commercial';
-  const isDrama = activeProject?.category === 'Netflix Original';
-  const isYouTube = activeProject?.category === 'YouTube';
+
+  const handleBackToHub = () => {
+    setSubPage(null);
+    setSubPageParam(null);
+  };
+
+  const handleNavigate = (page, param) => {
+    setSubPage(page);
+    setSubPageParam(param || null);
+  };
+
+  // All categories now use the Hub flow
+  const useNewFlow = !!activeProject;
 
   return (
     <div className="App">
@@ -63,36 +92,41 @@ function AppContent() {
           <div style={{ width: '32px', height: '32px', border: '2px solid var(--accent-primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
           RESTORING SESSION...
         </div>
-      ) : activeSceneId && activeProject ? (
-        <SceneDetailView
-          project={activeProject}
-          sceneId={activeSceneId}
-          onBack={() => setActiveSceneId(null)}
-        />
       ) : !activeProject ? (
         <Dashboard onEnterLab={handleEnterLab} />
-      ) : isAd ? (
-        <AdProjectDetail 
-          project={activeProject} 
-          onBack={handleBack} 
-        />
-      ) : isDrama ? (
-        <DramaProjectDetail
-          project={activeProject}
-          onBack={handleBack}
-        />
-      ) : isYouTube ? (
-        <YouTubeProjectDetail
-          project={activeProject}
-          onBack={handleBack}
-        />
-      ) : (
-        <ProjectDetail
-          project={activeProject}
-          onBack={handleBack}
-          onSceneOpen={(sceneId) => setActiveSceneId(sceneId)}
-        />
-      )}
+      ) : useNewFlow ? (
+        // ─── New Hub-based flow (Feature Film / Short Film) ───
+        subPage === 'writing' ? (
+          <WritingRoom
+            project={activeProject}
+            onBack={handleBackToHub}
+            initialStep={subPageParam}
+          />
+        ) : subPage === 'production' ? (
+          <ProductionDeck
+            project={activeProject}
+            onBack={handleBackToHub}
+            initialView="scenes"
+          />
+        ) : subPage === 'pipeline' ? (
+          <ProductionDeck
+            project={activeProject}
+            onBack={handleBackToHub}
+            initialView="pipeline"
+          />
+        ) : subPage === 'legacy' ? (
+          <ProjectDetail
+            project={activeProject}
+            onBack={handleBackToHub}
+          />
+        ) : (
+          <ProjectHub
+            project={activeProject}
+            onBack={handleBack}
+            onNavigate={handleNavigate}
+          />
+        )
+      ) : null}
     </div>
   );
 }

@@ -20,7 +20,16 @@ import { checkHealth } from '../utils/storyboardApi';
 
 // ─── Node status from pipeline data ───
 
-function computeNodeStatus(nodeId, pipelineData, project) {
+function computeNodeStatus(nodeId, pipelineData, project, dbStatus) {
+  // DB status takes priority if available
+  if (dbStatus && dbStatus[nodeId]) {
+    const s = dbStatus[nodeId];
+    if (s === 'done') return 'complete';
+    if (s === 'generating') return 'running';
+    if (s === 'error') return 'error';
+  }
+
+  // Fallback: infer from pipeline data
   const statusMap = {
     // Track A: Production Design
     script_analysis:      () => !!(pipelineData.scenario || pipelineData.treatment),
@@ -137,13 +146,29 @@ function HandoffArrow({ handoff }) {
 
 // ─── Main Component ───
 
-const PipelineView = ({ project, pipelineData, category, onNodeClick }) => {
+const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey }) => {
   const [activeTrack, setActiveTrack] = useState('both');
   const [storyboardServerOnline, setStoryboardServerOnline] = useState(false);
+  const [dbNodeStatus, setDbNodeStatus] = useState({}); // { nodeId: 'done' | 'generating' | ... }
 
   useEffect(() => {
     checkHealth().then(setStoryboardServerOnline);
-  }, []);
+    // Fetch real pipeline status from DB
+    if (project?.id) {
+      fetch(`/api/projects/${project.id}/pipeline`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.success && d.nodes) {
+            const statusMap = {};
+            for (const [k, v] of Object.entries(d.nodes)) {
+              statusMap[k] = v.status;
+            }
+            setDbNodeStatus(statusMap);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [project?.id, refreshKey]);
 
   const activeConfig = ACTIVE_NODES_BY_CATEGORY[category] || ACTIVE_NODES_BY_CATEGORY['Feature Film'];
   const activeDesignIds = new Set(activeConfig.design);
@@ -151,15 +176,15 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick }) => {
 
   const designStats = useMemo(() => {
     const active = PRODUCTION_DESIGN_NODES.filter(n => activeDesignIds.has(n.id));
-    const complete = active.filter(n => computeNodeStatus(n.id, pipelineData, project) === 'complete');
+    const complete = active.filter(n => computeNodeStatus(n.id, pipelineData, project, dbNodeStatus) === 'complete');
     return { total: active.length, complete: complete.length };
-  }, [pipelineData, project, category]);
+  }, [pipelineData, project, category, dbNodeStatus]);
 
   const videoStats = useMemo(() => {
     const active = VIDEO_GENERATION_NODES.filter(n => activeVideoIds.has(n.id));
-    const complete = active.filter(n => computeNodeStatus(n.id, pipelineData, project) === 'complete');
+    const complete = active.filter(n => computeNodeStatus(n.id, pipelineData, project, dbNodeStatus) === 'complete');
     return { total: active.length, complete: complete.length };
-  }, [pipelineData, project, category]);
+  }, [pipelineData, project, category, dbNodeStatus]);
 
   const showDesign = activeTrack === 'both' || activeTrack === 'design';
   const showVideo = activeTrack === 'both' || activeTrack === 'video';

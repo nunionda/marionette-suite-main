@@ -87,6 +87,34 @@ export const cuts = sqliteTable("cuts", {
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
 
+// ─── Production Pipeline Assets ───
+// Stores results from both Production Design and Video Generation nodes
+
+export const productionAssets = sqliteTable("production_assets", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").references(() => projects.id),
+  nodeId: text("node_id").notNull(),          // e.g. 'character_design', 'image_gen'
+  phase: text("phase").notNull(),             // e.g. 'analysis', 'world_building', 'image_gen'
+  track: text("track").notNull(),             // 'design' | 'video'
+  status: text("status").default("pending"),  // pending | generating | done | error
+
+  inputData: text("input_data"),              // JSON — input params used
+  outputData: text("output_data"),            // JSON — text results, analysis data
+  imageUrls: text("image_urls"),              // JSON array of image URLs
+  fileUrls: text("file_urls"),                // JSON array of file URLs (PDF, XLSX)
+
+  style: text("style"),                       // e.g. 'bong', 'kubrick' (10 Masters)
+  provider: text("provider"),                 // e.g. 'pollinations', 'ollama'
+  errorMessage: text("error_message"),
+
+  // For video track: link to specific cut
+  cutId: integer("cut_id").references(() => cuts.id),
+  sceneId: integer("scene_id").references(() => scenes.id),
+
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+  updatedAt: text("updated_at").$defaultFn(() => new Date().toISOString()),
+});
+
 export const loglineIdeas = sqliteTable("logline_ideas", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   content: text("content").notNull(),

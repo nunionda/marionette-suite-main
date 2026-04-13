@@ -47,8 +47,15 @@ const ProjectCard = ({ project, onEnter, onDelete }) => {
         </div>
         <div className="card-meta-row">
           <span style={{ color: meta.color }}>PROGRESS {project.progress || 0}%</span>
-          <span className="card-updated">{project.updated || 'Just now'}</span>
+          <span className="card-updated">{project.updated || project.createdAt || 'Just now'}</span>
         </div>
+        {(project.totalScenes > 0 || project.totalCuts > 0) && (
+          <div style={{ display: 'flex', gap: '8px', fontSize: '0.6rem', color: 'var(--text-dim)', marginTop: '4px' }}>
+            <span>{project.totalScenes} scenes</span>
+            <span>{project.totalCuts} cuts</span>
+            {project.completedCuts > 0 && <span style={{ color: '#22c55e' }}>{project.completedCuts} done</span>}
+          </div>
+        )}
       </div>
 
       <button className="tactical-btn full-width" onClick={() => onEnter(project.id)}>

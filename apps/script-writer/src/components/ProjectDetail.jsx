@@ -42,7 +42,7 @@ const PRODUCTION_STANDARDS = {
   }
 };
 
-const ProjectDetail = ({ project, onBack, onSceneOpen }) => {
+const ProjectDetail = ({ project, onBack }) => {
   const { updateProject } = useContext(ProjectContext);
   const [activeTab, setActiveTab] = useState('CONCEPT');
   const [zenMode, setZenMode] = useState(false);
@@ -607,18 +607,8 @@ const ProjectDetail = ({ project, onBack, onSceneOpen }) => {
                     <SceneBreakdownPanel
                       screenplayText={pipelineData.scenario}
                       projectTitle={project.title}
-                      onSceneClick={async (scene) => {
-                        setSelectedSceneId(scene.number);
-                        // Fetch scene from DB to get scene ID for SceneDetailView
-                        if (onSceneOpen) {
-                          try {
-                            const res = await fetch(`/api/projects/${project.id}/scenes`);
-                            const data = await res.json();
-                            const dbScene = data.scenes?.find(s => s.sceneNumber === scene.number);
-                            if (dbScene) onSceneOpen(dbScene.id);
-                          } catch (e) { console.error('Scene lookup failed:', e); }
-                        }
-                      }}
+                      projectId={project.id}
+                      onSceneClick={(scene) => setSelectedSceneId(scene.number)}
                     />
                   ) : (
                     <>

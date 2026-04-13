@@ -8,7 +8,9 @@ import { parseScreenplayToScenes } from '../utils/sceneCutParser';
  * Replaces the simple SCENE INVENTORY with a real breakdown
  * that matches studio's SceneMeta/CutMeta structure.
  */
-const SceneBreakdownPanel = ({ screenplayText, projectTitle, onSceneClick }) => {
+const STUDIO_URL = 'http://localhost:3001';
+
+const SceneBreakdownPanel = ({ screenplayText, projectTitle, projectId, onSceneClick }) => {
   const breakdown = useMemo(() => {
     if (!screenplayText || screenplayText.length < 50) return null;
     try {
@@ -98,7 +100,13 @@ const SceneBreakdownPanel = ({ screenplayText, projectTitle, onSceneClick }) => 
               cursor: 'pointer',
               transition: 'background 0.15s',
             }}
-            onClick={() => onSceneClick?.(scene)}
+            onClick={() => {
+              if (projectId) {
+                window.open(`${STUDIO_URL}/projects/${projectId}/scenes/${scene.slug}`, '_blank');
+              } else {
+                onSceneClick?.(scene);
+              }
+            }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
             onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
           >

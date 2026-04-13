@@ -42,6 +42,7 @@ export default async function CutPage({ params }: Props) {
       projectId={projectId}
       sceneSlug={sceneSlug}
       cutSlug={cutSlug}
+      cutId={cut.id}
       script={script}
       displayId={cut.displayId}
       prevCut={prevCut ? { slug: prevCut.slug, displayId: prevCut.displayId } : null}
