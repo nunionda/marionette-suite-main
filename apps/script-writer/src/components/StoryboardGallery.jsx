@@ -104,7 +104,7 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
           }),
         });
         const data = await res.json();
-        const imageUrl = data.result?.image_url || data.result?.path || null;
+        const imageUrl = data.result?.imageUrl || data.result?.image_url || data.result?.url || null;
 
         if (frameIdx >= 0) {
           newFrames[frameIdx] = { ...newFrames[frameIdx], imageUrl, status: imageUrl ? 'done' : 'error' };

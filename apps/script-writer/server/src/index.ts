@@ -554,10 +554,30 @@ const app = new Elysia()
             });
             const result = await res.json();
             // Build image URL: prefer explicit url, then construct from path
-            let imgUrl = result.url || result.image_url || null;
-            if (!imgUrl && result.path) {
+            let remoteImgUrl = result.url || result.image_url || null;
+            if (!remoteImgUrl && result.path) {
               const filename = result.path.split('/').pop();
-              imgUrl = `${STORYBOARD_API}/output/${filename}`;
+              remoteImgUrl = `${STORYBOARD_API}/output/${filename}`;
+            }
+            // Download remote image to local public dir so it stays accessible
+            let imgUrl = remoteImgUrl;
+            if (remoteImgUrl) {
+              try {
+                const imgRes = await fetch(remoteImgUrl, { signal: AbortSignal.timeout(30000) });
+                if (imgRes.ok) {
+                  const { default: fs } = await import('node:fs');
+                  const { default: path } = await import('node:path');
+                  const storyboardDir = path.join(process.cwd(), 'public', 'storyboard', 'images');
+                  if (!fs.existsSync(storyboardDir)) fs.mkdirSync(storyboardDir, { recursive: true });
+                  const ext = remoteImgUrl.split('.').pop()?.split('?')[0] || 'png';
+                  const fileName = `storyboard_${Date.now()}_${Math.floor(Math.random() * 9999)}.${ext}`;
+                  const filePath = path.join(storyboardDir, fileName);
+                  const buf = Buffer.from(await imgRes.arrayBuffer());
+                  fs.writeFileSync(filePath, buf);
+                  const host = process.env.BACKEND_URL || 'http://localhost:3006';
+                  imgUrl = `${host}/public/storyboard/images/${fileName}`;
+                }
+              } catch (_) { /* keep remoteImgUrl as fallback */ }
             }
             const imageUrls = imgUrl ? [imgUrl] : (result.images || []);
             await db.update(productionAssets).set({

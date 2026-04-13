@@ -12,25 +12,33 @@ import ExportRenderView from './components/ExportRenderView';
 import { ProjectProvider, ProjectContext } from './context/ProjectContext';
 
 /**
- * App routing — state-based page navigation.
+ * App routing — hash-based URL navigation.
  *
- * Flow:
- *   Dashboard → ProjectHub (phase overview)
- *                ├── WritingRoom (screenplay development, 5 steps)
- *                ├── ProductionDeck (scene/cut management + pipeline)
- *                └── ProjectDetail (legacy flat view, for Ad/Drama/YouTube)
+ * Hash format:
+ *   #/                         → Dashboard
+ *   #/project/123              → ProjectHub
+ *   #/project/123/writing      → WritingRoom
+ *   #/project/123/production   → ProductionDeck
+ *   #/project/123/pipeline     → ProductionDeck (pipeline tab)
+ *   #/project/123/legacy       → ProjectDetail
  *
- * Feature Film / Short Film projects use the new hub+sub-page flow.
- * Other categories (Ad, Drama, YouTube) keep their existing detail views.
+ * State is synced to the URL hash so refreshing restores the current view.
  */
+
+function parseHash() {
+  const hash = window.location.hash.replace('#', '');
+  const match = hash.match(/^\/project\/(\d+)(?:\/(\w+))?/);
+  return match ? { projectId: match[1], subPage: match[2] || null } : { projectId: null, subPage: null };
+}
 
 function AppContent() {
   const { projects } = useContext(ProjectContext);
   const [currentProjectId, setCurrentProjectId] = React.useState(() => {
-    return localStorage.getItem('lastProjectId') || null;
+    const { projectId } = parseHash();
+    return projectId || localStorage.getItem('lastProjectId') || null;
   });
   // Sub-page navigation: null = hub, 'writing' = WritingRoom, 'production' = ProductionDeck, 'pipeline' = ProductionDeck(pipeline), 'legacy' = old ProjectDetail
-  const [subPage, setSubPage] = useState(null);
+  const [subPage, setSubPage] = useState(() => parseHash().subPage);
   const [subPageParam, setSubPageParam] = useState(null); // e.g. initial step key
   const [isSyncing, setIsSyncing] = React.useState(true);
 
@@ -51,6 +59,29 @@ function AppContent() {
   React.useEffect(() => {
     const timer = setTimeout(() => setIsSyncing(false), 3000);
     return () => clearTimeout(timer);
+  }, []);
+
+  // Sync navigation state → URL hash
+  React.useEffect(() => {
+    if (!currentProjectId) {
+      window.location.hash = '';
+    } else if (!subPage) {
+      window.location.hash = `/project/${currentProjectId}`;
+    } else {
+      window.location.hash = `/project/${currentProjectId}/${subPage}`;
+    }
+  }, [currentProjectId, subPage]);
+
+  // Browser back/forward support
+  React.useEffect(() => {
+    const handler = () => {
+      const { projectId, subPage: sp } = parseHash();
+      setCurrentProjectId(projectId);
+      setSubPage(sp);
+      setSubPageParam(null);
+    };
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
   }, []);
 
   // Handle Export Rendering Route
