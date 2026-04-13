@@ -116,6 +116,16 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
               {project.category.toUpperCase()} · {project.genre}
             </div>
           </div>
+          <button
+            onClick={() => onNavigate('legacy')}
+            style={{
+              padding: '6px 12px', fontSize: '0.6rem', fontWeight: 500,
+              background: 'none', border: '1px solid rgba(255,255,255,0.08)',
+              borderRadius: '4px', color: 'var(--text-dim, #666)', cursor: 'pointer',
+            }}
+          >
+            Classic View
+          </button>
         </div>
       </header>
 
