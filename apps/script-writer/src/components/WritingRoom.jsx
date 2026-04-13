@@ -150,10 +150,23 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
 
   const getRoleContext = () => `\n[Creative Role]: DIRECTOR\n[Output Language]: ${language}\n`;
 
-  const saveToContext = () => {
+  const saveToContext = async () => {
     updateProject(project.id, { ...pipelineData, conceptBrief });
     setSaveStatus('SAVED');
-    setTimeout(() => setSaveStatus(''), 2000);
+
+    // Auto-parse scenes/cuts when screenplay data exists
+    const screenplayField = pipelineData.scenario || pipelineData.script || '';
+    if (screenplayField.length > 500) {
+      try {
+        const res = await fetch(`/api/projects/${project.id}/scenes/parse`, { method: 'POST' });
+        const data = await res.json();
+        if (data.success) {
+          setSaveStatus(`SAVED · ${data.stats?.totalScenes || 0} scenes parsed`);
+        }
+      } catch { /* silent */ }
+    }
+
+    setTimeout(() => setSaveStatus(''), 3000);
   };
 
   /* ─── Generation Functions ─── */
@@ -218,6 +231,12 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
   const depField = cfg.requires;
   const depMet = !depField || (pipelineData[depField] && pipelineData[depField].length > 50);
 
+  const selectStyle = {
+    padding: '4px 8px', fontSize: '0.6rem', fontWeight: 600,
+    background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '4px', color: 'var(--text-dim, #888)', cursor: 'pointer',
+  };
+
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-color, #0a0a0a)' }}>
       {/* ── Top Bar ── */}
@@ -235,6 +254,23 @@ const WritingRoom = ({ project, onBack, initialStep }) => {
           <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)', letterSpacing: '1px' }}>WRITING ROOM</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {/* Production Controls */}
+          <select value={language} onChange={e => setLanguage(e.target.value)} style={selectStyle}>
+            <option value="KO">KO</option>
+            <option value="EN">EN</option>
+          </select>
+          <select value={productionStandard} onChange={e => setProductionStandard(e.target.value)} style={selectStyle}>
+            {Object.entries(PRODUCTION_STANDARDS).map(([k, v]) => (
+              <option key={k} value={k}>{v.label}</option>
+            ))}
+          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)' }}>Style</span>
+            <input type="range" min="1" max="10" value={styleIntensity} onChange={e => setStyleIntensity(Number(e.target.value))}
+              style={{ width: '50px', height: '3px', accentColor: 'var(--accent-primary)' }} />
+            <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)', width: '12px' }}>{styleIntensity}</span>
+          </div>
+          <span style={{ color: 'rgba(255,255,255,0.1)' }}>|</span>
           {saveStatus && <span style={{ fontSize: '0.65rem', color: '#22c55e' }}>{saveStatus}</span>}
           <button onClick={saveToContext} style={{
             padding: '6px 16px', fontSize: '0.7rem', fontWeight: 600,
