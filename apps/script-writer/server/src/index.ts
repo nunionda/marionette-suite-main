@@ -9,6 +9,7 @@ import { addJob, getJob } from "./services/pdfQueue";
 import { analyzeScript, analyzeProduction } from "./services/analysisEngine";
 import { generateImage, buildCinematicPrompt, generateImageCandidates } from "./services/imageGenerator";
 import { generateTTS } from "./services/audioGenerator";
+import { getProviderStatus, getProvidersByType, setProviderEnabled } from "./services/providers";
 import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
@@ -909,6 +910,16 @@ const app = new Elysia()
           totalCuts: scene.cutCount,
           results,
         };
+      })
+
+      // ─── PROVIDER STATUS ─────────────────────────────────────
+      .get("/providers", () => {
+        return { success: true, providers: getProviderStatus() };
+      })
+      .post("/providers/:id/toggle", ({ params: { id }, body }) => {
+        const b = body as any;
+        setProviderEnabled(id, b.enabled ?? true, b.apiKey);
+        return { success: true, providers: getProviderStatus() };
       })
 
       // ─── ART BIBLE PDF EXPORT ─────────────────────────────────
