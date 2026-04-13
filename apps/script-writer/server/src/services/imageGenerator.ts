@@ -30,7 +30,7 @@ export async function generateImage(prompt: string, options: {
   model?: string;
   cutId?: string;
 } = {}): Promise<ImageGenResult> {
-  const { width = 1280, height = 720, seed, model = 'flux', cutId } = options;
+  const { width = 1024, height = 576, seed, model = 'flux', cutId } = options;
 
   try {
     // Shorten prompt for URL (Pollinations has URL length limits)
