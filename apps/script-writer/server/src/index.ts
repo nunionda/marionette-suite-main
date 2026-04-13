@@ -559,8 +559,9 @@ const app = new Elysia()
               const filename = result.path.split('/').pop();
               remoteImgUrl = `${STORYBOARD_API}/output/${filename}`;
             }
-            // Download remote image to local public dir so it stays accessible
-            let imgUrl = remoteImgUrl;
+            // Download remote image to local public dir so it stays accessible.
+            // Start as null — only set if local download succeeds (no fallback to dead :3007 URLs).
+            let imgUrl: string | null = null;
             if (remoteImgUrl) {
               try {
                 const imgRes = await fetch(remoteImgUrl, { signal: AbortSignal.timeout(30000) });
@@ -577,7 +578,7 @@ const app = new Elysia()
                   const host = process.env.BACKEND_URL || 'http://localhost:3006';
                   imgUrl = `${host}/public/storyboard/images/${fileName}`;
                 }
-              } catch (_) { /* keep remoteImgUrl as fallback */ }
+              } catch (_) { /* imgUrl stays null — frame stays pending, can be retried */ }
             }
             const imageUrls = imgUrl ? [imgUrl] : (result.images || []);
             await db.update(productionAssets).set({

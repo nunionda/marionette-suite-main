@@ -84,9 +84,9 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
     for (let i = 0; i < total; i++) {
       const cut = sceneCuts[i];
       const frameIdx = newFrames.findIndex(f => f.cutId === cut.id);
-      if (frameIdx >= 0 && newFrames[frameIdx].status === 'done') {
+      if (frameIdx >= 0 && newFrames[frameIdx].status === 'done' && newFrames[frameIdx].imageUrl) {
         setProgress(p => ({ ...p, current: i + 1 }));
-        continue; // Skip already generated
+        continue; // Skip already generated (skip broken/null so they get retried)
       }
 
       try {
@@ -249,10 +249,14 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
                       src={frame.imageUrl.startsWith('http') ? frame.imageUrl : `/public/${frame.imageUrl}`}
                       alt={frame.cutSlug}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => { e.target.style.display = 'none'; }}
+                      onError={() => {
+                        setGeneratedFrames(prev =>
+                          prev.map(f => f.cutId === frame.cutId ? { ...f, status: 'broken' } : f)
+                        );
+                      }}
                     />
-                  ) : frame.status === 'error' ? (
-                    <span style={{ fontSize: '0.7rem', color: 'var(--status-error)' }}>⚠ Generation failed</span>
+                  ) : frame.status === 'error' || frame.status === 'broken' ? (
+                    <span style={{ fontSize: '0.7rem', color: 'var(--status-error)' }}>⚠ 이미지 로드 실패</span>
                   ) : (
                     <span style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>
                       {generating ? '⏳' : '—'}
