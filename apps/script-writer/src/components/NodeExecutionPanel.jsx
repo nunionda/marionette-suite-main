@@ -12,8 +12,66 @@ import { PRODUCTION_DESIGN_NODES, VIDEO_GENERATION_NODES } from '../config/produ
  *   - Result display (images, text, status)
  */
 
-// Fallback styles if server is offline
-const FALLBACK_STYLES = [
+// ─── Node-specific style categories ───
+// Each production design node uses different reference artists
+
+const STYLE_BY_NODE = {
+  // 캐릭터 디자인: 할리우드 10대 캐릭터 디자이너/컨셉 아티스트
+  character_design: [
+    { id: 'iain_mccaig', label: 'Iain McCaig', desc: 'Star Wars 프리퀄 캐릭터 디자인, 다스 몰/파드메' },
+    { id: 'ralph_mcquarrie', label: 'Ralph McQuarrie', desc: 'Star Wars 오리지널 컨셉, 다스 베이더/C-3PO' },
+    { id: 'moebius', label: 'Moebius (Jean Giraud)', desc: 'Alien/Tron/Fifth Element 컨셉, 유럽 만화 거장' },
+    { id: 'neville_page', label: 'Neville Page', desc: 'Avatar/Star Trek/Prometheus 크리처 디자인' },
+    { id: 'mike_mignola', label: 'Mike Mignola', desc: 'Hellboy 창시자, 강렬한 실루엣과 그림자' },
+    { id: 'syd_mead', label: 'Syd Mead', desc: 'Blade Runner/Aliens/Tron 비주얼 퓨처리스트' },
+    { id: 'hr_giger', label: 'H.R. Giger', desc: 'Alien 제노모프 창시자, 바이오메카닉 공포' },
+    { id: 'carlos_huante', label: 'Carlos Huante', desc: 'Men in Black/Prometheus/Pacific Rim 크리처' },
+    { id: 'doug_chiang', label: 'Doug Chiang', desc: 'Star Wars 프리퀄 디자인 총괄, 메카닉+유기적' },
+    { id: 'crash_mcdonnell', label: 'Crash McCreery', desc: 'Jurassic Park/Pirates of Caribbean 크리처' },
+  ],
+  // 세트 디자인: 할리우드 10대 프로덕션 디자이너
+  set_design: [
+    { id: 'ken_adam', label: 'Ken Adam', desc: 'James Bond/Dr. Strangelove, 거대한 비현실적 공간' },
+    { id: 'nathan_crowley', label: 'Nathan Crowley', desc: 'Nolan 전담 — Dark Knight/Interstellar/Dunkirk' },
+    { id: 'rick_carter', label: 'Rick Carter', desc: 'Jurassic Park/Avatar/Star Wars, 세계관 건축가' },
+    { id: 'hannah_beachler', label: 'Hannah Beachler', desc: 'Black Panther 와칸다 설계, 아카데미 수상' },
+    { id: 'dante_ferretti', label: 'Dante Ferretti', desc: 'Scorsese 전담 — Hugo/Gangs of New York' },
+    { id: 'stuart_craig', label: 'Stuart Craig', desc: 'Harry Potter 전 시리즈 호그와트 설계' },
+    { id: 'eugenio_caballero', label: 'Eugenio Caballero', desc: "Pan's Labyrinth, 판타지+현실 공간 융합" },
+    { id: 'adam_stockhausen', label: 'Adam Stockhausen', desc: 'Grand Budapest Hotel/West Side Story' },
+    { id: 'mark_tildesley', label: 'Mark Tildesley', desc: '28 Days Later/Sunshine, 디스토피아 공간' },
+    { id: 'eve_stewart', label: 'Eve Stewart', desc: "Les Misérables/The King's Speech, 시대극 전문" },
+  ],
+  // 의상 디자인: 할리우드 10대 의상 디자이너
+  costume_design: [
+    { id: 'colleen_atwood', label: 'Colleen Atwood', desc: '팀 버튼 전담, Alice/Fantastic Beasts 4회 오스카' },
+    { id: 'ruth_carter', label: 'Ruth E. Carter', desc: 'Black Panther, 아프로퓨처리즘 의상 2회 오스카' },
+    { id: 'sandy_powell', label: 'Sandy Powell', desc: 'Scorsese 전담, The Aviator/Cinderella 3회 오스카' },
+    { id: 'eiko_ishioka', label: 'Eiko Ishioka', desc: "Bram Stoker's Dracula, 일본 아방가르드 오스카 수상" },
+    { id: 'jenny_beavan', label: 'Jenny Beavan', desc: 'Mad Max: Fury Road/Cruella 2회 오스카' },
+    { id: 'milena_canonero', label: 'Milena Canonero', desc: 'A Clockwork Orange/Grand Budapest 4회 오스카' },
+    { id: 'jacqueline_durran', label: 'Jacqueline Durran', desc: 'Little Women/Anna Karenina 2회 오스카' },
+    { id: 'michael_kaplan', label: 'Michael Kaplan', desc: 'Blade Runner/Star Wars: Force Awakens SF의상' },
+    { id: 'lindy_hemming', label: 'Lindy Hemming', desc: 'Dark Knight 조커 의상, 007 시리즈 오스카 수상' },
+    { id: 'arianne_phillips', label: 'Arianne Phillips', desc: 'Once Upon a Time/Kingsman 시대극+현대 융합' },
+  ],
+  // 소품 디자인: 할리우드 10대 소품/프랍 디자이너
+  props: [
+    { id: 'daniel_simon', label: 'Daniel Simon', desc: 'Tron Legacy/Captain America 미래 차량+메카닉' },
+    { id: 'annie_atkins', label: 'Annie Atkins', desc: 'Grand Budapest Hotel/Islanders 그래픽 프랍' },
+    { id: 'roger_christian', label: 'Roger Christian', desc: 'Star Wars 오리지널 소품 총괄 오스카 수상' },
+    { id: 'phil_saunders', label: 'Phil Saunders', desc: 'Iron Man 아머/Tron 차량 디자인' },
+    { id: 'weta_workshop', label: 'Weta Workshop', desc: 'LOTR/Avatar 소품+무기 제작 뉴질랜드' },
+    { id: 'adam_savage', label: 'Adam Savage', desc: 'The Matrix/Galaxy Quest/AI 하드 프랍 전문' },
+    { id: 'simon_mcquoid', label: 'Prop Realism', desc: '기능적 사실주의 — 실제 작동하는 소품 스타일' },
+    { id: 'sci_fi_minimal', label: 'SF Minimalist', desc: '미니멀 SF 소품 — 깔끔한 미래 디자인' },
+    { id: 'period_authentic', label: 'Period Authentic', desc: '시대극 고증 소품 — 역사적 정확성' },
+    { id: 'fantasy_ornate', label: 'Fantasy Ornate', desc: '판타지 장식 소품 — 정교한 디테일' },
+  ],
+};
+
+// 스토리보드 노드는 storyboard-concept-maker 서버에서 스타일을 가져옴 (연출가 스타일)
+const STORYBOARD_FALLBACK = [
   { id: 'bong', label: 'Bong Joon-ho', desc: '사회적 풍자, 극단적 대비' },
   { id: 'kurosawa', label: 'Akira Kurosawa', desc: '동적 구도, 자연광' },
   { id: 'miyazaki', label: 'Hayao Miyazaki', desc: '자연주의, 색채 풍부' },
@@ -23,12 +81,23 @@ const FALLBACK_STYLES = [
 
 const STORYBOARD_API = 'http://localhost:3007';
 
-const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
-  const [style, setStyle] = useState('bong');
-  const [availableStyles, setAvailableStyles] = useState(FALLBACK_STYLES);
+function getNodeStyles(nodeId) {
+  return STYLE_BY_NODE[nodeId] || null; // null means use storyboard server styles
+}
 
-  // Fetch real styles from storyboard server
+const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
+  // Use node-specific styles if available, otherwise fetch from storyboard server
+  const nodeSpecificStyles = getNodeStyles(node?.id);
+  const [style, setStyle] = useState(nodeSpecificStyles?.[0]?.id || 'bong');
+  const [availableStyles, setAvailableStyles] = useState(nodeSpecificStyles || STORYBOARD_FALLBACK);
+
+  // Fetch storyboard server styles only for storyboard/generic nodes
   useEffect(() => {
+    if (nodeSpecificStyles) {
+      setAvailableStyles(nodeSpecificStyles);
+      setStyle(nodeSpecificStyles[0]?.id || 'bong');
+      return;
+    }
     fetch(`${STORYBOARD_API}/api/styles`)
       .then(r => r.json())
       .then(d => {
@@ -166,7 +235,7 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
         {isDesignNode && hasImageApi && (
           <div style={{ marginBottom: '16px' }}>
             <div style={{ fontSize: '0.6rem', fontWeight: 600, color: 'var(--text-dim)', letterSpacing: '1px', marginBottom: '6px' }}>
-              STYLE — 10 MASTERS
+              {nodeSpecificStyles ? `REFERENCE ARTISTS — ${node.label.toUpperCase()}` : 'STYLE — 10 MASTERS'}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px' }}>
               {availableStyles.map(s => (
