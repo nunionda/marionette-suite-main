@@ -7,7 +7,7 @@ import { eq, desc, and, sql, count } from "drizzle-orm";
 import { syncProjectToFileSystem } from "./lib/sync";
 import { addJob, getJob } from "./services/pdfQueue";
 import { analyzeScript, analyzeProduction } from "./services/analysisEngine";
-import { generateImage, buildCinematicPrompt, generateImageCandidates } from "./services/imageGenerator";
+import { generateImage, buildCinematicPrompt, generateImageCandidates, buildPromptByCategory } from "./services/imageGenerator";
 import { generateVideo, buildVideoPrompt } from "./services/videoGenerator";
 import { getFormatForProject } from "./services/videoFormats";
 import { generateTTS } from "./services/audioGenerator";
@@ -529,14 +529,47 @@ const app = new Elysia()
           assetId = inserted.id;
         }
 
-        // For design nodes with storyboard API: execute immediately
+        // ─── Storyboard node: generate image directly via Pollinations ───
+        if (nodeId === 'storyboard') {
+          try {
+            // Resolve category: from body or DB
+            let category: string = b.category || '';
+            if (!category) {
+              const [proj] = await db.select({ category: projects.category })
+                .from(projects).where(eq(projects.id, projectId));
+              category = proj?.category || 'Feature Film';
+            }
+
+            const prompt = buildPromptByCategory(category, {
+              description: b.description || b.scene || '',
+              style: b.style || 'bong',
+            });
+
+            const imgResult = await generateImage(prompt, { cutId: String(assetId) });
+            const imgUrl = imgResult.success ? imgResult.imageUrl ?? null : null;
+            await db.update(productionAssets).set({
+              status: imgResult.success ? 'done' : 'error',
+              outputData: JSON.stringify({ prompt, category }),
+              imageUrls: imgUrl ? JSON.stringify([imgUrl]) : JSON.stringify([]),
+              errorMessage: imgResult.error || null,
+              updatedAt: new Date().toISOString(),
+            }).where(eq(productionAssets.id, assetId));
+            return { success: imgResult.success, assetId, result: { imageUrl: imgUrl, category, prompt } };
+          } catch (e: any) {
+            await db.update(productionAssets).set({
+              status: 'error', errorMessage: e.message, updatedAt: new Date().toISOString(),
+            }).where(eq(productionAssets.id, assetId));
+            return { success: false, error: e.message };
+          }
+        }
+
+        // For other design nodes: call Python storyboard API (:3007)
         const STORYBOARD_API = process.env.STORYBOARD_API_URL || 'http://localhost:3007';
         const apiMap: Record<string, string> = {
           character_design: '/api/character',
           set_design: '/api/environment',
           costume_design: '/api/costume',
           props: '/api/props',
-          storyboard: '/api/generate',
         };
 
         const apiEndpoint = apiMap[nodeId];

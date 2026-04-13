@@ -24,11 +24,22 @@ const STYLES = [
   { id: 'tarantino', label: 'Quentin Tarantino' },
 ];
 
+const YOUTUBE_STYLES = [
+  { id: 'thumbnail', label: 'Thumbnail Style' },
+  { id: 'reaction', label: 'Reaction / Talk' },
+  { id: 'vlog', label: 'Vlog / Lifestyle' },
+  { id: 'educational', label: 'Educational' },
+  { id: 'gaming', label: 'Gaming / Dynamic' },
+];
+
 const StoryboardGallery = ({ projectId, project, onBack }) => {
+  const isYouTube = project?.category === 'YouTube';
+  const styleOptions = isYouTube ? YOUTUBE_STYLES : STYLES;
+
   const [scenes, setScenes] = useState([]);
   const [selectedSceneId, setSelectedSceneId] = useState(null);
   const [sceneCuts, setSceneCuts] = useState([]);
-  const [style, setStyle] = useState('bong');
+  const [style, setStyle] = useState(isYouTube ? 'thumbnail' : 'bong');
   const [generating, setGenerating] = useState(false);
   const [generatedFrames, setGeneratedFrames] = useState([]); // { cutId, cutSlug, description, imageUrl, status }
   const [progress, setProgress] = useState({ current: 0, total: 0 });
@@ -101,6 +112,7 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
             description: cut.description || cut.script_text || `Scene cut ${cut.cut_number}`,
             scene: cut.description || cut.script_text || '',
             project: project?.title || 'Untitled',
+            category: project?.category || '',
           }),
         });
         const data = await res.json();
@@ -183,7 +195,7 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
           ))}
         </select>
 
-        {/* Style selector */}
+        {/* Style selector — category-aware */}
         <select
           value={style}
           onChange={(e) => setStyle(e.target.value)}
@@ -193,10 +205,15 @@ const StoryboardGallery = ({ projectId, project, onBack }) => {
             borderRadius: '4px', color: 'var(--text-main, #eee)',
           }}
         >
-          {STYLES.map(s => (
+          {styleOptions.map(s => (
             <option key={s.id} value={s.id}>{s.label}</option>
           ))}
         </select>
+        {isYouTube && (
+          <span style={{ fontSize: '0.6rem', color: '#f59e0b', letterSpacing: '1px' }}>
+            YT MODE
+          </span>
+        )}
 
         {/* Generate button */}
         <button

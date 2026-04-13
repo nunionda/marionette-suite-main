@@ -121,3 +121,77 @@ export function buildCinematicPrompt(options: {
 
   return parts.join(' ');
 }
+
+// ─── Category-aware prompt system ───
+
+const CATEGORY_PREFIXES: Record<string, string> = {
+  'YouTube':          'YouTube thumbnail style, vibrant high-contrast digital illustration,',
+  'Commercial':       'Commercial advertisement still, clean product lifestyle photography,',
+  'Netflix Original': 'Prestige TV drama still, cinematic series frame,',
+  'Feature Film':     'Photorealistic cinematic film still,',
+  'Short Film':       'Photorealistic cinematic film still,',
+  'Drama':            'Korean TV drama still, cinematic series frame,',
+};
+
+const CATEGORY_SUFFIXES: Record<string, string> = {
+  'YouTube':          'bold colors, face-forward, high energy, clean background, 8K digital.',
+  'Commercial':       'brand-safe, lifestyle aesthetic, product hero, studio quality, 8K.',
+  'Netflix Original': '8K, shallow depth of field, dramatic lighting, character-focused.',
+  'Feature Film':     '8K, shallow depth of field, anamorphic lens, film grain, dramatic lighting.',
+  'Short Film':       '8K, shallow depth of field, anamorphic lens, film grain, dramatic lighting.',
+  'Drama':            '8K, warm color grade, character emotion, cinematic TV format.',
+};
+
+const DIRECTOR_MAP: Record<string, string> = {
+  bong:      'Bong Joon-ho style, social realism',
+  kubrick:   'Kubrick style, symmetry',
+  miyazaki:  'Miyazaki style, hand-drawn animation',
+  ridley:    'Ridley Scott style, epic scale',
+  kurosawa:  'Kurosawa style, samurai drama',
+  wes:       'Wes Anderson style, pastel symmetry',
+  denis:     'Denis Villeneuve style, epic sci-fi',
+  wong:      'Wong Kar-wai style, neon nostalgia',
+  nolan:     'Nolan style, IMAX scale',
+  tarantino: 'Tarantino style, bold framing',
+};
+
+const YOUTUBE_STYLE_MAP: Record<string, string> = {
+  thumbnail:   'bright studio thumbnail, clickbait composition',
+  reaction:    'reaction cam style, presenter facing camera, expressive face',
+  vlog:        'natural lifestyle vlog frame, candid, warm tones',
+  educational: 'clean explainer visual, whiteboard aesthetic, clear subject',
+  gaming:      'dynamic gaming screenshot overlay style, vibrant HUD elements',
+};
+
+/**
+ * Build an image prompt tailored to the project category.
+ * Film/Drama projects use director-style modifiers; YouTube/Commercial use platform-specific styles.
+ */
+export function buildPromptByCategory(category: string, options: {
+  description: string;
+  style?: string;
+  location?: string;
+  characters?: string[];
+  visualTone?: string;
+}): string {
+  const prefix = CATEGORY_PREFIXES[category] ?? CATEGORY_PREFIXES['Feature Film'];
+  const suffix = CATEGORY_SUFFIXES[category] ?? CATEGORY_SUFFIXES['Feature Film'];
+
+  const parts = [prefix, options.description];
+  if (options.location) parts.push(`Location: ${options.location}.`);
+  if (options.characters?.length) parts.push(`Characters: ${options.characters.join(', ')}.`);
+  if (options.visualTone) parts.push(`Visual tone: ${options.visualTone}.`);
+
+  if (options.style) {
+    if (category === 'YouTube') {
+      const ytPart = YOUTUBE_STYLE_MAP[options.style];
+      if (ytPart) parts.push(ytPart + '.');
+    } else if (!['Commercial'].includes(category)) {
+      const directorPart = DIRECTOR_MAP[options.style];
+      if (directorPart) parts.push(directorPart + '.');
+    }
+  }
+
+  parts.push(suffix);
+  return parts.join(' ');
+}
