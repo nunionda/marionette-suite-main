@@ -636,13 +636,14 @@ const app = new Elysia()
         if (nodeId === 'script_analysis' || nodeId === 'production_breakdown') {
           try {
             const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
-            if (!project?.scenario) {
+            const screenplayText = project?.scenario || project?.script || '';
+            if (!screenplayText) {
               await db.update(productionAssets).set({ status: 'error', errorMessage: 'No screenplay text' }).where(eq(productionAssets.id, assetId));
               return { success: false, error: 'No screenplay text available' };
             }
 
             if (nodeId === 'script_analysis') {
-              const result = await analyzeScript(project.scenario, project.title);
+              const result = await analyzeScript(screenplayText, project.title);
               await db.update(productionAssets).set({
                 status: 'done',
                 outputData: JSON.stringify(result),
@@ -743,7 +744,7 @@ const app = new Elysia()
         const textNodeHandlers: Record<string, () => Promise<any>> = {
           visual_world: async () => {
             const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
-            const scenario = project?.scenario || '';
+            const scenario = project?.scenario || project?.script || '';
             // Extract visual tone from screenplay context
             const locations = scenario.match(/(?:INT\.|EXT\.)[^\n]+/g) || [];
             const uniqueLocations = [...new Set(locations.map(l => l.trim()))].slice(0, 10);

@@ -23,6 +23,13 @@ sqlite.exec(`
     review TEXT,
     analysis_data TEXT,
     storyboard_images TEXT,
+    concept_brief TEXT,
+    bible TEXT,
+    episodes TEXT,
+    script TEXT,
+    hook TEXT,
+    edit TEXT,
+    seo TEXT,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
   );
