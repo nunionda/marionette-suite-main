@@ -72,6 +72,22 @@ const ArtBibleViewer = ({ projectId, project, onBack }) => {
           <div style={{ width: '100px', height: '4px', background: 'rgba(255,255,255,0.08)', borderRadius: '2px' }}>
             <div style={{ width: `${progress}%`, height: '100%', background: '#ef4444', borderRadius: '2px' }} />
           </div>
+          <button
+            onClick={() => {
+              window.open(`/api/projects/${projectId}/art-bible/export`, '_blank');
+            }}
+            disabled={completedSections.length === 0}
+            style={{
+              padding: '6px 14px', fontSize: '0.65rem', fontWeight: 600,
+              background: completedSections.length > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)',
+              border: `1px solid ${completedSections.length > 0 ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.08)'}`,
+              borderRadius: '4px',
+              color: completedSections.length > 0 ? '#ef4444' : 'var(--text-dim)',
+              cursor: completedSections.length > 0 ? 'pointer' : 'not-allowed',
+            }}
+          >
+            📤 Export PDF
+          </button>
         </div>
       </header>
 

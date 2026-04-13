@@ -32,17 +32,26 @@ function AppContent() {
   // Sub-page navigation: null = hub, 'writing' = WritingRoom, 'production' = ProductionDeck, 'pipeline' = ProductionDeck(pipeline), 'legacy' = old ProjectDetail
   const [subPage, setSubPage] = useState(null);
   const [subPageParam, setSubPageParam] = useState(null); // e.g. initial step key
-
   const [isSyncing, setIsSyncing] = React.useState(true);
 
   React.useEffect(() => {
-    if (projects.length > 0) {
-      setIsSyncing(false);
+    // Check if we can find the saved project in the current project list
+    if (currentProjectId) {
+      const found = projects.find(p => String(p.id) === String(currentProjectId));
+      if (found) {
+        setIsSyncing(false);
+      }
+      // else: keep syncing until found or timeout
     } else {
-      const timer = setTimeout(() => setIsSyncing(false), 300);
-      return () => clearTimeout(timer);
+      if (projects.length > 0) setIsSyncing(false);
     }
-  }, [projects]);
+  }, [projects, currentProjectId]);
+
+  // Safety timeout — always stop syncing after 3s
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsSyncing(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Handle Export Rendering Route
   const path = window.location.pathname;

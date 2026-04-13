@@ -910,6 +910,61 @@ const app = new Elysia()
           results,
         };
       })
+
+      // ─── ART BIBLE PDF EXPORT ─────────────────────────────────
+      .get("/projects/:id/art-bible/export", async ({ params: { id }, set }) => {
+        const projectId = parseInt(id);
+        const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+        if (!project) { set.status = 404; return { error: 'Project not found' }; }
+
+        // Gather all design track assets
+        const assets = await db.select().from(productionAssets)
+          .where(and(eq(productionAssets.projectId, projectId), eq(productionAssets.track, 'design'), eq(productionAssets.status, 'done')));
+
+        // Build HTML document
+        const sections = assets.map(a => {
+          const data = a.outputData ? JSON.parse(a.outputData) : {};
+          const images = a.imageUrls ? JSON.parse(a.imageUrls) : [];
+          return { nodeId: a.nodeId, phase: a.phase, style: a.style, data, images };
+        });
+
+        const html = `<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+  body { font-family: 'Helvetica Neue', sans-serif; background: #0a0a0a; color: #eee; padding: 40px; }
+  h1 { font-size: 28px; border-bottom: 2px solid #8b5cf6; padding-bottom: 12px; }
+  h2 { font-size: 20px; color: #8b5cf6; margin-top: 40px; }
+  .section { margin-bottom: 32px; page-break-inside: avoid; }
+  .images { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+  .images img { max-width: 400px; border-radius: 6px; }
+  .data { background: #111; padding: 16px; border-radius: 8px; font-size: 13px; white-space: pre-wrap; }
+  .meta { font-size: 11px; color: #888; margin-top: 8px; }
+</style></head><body>
+  <h1>${project.title} — Art Bible</h1>
+  <p style="color:#888;">${project.category} · ${project.genre} · Generated ${new Date().toISOString().slice(0,10)}</p>
+  ${sections.map(s => `
+    <div class="section">
+      <h2>${s.nodeId.replace(/_/g, ' ').toUpperCase()}</h2>
+      ${s.images.length > 0 ? `<div class="images">${s.images.map(url => `<img src="${url}" />`).join('')}</div>` : ''}
+      <div class="data">${JSON.stringify(s.data, null, 2)}</div>
+      <div class="meta">Style: ${s.style || '-'} · Phase: ${s.phase}</div>
+    </div>
+  `).join('')}
+</body></html>`;
+
+        try {
+          const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+          const page = await browser.newPage();
+          await page.setContent(html, { waitUntil: 'networkidle0', timeout: 15000 });
+          const pdfBuffer = await page.pdf({ format: 'A4', printBackground: true, margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' } });
+          await browser.close();
+
+          set.headers['Content-Type'] = 'application/pdf';
+          set.headers['Content-Disposition'] = `attachment; filename="${project.title.replace(/[^a-zA-Z0-9가-힣]/g, '_')}_ArtBible.pdf"`;
+          return new Response(pdfBuffer);
+        } catch (e: any) {
+          return { success: false, error: `PDF generation failed: ${e.message}` };
+        }
+      })
   )
   .listen({
     port: 3006,
