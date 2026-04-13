@@ -347,7 +347,9 @@ const app = new Elysia()
       .post("/projects/:id/scenes/parse", async ({ params: { id } }) => {
         const projectId = parseInt(id);
         const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
-        if (!project?.scenario) return { success: false, error: "No screenplay text" };
+        // Use scenario (Film/Short/Commercial) or script (Netflix/YouTube) field
+        const screenplayText = project?.scenario || project?.script || '';
+        if (!screenplayText) return { success: false, error: "No screenplay text" };
 
         // Delete existing scenes/cuts for this project
         const existingScenes = await db.select().from(scenes).where(eq(scenes.projectId, projectId));
@@ -358,7 +360,7 @@ const app = new Elysia()
 
         // Parse screenplay — import dynamically to avoid bundling issues
         const { parseScreenplayToScenes } = await import("../../src/utils/sceneCutParser.js");
-        const result = parseScreenplayToScenes(project.scenario, { projectTitle: project.title });
+        const result = parseScreenplayToScenes(screenplayText, { projectTitle: project.title });
 
         // Insert scenes and cuts
         for (const s of result.scenes) {

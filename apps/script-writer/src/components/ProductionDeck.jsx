@@ -34,6 +34,16 @@ const ProductionDeck = ({ project, onBack, initialView }) => {
     treatment: project.treatment || '',
     scenario: project.scenario || '',
     review: project.review || '',
+    // Netflix/Drama
+    bible: project.bible || '',
+    episodes: project.episodes || '',
+    script: project.script || '',
+    // YouTube
+    hook: project.hook || '',
+    edit: project.edit || '',
+    seo: project.seo || '',
+    // Shared
+    conceptBrief: project.conceptBrief || '',
     analysisData: project.analysisData || null,
   };
 

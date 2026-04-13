@@ -32,9 +32,15 @@ export function parseScreenplayToScenes(text, options = {}) {
     .slice(0, 5) || 'PRJ';
 
   // ─── A/V Script detection (markdown table format) ───
-  // Commercial/YouTube scripts use: | 시간 | Visual | Audio |
+  // Commercial scripts use: | 시간 | Visual | Audio |
   if (isAVScriptTable(text)) {
     return parseAVScriptTable(text, initials);
+  }
+
+  // ─── YouTube/Markdown timecode script detection ───
+  // YouTube scripts use: **[0:00-0:05]** or [0:00-0:05] headers with descriptions
+  if (isYouTubeTimecodeScript(text)) {
+    return parseYouTubeTimecodeScript(text, initials);
   }
 
   const lines = text.split('\n');
@@ -381,6 +387,106 @@ function parseAVScriptTable(text, initials) {
       totalScenes: 1,
       totalCuts: cuts.length,
       totalCharacters: 0,
+      estimatedMinutes: Math.round(cuts.reduce((s, c) => s + (c.duration || 4), 0) / 60),
+      actBreakdown: { act1: 1, act2: 0, act3: 0 },
+    },
+  };
+}
+
+// ─── YouTube Timecode Script Parser ───
+// Parses markdown scripts with **[0:00-0:05]** SECTION_NAME headers
+// Each timecode block = 1 cut
+
+function isYouTubeTimecodeScript(text) {
+  // Detect [M:SS-M:SS] or **[M:SS-M:SS]** patterns (at least 2 occurrences)
+  const matches = text.match(/\*?\*?\[?\d+:\d{2}\s*[-–]\s*\d+:\d{2}\]?\*?\*?/g);
+  return matches && matches.length >= 2;
+}
+
+function parseYouTubeTimecodeScript(text, initials) {
+  const lines = text.split('\n');
+  const cuts = [];
+  let cutNum = 0;
+  let currentBlock = null;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Match timecode headers: **[0:00-0:02]** SECTION or [0:00-0:02] SECTION
+    const tcMatch = trimmed.match(/\*?\*?\[?(\d+):(\d{2})\s*[-–]\s*(\d+):(\d{2})\]?\*?\*?\s*(.*)/);
+    if (tcMatch) {
+      // Save previous block
+      if (currentBlock && currentBlock.lines.length > 0) {
+        cutNum++;
+        const desc = currentBlock.lines.join(' ').replace(/\*\*/g, '').replace(/\*\s*/g, '').trim();
+        cuts.push({
+          number: cutNum,
+          slug: `cut${String(cutNum).padStart(3, '0')}`,
+          displayId: `${initials}_sc001_cut${String(cutNum).padStart(3, '0')}`,
+          description: desc.length > 200 ? desc.slice(0, 197) + '...' : desc,
+          type: desc.toLowerCase().includes('vo:') || desc.includes('대사') ? 'dialogue' : 'action',
+          duration: currentBlock.duration,
+          timeCode: currentBlock.timeCode,
+        });
+      }
+
+      const startSec = parseInt(tcMatch[1]) * 60 + parseInt(tcMatch[2]);
+      const endSec = parseInt(tcMatch[3]) * 60 + parseInt(tcMatch[4]);
+      const sectionName = tcMatch[5].replace(/\*\*/g, '').replace(/[()]/g, '').trim();
+      currentBlock = {
+        timeCode: `${tcMatch[1]}:${tcMatch[2]}-${tcMatch[3]}:${tcMatch[4]}`,
+        duration: Math.max(endSec - startSec, 1),
+        lines: sectionName ? [sectionName] : [],
+      };
+      continue;
+    }
+
+    // Collect content lines for current block
+    if (currentBlock && trimmed && !trimmed.startsWith('#') && !trimmed.startsWith('---')) {
+      // Clean markdown formatting
+      const cleaned = trimmed
+        .replace(/^\*\s+/, '') // bullet points
+        .replace(/\*\*/g, '') // bold
+        .replace(/\*\s*/, '') // italics
+        .replace(/^[-·•]\s*/, '') // list markers
+        .trim();
+      if (cleaned.length > 5) {
+        currentBlock.lines.push(cleaned);
+      }
+    }
+  }
+
+  // Save last block
+  if (currentBlock && currentBlock.lines.length > 0) {
+    cutNum++;
+    const desc = currentBlock.lines.join(' ').replace(/\*\*/g, '').trim();
+    cuts.push({
+      number: cutNum,
+      slug: `cut${String(cutNum).padStart(3, '0')}`,
+      displayId: `${initials}_sc001_cut${String(cutNum).padStart(3, '0')}`,
+      description: desc.length > 200 ? desc.slice(0, 197) + '...' : desc,
+      type: desc.toLowerCase().includes('vo:') || desc.includes('대사') ? 'dialogue' : 'action',
+      duration: currentBlock.duration,
+      timeCode: currentBlock.timeCode,
+    });
+  }
+
+  if (cuts.length === 0) {
+    cuts.push({
+      number: 1, slug: 'cut001', displayId: `${initials}_sc001_cut001`,
+      description: '(YouTube script - no timecodes detected)', type: 'action', duration: 30,
+    });
+  }
+
+  return {
+    scenes: [{
+      number: 1, slug: 'sc001', displayId: `${initials}_sc001`,
+      heading: 'YOUTUBE SCRIPT', setting: '', location: 'Various', timeOfDay: '',
+      characters: [], summary: cuts.slice(0, 3).map(c => c.description).join('. ').slice(0, 150),
+      cuts, cutCount: cuts.length,
+    }],
+    stats: {
+      totalScenes: 1, totalCuts: cuts.length, totalCharacters: 0,
       estimatedMinutes: Math.round(cuts.reduce((s, c) => s + (c.duration || 4), 0) / 60),
       actBreakdown: { act1: 1, act2: 0, act3: 0 },
     },
