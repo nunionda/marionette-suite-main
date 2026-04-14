@@ -115,11 +115,10 @@
 
 <script src="gallery-api.js"></script>
 <script>
-// Embed mode detection
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
-})();
+// Embed mode detection + project name from URL
+const _urlParams = new URLSearchParams(window.location.search);
+if (_urlParams.get('embed') === 'true') document.body.classList.add('embed-mode');
+const projectName = _urlParams.get('project') || 'Untitled';
 
 const ARTISTS = [
   {
@@ -553,7 +552,7 @@ function handleGenerate() {
   closeModal();
   setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
 
-  generateConcept('storyboard', { description: scene, style, camera, mood })
+  generateConcept('storyboard', { description: scene, style, camera, mood, project: projectName })
     .then(data => {
       if (data.success && data.url) {
         showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`);

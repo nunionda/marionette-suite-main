@@ -99,6 +99,23 @@ const WritingRoom = ({ project, onBack, onNavigate, initialStep }) => {
   const { updateProject } = useContext(ProjectContext);
   const { steps: STEP_CONFIG, order: STEP_ORDER } = getStepConfig(project.category);
   const [activeStep, setActiveStep] = useState(initialStep || STEP_ORDER[0]);
+  // Helper: read from top-level field, fall back to analysisData nested JSON
+  // for categories (YouTube/Netflix) that stored content there in older builds.
+  const getProjectField = (field) => {
+    const direct = project[field];
+    if (!direct || direct === field || direct.length < 30) {
+      try {
+        const analysis = project.analysisData ? JSON.parse(project.analysisData) : null;
+        if (analysis) {
+          const catKey = (project.category || '').toLowerCase().replace(/\s+/g, '_');
+          const nested = analysis[catKey]?.[field] || analysis[field];
+          if (nested) return nested;
+        }
+      } catch (_) {}
+    }
+    return direct || '';
+  };
+
   const [pipelineData, setPipelineData] = useState({
     concept: project.concept || '',
     architecture: project.architecture || '',
@@ -108,11 +125,11 @@ const WritingRoom = ({ project, onBack, onNavigate, initialStep }) => {
     // Drama fields
     bible: project.bible || '',
     episodes: project.episodes || '',
-    script: project.script || project.scenario || '',
+    script: getProjectField('script') || project.scenario || '',
     // YouTube fields
-    hook: project.hook || '',
-    edit: project.edit || '',
-    seo: project.seo || '',
+    hook: getProjectField('hook'),
+    edit: getProjectField('edit'),
+    seo: getProjectField('seo'),
     analysisData: project.analysisData || null,
   });
   const [scenes, setScenes] = useState([]);

@@ -529,8 +529,48 @@ const app = new Elysia()
           assetId = inserted.id;
         }
 
-        // ─── Storyboard node: generate image directly via Pollinations ───
+        // ─── Storyboard node ───
         if (nodeId === 'storyboard') {
+          // Gallery-generated image: skip Pollinations, download and save locally
+          if (b.provider === 'storyboard-gallery' && b.galleryImageUrl) {
+            try {
+              const remoteUrl: string = b.galleryImageUrl;
+              // SSRF guard: only fetch from known safe hosts
+              const GALLERY_ALLOWED_HOSTS = new Set(['localhost', '127.0.0.1', 'image.pollinations.ai', 'i.pinimg.com', 'images.unsplash.com']);
+              const ALLOWED_EXTS = new Set(['jpg', 'jpeg', 'png', 'webp', 'gif']);
+              let parsedGalleryUrl: URL;
+              try { parsedGalleryUrl = new URL(remoteUrl); } catch { throw new Error('Invalid galleryImageUrl'); }
+              if (!GALLERY_ALLOWED_HOSTS.has(parsedGalleryUrl.hostname)) throw new Error(`Gallery URL host not allowed: ${parsedGalleryUrl.hostname}`);
+              let finalUrl: string = remoteUrl;
+              try {
+                const resp = await fetch(remoteUrl);
+                if (resp.ok) {
+                  const buf = await resp.arrayBuffer();
+                  const rawExt = (remoteUrl.split('.').pop()?.split('?')[0] || 'jpg').toLowerCase();
+                  const ext = ALLOWED_EXTS.has(rawExt) ? rawExt : 'jpg';
+                  const filename = `storyboard_${projectId}_${assetId}_${Date.now()}.${ext}`;
+                  if (!fs.existsSync('./public/storyboard')) fs.mkdirSync('./public/storyboard', { recursive: true });
+                  await Bun.write(`./public/storyboard/${filename}`, buf);
+                  finalUrl = `/public/storyboard/${filename}`;
+                }
+              } catch (_) { /* keep remoteUrl as fallback */ }
+
+              await db.update(productionAssets).set({
+                status: 'done',
+                outputData: JSON.stringify({ imageUrl: finalUrl, style: b.style, source: 'gallery' }),
+                imageUrls: JSON.stringify([finalUrl]),
+                updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+              return { success: true, assetId, result: { imageUrl: finalUrl } };
+            } catch (e: any) {
+              await db.update(productionAssets).set({
+                status: 'error', errorMessage: e.message, updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+              return { success: false, error: e.message };
+            }
+          }
+
+          // Default: generate via Pollinations
           try {
             // Resolve category: from body or DB
             let category: string = b.category || '';

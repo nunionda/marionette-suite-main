@@ -130,6 +130,7 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
           track: track || 'design',
           style: payload.style,
           description: payload.description,
+          galleryImageUrl: payload.url || null,
           inputData: { description: payload.description, style: payload.style, source: 'gallery' },
           provider: 'storyboard-gallery',
         }),

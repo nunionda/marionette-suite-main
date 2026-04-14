@@ -54,8 +54,24 @@ function getSteps(category) {
   return WRITING_STEPS[category] || WRITING_STEPS['Feature Film'];
 }
 
+function getFieldValue(project, field) {
+  const direct = project[field];
+  // If top-level field is empty or a short placeholder (e.g. the column name itself),
+  // fall back to analysisData nested JSON. WritingRoom saves YouTube/Netflix content there.
+  if (!direct || direct === field || direct.length < 30) {
+    try {
+      const analysis = project.analysisData ? JSON.parse(project.analysisData) : null;
+      if (analysis) {
+        const categoryKey = (project.category || '').toLowerCase().replace(/\s+/g, '_');
+        return analysis[categoryKey]?.[field] || analysis[field] || direct;
+      }
+    } catch (_) {}
+  }
+  return direct;
+}
+
 function getStepStatus(project, field) {
-  const val = project[field];
+  const val = getFieldValue(project, field);
   if (!val || val.length < 30) return 'empty';
   if (val.length < 200) return 'draft';
   return 'complete';
@@ -121,7 +137,7 @@ const ProjectHub = ({ project, onBack, onNavigate }) => {
   // Calculate writing phase progress
   const completedSteps = steps.filter(s => getStepStatus(project, s.field) === 'complete').length;
   const writingProgress = Math.round((completedSteps / steps.length) * 100);
-  const hasScreenplay = (project.scenario || project.script || '').length > 500;
+  const hasScreenplay = (getFieldValue(project, 'scenario') || getFieldValue(project, 'script') || '').length > 500;
 
   // Production readiness
   const productionReady = hasScreenplay;
