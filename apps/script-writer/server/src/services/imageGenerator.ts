@@ -122,6 +122,58 @@ export function buildCinematicPrompt(options: {
   return parts.join(' ');
 }
 
+// ─── Specialist agent personas (per production node) ───
+
+const SPECIALIST_SYSTEM_PROMPTS: Record<string, string> = {
+  character_design: 'Iain McCaig style — Star Wars Episode I concept art, deeply human emotional character design. Facial expression psychology, costume-as-character, silhouette clarity, age/weight/posture storytelling. Front/3-quarter/profile views with clear annotation.',
+  set_design: 'Ken Adam style — James Bond / Dr. Strangelove production design, expressive monumental environments. Architectural drama, spatial tension, practical lighting integration, era-specific details. Establishing angle + detail close-up.',
+  costume_design: "Eiko Ishioka style — Oscar-winning designer (Bram Stoker's Dracula). Fabric as character psychology, cultural symbolism, color as narrative tool. Full-body front/back illustration with fabric swatches and accessory breakdown.",
+  props: 'Senior prop master / hero prop design. Material authenticity, camera-ready finish, character interaction points, aging and weathering for story timeline. Hero prop front/back/detail view + in-scene scale reference.',
+  storyboard: 'J. Todd Anderson style — Coen Brothers / Spielberg storyboard artist. Clean readable compositions, clear eyeline and axis, dynamic camera energy, emotional beats in body language. Sequential 16:9 panels with camera notation.',
+  lookbook: 'Film lookbook / mood board — creative director style. Visual cohesion, era and location authenticity, texture palette, cinematic lighting reference. Grid composition with typography overlay and color palette.',
+  color_script: 'Nate Wragg / Pixar color script style. Emotional arc through color temperature, saturation as tension indicator, palette continuity across acts. Horizontal sequence of color blocks with narrative annotation.',
+  graphic_design: 'Title sequence / in-world graphic design — Imaginary Forces / Elastic style. Typography as narrative, motion design hierarchy, brand integration into the film world. Title treatment options and in-world graphic assets.',
+  visual_world: 'Syd Mead / Dylan Cole style — visionary Visual Development Artist for feature films (Blade Runner, Avatar, Tron Legacy). Atmospheric concept painting that establishes the emotional color grammar of the entire world. Rich material textures, environmental storytelling through light and shadow, signature color palette that defines the film\'s visual identity. Panoramic establishing view with atmospheric depth, color palette strip below image.',
+};
+
+/**
+ * Build a specialized prompt that combines:
+ * 1. The node-specific specialist artist persona
+ * 2. The scene description
+ * 3. The category-aware visual suffix
+ */
+export function buildSpecializedPrompt(
+  nodeId: string,
+  description: string,
+  options: { category?: string; style?: string } = {}
+): string {
+  const specialist = SPECIALIST_SYSTEM_PROMPTS[nodeId] || '';
+  const category = options.category || 'Feature Film';
+
+  // Concept-art nodes always use cinematic suffix regardless of project category
+  // (avoids YouTube thumbnail / commercial ad language bleeding into production design)
+  const isCinematicArtNode = CINEMATIC_ART_NODES.has(nodeId);
+  const suffix = isCinematicArtNode && ['YouTube', 'Commercial'].includes(category)
+    ? CINEMATIC_CONCEPT_SUFFIX
+    : (CATEGORY_SUFFIXES[category] ?? CATEGORY_SUFFIXES['Feature Film']);
+
+  const parts: string[] = [];
+  if (specialist) parts.push(specialist);
+  parts.push(description);
+
+  // Apply style modifier from the appropriate artist map
+  if (options.style) {
+    const stylePart =
+      VISUAL_WORLD_MAP[options.style] ??
+      STORYBOARD_MAP[options.style] ??
+      (isCinematicArtNode ? undefined : DIRECTOR_MAP[options.style]);
+    if (stylePart) parts.push(stylePart + '.');
+  }
+
+  parts.push(suffix);
+  return parts.join(' ');
+}
+
 // ─── Category-aware prompt system ───
 
 const CATEGORY_PREFIXES: Record<string, string> = {
@@ -154,6 +206,29 @@ const DIRECTOR_MAP: Record<string, string> = {
   nolan:     'Nolan style, IMAX scale',
   tarantino: 'Tarantino style, bold framing',
 };
+
+const VISUAL_WORLD_MAP: Record<string, string> = {
+  syd_mead:        'Syd Mead futurist industrial design, chrome and glass surfaces, Blade Runner atmosphere',
+  dylan_cole:      'Dylan Cole epic atmospheric matte painting, Avatar scale, volumetric godray light',
+  ralph_mcquarrie: 'Ralph McQuarrie Star Wars OT concept art, retro-futurist, iconic painted silhouettes',
+  paul_lasaine:    'Paul Lasaine warm organic palette, Frozen/Tangled lush immersive environments',
+  nathan_fowkes:   'Nathan Fowkes DreamWorks color script, emotional palette storytelling, loose painterly strokes',
+  ryan_church:     'Ryan Church cinematic architectural scale, Star Wars prequel grandeur, dramatic sky drama',
+};
+
+const STORYBOARD_MAP: Record<string, string> = {
+  j_todd_anderson: 'J. Todd Anderson precise shot design, Coen Brothers comic timing, clean numbered panels',
+  moebius:         'Moebius / Jean Giraud expressive line art, surrealist composition, bande dessinée style',
+  martin_asbury:   'Martin Asbury dynamic action clarity, Bond/Indiana Jones staging, bold Dutch angles',
+  mike_kungl:      'Mike Kungl character-centered emotional beats, Pixar storytelling thumbnail panels',
+  alex_saviuk:     'Alex Saviuk Hollywood action coverage, wide establishing shot to tight close-up sequence',
+  pierre_droal:    'Pierre Droal painterly European cinematic boards, deep staging, rich atmospheric depth',
+};
+
+// Nodes that always output cinematic concept art regardless of project category
+const CINEMATIC_ART_NODES = new Set(['visual_world', 'lookbook', 'color_script', 'character_design', 'set_design', 'costume_design', 'props', 'graphic_design', 'storyboard']);
+// Neutral suffix for concept-art nodes on non-film categories (avoids thumbnail/ad language)
+const CINEMATIC_CONCEPT_SUFFIX = 'cinematic concept art, wide establishing view, atmospheric depth, professional production design, 8K.';
 
 const YOUTUBE_STYLE_MAP: Record<string, string> = {
   thumbnail:   'bright studio thumbnail, clickbait composition',
