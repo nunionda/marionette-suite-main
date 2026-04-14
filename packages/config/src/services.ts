@@ -107,6 +107,24 @@ export const SERVICES = {
     phase: 5,
     description: "마리오네트 스튜디오 메인 홈페이지",
   },
+
+  // ─── Phase 6: 숏폼 팬튜브 자동화 ───
+  shortsFactoryFrontend: {
+    name: "Shorts Factory",
+    port: 5178,
+    envKey: "SHORTS_FACTORY_PORT",
+    runtime: "Vite + React",
+    phase: 6,
+    description: "K-POP 숏폼 팬튜브 자동화 프론트엔드",
+  },
+  shortsFactoryBackend: {
+    name: "Shorts Factory API",
+    port: 3008,
+    envKey: "SHORTS_FACTORY_API_PORT",
+    runtime: "Elysia (Bun)",
+    phase: 6,
+    description: "K-POP 숏폼 팬튜브 자동화 백엔드 (FFmpeg, Whisper, YouTube API)",
+  },
 } as const satisfies Record<string, ServiceDef>;
 
 export type ServiceId = keyof typeof SERVICES;

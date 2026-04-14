@@ -1,0 +1,141 @@
+"""
+compositor.py — FFmpeg final render: clip + ASS subtitles + credit overlay.
+
+Output: output/rendered/{render_job_id}_final.mp4 (1080x1920, Shorts-ready)
+
+Filter availability is probed at import time; missing filters are skipped
+gracefully so the pipeline always produces output.
+
+Install these to enable overlays:
+  brew install libass libfreetype
+  then recompile / reinstall ffmpeg with:
+  brew install homebrew-ffmpeg/ffmpeg/ffmpeg --with-libass --with-libfreetype
+"""
+
+import subprocess
+import os
+import sys
+
+
+RENDERED_DIR = os.path.join(os.path.dirname(__file__), "..", "output", "rendered")
+
+# ---------------------------------------------------------------------------
+# One-time filter availability probes
+# ---------------------------------------------------------------------------
+
+def _ffmpeg_has_filter(name: str) -> bool:
+    """Return True if FFmpeg reports the named filter as available."""
+    result = subprocess.run(
+        ["ffmpeg", "-filters"],
+        capture_output=True, text=True,
+    )
+    return f" {name} " in result.stdout or f"\t{name}\t" in result.stdout or f" {name}\n" in result.stdout
+
+
+_HAS_DRAWTEXT = _ffmpeg_has_filter("drawtext")
+_HAS_ASS      = _ffmpeg_has_filter("ass")
+
+if not _HAS_DRAWTEXT:
+    print("[compositor] ⚠ drawtext filter unavailable (libfreetype not compiled in) — credit overlay skipped")
+if not _HAS_ASS:
+    print("[compositor] ⚠ ass filter unavailable (libass not compiled in) — subtitle burn skipped")
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _has_dialogue(ass_path: str) -> bool:
+    """Return True if the ASS file contains at least one Dialogue line."""
+    try:
+        with open(ass_path, encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                if line.startswith("Dialogue:"):
+                    return True
+    except OSError:
+        pass
+    return False
+
+
+# ---------------------------------------------------------------------------
+# Main compose function
+# ---------------------------------------------------------------------------
+
+def compose(
+    clip_path: str,
+    ass_path: str | None,
+    credit_text: str,
+    render_job_id: int,
+) -> str:
+    """
+    Burn ASS subtitles and credit text overlay into the clip.
+    Returns the output file path.
+    Raises RuntimeError on failure.
+    """
+    os.makedirs(RENDERED_DIR, exist_ok=True)
+    out_path = os.path.join(RENDERED_DIR, f"{render_job_id}_final.mp4")
+
+    vf_parts = []
+
+    # ASS subtitles — requires libass in FFmpeg
+    if _HAS_ASS and ass_path and os.path.exists(ass_path) and _has_dialogue(ass_path):
+        safe_ass = os.path.abspath(ass_path).replace("\\", "/").replace(":", "\\:")
+        vf_parts.append(f"ass=filename={safe_ass}")
+
+    # Credit text overlay — requires libfreetype in FFmpeg
+    if _HAS_DRAWTEXT and credit_text:
+        safe_credit = (
+            credit_text
+            .replace("\\", "\\\\")
+            .replace("'", "\\'")
+            .replace(":", "\\:")
+            .replace("%", "\\%")
+        )
+        vf_parts.append(
+            f"drawtext="
+            f"text='{safe_credit}':"
+            f"fontsize=16:"
+            f"fontcolor=white:"
+            f"x=(w-tw)/2:"
+            f"y=h-th-20:"
+            f"box=1:"
+            f"boxcolor=black@0.55:"
+            f"boxborderw=6"
+        )
+
+    vf = ",".join(vf_parts) if vf_parts else "copy"
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-i", clip_path,
+        "-vf", vf,
+        "-c:v", "libx264",
+        "-preset", "medium",
+        "-crf", "22",
+        "-c:a", "aac",
+        "-b:a", "192k",
+        "-movflags", "+faststart",
+        out_path,
+    ]
+
+    print(f"[compositor] vf={vf!r}")
+    print(f"[compositor] rendering → {out_path}")
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+    if result.returncode != 0:
+        raise RuntimeError(f"FFmpeg compose failed:\n{result.stderr[-2000:]}")
+
+    if not os.path.exists(out_path):
+        raise RuntimeError("FFmpeg succeeded but output file not found")
+
+    size_mb = os.path.getsize(out_path) / 1_048_576
+    print(f"[compositor] done: {out_path} ({size_mb:.1f} MB)")
+    return out_path
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 4:
+        print("Usage: compositor.py <clip_path> <ass_path_or_none> <credit_text> <render_job_id>")
+        sys.exit(1)
+    ass = sys.argv[2] if sys.argv[2] != "none" else None
+    result = compose(sys.argv[1], ass, sys.argv[3], int(sys.argv[4]))
+    print(result)
