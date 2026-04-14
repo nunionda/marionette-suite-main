@@ -260,7 +260,7 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey
                     <PipelineNode
                       key={node.id}
                       node={node}
-                      status={computeNodeStatus(node.id, pipelineData, project)}
+                      status={computeNodeStatus(node.id, pipelineData, project, dbNodeStatus)}
                       isActive={activeDesignIds.has(node.id)}
                       onClick={() => onNodeClick?.('design', node)}
                     />
@@ -302,7 +302,7 @@ const PipelineView = ({ project, pipelineData, category, onNodeClick, refreshKey
                     <PipelineNode
                       key={node.id}
                       node={node}
-                      status={computeNodeStatus(node.id, pipelineData, project)}
+                      status={computeNodeStatus(node.id, pipelineData, project, dbNodeStatus)}
                       isActive={activeVideoIds.has(node.id)}
                       onClick={() => onNodeClick?.('video', node)}
                     />

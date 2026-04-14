@@ -81,6 +81,24 @@ const STYLE_BY_NODE = {
     { id: 'period_authentic', label: 'Period Authentic', desc: '시대극 고증 소품 — 역사적 정확성' },
     { id: 'fantasy_ornate', label: 'Fantasy Ornate', desc: '판타지 장식 소품 — 정교한 디테일' },
   ],
+  // 비주얼 세계관 설계: Visual Development Artists (세계의 색·질감·분위기 정의)
+  visual_world: [
+    { id: 'syd_mead', label: 'Syd Mead', desc: 'Blade Runner/Aliens/Tron — 미래 산업 환경의 비주얼 퓨처리스트' },
+    { id: 'dylan_cole', label: 'Dylan Cole', desc: 'Avatar/Tron Legacy — 서사시적 대기 원경 페인팅' },
+    { id: 'ralph_mcquarrie', label: 'Ralph McQuarrie', desc: 'Star Wars OT — SF 세계관의 원형을 정의한 거장' },
+    { id: 'paul_lasaine', label: 'Paul Lasaine', desc: 'Frozen/Tangled/Prince of Egypt — 유기적 색채 주도 환경' },
+    { id: 'nathan_fowkes', label: 'Nathan Fowkes', desc: 'DreamWorks 컬러 스크립트 — 감정 팔레트 내러티브' },
+    { id: 'ryan_church', label: 'Ryan Church', desc: 'Star Wars 프리퀄/Tron Legacy — 시네마틱 스케일 환경' },
+  ],
+  // 스토리보드: 시퀀셜 패널 아티스트 (씬을 어떻게 촬영할지 구성)
+  storyboard: [
+    { id: 'j_todd_anderson', label: 'J. Todd Anderson', desc: 'Coen Brothers/Fargo/No Country — 명료한 샷 디자인, 블랙 코미디 타이밍' },
+    { id: 'moebius', label: 'Moebius (Jean Giraud)', desc: 'Alien/Tron — 표현주의적 선, 초현실적 구도' },
+    { id: 'martin_asbury', label: 'Martin Asbury', desc: 'James Bond/Indiana Jones — 액션 명확성, 다이나믹 앵글' },
+    { id: 'mike_kungl', label: 'Mike Kungl', desc: 'Pixar/Disney — 캐릭터 중심 감정 비트' },
+    { id: 'alex_saviuk', label: 'Alex Saviuk', desc: '할리우드 액션 — 와이드 인서트에서 타이트 커버리지까지' },
+    { id: 'pierre_droal', label: 'Pierre Droal', desc: '유럽 시네마틱 — 회화적 패널, 깊이감 있는 스테이징' },
+  ],
 };
 
 // ─── Gallery page mapping for design nodes ───
@@ -215,15 +233,47 @@ const NodeExecutionPanel = ({ node, track, projectId, project, onClose }) => {
     setExecuting(true);
     setError(null);
     try {
+      const ytData = project?.analysisData?.youtube || {};
       const payload = {
         phase: node.phase,
         track,
         style: isDesignNode ? style : undefined,
         description,
+        category: project?.category || 'Feature Film',
         project: project?.title || 'Untitled',
         inputData: { description, style },
         provider: hasImageApi ? 'pollinations' : 'local',
+        ...(project?.category === 'YouTube' && {
+          ytHook: ytData.hook || '',
+          ytScript: ytData.script || '',
+          ytConceptBrief: ytData.conceptBrief || '',
+          ytTargetAudience: ytData.targetAudience || '',
+          ytEdit: ytData.edit || '',
+          ytSeo: ytData.seo || '',
+        }),
       };
+
+      // Client-side chaining hint: pass previous node's prompt if available
+      if (node.id === 'image_gen') {
+        try {
+          const r = await fetch(`/api/projects/${projectId}/pipeline/image_prompt`);
+          if (r.ok) {
+            const d = await r.json();
+            const prev = d.asset?.outputData ? JSON.parse(d.asset.outputData) : null;
+            if (prev?.prompt) payload.prompt = prev.prompt;
+          }
+        } catch (_) {}
+      } else if (node.id === 'video_gen') {
+        try {
+          const r = await fetch(`/api/projects/${projectId}/pipeline/video_prompt`);
+          if (r.ok) {
+            const d = await r.json();
+            const prev = d.asset?.outputData ? JSON.parse(d.asset.outputData) : null;
+            if (prev?.prompt) payload.prompt = prev.prompt;
+          }
+        } catch (_) {}
+      }
+
       const res = await fetch(`/api/projects/${projectId}/pipeline/${node.id}/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

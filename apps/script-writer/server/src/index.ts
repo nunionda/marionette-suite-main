@@ -7,7 +7,7 @@ import { eq, desc, and, sql, count } from "drizzle-orm";
 import { syncProjectToFileSystem } from "./lib/sync";
 import { addJob, getJob } from "./services/pdfQueue";
 import { analyzeScript, analyzeProduction } from "./services/analysisEngine";
-import { generateImage, buildCinematicPrompt, generateImageCandidates, buildPromptByCategory } from "./services/imageGenerator";
+import { generateImage, buildCinematicPrompt, generateImageCandidates, buildPromptByCategory, buildSpecializedPrompt } from "./services/imageGenerator";
 import { generateVideo, buildVideoPrompt } from "./services/videoGenerator";
 import { getFormatForProject } from "./services/videoFormats";
 import { generateTTS } from "./services/audioGenerator";
@@ -570,7 +570,7 @@ const app = new Elysia()
             }
           }
 
-          // Default: generate via Pollinations
+          // Default: generate via Pollinations with storyboard specialist prompt
           try {
             // Resolve category: from body or DB
             let category: string = b.category || '';
@@ -580,9 +580,9 @@ const app = new Elysia()
               category = proj?.category || 'Feature Film';
             }
 
-            const prompt = buildPromptByCategory(category, {
-              description: b.description || b.scene || '',
-              style: b.style || 'bong',
+            const prompt = buildSpecializedPrompt('storyboard', b.description || b.scene || '', {
+              category,
+              style: b.style,
             });
 
             const imgResult = await generateImage(prompt, { cutId: String(assetId) });
@@ -615,14 +615,20 @@ const app = new Elysia()
         const apiEndpoint = apiMap[nodeId];
         if (apiEndpoint) {
           try {
+            const rawDescription = b.description || b.inputData?.description || '';
+            const specialistDescription = buildSpecializedPrompt(nodeId, rawDescription, {
+              category: b.category || 'Feature Film',
+              style: b.style,
+            });
             const res = await fetch(`${STORYBOARD_API}${apiEndpoint}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                description: b.description || b.inputData?.description || '',
+                description: specialistDescription,
                 style: b.style || 'bong',
                 project: b.project || 'Untitled',
-                scene: b.scene || b.description || '',
+                scene: b.scene || rawDescription,
+                specialist: nodeId,
               }),
             });
             const result = await res.json();
@@ -676,7 +682,19 @@ const app = new Elysia()
         if (nodeId === 'script_analysis' || nodeId === 'production_breakdown') {
           try {
             const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
-            const screenplayText = project?.scenario || project?.script || '';
+            let screenplayText = project?.scenario || project?.script || '';
+
+            // YouTube projects store content in analysisData.youtube, not scenario
+            const ytData = project?.analysisData?.youtube;
+            if (category === 'YouTube' && ytData && !screenplayText) {
+              screenplayText = [
+                ytData.conceptBrief && `[콘셉트] ${ytData.conceptBrief}`,
+                ytData.hook && `[훅] ${ytData.hook}`,
+                ytData.script && `[스크립트]\n${ytData.script}`,
+                ytData.targetAudience && `[타겟 오디언스] ${ytData.targetAudience}`,
+              ].filter(Boolean).join('\n\n');
+            }
+
             if (!screenplayText) {
               await db.update(productionAssets).set({ status: 'error', errorMessage: 'No screenplay text' }).where(eq(productionAssets.id, assetId));
               return { success: false, error: 'No screenplay text available' };
@@ -719,25 +737,49 @@ const app = new Elysia()
         if (nodeId === 'image_prompt' || nodeId === 'image_gen' || nodeId === 'audio_gen') {
           try {
             if (nodeId === 'image_prompt') {
-              // Generate cinematic prompt from cut description
-              const prompt = buildCinematicPrompt({
-                description: b.description || '',
-                characters: b.characters,
-                location: b.location,
-                timeOfDay: b.timeOfDay,
-                visualTone: b.visualTone,
-                cameraAngle: b.cameraAngle,
-              });
+              // YouTube: use category-aware prompt builder (thumbnail style)
+              // Film/Drama: use cinematic prompt builder
+              const prompt = category === 'YouTube'
+                ? buildPromptByCategory(category, {
+                    description: b.description || '',
+                    style: b.style,
+                    location: b.location,
+                    characters: b.characters,
+                    visualTone: b.ytHook ? `Hook: ${b.ytHook}` : b.visualTone,
+                  })
+                : buildCinematicPrompt({
+                    description: b.description || '',
+                    characters: b.characters,
+                    location: b.location,
+                    timeOfDay: b.timeOfDay,
+                    visualTone: b.visualTone,
+                    cameraAngle: b.cameraAngle,
+                  });
               await db.update(productionAssets).set({
                 status: 'done',
-                outputData: JSON.stringify({ prompt }),
+                outputData: JSON.stringify({ prompt, category }),
                 updatedAt: new Date().toISOString(),
               }).where(eq(productionAssets.id, assetId));
               return { success: true, assetId, result: { prompt } };
             }
 
             if (nodeId === 'image_gen') {
-              const prompt = b.prompt || b.description || '';
+              let prompt = b.prompt || '';
+              if (!prompt) {
+                const [prevAsset] = await db.select().from(productionAssets)
+                  .where(and(
+                    eq(productionAssets.projectId, projectId),
+                    eq(productionAssets.nodeId, 'image_prompt'),
+                    eq(productionAssets.status, 'done'),
+                  ))
+                  .orderBy(desc(productionAssets.createdAt))
+                  .limit(1);
+                if (prevAsset?.outputData) {
+                  const out = JSON.parse(prevAsset.outputData);
+                  prompt = out.prompt || '';
+                }
+                if (!prompt) prompt = b.description || '';
+              }
               const formatPreset = getFormatForProject(b.category || '', b.format || '', b.platform || '');
               const result = await generateImage(prompt, { cutId: b.cutId, formatPreset });
               const imageUrls = result.imageUrl ? [result.imageUrl] : [];
@@ -784,17 +826,43 @@ const app = new Elysia()
         const textNodeHandlers: Record<string, () => Promise<any>> = {
           visual_world: async () => {
             const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+            const isYouTube = category === 'YouTube';
+            const ytData = project?.analysisData?.youtube;
             const scenario = project?.scenario || project?.script || '';
-            // Extract visual tone from screenplay context
             const locations = scenario.match(/(?:INT\.|EXT\.)[^\n]+/g) || [];
-            const uniqueLocations = [...new Set(locations.map(l => l.trim()))].slice(0, 10);
-            return {
-              colorPalette: b.colorPalette || 'Cold blue-gray with warm amber accents, high contrast noir lighting',
-              visualTone: b.visualTone || 'Tech-noir thriller: metallic surfaces, screen glow, urban density',
-              lightingStyle: 'Low-key with motivated sources, neon accents in night scenes',
-              cameraLanguage: 'Handheld intimacy for dialogue, locked-off symmetry for tension',
+            const uniqueLocations = [...new Set(locations.map((l: string) => l.trim()))].slice(0, 10);
+
+            const worldData = isYouTube ? {
+              colorPalette: b.colorPalette || 'Vibrant, high-saturation digital color palette, eye-catching contrast',
+              visualTone: b.visualTone || (ytData?.conceptBrief
+                ? `YouTube visual identity: ${ytData.conceptBrief}`
+                : 'Dynamic YouTube aesthetic: bold colors, energetic composition, face-forward framing'),
+              lightingStyle: 'Studio lighting, ring light, clean bright environment',
+              cameraLanguage: 'Dynamic cuts, face cam, reaction shots, screen recording overlays',
               referenceLocations: uniqueLocations,
-              moodKeywords: ['tension', 'paranoia', 'isolation', 'digital claustrophobia', 'neon noir'],
+              moodKeywords: ['energetic', 'engaging', 'bold', 'authentic', 'viral'],
+            } : {
+              colorPalette: b.colorPalette || 'Cold blue-gray with warm amber accents, high contrast noir lighting',
+              visualTone: b.visualTone || 'Cinematic atmosphere with distinctive visual language',
+              lightingStyle: 'High contrast, motivated practical sources, lens flare',
+              cameraLanguage: 'Anamorphic, slow push-ins, negative space',
+              referenceLocations: uniqueLocations,
+              moodKeywords: ['cinematic', 'atmospheric', 'dramatic', 'immersive'],
+            };
+
+            // Visual Development Artist concept painting (Syd Mead / Dylan Cole style)
+            const conceptPrompt = buildSpecializedPrompt('visual_world', b.description || worldData.visualTone, {
+              category: b.category || category,
+            });
+            const imgResult = await generateImage(conceptPrompt, {
+              width: isYouTube ? 1280 : 1344,
+              height: isYouTube ? 720 : 768,
+              cutId: `world_${projectId}`,
+            });
+            return {
+              ...worldData,
+              conceptArtUrl: imgResult.success ? imgResult.imageUrl : undefined,
+              conceptArtPrompt: conceptPrompt,
             };
           },
           character_arc: async () => {
@@ -876,14 +944,53 @@ const app = new Elysia()
             // Image selection — just marks the selected image
             return { selectedIndex: b.selectedIndex ?? 0, imageUrl: b.imageUrl || null };
           },
+          makeup_hair: async () => {
+            const description = b.description || 'Hair and makeup design for characters';
+            const prompt = buildSpecializedPrompt('character_design', description, { category: b.category, style: b.style });
+            const result = await generateImage(prompt, { width: 1024, height: 576, cutId: b.cutId });
+            return { imageUrl: result.imageUrl, prompt, success: result.success, error: result.error };
+          },
+          lookbook: async () => {
+            const description = b.description || 'Film visual reference lookbook';
+            const prompt = buildSpecializedPrompt('lookbook', description, { category: b.category, style: b.style });
+            const result = await generateImage(prompt, { width: 1024, height: 1024, cutId: b.cutId });
+            return { imageUrl: result.imageUrl, prompt, moodElements: [], success: result.success, error: result.error };
+          },
+          color_script: async () => {
+            const description = b.description || 'Emotional color arc for the film';
+            const prompt = buildSpecializedPrompt('color_script', description, { category: b.category, style: b.style });
+            const result = await generateImage(prompt, { width: 1024, height: 400, cutId: b.cutId });
+            return { imageUrl: result.imageUrl, colorPalette: [], prompt, success: result.success, error: result.error };
+          },
+          graphic_design: async () => {
+            const description = b.description || 'Title sequence and in-world graphic assets';
+            const prompt = buildSpecializedPrompt('graphic_design', description, { category: b.category, style: b.style });
+            const result = await generateImage(prompt, { width: 1024, height: 576, cutId: b.cutId });
+            return { imageUrl: result.imageUrl, prompt, success: result.success, error: result.error };
+          },
           video_prompt: async () => {
             const description = b.description || '';
             const cameraMove = b.cameraMove || 'slow zoom in';
-            const prompt = `Cinematic video: ${description}. Camera: ${cameraMove}. Smooth motion, 24fps, film look, shallow DOF.`;
+            const prompt = buildVideoPrompt({ description, cameraMove, category: b.category });
             return { prompt, cameraMove };
           },
           video_gen: async () => {
-            const prompt = b.prompt || b.description || '';
+            let prompt = b.prompt || '';
+            if (!prompt) {
+              const [prevAsset] = await db.select().from(productionAssets)
+                .where(and(
+                  eq(productionAssets.projectId, projectId),
+                  eq(productionAssets.nodeId, 'video_prompt'),
+                  eq(productionAssets.status, 'done'),
+                ))
+                .orderBy(desc(productionAssets.createdAt))
+                .limit(1);
+              if (prevAsset?.outputData) {
+                const out = JSON.parse(prevAsset.outputData);
+                prompt = out.prompt || '';
+              }
+              if (!prompt) prompt = buildVideoPrompt({ description: b.description || '', category: b.category });
+            }
             const result = await generateVideo(prompt, { cutId: b.cutId });
             return { ...result, note: 'Experimental — may not be available' };
           },
