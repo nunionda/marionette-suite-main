@@ -217,12 +217,12 @@ const VISUAL_WORLD_MAP: Record<string, string> = {
 };
 
 const STORYBOARD_MAP: Record<string, string> = {
-  j_todd_anderson: 'J. Todd Anderson precise shot design, Coen Brothers comic timing, clean numbered panels',
-  moebius:         'Moebius / Jean Giraud expressive line art, surrealist composition, bande dessinée style',
-  martin_asbury:   'Martin Asbury dynamic action clarity, Bond/Indiana Jones staging, bold Dutch angles',
-  mike_kungl:      'Mike Kungl character-centered emotional beats, Pixar storytelling thumbnail panels',
-  alex_saviuk:     'Alex Saviuk Hollywood action coverage, wide establishing shot to tight close-up sequence',
-  pierre_droal:    'Pierre Droal painterly European cinematic boards, deep staging, rich atmospheric depth',
+  j_todd_anderson: 'pencil sketch storyboard panels, J. Todd Anderson precise shot design, ink line art, Coen Brothers comic timing, hand-drawn numbered frames, rough sketch aesthetic',
+  moebius:         'Moebius / Jean Giraud ink line art storyboard, expressive hand-drawn panels, bande dessinée black-and-white sketch, surrealist composition, bold outlines',
+  martin_asbury:   'Martin Asbury hand-drawn storyboard panels, ink sketch, Bond/Indiana Jones action staging, bold Dutch angles, rough pencil frames with camera notation',
+  mike_kungl:      'Mike Kungl hand-drawn thumbnail panels, pencil sketch storyboard, Pixar storytelling boards, character-centered rough sketches, loose gestural drawing',
+  alex_saviuk:     'Alex Saviuk pencil storyboard panels, Hollywood action coverage sketch, hand-drawn frames, wide to tight coverage sequence, rough ink line art',
+  pierre_droal:    'Pierre Droal painterly storyboard panels, European graphic novel style, pencil and wash technique, rough cinematic boards, hand-drawn atmospheric depth',
 };
 
 // Nodes that always output cinematic concept art regardless of project category

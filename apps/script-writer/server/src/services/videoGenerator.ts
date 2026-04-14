@@ -34,7 +34,8 @@ export async function generateVideo(prompt: string, options: {
     const shortPrompt = prompt.length > 300 ? prompt.slice(0, 300) : prompt;
     const encodedPrompt = encodeURIComponent(shortPrompt);
 
-    const url = `${POLLINATIONS_VIDEO_BASE}?prompt=${encodedPrompt}&model=${model}`;
+    const params = new URLSearchParams({ prompt: shortPrompt, model });
+    const url = `${POLLINATIONS_VIDEO_BASE}?${params}`;
 
     const res = await fetch(url, {
       headers: { 'User-Agent': 'MarionetteStudio/1.0' },
@@ -63,15 +64,38 @@ export async function generateVideo(prompt: string, options: {
   }
 }
 
+const CATEGORY_VIDEO_STYLE: Record<string, string> = {
+  'YouTube':          'fast-cut dynamic edit, high contrast, face-forward energy',
+  'Commercial':       'smooth brand commercial look, aspirational lifestyle motion',
+  'Netflix Original': 'prestige TV drama pacing, emotional close-ups, cinematic depth',
+  'Feature Film':     'filmic 24fps grain, anamorphic bokeh, immersive depth',
+  'Short Film':       'filmic 24fps grain, anamorphic bokeh, immersive depth',
+  'Drama':            'Korean drama warm grade, intimate handheld movement, golden hour',
+};
+
+const CAMERA_MOVES: Record<string, string> = {
+  closeup:   'slow push in on face',
+  wide:      'gentle crane reveal, pulling back to establish',
+  action:    'handheld follow, rapid direction changes',
+  dramatic:  'low angle slow zoom with dutch tilt',
+  dialogue:  'subtle rack focus between subjects',
+  aerial:    'sweeping drone arc overhead',
+};
+
 /**
  * Build a concise English video prompt from cut data.
- * Keeps it short to avoid URL length issues with Pollinations.
+ * Category-aware style + shot-type camera movement.
  */
 export function buildVideoPrompt(options: {
   description: string;
   cameraMove?: string;
+  category?: string;
+  shotType?: string;
 }): string {
   const desc = options.description.slice(0, 200);
-  const camera = options.cameraMove || 'slow zoom in';
-  return `Cinematic video: ${desc}. Camera: ${camera}. Smooth motion, 24fps, film look, shallow DOF.`;
+  const styleNote = CATEGORY_VIDEO_STYLE[options.category || ''] || 'cinematic film look';
+  const camera = options.cameraMove
+    || CAMERA_MOVES[options.shotType || '']
+    || 'slow cinematic zoom';
+  return `Cinematic video clip: ${desc}. Camera: ${camera}. Style: ${styleNote}. Smooth motion, 24fps, shallow DOF, professional color grade.`;
 }
