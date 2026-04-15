@@ -313,16 +313,18 @@ def resume_composite(row) -> bool:
     except Exception:
         pass
 
-    # Write ASS from saved entries
+    # Write ASS from saved entries (with trendy preset if available)
     ass_path = None
     try:
         from subtitler import build_ass, DEFAULT_ASS_STYLE, SUBTITLES_DIR
         os.makedirs(SUBTITLES_DIR, exist_ok=True)
         ass_path = os.path.join(SUBTITLES_DIR, f"{job_id}.ass")
         style = style_str if style_str else DEFAULT_ASS_STYLE
+        # Use "viral" preset by default for trendy captions
+        preset = "viral" if render_tier != "ffmpeg" or not style_str else None
         with open(ass_path, "w", encoding="utf-8") as f:
-            f.write(build_ass(entries, style))
-        print(f"[worker] ASS written from confirmed entries: {ass_path} ({len(entries)} lines)")
+            f.write(build_ass(entries, style, preset=preset))
+        print(f"[worker] ASS written: {ass_path} ({len(entries)} lines, preset={preset})")
     except Exception as e:
         print(f"[worker] ASS write failed (non-fatal): {e}", file=sys.stderr)
         ass_path = None

@@ -26,15 +26,59 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 # Default ASS style — global English, modern YouTube Shorts look
-# FontSize=34: readable on 9:16 mobile screens
-# Outline=3 (no shadow, no box): clean contrast on any background
-# MarginV=180: clears the credit text zone at the bottom of the frame
 DEFAULT_ASS_STYLE = (
     "FontName=Montserrat,FontSize=90,PrimaryColour=&H00FFFFFF,"
     "OutlineColour=&H00000000,BackColour=&H00000000,"
     "Bold=1,Italic=0,Outline=4,Shadow=2,Alignment=2,"
     "MarginL=60,MarginR=60,MarginV=320"
 )
+
+# ─── Trendy Template Presets ───
+
+CAPTION_PRESETS = {
+    "viral": {
+        "FontName": "Montserrat",
+        "FontSize": "90",
+        "PrimaryColour": "&H00FFFFFF",
+        "OutlineColour": "&H00000000",
+        "BackColour": "&H00000000",
+        "Bold": "1",
+        "Outline": "4",
+        "Shadow": "2",
+        "Alignment": "2",
+        "MarginV": "320",
+        "HighlightColour": "&H0000D7FF",  # gold/yellow
+        "Animation": "karaoke",
+    },
+    "minimal": {
+        "FontName": "Arial",
+        "FontSize": "72",
+        "PrimaryColour": "&H00FFFFFF",
+        "OutlineColour": "&H00000000",
+        "BackColour": "&H00000000",
+        "Bold": "0",
+        "Outline": "2",
+        "Shadow": "0",
+        "Alignment": "2",
+        "MarginV": "280",
+        "HighlightColour": None,
+        "Animation": "fade",
+    },
+    "neon": {
+        "FontName": "Montserrat",
+        "FontSize": "84",
+        "PrimaryColour": "&H0000FFFF",  # cyan
+        "OutlineColour": "&H00FF00FF",  # magenta glow
+        "BackColour": "&H00000000",
+        "Bold": "1",
+        "Outline": "5",
+        "Shadow": "3",
+        "Alignment": "2",
+        "MarginV": "300",
+        "HighlightColour": "&H0000FF00",  # green
+        "Animation": "karaoke",
+    },
+}
 
 
 def seconds_to_ass_time(seconds: float) -> str:
@@ -73,14 +117,36 @@ def parse_srt(srt_text: str) -> list[dict]:
     return entries
 
 
-def build_ass(entries: list[dict], style_str: str = DEFAULT_ASS_STYLE) -> str:
-    """Build ASS subtitle file content."""
-    # Parse style string into key=value dict
-    style_dict = {}
-    for part in style_str.split(","):
-        if "=" in part:
-            k, v = part.split("=", 1)
-            style_dict[k.strip()] = v.strip()
+def build_ass(
+    entries: list[dict],
+    style_str: str = DEFAULT_ASS_STYLE,
+    preset: str | None = None,
+) -> str:
+    """
+    Build ASS subtitle file with optional trendy preset.
+
+    Presets:
+      "viral"   — word-by-word karaoke highlight (gold on white)
+      "minimal" — clean fade-in/out, no highlight
+      "neon"    — cyberpunk glow with karaoke highlight
+      None      — use raw style_str (legacy behavior)
+    """
+    # Resolve style: preset overrides style_str
+    if preset and preset in CAPTION_PRESETS:
+        style_dict = dict(CAPTION_PRESETS[preset])
+    else:
+        style_dict = {}
+        for part in style_str.split(","):
+            if "=" in part:
+                k, v = part.split("=", 1)
+                style_dict[k.strip()] = v.strip()
+
+    highlight_colour = style_dict.pop("HighlightColour", None)
+    animation = style_dict.pop("Animation", "none")
+
+    margin_l = style_dict.get("MarginL", "60")
+    margin_r = style_dict.get("MarginR", "60")
+    margin_v = style_dict.get("MarginV", "320")
 
     header = f"""[Script Info]
 ScriptType: v4.00+
@@ -90,7 +156,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{style_dict.get("FontName", "Arial")},{style_dict.get("FontSize", "22")},{style_dict.get("PrimaryColour", "&H00FFFFFF")},&H000000FF,{style_dict.get("OutlineColour", "&H00000000")},{style_dict.get("BackColour", "&H80000000")},{style_dict.get("Bold", "1")},0,0,0,100,100,0,0,1,{style_dict.get("Outline", "2")},{style_dict.get("Shadow", "1")},{style_dict.get("Alignment", "2")},{style_dict.get("MarginL", "30")},{style_dict.get("MarginR", "30")},{style_dict.get("MarginV", "60")},1
+Style: Default,{style_dict.get("FontName", "Arial")},{style_dict.get("FontSize", "22")},{style_dict.get("PrimaryColour", "&H00FFFFFF")},&H000000FF,{style_dict.get("OutlineColour", "&H00000000")},{style_dict.get("BackColour", "&H80000000")},{style_dict.get("Bold", "1")},0,0,0,100,100,0,0,1,{style_dict.get("Outline", "2")},{style_dict.get("Shadow", "1")},{style_dict.get("Alignment", "2")},{margin_l},{margin_r},{margin_v},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -99,10 +165,55 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
     for e in entries:
         start = seconds_to_ass_time(e["start"])
         end = seconds_to_ass_time(e["end"])
-        text = e["text"].replace("\n", "\\N")
+        raw_text = e["text"].replace("\n", " ").strip()
+
+        if not raw_text:
+            continue
+
+        if animation == "karaoke" and highlight_colour:
+            text = _build_karaoke_line(raw_text, e, highlight_colour)
+        elif animation == "fade":
+            text = _build_fade_line(raw_text)
+        else:
+            text = raw_text.replace("\n", "\\N")
+
         dialogue_lines.append(f"Dialogue: 0,{start},{end},Default,,0,0,0,,{text}")
 
     return header + "\n".join(dialogue_lines) + "\n"
+
+
+def _build_karaoke_line(text: str, entry: dict, highlight_colour: str) -> str:
+    """
+    Build ASS karaoke-style line: each word gets a \\kf timing tag.
+    The highlighted word shows in highlight_colour, others stay white.
+
+    Uses ASS \\kf (smooth fill) for word-by-word highlight effect.
+    """
+    words = text.split()
+    if not words:
+        return text
+
+    duration_cs = int((entry["end"] - entry["start"]) * 100)  # centiseconds
+    per_word_cs = max(duration_cs // len(words), 10)
+
+    parts = []
+    for i, word in enumerate(words):
+        # \kf = smooth karaoke fill, duration in centiseconds
+        # SecondaryColour in the style is used as the "filled" color
+        # We override per-word with \1c (primary) and \2c (secondary/highlight)
+        parts.append(f"{{\\kf{per_word_cs}}}{word}")
+
+    # The karaoke effect uses SecondaryColour for unfilled, PrimaryColour for filled
+    # We want: filled = highlight_colour, unfilled = white
+    # Override at line level: set secondary to white, primary to highlight
+    prefix = f"{{\\1c{highlight_colour}\\2c&H00FFFFFF}}"
+    return prefix + " ".join(parts)
+
+
+def _build_fade_line(text: str) -> str:
+    """Build ASS line with fade-in/out animation."""
+    # \fad(fade_in_ms, fade_out_ms)
+    return f"{{\\fad(200,150)}}{text}"
 
 
 def extract_audio(clip_path: str, tmp_dir: str) -> str:

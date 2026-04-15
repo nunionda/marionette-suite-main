@@ -73,16 +73,29 @@ def compose(
     render_job_id: int,
     logo_path: str | None = None,
     fmt: str = "vertical",
+    hook_zoom: bool = True,
 ) -> str:
     """
     Burn ASS subtitles, credit text overlay, and optional channel logo into the clip.
     fmt: 'vertical' (9:16) or 'horizontal' (16:9) — adjusts credit position/size.
+    hook_zoom: if True, applies a subtle zoom-in on the first 0.8s for hook effect.
     Returns the output file path.
     """
     os.makedirs(RENDERED_DIR, exist_ok=True)
     out_path = os.path.join(RENDERED_DIR, f"{render_job_id}_final.mp4")
 
     vf_parts = []
+
+    # Hook zoom: subtle 1.05x → 1.0x zoom-out in first 0.8s for attention grab
+    if hook_zoom:
+        # zoompan on video clips: scale up then use crop to simulate zoom
+        # Uses expression: zoom from 1.05 to 1.0 over first 24 frames (0.8s at 30fps)
+        vf_parts.append(
+            "scale=iw*1.05:ih*1.05,"
+            "crop=iw/1.05:ih/1.05:"
+            "(iw-iw/1.05)/2*(1-min(1\\,t/0.8)):"
+            "(ih-ih/1.05)/2*(1-min(1\\,t/0.8))"
+        )
 
     # ASS subtitles — requires libass in FFmpeg
     if _HAS_ASS and ass_path and os.path.exists(ass_path) and _has_dialogue(ass_path):
