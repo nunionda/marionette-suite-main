@@ -56,6 +56,7 @@ export const renderJobs = sqliteTable("render_jobs", {
   templateId: text("template_id").notNull(),
   templateVersion: integer("template_version").default(1),
   format: text("format").default("vertical"), // vertical (9:16) | horizontal (16:9)
+  renderTier: text("render_tier").default("ffmpeg"), // ffmpeg | submagic | resolve
   langSet: text("lang_set").default("kr,en"),
   status: text("status").default("queued"),
   stage: text("stage"),

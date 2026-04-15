@@ -130,7 +130,7 @@ export const candidatesRoutes = new Elysia()
   })
 
   // POST /api/candidates/:id/render — create renderJob + spawn worker
-  .post("/api/candidates/:id/render", async ({ params, error }) => {
+  .post("/api/candidates/:id/render", async ({ params, query, error }) => {
     const [candidate] = await db
       .select()
       .from(candidateClips)
@@ -156,12 +156,14 @@ export const candidatesRoutes = new Elysia()
     }
 
     const fmt = candidate.contentType === "long" ? "horizontal" : "vertical";
+    const tier = (query as any)?.tier ?? "ffmpeg"; // ffmpeg | submagic | resolve
     const [job] = await db
       .insert(renderJobs)
       .values({
         candidateClipId: candidate.id,
         templateId,
         format: fmt,
+        renderTier: tier,
         langSet: "kr,en",
         status: "queued",
         idempotencyKey,

@@ -145,8 +145,10 @@ export default function CandidateEditor({ assetId, onBack }) {
 
   // ─── Render trigger ──────────────────────────────────────────────────────
 
+  const [renderTier, setRenderTier] = useState('ffmpeg'); // ffmpeg | submagic | resolve
+
   const handleRender = async (candidateId) => {
-    await fetch(`/api/candidates/${candidateId}/render`, { method: 'POST' });
+    await fetch(`/api/candidates/${candidateId}/render?tier=${renderTier}`, { method: 'POST' });
     loadRenderJobs();
     loadCandidates();
   };
@@ -411,15 +413,26 @@ export default function CandidateEditor({ assetId, onBack }) {
                     )}
 
                     {/* Actions */}
-                    <div style={{ display: 'flex', gap: 6 }}>
+                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                       {(!job || job.status === 'error') && c.status !== 'rendering' && (
-                        <button
-                          className="btn-primary"
-                          style={{ padding: '3px 8px', fontSize: '0.6rem', flex: 1 }}
-                          onClick={() => handleRender(c.id)}
-                        >
-                          {job?.status === 'error' ? 'Retry Render' : 'Render'}
-                        </button>
+                        <>
+                          <select
+                            style={{ padding: '3px 4px', fontSize: '0.55rem', background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 3, color: 'var(--text)', fontFamily: 'var(--font-mono)' }}
+                            value={renderTier}
+                            onChange={e => setRenderTier(e.target.value)}
+                          >
+                            <option value="ffmpeg">FFmpeg</option>
+                            <option value="submagic">Submagic ✨</option>
+                            <option value="resolve">DaVinci 🎬</option>
+                          </select>
+                          <button
+                            className="btn-primary"
+                            style={{ padding: '3px 8px', fontSize: '0.6rem', flex: 1 }}
+                            onClick={() => handleRender(c.id)}
+                          >
+                            {job?.status === 'error' ? 'Retry' : 'Render'}
+                          </button>
+                        </>
                       )}
                       {(c.status === 'pending' || c.status === 'rendered') && (
                         <button

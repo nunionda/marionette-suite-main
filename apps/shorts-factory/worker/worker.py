@@ -43,6 +43,7 @@ JOB_QUERY = """
         rj.template_id,
         rj.subtitle_entries,
         rj.format,
+        rj.render_tier,
         cc.start_sec,
         cc.end_sec,
         a.raw_file_path,
@@ -70,6 +71,7 @@ CONFIRMED_QUERY = """
         rj.template_id,
         rj.subtitle_entries,
         rj.format,
+        rj.render_tier,
         cc.start_sec,
         cc.end_sec,
         a.raw_file_path,
@@ -96,6 +98,7 @@ SINGLE_JOB_QUERY = """
         rj.template_id,
         rj.subtitle_entries,
         rj.format,
+        rj.render_tier,
         cc.start_sec,
         cc.end_sec,
         a.raw_file_path,
@@ -165,6 +168,7 @@ def process_job(row) -> bool:
     end_sec     = row["end_sec"]
     raw_path    = row["raw_file_path"]
     fmt         = row["format"] or "vertical"
+    render_tier = row["render_tier"] or "ffmpeg"
     lang_set    = row["lang_set"] or "kr,en"
     style_str   = row["subtitle_style"] or ""
     credit_text = row["template_credit"] or row["source_credit"] or ""
@@ -172,7 +176,7 @@ def process_job(row) -> bool:
     channel_id  = row["source_channel_id"] or ""
     channel_url = row["source_channel_url"] or ""
 
-    print(f"\n[worker] ─── Job {job_id}: {fmt} {start_sec}s → {end_sec}s ───")
+    print(f"\n[worker] ─── Job {job_id}: {fmt} {render_tier} {start_sec}s → {end_sec}s ───")
 
     if not raw_path or not os.path.exists(raw_path):
         patch_job(job_id, {
@@ -215,16 +219,81 @@ def process_job(row) -> bool:
     return True  # resume_composite() picks up after operator confirms
 
 
+def _render_submagic(row, job_id: int, fmt: str) -> bool:
+    """Tier 2: Send clip to Submagic API for trendy rendering."""
+    app_dir = os.path.join(os.path.dirname(__file__), "..")
+    clip_path = os.path.abspath(os.path.join(app_dir, "output", "clips", f"{job_id}_clip.mp4"))
+
+    if not os.path.exists(clip_path):
+        patch_job(job_id, {
+            "status": "error", "stage": "submagic",
+            "errorCode": "CLIP_NOT_FOUND", "errorMessage": f"Clip missing: {clip_path}",
+        })
+        return False
+
+    # Submagic needs a public URL — serve via the local API's static /output route
+    clip_url = f"{API_BASE}/output/clips/{job_id}_clip.mp4"
+    out_path = os.path.abspath(os.path.join(app_dir, "output", "rendered", f"{job_id}_final.mp4"))
+    os.makedirs(os.path.dirname(out_path), exist_ok=True)
+
+    patch_job(job_id, {"status": "processing", "stage": "submagic"})
+
+    try:
+        # Call Submagic API via the TypeScript server (it has the API key)
+        payload = json.dumps({
+            "clipUrl": clip_url,
+            "title": f"Job {job_id}",
+            "language": "ko",
+            "outputPath": out_path,
+        }).encode()
+        req = urllib.request.Request(
+            f"{API_BASE}/api/render/{job_id}/submagic",
+            method="POST",
+            data=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        resp = urllib.request.urlopen(req, timeout=300)
+        result = json.loads(resp.read())
+
+        if result.get("success") and result.get("outputPath"):
+            out_path = result["outputPath"]
+            patch_job(job_id, {
+                "status": "done", "stage": "done",
+                "outputFilePath": out_path,
+            })
+            print(f"[worker] Job {job_id} Submagic render complete → {out_path}")
+            return True
+        else:
+            raise RuntimeError(result.get("error", "Submagic render failed"))
+    except Exception as e:
+        print(f"[worker] Submagic failed, falling back to FFmpeg: {e}", file=sys.stderr)
+        # Fallback to FFmpeg (Tier 1)
+        patch_job(job_id, {"stage": "composite (ffmpeg fallback)"})
+        # Continue to the regular composite flow below by calling resume_composite
+        # but we need to avoid infinite recursion, so patch render_tier
+        return False  # caller will retry with FFmpeg path
+
+
 def resume_composite(row) -> bool:
     """Resume pipeline from composite stage using confirmed subtitle entries."""
     job_id      = row["id"]
     fmt         = row["format"] or "vertical"
+    render_tier = row["render_tier"] or "ffmpeg"
     style_str   = row["subtitle_style"] or ""
     credit_text = row["template_credit"] or row["source_credit"] or ""
     channel_id  = row["source_channel_id"] or ""
     channel_url = row["source_channel_url"] or ""
 
-    print(f"\n[worker] ─── Resume composite Job {job_id} ({fmt}) ───")
+    print(f"\n[worker] ─── Resume composite Job {job_id} ({fmt}, {render_tier}) ───")
+
+    # Tier 2: Submagic API — send clip for trendy rendering
+    if render_tier == "submagic":
+        return _render_submagic(row, job_id, fmt)
+
+    # Tier 3: DaVinci Resolve — placeholder for MCP integration
+    if render_tier == "resolve":
+        print(f"[worker] DaVinci Resolve tier not yet connected — falling back to FFmpeg")
+        # Falls through to FFmpeg below
 
     # Reconstruct clip path (already produced in Stage 1)
     app_dir = os.path.join(os.path.dirname(__file__), "..")

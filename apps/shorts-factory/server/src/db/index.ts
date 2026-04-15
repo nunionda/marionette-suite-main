@@ -56,6 +56,7 @@ const DDL = `
     template_id TEXT NOT NULL,
     template_version INTEGER DEFAULT 1,
     format TEXT DEFAULT 'vertical',
+    render_tier TEXT DEFAULT 'ffmpeg',
     lang_set TEXT DEFAULT 'kr,en',
     status TEXT DEFAULT 'queued',
     stage TEXT,
@@ -184,6 +185,10 @@ if (!renderJobsColumns.includes("subtitle_entries")) {
 if (!renderJobsColumns.includes("format")) {
   sqlite.run("ALTER TABLE render_jobs ADD COLUMN format TEXT DEFAULT 'vertical'");
   console.log("Migration: added format column to render_jobs");
+}
+if (!renderJobsColumns.includes("render_tier")) {
+  sqlite.run("ALTER TABLE render_jobs ADD COLUMN render_tier TEXT DEFAULT 'ffmpeg'");
+  console.log("Migration: added render_tier column to render_jobs");
 }
 
 const candidateColumns = (
