@@ -43,7 +43,8 @@ export const candidatesRoutes = new Elysia()
         return error(400, { error: "endSec must be greater than startSec" });
       }
 
-      if (asset.sourceId) {
+      const isLong = (body.contentType ?? "short") === "long";
+      if (!isLong && asset.sourceId) {
         const [source] = await db.select().from(sources).where(eq(sources.id, asset.sourceId));
         if (source?.maxClipSeconds && clipDuration > source.maxClipSeconds) {
           return error(400, {
@@ -60,6 +61,7 @@ export const candidatesRoutes = new Elysia()
           endSec: body.endSec,
           ruleType: body.ruleType,
           rationale: body.rationale ?? null,
+          contentType: body.contentType ?? "short",
           status: "pending",
         })
         .returning();
@@ -72,6 +74,7 @@ export const candidatesRoutes = new Elysia()
         endSec: t.Number(),
         ruleType: t.String(),
         rationale: t.Optional(t.String()),
+        contentType: t.Optional(t.String()),
       }),
     }
   )
@@ -152,11 +155,13 @@ export const candidatesRoutes = new Elysia()
       return { renderJobId: existing[0].id, alreadyExists: true };
     }
 
+    const fmt = candidate.contentType === "long" ? "horizontal" : "vertical";
     const [job] = await db
       .insert(renderJobs)
       .values({
         candidateClipId: candidate.id,
         templateId,
+        format: fmt,
         langSet: "kr,en",
         status: "queued",
         idempotencyKey,

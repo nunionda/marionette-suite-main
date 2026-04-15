@@ -42,6 +42,7 @@ export const candidateClips = sqliteTable("candidate_clips", {
   endSec: real("end_sec").notNull(),
   ruleType: text("rule_type").notNull(),
   rationale: text("rationale"),
+  contentType: text("content_type").default("short"), // short | long
   status: text("status").default("pending"),
   createdBy: text("created_by").default("operator"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
@@ -54,6 +55,7 @@ export const renderJobs = sqliteTable("render_jobs", {
   candidateClipId: integer("candidate_clip_id").references(() => candidateClips.id),
   templateId: text("template_id").notNull(),
   templateVersion: integer("template_version").default(1),
+  format: text("format").default("vertical"), // vertical (9:16) | horizontal (16:9)
   langSet: text("lang_set").default("kr,en"),
   status: text("status").default("queued"),
   stage: text("stage"),

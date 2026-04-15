@@ -42,6 +42,7 @@ JOB_QUERY = """
         rj.lang_set,
         rj.template_id,
         rj.subtitle_entries,
+        rj.format,
         cc.start_sec,
         cc.end_sec,
         a.raw_file_path,
@@ -68,6 +69,7 @@ CONFIRMED_QUERY = """
         rj.lang_set,
         rj.template_id,
         rj.subtitle_entries,
+        rj.format,
         cc.start_sec,
         cc.end_sec,
         a.raw_file_path,
@@ -93,6 +95,7 @@ SINGLE_JOB_QUERY = """
         rj.lang_set,
         rj.template_id,
         rj.subtitle_entries,
+        rj.format,
         cc.start_sec,
         cc.end_sec,
         a.raw_file_path,
@@ -161,6 +164,7 @@ def process_job(row) -> bool:
     start_sec   = row["start_sec"]
     end_sec     = row["end_sec"]
     raw_path    = row["raw_file_path"]
+    fmt         = row["format"] or "vertical"
     lang_set    = row["lang_set"] or "kr,en"
     style_str   = row["subtitle_style"] or ""
     credit_text = row["template_credit"] or row["source_credit"] or ""
@@ -168,7 +172,7 @@ def process_job(row) -> bool:
     channel_id  = row["source_channel_id"] or ""
     channel_url = row["source_channel_url"] or ""
 
-    print(f"\n[worker] ─── Job {job_id}: {start_sec}s → {end_sec}s ───")
+    print(f"\n[worker] ─── Job {job_id}: {fmt} {start_sec}s → {end_sec}s ───")
 
     if not raw_path or not os.path.exists(raw_path):
         patch_job(job_id, {
@@ -179,10 +183,10 @@ def process_job(row) -> bool:
         })
         return False
 
-    # Stage 1: Cut + 9:16 crop
+    # Stage 1: Cut + crop (format-aware)
     patch_job(job_id, {"status": "processing", "stage": "cut"})
     try:
-        clip_path = cut_and_crop(raw_path, start_sec, end_sec, job_id)
+        clip_path = cut_and_crop(raw_path, start_sec, end_sec, job_id, fmt=fmt)
     except Exception as e:
         patch_job(job_id, {
             "status": "error", "stage": "cut",
@@ -214,12 +218,13 @@ def process_job(row) -> bool:
 def resume_composite(row) -> bool:
     """Resume pipeline from composite stage using confirmed subtitle entries."""
     job_id      = row["id"]
+    fmt         = row["format"] or "vertical"
     style_str   = row["subtitle_style"] or ""
     credit_text = row["template_credit"] or row["source_credit"] or ""
     channel_id  = row["source_channel_id"] or ""
     channel_url = row["source_channel_url"] or ""
 
-    print(f"\n[worker] ─── Resume composite Job {job_id} ───")
+    print(f"\n[worker] ─── Resume composite Job {job_id} ({fmt}) ───")
 
     # Reconstruct clip path (already produced in Stage 1)
     app_dir = os.path.join(os.path.dirname(__file__), "..")
@@ -264,7 +269,7 @@ def resume_composite(row) -> bool:
     # Composite
     patch_job(job_id, {"status": "processing", "stage": "composite"})
     try:
-        out_path = compose(clip_path, ass_path, credit_text, job_id, logo_path=logo_path)
+        out_path = compose(clip_path, ass_path, credit_text, job_id, logo_path=logo_path, fmt=fmt)
     except Exception as e:
         patch_job(job_id, {
             "status": "error", "stage": "composite",

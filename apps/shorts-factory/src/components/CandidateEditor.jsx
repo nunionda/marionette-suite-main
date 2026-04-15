@@ -44,12 +44,13 @@ export default function CandidateEditor({ assetId, onBack }) {
   const [currentTime, setCurrentTime] = useState(0);
 
   // Form state
-  const [startSec, setStartSec]   = useState(0);
-  const [endSec, setEndSec]       = useState(0);
-  const [ruleType, setRuleType]   = useState('highlight');
-  const [rationale, setRationale] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [formError, setFormError]   = useState('');
+  const [startSec, setStartSec]       = useState(0);
+  const [endSec, setEndSec]           = useState(0);
+  const [ruleType, setRuleType]       = useState('highlight');
+  const [rationale, setRationale]     = useState('');
+  const [contentType, setContentType] = useState('short'); // short | long
+  const [submitting, setSubmitting]   = useState(false);
+  const [formError, setFormError]     = useState('');
 
   // ─── Data loading ───────────────────────────────────────────────────────
 
@@ -101,7 +102,7 @@ export default function CandidateEditor({ assetId, onBack }) {
   // ─── Candidate form ──────────────────────────────────────────────────────
 
   const duration = endSec - startSec;
-  const maxSec   = asset?.maxClipSeconds ?? 60;
+  const maxSec   = contentType === 'long' ? 900 : (asset?.maxClipSeconds ?? 60);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -121,7 +122,7 @@ export default function CandidateEditor({ assetId, onBack }) {
       const res = await fetch('/api/candidates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId, startSec, endSec, ruleType, rationale }),
+        body: JSON.stringify({ assetId, startSec, endSec, ruleType, rationale, contentType }),
       });
       if (!res.ok) {
         const err = await res.json();
@@ -272,13 +273,22 @@ export default function CandidateEditor({ assetId, onBack }) {
               </div>
             </div>
 
-            <div style={{ marginBottom: 10 }}>
-              <label style={labelStyle}>RULE TYPE</label>
-              <select style={inputStyle} value={ruleType} onChange={e => setRuleType(e.target.value)}>
-                {RULE_TYPES.map(r => (
-                  <option key={r.value} value={r.value}>{r.label}</option>
-                ))}
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+              <div>
+                <label style={labelStyle}>CONTENT TYPE</label>
+                <select style={inputStyle} value={contentType} onChange={e => setContentType(e.target.value)}>
+                  <option value="short">Short (9:16)</option>
+                  <option value="long">Long-form (16:9)</option>
+                </select>
+              </div>
+              <div>
+                <label style={labelStyle}>RULE TYPE</label>
+                <select style={inputStyle} value={ruleType} onChange={e => setRuleType(e.target.value)}>
+                  {RULE_TYPES.map(r => (
+                    <option key={r.value} value={r.value}>{r.label}</option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             <div style={{ marginBottom: 12 }}>

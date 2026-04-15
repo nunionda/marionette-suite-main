@@ -44,6 +44,7 @@ const DDL = `
     end_sec REAL NOT NULL,
     rule_type TEXT NOT NULL,
     rationale TEXT,
+    content_type TEXT DEFAULT 'short',
     status TEXT DEFAULT 'pending',
     created_by TEXT DEFAULT 'operator',
     created_at TEXT DEFAULT (datetime('now'))
@@ -54,6 +55,7 @@ const DDL = `
     candidate_clip_id INTEGER REFERENCES candidate_clips(id),
     template_id TEXT NOT NULL,
     template_version INTEGER DEFAULT 1,
+    format TEXT DEFAULT 'vertical',
     lang_set TEXT DEFAULT 'kr,en',
     status TEXT DEFAULT 'queued',
     stage TEXT,
@@ -178,6 +180,18 @@ const renderJobsColumns = (
 if (!renderJobsColumns.includes("subtitle_entries")) {
   sqlite.run("ALTER TABLE render_jobs ADD COLUMN subtitle_entries TEXT");
   console.log("Migration: added subtitle_entries column to render_jobs");
+}
+if (!renderJobsColumns.includes("format")) {
+  sqlite.run("ALTER TABLE render_jobs ADD COLUMN format TEXT DEFAULT 'vertical'");
+  console.log("Migration: added format column to render_jobs");
+}
+
+const candidateColumns = (
+  sqlite.query("PRAGMA table_info(candidate_clips)").all() as { name: string }[]
+).map(c => c.name);
+if (!candidateColumns.includes("content_type")) {
+  sqlite.run("ALTER TABLE candidate_clips ADD COLUMN content_type TEXT DEFAULT 'short'");
+  console.log("Migration: added content_type column to candidate_clips");
 }
 
 const publishJobsColumns = (

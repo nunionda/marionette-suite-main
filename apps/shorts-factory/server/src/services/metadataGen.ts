@@ -12,6 +12,7 @@ export interface MetadataInput {
   startSec: number;
   endSec: number;
   channelName?: string;
+  contentType?: "short" | "long"; // short = Shorts, long = long-form video
 }
 
 export interface GeneratedMetadata {
@@ -50,6 +51,26 @@ async function callGemini(prompt: string): Promise<string> {
 function ruleBasedFallback(input: MetadataInput): GeneratedMetadata {
   const base = input.videoTitle.slice(0, 40).trim();
   const ch = input.channelName ?? "KPOP";
+  const isLong = input.contentType === "long";
+
+  if (isLong) {
+    return {
+      titles: [
+        `${base} | Best Moments Compilation`,
+        `${base} | Must-Watch Highlights`,
+        `${base} | Top Moments ${new Date().getFullYear()}`,
+      ],
+      hashtags: [
+        "#kpop",
+        `#${ch.replace(/\s+/g, "").toLowerCase()}`,
+        "#highlights",
+        "#compilation",
+        "#bestmoments",
+      ],
+      description: `${input.videoTitle}\n\nBest moments compilation.\n\n${input.creditText}\n\n#kpop`,
+    };
+  }
+
   return {
     titles: [
       `${base} 🔥 Best Moment #shorts`,
@@ -72,8 +93,39 @@ export async function generateMetadata(
 ): Promise<GeneratedMetadata> {
   const durSec = Math.round(input.endSec - input.startSec);
   const channel = input.channelName ?? "K-POP channel";
+  const isLong = input.contentType === "long";
 
-  const prompt = `You are a YouTube Shorts expert for K-POP idol fan channels.
+  const prompt = isLong
+    ? `You are a YouTube SEO expert for K-POP fan channels creating LONG-FORM videos (3-15 minutes).
+
+Original video: "${input.videoTitle}"
+Source channel: ${channel}
+Clip type: ${input.ruleType}
+Total duration: ${durSec} seconds (~${Math.round(durSec / 60)} minutes)
+
+Generate YouTube long-form video metadata. Respond ONLY with valid JSON — no markdown, no prose:
+{
+  "titles": ["title1_under80chars", "title2_under80chars", "title3_under80chars"],
+  "hashtags": ["#tag1", "#tag2", ...8 to 12 total...],
+  "description": "4-5 sentences with SEO keywords then newline then credit"
+}
+
+Title rules:
+- Each under 80 characters (longer than Shorts titles for SEO)
+- Include relevant emojis sparingly
+- Optimize for YouTube search: include group name, year, specific event/song name
+- Each takes a different angle: list/compilation / emotional narrative / search-optimized
+
+Hashtag rules:
+- Include: #kpop, group name tags
+- Do NOT include #shorts
+- Focus on searchable terms: song names, event names, member names
+
+Description rules:
+- 4-5 sentences with relevant keywords for search
+- Include timestamps if this is a compilation (use format: 0:00 First clip title)
+- End with blank line then exactly: ${input.creditText}`
+    : `You are a YouTube Shorts expert for K-POP idol fan channels.
 
 Original video: "${input.videoTitle}"
 Source channel: ${channel}

@@ -1,8 +1,9 @@
 """
-cutter.py — FFmpeg cut + 9:16 center crop.
+cutter.py — FFmpeg cut + format-aware crop/scale.
 
-Takes a source video and a time range, outputs a vertical-format MP4
-suitable for YouTube Shorts (1080x1920).
+Supports two output formats:
+  vertical   — 9:16 (1080x1920) for YouTube Shorts
+  horizontal — 16:9 (1920x1080) for long-form YouTube
 """
 
 import subprocess
@@ -12,17 +13,23 @@ import sys
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "output", "clips")
 
+FORMATS = {
+    "vertical":   {"w": 1080, "h": 1920, "vf": "crop='min(iw,ih*9/16)':ih,scale=1080:1920"},
+    "horizontal": {"w": 1920, "h": 1080, "vf": "scale=1920:1080:force_original_aspect_ratio=decrease,pad=1920:1080:(ow-iw)/2:(oh-ih)/2"},
+}
+
 
 def cut_and_crop(
     source_path: str,
     start_sec: float,
     end_sec: float,
     render_job_id: int,
+    fmt: str = "vertical",
 ) -> str:
     """
-    Cut [start_sec, end_sec] from source_path and center-crop to 9:16.
+    Cut [start_sec, end_sec] from source_path and crop/scale to target format.
+    fmt: 'vertical' (9:16) or 'horizontal' (16:9).
     Returns the output file path.
-    Raises RuntimeError on failure.
     """
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     out_path = os.path.join(OUTPUT_DIR, f"{render_job_id}_clip.mp4")
@@ -31,10 +38,8 @@ def cut_and_crop(
     if duration <= 0:
         raise ValueError(f"Invalid range: {start_sec}s → {end_sec}s")
 
-    # min(iw, ih*9/16) ensures crop width never exceeds the frame — safe for both
-    # landscape sources (center-strip to 9:16) and portrait sources already at or
-    # narrower than 9:16 (no horizontal crop, just scale to 1080×1920).
-    vf = "crop='min(iw,ih*9/16)':ih,scale=1080:1920"
+    spec = FORMATS.get(fmt, FORMATS["vertical"])
+    vf = spec["vf"]
 
     cmd = [
         "ffmpeg", "-y",
@@ -51,8 +56,8 @@ def cut_and_crop(
         out_path,
     ]
 
-    print(f"[cutter] {start_sec}s–{end_sec}s → {out_path}")
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+    print(f"[cutter] {fmt} {start_sec}s–{end_sec}s → {out_path}")
+    result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg failed:\n{result.stderr[-2000:]}")
 
@@ -66,7 +71,8 @@ def cut_and_crop(
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print("Usage: cutter.py <source> <start_sec> <end_sec> <render_job_id>")
+        print("Usage: cutter.py <source> <start_sec> <end_sec> <render_job_id> [format]")
         sys.exit(1)
-    result = cut_and_crop(sys.argv[1], float(sys.argv[2]), float(sys.argv[3]), int(sys.argv[4]))
+    fmt = sys.argv[5] if len(sys.argv) > 5 else "vertical"
+    result = cut_and_crop(sys.argv[1], float(sys.argv[2]), float(sys.argv[3]), int(sys.argv[4]), fmt)
     print(result)
