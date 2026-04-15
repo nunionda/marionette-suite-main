@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const RULE_TYPES = [
-  { value: 'highlight',    label: 'Highlight' },
-  { value: 'performance',  label: 'Performance' },
-  { value: 'reaction',     label: 'Reaction' },
-  { value: 'interview',    label: 'Interview' },
-  { value: 'broll',        label: 'B-Roll' },
+  // A: AI Picks
+  { value: 'highlight',    label: '🔥 Highlight' },
+  { value: 'performance',  label: '🎤 Performance' },
+  { value: 'reaction',     label: '😮 Reaction' },
+  // B: Cross-Group
+  { value: 'comparison',   label: '⚔️ Group Comparison' },
+  { value: 'compilation',  label: '🏆 Top Compilation' },
+  // C: AI Analysis
+  { value: 'analysis',     label: '🔬 AI Analysis' },
+  // Other
+  { value: 'interview',    label: '🎙️ Interview' },
+  { value: 'broll',        label: '🎬 B-Roll' },
 ];
 
 const RENDER_STATUS_COLOR = {
