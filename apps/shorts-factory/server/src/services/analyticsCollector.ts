@@ -11,7 +11,7 @@
 
 import { google } from "googleapis";
 import { db, dailyMetrics, publishJobs } from "../db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNotNull } from "drizzle-orm";
 import { getAuthenticatedClient } from "../lib/youtube-auth";
 
 function todayISO(): string {
@@ -77,8 +77,10 @@ export async function collectMetricsForJob(publishJobId: number): Promise<void> 
 }
 
 export async function collectAllMetrics(): Promise<{ collected: number; errors: number }> {
-  const all = await db.select().from(publishJobs);
-  const uploaded = all.filter(j => !!j.uploadId);
+  const uploaded = await db
+    .select()
+    .from(publishJobs)
+    .where(isNotNull(publishJobs.uploadId));
 
   let collected = 0, errors = 0;
   for (const pj of uploaded) {

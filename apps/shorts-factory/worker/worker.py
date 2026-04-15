@@ -21,26 +21,35 @@ import json
 import urllib.request
 import urllib.error
 
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 from cutter import cut_and_crop
 from subtitler import generate_subtitles
 from compositor import compose
+from logo_downloader import download_channel_logo
 
 APP_DIR = os.path.join(os.path.dirname(__file__), "..")
 DB_PATH = os.path.join(APP_DIR, "shorts_factory.db")
 API_BASE = os.environ.get("SHORTS_API_BASE", "http://localhost:3008")
+WORKER_SECRET = os.environ.get("WORKER_SECRET", "")
 POLL_INTERVAL = 5  # seconds between polls when queue is empty
 
 JOB_QUERY = """
     SELECT
         rj.id,
+        rj.status,
         rj.lang_set,
         rj.template_id,
+        rj.subtitle_entries,
         cc.start_sec,
         cc.end_sec,
         a.raw_file_path,
         et.subtitle_style,
         et.credit_text   AS template_credit,
-        s.credit_text    AS source_credit
+        s.credit_text    AS source_credit,
+        s.channel_id     AS source_channel_id,
+        s.channel_url    AS source_channel_url
     FROM render_jobs rj
     JOIN candidate_clips cc ON cc.id = rj.candidate_clip_id
     JOIN assets a            ON a.id  = cc.asset_id
@@ -51,7 +60,54 @@ JOB_QUERY = """
     LIMIT 1
 """
 
-SINGLE_JOB_QUERY = JOB_QUERY.replace("WHERE rj.status = 'queued'", "WHERE rj.id = ?")
+# Same fields — picks up confirmed subtitle jobs for composite step
+CONFIRMED_QUERY = """
+    SELECT
+        rj.id,
+        rj.status,
+        rj.lang_set,
+        rj.template_id,
+        rj.subtitle_entries,
+        cc.start_sec,
+        cc.end_sec,
+        a.raw_file_path,
+        et.subtitle_style,
+        et.credit_text   AS template_credit,
+        s.credit_text    AS source_credit,
+        s.channel_id     AS source_channel_id,
+        s.channel_url    AS source_channel_url
+    FROM render_jobs rj
+    JOIN candidate_clips cc ON cc.id = rj.candidate_clip_id
+    JOIN assets a            ON a.id  = cc.asset_id
+    LEFT JOIN edit_templates et ON CAST(et.id AS TEXT) = rj.template_id
+    LEFT JOIN sources s         ON s.id = a.source_id
+    WHERE rj.status = 'subtitle_review_confirmed'
+    ORDER BY rj.created_at ASC
+    LIMIT 1
+"""
+
+SINGLE_JOB_QUERY = """
+    SELECT
+        rj.id,
+        rj.status,
+        rj.lang_set,
+        rj.template_id,
+        rj.subtitle_entries,
+        cc.start_sec,
+        cc.end_sec,
+        a.raw_file_path,
+        et.subtitle_style,
+        et.credit_text   AS template_credit,
+        s.credit_text    AS source_credit,
+        s.channel_id     AS source_channel_id,
+        s.channel_url    AS source_channel_url
+    FROM render_jobs rj
+    JOIN candidate_clips cc ON cc.id = rj.candidate_clip_id
+    JOIN assets a            ON a.id  = cc.asset_id
+    LEFT JOIN edit_templates et ON CAST(et.id AS TEXT) = rj.template_id
+    LEFT JOIN sources s         ON s.id = a.source_id
+    WHERE rj.id = ?
+"""
 
 
 # ─── API helpers ──────────────────────────────────────────────────────────
@@ -59,10 +115,13 @@ SINGLE_JOB_QUERY = JOB_QUERY.replace("WHERE rj.status = 'queued'", "WHERE rj.id 
 def patch_job(job_id: int, payload: dict):
     """PATCH /api/render/:id — update job status/stage/paths."""
     data = json.dumps(payload).encode()
+    headers = {"Content-Type": "application/json"}
+    if WORKER_SECRET:
+        headers["X-Worker-Secret"] = WORKER_SECRET
     req = urllib.request.Request(
         f"{API_BASE}/api/render/{job_id}",
         data=data,
-        headers={"Content-Type": "application/json"},
+        headers=headers,
         method="PATCH",
     )
     try:
@@ -74,6 +133,28 @@ def patch_job(job_id: int, payload: dict):
 
 # ─── Pipeline ─────────────────────────────────────────────────────────────
 
+def _transcribe_only(clip_path: str, job_id: int, style_str: str, translate: bool) -> list:
+    """Run STT (and optional translation) without writing ASS. Returns entry list."""
+    from subtitler import extract_audio, transcribe_groq, translate_entries_gemini, GROQ_API_KEY
+    import tempfile
+
+    if not GROQ_API_KEY:
+        print("[worker] GROQ_API_KEY not set — empty subtitles")
+        return []
+
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        audio_path = extract_audio(clip_path, tmp_dir)
+        entries = transcribe_groq(audio_path)
+        print(f"[worker] Whisper: {len(entries)} segments")
+
+        if translate:
+            from subtitler import translate_entries_gemini, GEMINI_API_KEY
+            if GEMINI_API_KEY and entries:
+                entries = translate_entries_gemini(entries)
+
+    return entries
+
+
 def process_job(row) -> bool:
     """Run the full render pipeline for one job. Returns True on success."""
     job_id      = row["id"]
@@ -84,6 +165,8 @@ def process_job(row) -> bool:
     style_str   = row["subtitle_style"] or ""
     credit_text = row["template_credit"] or row["source_credit"] or ""
     translate   = "en" in lang_set
+    channel_id  = row["source_channel_id"] or ""
+    channel_url = row["source_channel_url"] or ""
 
     print(f"\n[worker] ─── Job {job_id}: {start_sec}s → {end_sec}s ───")
 
@@ -107,18 +190,81 @@ def process_job(row) -> bool:
         })
         return False
 
-    # Stage 2: Subtitles (non-fatal — empty ASS if Whisper fails)
-    patch_job(job_id, {"stage": "subtitles"})
+    # Stage 2: Transcribe + subtitle review gate
+    # Run STT (and optional KR→EN translation), persist entries, pause for operator review.
+    # Composite is triggered after the operator confirms/edits via subtitle_review_confirmed.
+    patch_job(job_id, {"status": "processing", "stage": "subtitle"})
     try:
-        ass_path = generate_subtitles(clip_path, job_id, style_str=style_str, translate=translate)
+        entries = _transcribe_only(clip_path, job_id, style_str, translate)
     except Exception as e:
-        print(f"[worker] subtitle warning (non-fatal): {e}", file=sys.stderr)
+        # STT failure is non-fatal — proceed without subtitles rather than blocking the job
+        print(f"[worker] STT failed (non-fatal): {e}", file=sys.stderr)
+        entries = []
+
+    # Persist entries and pause for operator subtitle review
+    patch_job(job_id, {
+        "status": "subtitle_review",
+        "stage": "subtitle",
+        "subtitleEntries": json.dumps(entries),
+    })
+    print(f"[worker] Job {job_id} paused for subtitle review ({len(entries)} segments)")
+    return True  # resume_composite() picks up after operator confirms
+
+
+def resume_composite(row) -> bool:
+    """Resume pipeline from composite stage using confirmed subtitle entries."""
+    job_id      = row["id"]
+    style_str   = row["subtitle_style"] or ""
+    credit_text = row["template_credit"] or row["source_credit"] or ""
+    channel_id  = row["source_channel_id"] or ""
+    channel_url = row["source_channel_url"] or ""
+
+    print(f"\n[worker] ─── Resume composite Job {job_id} ───")
+
+    # Reconstruct clip path (already produced in Stage 1)
+    app_dir = os.path.join(os.path.dirname(__file__), "..")
+    clip_path = os.path.abspath(os.path.join(app_dir, "output", "clips", f"{job_id}_clip.mp4"))
+    if not os.path.exists(clip_path):
+        patch_job(job_id, {
+            "status": "error", "stage": "composite",
+            "errorCode": "CLIP_NOT_FOUND", "errorMessage": f"Clip missing: {clip_path}",
+        })
+        return False
+
+    # Load confirmed/edited subtitle entries from DB
+    entries = []
+    entries_json = row["subtitle_entries"] or "[]"
+    try:
+        entries = json.loads(entries_json)
+    except Exception:
+        pass
+
+    # Write ASS from saved entries
+    ass_path = None
+    try:
+        from subtitler import build_ass, DEFAULT_ASS_STYLE, SUBTITLES_DIR
+        os.makedirs(SUBTITLES_DIR, exist_ok=True)
+        ass_path = os.path.join(SUBTITLES_DIR, f"{job_id}.ass")
+        style = style_str if style_str else DEFAULT_ASS_STYLE
+        with open(ass_path, "w", encoding="utf-8") as f:
+            f.write(build_ass(entries, style))
+        print(f"[worker] ASS written from confirmed entries: {ass_path} ({len(entries)} lines)")
+    except Exception as e:
+        print(f"[worker] ASS write failed (non-fatal): {e}", file=sys.stderr)
         ass_path = None
 
-    # Stage 3: Final composite
-    patch_job(job_id, {"stage": "composite"})
+    # Fetch channel logo (cached)
+    logo_path = None
+    if channel_id and channel_url:
+        try:
+            logo_path = download_channel_logo(channel_id, channel_url)
+        except Exception as e:
+            print(f"[worker] logo download warning (non-fatal): {e}", file=sys.stderr)
+
+    # Composite
+    patch_job(job_id, {"status": "processing", "stage": "composite"})
     try:
-        out_path = compose(clip_path, ass_path, credit_text, job_id)
+        out_path = compose(clip_path, ass_path, credit_text, job_id, logo_path=logo_path)
     except Exception as e:
         patch_job(job_id, {
             "status": "error", "stage": "composite",
@@ -145,13 +291,20 @@ def run_loop():
         try:
             conn = sqlite3.connect(f"file:{DB_PATH}?mode=ro", uri=True)
             conn.row_factory = sqlite3.Row
-            row = conn.execute(JOB_QUERY).fetchone()
+            # Priority: confirmed subtitle jobs first, then fresh queued jobs
+            confirmed_row = conn.execute(CONFIRMED_QUERY).fetchone()
+            row = conn.execute(JOB_QUERY).fetchone() if not confirmed_row else None
             conn.close()
 
-            if row:
+            if confirmed_row:
+                resume_composite(confirmed_row)
+                time.sleep(1)  # brief pause between jobs to avoid DB hammering
+            elif row:
                 process_job(row)
+                time.sleep(1)
             else:
                 time.sleep(POLL_INTERVAL)
+
         except KeyboardInterrupt:
             print("\n[worker] stopped")
             break
@@ -175,7 +328,10 @@ def run_single(job_id: int):
         print(f"[worker] render job {job_id} not found", file=sys.stderr)
         sys.exit(1)
 
-    success = process_job(row)
+    if row["status"] == "subtitle_review_confirmed":
+        success = resume_composite(row)
+    else:
+        success = process_job(row)
     sys.exit(0 if success else 1)
 
 

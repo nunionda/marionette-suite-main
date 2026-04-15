@@ -52,6 +52,7 @@ export default function ReviewPanel() {
   const [generating, setGenerating] = useState(false);
   const [deciding, setDeciding] = useState(false);
   const [savingMeta, setSavingMeta] = useState(false);
+  const [descPreview, setDescPreview] = useState(false);
 
   const loadJobs = useCallback(() => {
     fetch('/api/review').then(r => r.json()).then(d => setJobs(d.jobs || []));
@@ -65,14 +66,28 @@ export default function ReviewPanel() {
     setDetail(data);
     setChecklist({});
     setNotes('');
-    setTitleVariants(null);
     setSelectedVariant(0);
 
     if (data.publishJob) {
       setEditTitle(data.publishJob.title || '');
       setEditDesc(data.publishJob.description || '');
       setEditTags(data.publishJob.hashtags || '');
+      // Restore persisted title variants so the operator can switch between them after a reload
+      try {
+        const variants = data.publishJob.titleVariants
+          ? JSON.parse(data.publishJob.titleVariants)
+          : null;
+        setTitleVariants(variants);
+        // Sync selectedVariant to whichever variant matches the current title
+        if (variants) {
+          const idx = variants.indexOf(data.publishJob.title);
+          setSelectedVariant(idx !== -1 ? idx : 0);
+        }
+      } catch {
+        setTitleVariants(null);
+      }
     } else {
+      setTitleVariants(null);
       setEditTitle('');
       setEditDesc('');
       setEditTags('');
@@ -104,6 +119,12 @@ export default function ReviewPanel() {
   const handleVariantSelect = (idx) => {
     setSelectedVariant(idx);
     setEditTitle(titleVariants[idx]);
+    // Persist selection immediately so a reload restores the chosen variant
+    fetch(`/api/review/${selectedId}/metadata`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ titleIndex: idx }),
+    });
   };
 
   const saveMetadata = async () => {
@@ -151,7 +172,8 @@ export default function ReviewPanel() {
   const decisionBadge = detail?.latestDecision?.decision;
   const videoUrl = detail ? fileToUrl(detail.outputFilePath) : null;
   const hasMetadata = !!(detail?.publishJob || titleVariants);
-  const canApprove = editTitle.trim().length > 0;
+  const allChecked = CHECKLIST_ITEMS.every(item => checklist[item.id]);
+  const canApprove = editTitle.trim().length > 0 && allChecked;
 
   const selectStyle = {
     padding: '5px 8px',
@@ -392,7 +414,22 @@ export default function ReviewPanel() {
                 </div>
 
                 <div>
-                  <div style={{ ...monoStyle, marginBottom: 4 }}>HASHTAGS</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <div style={monoStyle}>HASHTAGS</div>
+                    {editTags.trim() && (() => {
+                      const count = (editTags.match(/#\w+/g) ?? []).length;
+                      return (
+                        <span style={{
+                          fontSize: '0.6rem', fontFamily: 'var(--font-mono)',
+                          padding: '1px 6px', borderRadius: 10,
+                          background: 'var(--bg-elevated)',
+                          color: count > 15 ? 'var(--status-warn)' : 'var(--gold)',
+                          border: `1px solid ${count > 15 ? 'var(--status-warn)44' : 'var(--gold)44'}`,
+                        }}>#{count}</span>
+                      );
+                    })()}
+                    <span style={{ ...monoStyle, marginLeft: 'auto', fontSize: '0.55rem' }}>≤15 recommended</span>
+                  </div>
                   <input
                     type="text"
                     value={editTags}
@@ -412,25 +449,72 @@ export default function ReviewPanel() {
                 </div>
 
                 <div>
-                  <div style={{ ...monoStyle, marginBottom: 4 }}>DESCRIPTION</div>
-                  <textarea
-                    value={editDesc}
-                    onChange={e => setEditDesc(e.target.value)}
-                    rows={5}
-                    placeholder="Description with credit text..."
-                    style={{
+                  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+                    <div style={monoStyle}>DESCRIPTION</div>
+                    <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{
+                        ...monoStyle,
+                        color: editDesc.length >= 5000 ? 'var(--status-error)'
+                          : editDesc.length >= 4500 ? '#f5a623'
+                          : 'var(--text-muted)',
+                        fontWeight: editDesc.length >= 4500 ? 600 : 400,
+                      }}>
+                        {editDesc.length} / 5000
+                      </span>
+                      <button
+                        onClick={() => setDescPreview(v => !v)}
+                        style={{
+                          background: 'none', border: '1px solid var(--border)',
+                          borderRadius: 'var(--r-sm)', padding: '1px 7px',
+                          cursor: 'pointer', fontSize: '0.6rem',
+                          fontFamily: 'var(--font-mono)', color: 'var(--text-muted)',
+                        }}
+                      >
+                        {descPreview ? 'Edit ▲' : 'Preview ▾'}
+                      </button>
+                    </div>
+                  </div>
+                  {descPreview ? (
+                    <div style={{
                       width: '100%', boxSizing: 'border-box',
-                      padding: '8px 10px',
+                      padding: '8px 10px', minHeight: 90,
                       background: 'var(--bg-elevated)',
                       border: '1px solid var(--border)',
                       borderRadius: 'var(--r-sm)',
-                      color: 'var(--text)',
-                      fontSize: '0.75rem',
-                      fontFamily: 'var(--font-body)',
-                      resize: 'vertical',
-                      lineHeight: 1.5,
-                    }}
-                  />
+                      fontSize: '0.75rem', fontFamily: 'var(--font-body)',
+                      lineHeight: 1.6, color: 'var(--text)',
+                    }}>
+                      {editDesc.split('\n').map((line, i) => (
+                        <React.Fragment key={i}>
+                          {i > 0 && <br />}
+                          {line.split(/(#\w+)/g).map((part, j) =>
+                            /^#\w+$/.test(part)
+                              ? <span key={j} style={{ color: 'var(--gold)' }}>{part}</span>
+                              : part
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  ) : (
+                    <textarea
+                      value={editDesc}
+                      onChange={e => setEditDesc(e.target.value)}
+                      rows={5}
+                      placeholder="Description with credit text..."
+                      style={{
+                        width: '100%', boxSizing: 'border-box',
+                        padding: '8px 10px',
+                        background: 'var(--bg-elevated)',
+                        border: `1px solid ${editDesc.length >= 5000 ? 'var(--status-error)' : 'var(--border)'}`,
+                        borderRadius: 'var(--r-sm)',
+                        color: 'var(--text)',
+                        fontSize: '0.75rem',
+                        fontFamily: 'var(--font-body)',
+                        resize: 'vertical',
+                        lineHeight: 1.5,
+                      }}
+                    />
+                  )}
                 </div>
 
                 {hasMetadata && (
@@ -516,7 +600,9 @@ export default function ReviewPanel() {
               </div>
               {!canApprove && (
                 <div style={{ ...monoStyle, marginTop: 8, color: 'var(--text-dim)' }}>
-                  Generate or enter a title to enable Approve
+                  {!editTitle.trim()
+                    ? '↑ Enter a title to enable Approve'
+                    : `✗ ${CHECKLIST_ITEMS.filter(item => !checklist[item.id]).length} checklist item(s) remaining`}
                 </div>
               )}
             </div>

@@ -84,12 +84,13 @@ export const publishRoutes = new Elysia()
       )}`;
       return;
     }
-    if (!query.code) {
-      set.redirect = `${FRONTEND_URL}/?youtubeAuth=error&msg=missing_code`;
+    const code = String(query.code ?? "");
+    if (!code || code.length < 10 || code.length > 1024 || !/^[\w\-./]+$/.test(code)) {
+      set.redirect = `${FRONTEND_URL}/?youtubeAuth=error&msg=invalid_code`;
       return;
     }
     try {
-      await exchangeCode(String(query.code));
+      await exchangeCode(code);
       set.redirect = `${FRONTEND_URL}/?youtubeAuth=success`;
     } catch (err: any) {
       set.redirect = `${FRONTEND_URL}/?youtubeAuth=error&msg=${encodeURIComponent(

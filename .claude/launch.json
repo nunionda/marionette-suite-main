@@ -14,6 +14,13 @@
       "runtimeArgs": ["run", "src/index.ts"],
       "port": 3006,
       "cwd": "apps/script-writer/server"
+    },
+    {
+      "name": "shorts-factory-frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "5178", "--host", "0.0.0.0"],
+      "port": 5178,
+      "cwd": "apps/shorts-factory"
     }
   ]
 }

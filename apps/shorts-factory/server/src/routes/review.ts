@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { db, renderJobs, candidateClips, assets, sources, reviewDecisions, publishJobs } from "../db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, inArray } from "drizzle-orm";
 import { generateMetadata } from "../services/metadataGen";
 
 // Shared select shape for render job + context
@@ -29,30 +29,45 @@ const JOB_SELECT = {
   creditText: sources.creditText,
 };
 
-async function attachReviewInfo(rows: (typeof JOB_SELECT)[]) {
-  return Promise.all(
-    rows.map(async (row: any) => {
-      const [latestDecision] = await db
-        .select()
-        .from(reviewDecisions)
-        .where(eq(reviewDecisions.renderJobId, row.id))
-        .orderBy(desc(reviewDecisions.decidedAt))
-        .limit(1);
+async function attachReviewInfo(rows: any[]) {
+  if (rows.length === 0) return [];
 
-      const [publishJob] = await db
-        .select()
-        .from(publishJobs)
-        .where(eq(publishJobs.renderJobId, row.id))
-        .orderBy(desc(publishJobs.createdAt))
-        .limit(1);
+  const jobIds = rows.map(r => r.id as number);
 
-      return {
-        ...row,
-        latestDecision: latestDecision ?? null,
-        publishJob: publishJob ?? null,
-      };
-    })
-  );
+  // Two queries total instead of 2×N — fetch all related rows in bulk
+  const [allDecisions, allPublishJobs] = await Promise.all([
+    db
+      .select()
+      .from(reviewDecisions)
+      .where(inArray(reviewDecisions.renderJobId, jobIds))
+      .orderBy(desc(reviewDecisions.decidedAt)),
+    db
+      .select()
+      .from(publishJobs)
+      .where(inArray(publishJobs.renderJobId, jobIds))
+      .orderBy(desc(publishJobs.createdAt)),
+  ]);
+
+  // Group by renderJobId — first entry is the latest due to DESC order above
+  const decisionByJob = new Map<number, typeof allDecisions[0]>();
+  for (const d of allDecisions) {
+    if (d.renderJobId !== null && !decisionByJob.has(d.renderJobId)) {
+      decisionByJob.set(d.renderJobId, d);
+    }
+  }
+
+  const publishJobByJob = new Map<number, typeof allPublishJobs[0]>();
+  for (const pj of allPublishJobs) {
+    if (pj.renderJobId !== null && !publishJobByJob.has(pj.renderJobId)) {
+      publishJobByJob.set(pj.renderJobId, pj);
+    }
+  }
+
+  return rows.map(row => ({
+    ...row,
+    latestDecision: decisionByJob.get(row.id) ?? null,
+    publishJob: publishJobByJob.get(row.id) ?? null,
+  }));
 }
 
 export const reviewRoutes = new Elysia()
@@ -132,6 +147,8 @@ export const reviewRoutes = new Elysia()
 
     const hashtagStr = metadata.hashtags.join(" ");
 
+    const variantsJson = JSON.stringify(metadata.titles);
+
     if (existing) {
       await db
         .update(publishJobs)
@@ -139,6 +156,7 @@ export const reviewRoutes = new Elysia()
           title: metadata.titles[0],
           description: metadata.description,
           hashtags: hashtagStr,
+          titleVariants: variantsJson,
           status: "pending",
           updatedAt: new Date().toISOString(),
         })
@@ -149,6 +167,7 @@ export const reviewRoutes = new Elysia()
         title: metadata.titles[0],
         description: metadata.description,
         hashtags: hashtagStr,
+        titleVariants: variantsJson,
         status: "pending",
         idempotencyKey: `review-${params.id}-draft-${Date.now()}`,
       });
@@ -170,10 +189,21 @@ export const reviewRoutes = new Elysia()
 
       if (!existing) return error(404, { error: "No draft metadata found. Generate first." });
 
+      // If titleIndex is provided, pick that variant as the active title
+      let resolvedTitle = body.title;
+      if (body.titleIndex !== undefined && existing.titleVariants) {
+        try {
+          const variants = JSON.parse(existing.titleVariants) as string[];
+          if (variants[body.titleIndex]) resolvedTitle = variants[body.titleIndex];
+        } catch {
+          // malformed JSON — fall through to body.title
+        }
+      }
+
       await db
         .update(publishJobs)
         .set({
-          ...(body.title !== undefined && { title: body.title }),
+          ...(resolvedTitle !== undefined && { title: resolvedTitle }),
           ...(body.description !== undefined && { description: body.description }),
           ...(body.hashtags !== undefined && { hashtags: body.hashtags }),
           updatedAt: new Date().toISOString(),
@@ -191,6 +221,7 @@ export const reviewRoutes = new Elysia()
         title: t.Optional(t.String()),
         description: t.Optional(t.String()),
         hashtags: t.Optional(t.String()),
+        titleIndex: t.Optional(t.Number()),
       }),
     }
   )
@@ -218,19 +249,20 @@ export const reviewRoutes = new Elysia()
 
       // Side effects by decision
       if (body.decision === "approve") {
-        // Mark publishJob as approved
+        // Require metadata draft before approving
         const [pj] = await db
           .select()
           .from(publishJobs)
           .where(eq(publishJobs.renderJobId, Number(params.id)))
           .orderBy(desc(publishJobs.createdAt))
           .limit(1);
-        if (pj) {
-          await db
-            .update(publishJobs)
-            .set({ status: "approved", updatedAt: new Date().toISOString() })
-            .where(eq(publishJobs.id, pj.id));
+        if (!pj) {
+          return error(400, { error: "Generate metadata first before approving" });
         }
+        await db
+          .update(publishJobs)
+          .set({ status: "approved", updatedAt: new Date().toISOString() })
+          .where(eq(publishJobs.id, pj.id));
       } else if (body.decision === "reject") {
         // Reset candidate clip to pending so it can be re-rendered
         if (job.candidateClipId) {

@@ -4,6 +4,7 @@ import SourceManager from './components/SourceManager';
 import AssetList from './components/AssetList';
 import CandidateEditor from './components/CandidateEditor';
 import ReviewPanel from './components/ReviewPanel';
+import SubtitleEditor from './components/SubtitleEditor';
 import PublishQueue from './components/PublishQueue';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
 
@@ -11,6 +12,7 @@ const PAGES = {
   dashboard:  { label: 'Dashboard',  icon: '📊' },
   sources:    { label: 'Sources',    icon: '📡' },
   assets:     { label: 'Assets',     icon: '🎬' },
+  subtitles:  { label: 'Subtitles',  icon: '💬' },
   review:     { label: 'Review',     icon: '✅' },
   publish:    { label: 'Publish',    icon: '📤' },
   analytics:  { label: 'Analytics',  icon: '📈' },
@@ -43,6 +45,8 @@ export default function App() {
         return selectedAssetId
           ? <CandidateEditor assetId={selectedAssetId} onBack={() => navigateTo('assets')} />
           : <AssetList onEditClips={openCandidates} />;
+      case 'subtitles':
+        return <SubtitleEditor />;
       case 'review':
         return <ReviewPanel />;
       case 'publish':

@@ -61,6 +61,7 @@ export const renderJobs = sqliteTable("render_jobs", {
   errorMessage: text("error_message"),
   outputFilePath: text("output_file_path"),
   subtitleFilePath: text("subtitle_file_path"),
+  subtitleEntries: text("subtitle_entries"), // JSON: [{start, end, text}[]]
   idempotencyKey: text("idempotency_key").unique(),
   retryCount: integer("retry_count").default(0),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
@@ -96,6 +97,7 @@ export const publishJobs = sqliteTable("publish_jobs", {
   retryCount: integer("retry_count").default(0),
   maxRetries: integer("max_retries").default(3),
   idempotencyKey: text("idempotency_key").unique(),
+  titleVariants: text("title_variants"), // JSON array of 3 LLM-generated title options
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
   updatedAt: text("updated_at").$defaultFn(() => new Date().toISOString()),
 });

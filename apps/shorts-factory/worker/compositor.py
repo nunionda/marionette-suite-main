@@ -66,9 +66,11 @@ def compose(
     ass_path: str | None,
     credit_text: str,
     render_job_id: int,
+    logo_path: str | None = None,
 ) -> str:
     """
-    Burn ASS subtitles and credit text overlay into the clip.
+    Burn ASS subtitles, credit text overlay, and optional channel logo into the clip.
+    Logo is placed at top-right (scale=120px wide, overlay=W-w-30:30).
     Returns the output file path.
     Raises RuntimeError on failure.
     """
@@ -94,7 +96,7 @@ def compose(
         vf_parts.append(
             f"drawtext="
             f"text='{safe_credit}':"
-            f"fontsize=16:"
+            f"fontsize=32:"
             f"fontcolor=white:"
             f"x=(w-tw)/2:"
             f"y=h-th-20:"
@@ -103,23 +105,43 @@ def compose(
             f"boxborderw=6"
         )
 
-    vf = ",".join(vf_parts) if vf_parts else "copy"
+    use_logo = bool(logo_path and os.path.exists(logo_path))
 
-    cmd = [
-        "ffmpeg", "-y",
-        "-i", clip_path,
-        "-vf", vf,
-        "-c:v", "libx264",
-        "-preset", "medium",
-        "-crf", "22",
-        "-c:a", "aac",
-        "-b:a", "192k",
-        "-movflags", "+faststart",
-        out_path,
-    ]
+    if use_logo:
+        # filter_complex required when using 2 video inputs (clip + logo PNG)
+        inner = ",".join(vf_parts) if vf_parts else "null"
+        filter_complex = (
+            f"[0:v]{inner}[base];"
+            f"[1:v]scale=120:-1[logo];"
+            f"[base][logo]overlay=W-w-30:30[out]"
+        )
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", clip_path,
+            "-i", logo_path,
+            "-filter_complex", filter_complex,
+            "-map", "[out]",
+            "-map", "0:a",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "22",
+            "-c:a", "aac", "-b:a", "192k",
+            "-movflags", "+faststart",
+            out_path,
+        ]
+        print(f"[compositor] filter_complex (logo overlay) → {out_path}")
+    else:
+        vf = ",".join(vf_parts) if vf_parts else "copy"
+        cmd = [
+            "ffmpeg", "-y",
+            "-i", clip_path,
+            "-vf", vf,
+            "-c:v", "libx264", "-preset", "medium", "-crf", "22",
+            "-c:a", "aac", "-b:a", "192k",
+            "-movflags", "+faststart",
+            out_path,
+        ]
+        print(f"[compositor] vf={vf!r}")
+        print(f"[compositor] rendering → {out_path}")
 
-    print(f"[compositor] vf={vf!r}")
-    print(f"[compositor] rendering → {out_path}")
     result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
     if result.returncode != 0:
         raise RuntimeError(f"FFmpeg compose failed:\n{result.stderr[-2000:]}")
@@ -133,9 +155,10 @@ def compose(
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        print("Usage: compositor.py <clip_path> <ass_path_or_none> <credit_text> <render_job_id>")
+    if len(sys.argv) < 5:
+        print("Usage: compositor.py <clip_path> <ass_path_or_none> <credit_text> <render_job_id> [logo_path]")
         sys.exit(1)
     ass = sys.argv[2] if sys.argv[2] != "none" else None
-    result = compose(sys.argv[1], ass, sys.argv[3], int(sys.argv[4]))
+    logo = sys.argv[5] if len(sys.argv) > 5 and sys.argv[5] != "none" else None
+    result = compose(sys.argv[1], ass, sys.argv[3], int(sys.argv[4]), logo_path=logo)
     print(result)

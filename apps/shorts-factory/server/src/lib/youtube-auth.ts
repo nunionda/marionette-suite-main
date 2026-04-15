@@ -11,8 +11,10 @@
 
 import { google } from "googleapis";
 import { readFile, writeFile, unlink } from "fs/promises";
+import { join } from "path";
 
-const TOKEN_PATH = "./youtube-tokens.json";
+// Absolute path anchored to this file's directory — safe regardless of process CWD
+const TOKEN_PATH = join(import.meta.dir, "../../../youtube-tokens.json");
 const REDIRECT_URI =
   process.env.YOUTUBE_REDIRECT_URI ??
   "http://localhost:3008/api/auth/youtube/callback";

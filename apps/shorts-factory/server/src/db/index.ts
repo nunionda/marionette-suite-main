@@ -61,6 +61,7 @@ const DDL = `
     error_message TEXT,
     output_file_path TEXT,
     subtitle_file_path TEXT,
+    subtitle_entries TEXT,
     idempotency_key TEXT UNIQUE,
     retry_count INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now')),
@@ -84,6 +85,7 @@ const DDL = `
     title TEXT NOT NULL,
     description TEXT,
     hashtags TEXT,
+    title_variants TEXT,
     scheduled_at TEXT,
     status TEXT DEFAULT 'pending',
     upload_id TEXT,
@@ -143,6 +145,24 @@ const DDL = `
 `;
 for (const stmt of DDL.split(';').map(s => s.trim()).filter(Boolean)) {
   sqlite.run(stmt);
+}
+
+// Migrations for existing databases: add columns that may be missing
+// (SQLite ALTER TABLE does not support IF NOT EXISTS)
+const renderJobsColumns = (
+  sqlite.query("PRAGMA table_info(render_jobs)").all() as { name: string }[]
+).map(c => c.name);
+if (!renderJobsColumns.includes("subtitle_entries")) {
+  sqlite.run("ALTER TABLE render_jobs ADD COLUMN subtitle_entries TEXT");
+  console.log("Migration: added subtitle_entries column to render_jobs");
+}
+
+const publishJobsColumns = (
+  sqlite.query("PRAGMA table_info(publish_jobs)").all() as { name: string }[]
+).map(c => c.name);
+if (!publishJobsColumns.includes("title_variants")) {
+  sqlite.run("ALTER TABLE publish_jobs ADD COLUMN title_variants TEXT");
+  console.log("Migration: added title_variants column to publish_jobs");
 }
 
 // Seed default templates if empty

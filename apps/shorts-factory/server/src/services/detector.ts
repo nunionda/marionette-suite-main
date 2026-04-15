@@ -20,7 +20,8 @@ interface RssEntry {
 }
 
 function extractTag(block: string, tag: string): string | null {
-  const m = block.match(new RegExp(`<${tag}>([^<]+)<\\/${tag}>`));
+  // Handles both plain text and CDATA-wrapped values: <title><![CDATA[...]]></title>
+  const m = block.match(new RegExp(`<${tag}>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\\/${tag}>`));
   return m ? m[1].trim() : null;
 }
 

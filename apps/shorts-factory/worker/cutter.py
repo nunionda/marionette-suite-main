@@ -31,9 +31,10 @@ def cut_and_crop(
     if duration <= 0:
         raise ValueError(f"Invalid range: {start_sec}s → {end_sec}s")
 
-    # crop=ih*9/16:ih takes the center vertical strip of a landscape video
-    # scale=1080:1920 upscales to full Shorts resolution
-    vf = "crop=ih*9/16:ih,scale=1080:1920"
+    # min(iw, ih*9/16) ensures crop width never exceeds the frame — safe for both
+    # landscape sources (center-strip to 9:16) and portrait sources already at or
+    # narrower than 9:16 (no horizontal crop, just scale to 1080×1920).
+    vf = "crop='min(iw,ih*9/16)':ih,scale=1080:1920"
 
     cmd = [
         "ffmpeg", "-y",

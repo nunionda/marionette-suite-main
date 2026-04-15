@@ -162,11 +162,13 @@ export default function AssetList({ onEditClips }) {
           <div key={a.id} className="glass" style={{ padding: '12px 16px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
             {/* Thumbnail */}
             {a.thumbnailUrl ? (
-              <img
-                src={a.thumbnailUrl}
-                alt={a.title}
-                style={{ width: 80, height: 45, objectFit: 'cover', borderRadius: 4, flexShrink: 0 }}
-              />
+              <a href={`https://youtube.com/watch?v=${a.videoId}`} target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0 }}>
+                <img
+                  src={a.thumbnailUrl}
+                  alt={a.title}
+                  style={{ width: 80, height: 45, objectFit: 'cover', borderRadius: 4, display: 'block', cursor: 'pointer' }}
+                />
+              </a>
             ) : (
               <div style={{ width: 80, height: 45, background: 'var(--bg-elevated)', borderRadius: 4, flexShrink: 0 }} />
             )}

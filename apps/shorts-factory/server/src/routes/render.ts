@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { db, renderJobs, candidateClips, assets } from "../db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export const renderRoutes = new Elysia()
 
@@ -35,13 +35,10 @@ export const renderRoutes = new Elysia()
       .from(renderJobs)
       .leftJoin(candidateClips, eq(renderJobs.candidateClipId, candidateClips.id))
       .leftJoin(assets, eq(candidateClips.assetId, assets.id))
+      .where(query.status ? eq(renderJobs.status, query.status) : undefined)
       .orderBy(desc(renderJobs.createdAt));
 
-    const filtered = query.status
-      ? rows.filter((r) => r.status === query.status)
-      : rows;
-
-    return { jobs: filtered };
+    return { jobs: rows };
   })
 
   // GET /api/render/:id
@@ -81,7 +78,12 @@ export const renderRoutes = new Elysia()
   // PATCH /api/render/:id — called by Python worker to update status
   .patch(
     "/api/render/:id",
-    async ({ params, body, error }) => {
+    async ({ params, body, headers, error }) => {
+      const secret = process.env.WORKER_SECRET;
+      if (secret && headers["x-worker-secret"] !== secret) {
+        return error(401, { error: "Unauthorized" });
+      }
+
       const [job] = await db
         .select()
         .from(renderJobs)
@@ -97,6 +99,7 @@ export const renderRoutes = new Elysia()
           ...(body.errorMessage !== undefined && { errorMessage: body.errorMessage }),
           ...(body.outputFilePath !== undefined && { outputFilePath: body.outputFilePath }),
           ...(body.subtitleFilePath !== undefined && { subtitleFilePath: body.subtitleFilePath }),
+          ...(body.subtitleEntries !== undefined && { subtitleEntries: body.subtitleEntries }),
           ...(body.retryCount !== undefined && { retryCount: body.retryCount }),
           updatedAt: new Date().toISOString(),
         })
@@ -131,7 +134,60 @@ export const renderRoutes = new Elysia()
         errorMessage: t.Optional(t.Nullable(t.String())),
         outputFilePath: t.Optional(t.Nullable(t.String())),
         subtitleFilePath: t.Optional(t.Nullable(t.String())),
+        subtitleEntries: t.Optional(t.Nullable(t.String())),
         retryCount: t.Optional(t.Number()),
+      }),
+    }
+  )
+
+  // GET /api/render/:id/subtitles — fetch parsed subtitle entries for editing
+  .get("/api/render/:id/subtitles", async ({ params, error }) => {
+    const [job] = await db
+      .select({ subtitleEntries: renderJobs.subtitleEntries, status: renderJobs.status })
+      .from(renderJobs)
+      .where(eq(renderJobs.id, Number(params.id)));
+
+    if (!job) return error(404, { error: "Render job not found" });
+
+    const entries = job.subtitleEntries ? JSON.parse(job.subtitleEntries) : [];
+    return { entries, status: job.status };
+  })
+
+  // POST /api/render/:id/confirm-subtitles — save edited entries + trigger composite
+  .post(
+    "/api/render/:id/confirm-subtitles",
+    async ({ params, body, error }) => {
+      const [job] = await db
+        .select()
+        .from(renderJobs)
+        .where(eq(renderJobs.id, Number(params.id)));
+
+      if (!job) return error(404, { error: "Render job not found" });
+      if (job.status !== "subtitle_review") {
+        return error(400, { error: `Job is not in subtitle_review status (current: ${job.status})` });
+      }
+
+      await db
+        .update(renderJobs)
+        .set({
+          subtitleEntries: JSON.stringify(body.entries),
+          status: "subtitle_review_confirmed",
+          stage: "subtitle_review_confirmed",
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(renderJobs.id, job.id));
+
+      return { ok: true, message: "Subtitles confirmed — composite will start shortly" };
+    },
+    {
+      body: t.Object({
+        entries: t.Array(
+          t.Object({
+            start: t.Number(),
+            end: t.Number(),
+            text: t.String(),
+          })
+        ),
       }),
     }
   );

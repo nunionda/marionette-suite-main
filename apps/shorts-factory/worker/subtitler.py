@@ -25,12 +25,15 @@ SUBTITLES_DIR = os.path.join(os.path.dirname(__file__), "..", "output", "subtitl
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
-# Default ASS style for K-POP shorts
+# Default ASS style — global English, modern YouTube Shorts look
+# FontSize=34: readable on 9:16 mobile screens
+# Outline=3 (no shadow, no box): clean contrast on any background
+# MarginV=180: clears the credit text zone at the bottom of the frame
 DEFAULT_ASS_STYLE = (
-    "FontName=Arial,FontSize=22,PrimaryColour=&H00FFFFFF,"
-    "OutlineColour=&H00000000,BackColour=&H80000000,"
-    "Bold=1,Italic=0,Outline=2,Shadow=1,Alignment=2,"
-    "MarginL=30,MarginR=30,MarginV=60"
+    "FontName=Montserrat,FontSize=90,PrimaryColour=&H00FFFFFF,"
+    "OutlineColour=&H00000000,BackColour=&H00000000,"
+    "Bold=1,Italic=0,Outline=4,Shadow=2,Alignment=2,"
+    "MarginL=60,MarginR=60,MarginV=320"
 )
 
 
@@ -119,8 +122,8 @@ def extract_audio(clip_path: str, tmp_dir: str) -> str:
     return audio_path
 
 
-def transcribe_groq(audio_path: str) -> str:
-    """Send audio to Groq Whisper API, return SRT text."""
+def transcribe_groq(audio_path: str) -> list[dict]:
+    """Send audio to Groq Whisper API, return list of {start, end, text} dicts."""
     boundary = "----FormBoundary7MA4YWxkTrZu0gW"
     with open(audio_path, "rb") as f:
         audio_data = f.read()
@@ -136,7 +139,7 @@ def transcribe_groq(audio_path: str) -> str:
         f"whisper-large-v3-turbo\r\n"
         f"--{boundary}\r\n"
         f'Content-Disposition: form-data; name="response_format"\r\n\r\n'
-        f"srt\r\n"
+        f"verbose_json\r\n"
         f"--{boundary}--\r\n"
     ).encode()
 
@@ -146,12 +149,18 @@ def transcribe_groq(audio_path: str) -> str:
         headers={
             "Authorization": f"Bearer {GROQ_API_KEY}",
             "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
         },
         method="POST",
     )
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
-            return resp.read().decode()
+            data = json.loads(resp.read())
+        # verbose_json has a "segments" array with start/end/text per segment
+        return [
+            {"start": seg["start"], "end": seg["end"], "text": seg["text"].strip()}
+            for seg in data.get("segments", [])
+        ]
     except urllib.error.HTTPError as e:
         raise RuntimeError(f"Groq API error {e.code}: {e.read().decode()[:500]}")
 
@@ -223,8 +232,7 @@ def generate_subtitles(
 
         print("[subtitler] transcribing via Groq Whisper...")
         try:
-            srt_text = transcribe_groq(audio_path)
-            entries = parse_srt(srt_text)
+            entries = transcribe_groq(audio_path)
             print(f"[subtitler] got {len(entries)} subtitle entries")
         except Exception as e:
             print(f"[subtitler] Whisper failed: {e}", file=sys.stderr)

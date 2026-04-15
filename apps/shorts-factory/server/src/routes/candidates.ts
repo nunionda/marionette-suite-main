@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { db, candidateClips, assets, renderJobs, editTemplates } from "../db";
+import { db, candidateClips, assets, sources, renderJobs, editTemplates } from "../db";
 import { eq, desc } from "drizzle-orm";
 import { triggerRender } from "../lib/worker-bridge";
 
@@ -36,6 +36,20 @@ export const candidatesRoutes = new Elysia()
       if (!asset) return error(404, { error: "Asset not found" });
       if (asset.downloadStatus !== "done") {
         return error(400, { error: "Asset must be downloaded before adding candidates" });
+      }
+
+      const clipDuration = body.endSec - body.startSec;
+      if (clipDuration <= 0) {
+        return error(400, { error: "endSec must be greater than startSec" });
+      }
+
+      if (asset.sourceId) {
+        const [source] = await db.select().from(sources).where(eq(sources.id, asset.sourceId));
+        if (source?.maxClipSeconds && clipDuration > source.maxClipSeconds) {
+          return error(400, {
+            error: `Clip duration ${clipDuration}s exceeds source limit of ${source.maxClipSeconds}s`,
+          });
+        }
       }
 
       const [row] = await db

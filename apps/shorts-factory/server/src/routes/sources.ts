@@ -15,21 +15,36 @@ export const sourcesRoutes = new Elysia({ prefix: "/api/sources" })
     return { success: true, source: row };
   })
 
-  .post("/", async ({ body }) => {
-    const b = body as any;
-    const [row] = await db.insert(sources).values({
-      type: b.type || "youtube",
-      channelId: b.channelId,
-      channelName: b.channelName,
-      channelUrl: b.channelUrl,
-      creditText: b.creditText,
-      disclaimerText: b.disclaimerText || null,
-      riskLevel: b.riskLevel || "low",
-      maxClipSeconds: b.maxClipSeconds || 20,
-      enabled: b.enabled ?? 1,
-    }).returning();
-    return { success: true, source: row };
-  })
+  .post(
+    "/",
+    async ({ body }) => {
+      const [row] = await db.insert(sources).values({
+        type: body.type ?? "youtube",
+        channelId: body.channelId,
+        channelName: body.channelName,
+        channelUrl: body.channelUrl,
+        creditText: body.creditText,
+        disclaimerText: body.disclaimerText ?? null,
+        riskLevel: body.riskLevel ?? "low",
+        maxClipSeconds: body.maxClipSeconds ?? 20,
+        enabled: body.enabled ?? 1,
+      }).returning();
+      return { success: true, source: row };
+    },
+    {
+      body: t.Object({
+        channelId: t.String(),
+        channelName: t.String(),
+        channelUrl: t.String(),
+        creditText: t.String(),
+        type: t.Optional(t.String()),
+        disclaimerText: t.Optional(t.String()),
+        riskLevel: t.Optional(t.String()),
+        maxClipSeconds: t.Optional(t.Number()),
+        enabled: t.Optional(t.Number()),
+      }),
+    }
+  )
 
   .patch("/:id", async ({ params, body }) => {
     const b = body as any;
