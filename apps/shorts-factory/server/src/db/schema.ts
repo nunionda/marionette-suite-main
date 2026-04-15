@@ -152,3 +152,28 @@ export const editTemplates = sqliteTable("edit_templates", {
   isDefault: integer("is_default").default(0),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
+
+// ─── K-pop Groups (소프트파워 그룹 DB) ───
+
+export const kpopGroups = sqliteTable("kpop_groups", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  nameKr: text("name_kr").notNull(),
+  nameEn: text("name_en").notNull(),
+  nameAlias: text("name_alias"),
+  agency: text("agency"),
+  groupType: text("group_type").default("boy_group"),
+  generation: integer("generation"),
+  debutYear: integer("debut_year"),
+  disbandYear: integer("disband_year"),
+  status: text("status").default("active"),
+  memberCount: integer("member_count"),
+  softPowerTier: integer("soft_power_tier").default(3),
+  diplomaticRoles: text("diplomatic_roles").default("[]"),
+  youtubeChannelId: text("youtube_channel_id"),
+  youtubeHandle: text("youtube_handle"),
+  youtubeChannelUrl: text("youtube_channel_url"),
+  fandomName: text("fandom_name"),
+  tags: text("tags").default("[]"),
+  sourceId: integer("source_id").references(() => sources.id, { onDelete: "set null" }),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});

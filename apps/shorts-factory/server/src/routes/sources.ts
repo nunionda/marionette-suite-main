@@ -49,6 +49,7 @@ export const sourcesRoutes = new Elysia({ prefix: "/api/sources" })
   .patch("/:id", async ({ params, body }) => {
     const b = body as any;
     const updates: Record<string, any> = {};
+    if (b.channelId !== undefined) updates.channelId = b.channelId;
     if (b.channelName !== undefined) updates.channelName = b.channelName;
     if (b.channelUrl !== undefined) updates.channelUrl = b.channelUrl;
     if (b.creditText !== undefined) updates.creditText = b.creditText;

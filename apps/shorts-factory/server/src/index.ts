@@ -9,6 +9,7 @@ import { renderRoutes } from "./routes/render";
 import { reviewRoutes } from "./routes/review";
 import { publishRoutes } from "./routes/publish";
 import { analyticsRoutes } from "./routes/analytics";
+import { kpopGroupsRoutes } from "./routes/kpop-groups";
 import { startDetectorLoop } from "./services/detector";
 
 // DB import triggers table creation + seed
@@ -27,6 +28,7 @@ const app = new Elysia()
   .use(reviewRoutes)
   .use(publishRoutes)
   .use(analyticsRoutes)
+  .use(kpopGroupsRoutes)
 
   // Health check
   .get("/api/health", () => ({

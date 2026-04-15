@@ -55,6 +55,36 @@ function parseRssXml(xml: string): RssEntry[] {
   return entries;
 }
 
+/** Fallback: use yt-dlp to get recent videos when RSS is unavailable. */
+async function detectViaYtdlp(channelId: string, count = 15): Promise<RssEntry[]> {
+  const url = `https://www.youtube.com/channel/${channelId}/videos`;
+  const SEP = "|||";
+  const proc = Bun.spawn(
+    ["yt-dlp", "--flat-playlist", "--print", `%(id)s${SEP}%(title)s${SEP}%(upload_date)s`, "-I", `1:${count}`, url],
+    { stdout: "pipe", stderr: "pipe" }
+  );
+  const stdout = await new Response(proc.stdout).text();
+  await proc.exited;
+
+  const entries: RssEntry[] = [];
+  for (const line of stdout.trim().split("\n")) {
+    if (!line.trim()) continue;
+    const [videoId, title, uploadDate] = line.split(SEP);
+    if (!videoId || !title) continue;
+    const publishedAt =
+      uploadDate && uploadDate !== "NA" && uploadDate.length === 8
+        ? `${uploadDate.slice(0, 4)}-${uploadDate.slice(4, 6)}-${uploadDate.slice(6, 8)}T00:00:00Z`
+        : new Date().toISOString();
+    entries.push({
+      videoId,
+      title,
+      publishedAt,
+      thumbnailUrl: `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`,
+    });
+  }
+  return entries;
+}
+
 /** Poll one source channel. Returns number of new assets inserted. */
 export async function detectSource(sourceId: number): Promise<number> {
   const [source] = await db
@@ -64,18 +94,25 @@ export async function detectSource(sourceId: number): Promise<number> {
 
   if (!source) return 0;
 
+  // Try RSS first, fallback to yt-dlp
+  let entries: RssEntry[] = [];
+
   const url = `${RSS_BASE}${source.channelId}`;
-  let xml: string;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    xml = await res.text();
-  } catch (err) {
-    console.error(`[detector] fetch failed for ${source.channelName}:`, err);
-    return 0;
+    const xml = await res.text();
+    entries = parseRssXml(xml);
+  } catch {
+    // RSS failed — try yt-dlp fallback
+    try {
+      entries = await detectViaYtdlp(source.channelId);
+    } catch (err) {
+      console.error(`[detector] both RSS and yt-dlp failed for ${source.channelName}:`, err);
+      return 0;
+    }
   }
 
-  const entries = parseRssXml(xml);
   let newCount = 0;
 
   for (const entry of entries) {

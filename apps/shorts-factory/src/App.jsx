@@ -7,6 +7,7 @@ import ReviewPanel from './components/ReviewPanel';
 import SubtitleEditor from './components/SubtitleEditor';
 import PublishQueue from './components/PublishQueue';
 import AnalyticsDashboard from './components/AnalyticsDashboard';
+import KpopGroupBrowser from './components/KpopGroupBrowser';
 
 const PAGES = {
   dashboard:  { label: 'Dashboard',  icon: '📊' },
@@ -16,6 +17,7 @@ const PAGES = {
   review:     { label: 'Review',     icon: '✅' },
   publish:    { label: 'Publish',    icon: '📤' },
   analytics:  { label: 'Analytics',  icon: '📈' },
+  kpop:       { label: 'K-pop DB',   icon: '⭐' },
 };
 
 export default function App() {
@@ -53,6 +55,8 @@ export default function App() {
         return <PublishQueue />;
       case 'analytics':
         return <AnalyticsDashboard />;
+      case 'kpop':
+        return <KpopGroupBrowser />;
       default:
         return (
           <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
