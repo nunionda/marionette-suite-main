@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import type {
   PostProject,
   EditCut,
@@ -141,7 +141,7 @@ export function PostStudioClient(props: Props) {
               {tab === "vfx" && <VFXTab rows={filter(props.vfx)} />}
               {tab === "sound" && <SoundTab rows={filter(props.sound)} />}
               {tab === "color" && <ColorTab rows={filter(props.color)} />}
-              {tab === "delivery" && <DeliveryTab rows={filter(props.delivery)} />}
+              {tab === "delivery" && <DeliveryTab rows={filter(props.delivery)} project={project} />}
             </>
           ) : (
             <p style={{ color: "var(--studio-text-dim)" }}>No project selected.</p>
@@ -286,22 +286,86 @@ function ColorTab({ rows }: { rows: ColorReel[] }) {
   );
 }
 
-function DeliveryTab({ rows }: { rows: DeliveryItem[] }) {
+type PublishState = "idle" | "loading" | "done" | "error";
+
+function DeliveryTab({ rows, project }: { rows: DeliveryItem[]; project: PostProject }) {
+  const [publishState, setPublishState] = useState<PublishState>("idle");
+
+  const hasDelivered = rows.some((r) => r.status === "delivered");
+  const channels = rows
+    .filter((r) => r.status === "delivered" && r.deliveredTo)
+    .map((r) => r.deliveredTo as string);
+
+  const handlePublish = useCallback(async () => {
+    setPublishState("loading");
+    try {
+      const res = await fetch("http://localhost:4003/api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId: project.id,
+          title: project.title,
+          category: project.category,
+          studio: project.studio,
+          deliverables: project.deliveryFormats,
+          channels,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setPublishState("done");
+    } catch (err) {
+      console.error("[post-studio] publish failed:", err);
+      setPublishState("error");
+    }
+  }, [project, channels]);
+
   return (
-    <Table>
-      <thead><tr><Th>Format</Th><Th>Resolution</Th><Th>Codec</Th><Th>To</Th><Th>Date</Th><Th>Status</Th></tr></thead>
-      <tbody>
-        {rows.map((r) => (
-          <tr key={r.id}>
-            <Td>{r.format}</Td>
-            <Td>{r.resolution}</Td>
-            <Td>{r.codec}</Td>
-            <Td>{r.deliveredTo ?? "—"}</Td>
-            <Td style={{ color: "var(--studio-text-dim)" }}>{r.deliveryDate ?? "—"}</Td>
-            <Td><StatusPill status={r.status} /></Td>
-          </tr>
-        ))}
-      </tbody>
-    </Table>
+    <div className="flex flex-col gap-4">
+      <Table>
+        <thead><tr><Th>Format</Th><Th>Resolution</Th><Th>Codec</Th><Th>To</Th><Th>Date</Th><Th>Status</Th></tr></thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.id}>
+              <Td>{r.format}</Td>
+              <Td>{r.resolution}</Td>
+              <Td>{r.codec}</Td>
+              <Td>{r.deliveredTo ?? "—"}</Td>
+              <Td style={{ color: "var(--studio-text-dim)" }}>{r.deliveryDate ?? "—"}</Td>
+              <Td><StatusPill status={r.status} /></Td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={publishState === "done" ? undefined : handlePublish}
+          disabled={!hasDelivered || publishState === "loading" || publishState === "done"}
+          className="rounded px-4 py-2 text-sm font-bold tracking-wide transition disabled:opacity-40"
+          style={{
+            backgroundColor: publishState === "done" ? "#052e16" : "var(--studio-accent-muted, #1e1b4b)",
+            color: publishState === "done" ? "#4ade80" : "var(--studio-accent)",
+            border: "1px solid",
+            borderColor: publishState === "done" ? "#166534" : "var(--studio-accent)",
+            cursor: !hasDelivered || publishState === "loading" || publishState === "done" ? "not-allowed" : "pointer",
+          }}
+        >
+          {publishState === "loading" && "⏳ Publishing…"}
+          {publishState === "done" && "✅ Published to Library"}
+          {publishState === "error" && "⚠️ Retry Publish"}
+          {publishState === "idle" && "📤 Publish to Library"}
+        </button>
+        {!hasDelivered && (
+          <span className="text-[11px]" style={{ color: "var(--studio-text-dim)" }}>
+            No delivered items yet — publish unlocks when at least one delivery is done.
+          </span>
+        )}
+        {publishState === "error" && (
+          <span className="text-[11px]" style={{ color: "#f87171" }}>
+            Content Library offline? Check that :4003 is running.
+          </span>
+        )}
+      </div>
+    </div>
   );
 }

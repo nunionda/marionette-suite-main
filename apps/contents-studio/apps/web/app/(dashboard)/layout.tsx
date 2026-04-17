@@ -13,6 +13,7 @@ const navItems = [
   { href: process.env.NEXT_PUBLIC_PIPELINE_URL || "http://localhost:3000/dashboard", label: "Production Pipeline", icon: "⚙️", external: true },
   { href: "http://localhost:4002", label: "Post Studio", icon: "✂️", external: true },
   { href: "http://localhost:4003", label: "Content Library", icon: "📚", external: true },
+  { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },
   { href: "/agents", label: "Agents", icon: "🤖" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },
   { href: "/prompt-guide", label: "Prompt Guide", icon: "🎨" },
