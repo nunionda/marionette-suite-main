@@ -35,6 +35,56 @@
       "runtimeArgs": ["run", "--watch", "src/index.ts"],
       "port": 4006,
       "cwd": "apps/analysis-system/apps/api"
+    },
+    {
+      "name": "contents-studio-web",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "--turbopack", "--port", "4001"],
+      "port": 4001,
+      "autoPort": false,
+      "cwd": "apps/contents-studio/apps/web"
+    },
+    {
+      "name": "contents-studio-api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--watch", "src/index.ts"],
+      "port": 3005,
+      "cwd": "apps/contents-studio/apps/api"
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "-p", "3001"],
+      "port": 3001,
+      "cwd": "apps/studio"
+    },
+    {
+      "name": "contents-studio-scenario-web",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "--port", "4000"],
+      "port": 4000,
+      "cwd": "apps/contents-studio/apps/scenario-web"
+    },
+    {
+      "name": "post-studio",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "--turbopack", "--port", "4002"],
+      "port": 4002,
+      "cwd": "apps/post-studio"
+    },
+    {
+      "name": "content-library",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "--turbopack", "--port", "4003"],
+      "port": 4003,
+      "cwd": "apps/content-library"
+    },
+    {
+      "name": "storyboard-maker-server",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["server.py"],
+      "port": 3007,
+      "cwd": "apps/storyboard-maker"
     }
   ]
 }
