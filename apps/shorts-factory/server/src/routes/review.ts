@@ -87,7 +87,7 @@ export const reviewRoutes = new Elysia()
   })
 
   // GET /api/review/:id — detail for one render job
-  .get("/api/review/:id", async ({ params, error }) => {
+  .get("/api/review/:id", async ({ params, status }) => {
     const rows = await db
       .select(JOB_SELECT)
       .from(renderJobs)
@@ -96,7 +96,7 @@ export const reviewRoutes = new Elysia()
       .leftJoin(sources, eq(assets.sourceId, sources.id))
       .where(eq(renderJobs.id, Number(params.id)));
 
-    if (rows.length === 0) return error(404, { error: "Render job not found" });
+    if (rows.length === 0) return status(404, { error: "Render job not found" });
 
     const decisions = await db
       .select()
@@ -115,7 +115,7 @@ export const reviewRoutes = new Elysia()
   })
 
   // POST /api/review/:id/generate — generate LLM metadata, upsert publishJob draft
-  .post("/api/review/:id/generate", async ({ params, error }) => {
+  .post("/api/review/:id/generate", async ({ params, status }) => {
     const rows = await db
       .select(JOB_SELECT)
       .from(renderJobs)
@@ -124,7 +124,7 @@ export const reviewRoutes = new Elysia()
       .leftJoin(sources, eq(assets.sourceId, sources.id))
       .where(eq(renderJobs.id, Number(params.id)));
 
-    if (rows.length === 0) return error(404, { error: "Render job not found" });
+    if (rows.length === 0) return status(404, { error: "Render job not found" });
 
     const job = rows[0] as any;
 
@@ -179,7 +179,7 @@ export const reviewRoutes = new Elysia()
   // PATCH /api/review/:id/metadata — update publishJob fields (operator edits)
   .patch(
     "/api/review/:id/metadata",
-    async ({ params, body, error }) => {
+    async ({ params, body, status }) => {
       const [existing] = await db
         .select()
         .from(publishJobs)
@@ -187,7 +187,7 @@ export const reviewRoutes = new Elysia()
         .orderBy(desc(publishJobs.createdAt))
         .limit(1);
 
-      if (!existing) return error(404, { error: "No draft metadata found. Generate first." });
+      if (!existing) return status(404, { error: "No draft metadata found. Generate first." });
 
       // If titleIndex is provided, pick that variant as the active title
       let resolvedTitle = body.title;
@@ -229,12 +229,12 @@ export const reviewRoutes = new Elysia()
   // POST /api/review/:id/decide — submit review decision
   .post(
     "/api/review/:id/decide",
-    async ({ params, body, error }) => {
+    async ({ params, body, status }) => {
       const [job] = await db
         .select()
         .from(renderJobs)
         .where(eq(renderJobs.id, Number(params.id)));
-      if (!job) return error(404, { error: "Render job not found" });
+      if (!job) return status(404, { error: "Render job not found" });
 
       // Record decision
       await db.insert(reviewDecisions).values({
@@ -257,7 +257,7 @@ export const reviewRoutes = new Elysia()
           .orderBy(desc(publishJobs.createdAt))
           .limit(1);
         if (!pj) {
-          return error(400, { error: "Generate metadata first before approving" });
+          return status(400, { error: "Generate metadata first before approving" });
         }
         await db
           .update(publishJobs)

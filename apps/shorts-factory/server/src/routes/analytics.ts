@@ -94,11 +94,11 @@ export const analyticsRoutes = new Elysia()
     return { success: true, ...result };
   })
 
-  .post("/api/analytics/collect/:publishJobId", async ({ params, error }) => {
+  .post("/api/analytics/collect/:publishJobId", async ({ params, status }) => {
     try {
       await collectMetricsForJob(Number(params.publishJobId));
       return { success: true };
     } catch (err: any) {
-      return error(500, { error: err.message ?? String(err) });
+      return status(500, { error: err.message ?? String(err) });
     }
   });

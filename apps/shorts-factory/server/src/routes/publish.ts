@@ -114,21 +114,21 @@ export const publishRoutes = new Elysia()
     return { jobs: filtered };
   })
 
-  .get("/api/publish/:id", async ({ params, error }) => {
+  .get("/api/publish/:id", async ({ params, status }) => {
     const rows = await joinedPublishQuery()
       .where(eq(publishJobs.id, Number(params.id)));
-    if (rows.length === 0) return error(404, { error: "Publish job not found" });
+    if (rows.length === 0) return status(404, { error: "Publish job not found" });
     return rows[0];
   })
 
   .patch(
     "/api/publish/:id",
-    async ({ params, body, error }) => {
+    async ({ params, body, status }) => {
       const [pj] = await db
         .select()
         .from(publishJobs)
         .where(eq(publishJobs.id, Number(params.id)));
-      if (!pj) return error(404, { error: "Publish job not found" });
+      if (!pj) return status(404, { error: "Publish job not found" });
 
       await db
         .update(publishJobs)
@@ -158,16 +158,16 @@ export const publishRoutes = new Elysia()
   )
 
   // Trigger upload — fires in background, caller polls for status
-  .post("/api/publish/:id/upload", async ({ params, error }) => {
+  .post("/api/publish/:id/upload", async ({ params, status }) => {
     const [pj] = await db
       .select()
       .from(publishJobs)
       .where(eq(publishJobs.id, Number(params.id)));
-    if (!pj) return error(404, { error: "Publish job not found" });
+    if (!pj) return status(404, { error: "Publish job not found" });
 
     const uploadable = ["approved", "error"];
     if (!uploadable.includes(pj.status ?? "")) {
-      return error(409, {
+      return status(409, {
         error: `Cannot upload a job with status '${pj.status}'`,
       });
     }

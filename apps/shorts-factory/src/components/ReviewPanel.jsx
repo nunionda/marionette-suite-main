@@ -21,10 +21,13 @@ const DECISION_COLOR = {
 };
 
 /** Convert absolute output file path → browser-accessible URL. */
-function fileToUrl(filePath) {
+function fileToUrl(filePath, cacheKey) {
   if (!filePath) return null;
   const idx = filePath.indexOf('/output/');
-  return idx !== -1 ? filePath.substring(idx) : null;
+  if (idx === -1) return null;
+  const base = filePath.substring(idx);
+  // cache-bust on re-render so the browser does not serve a stale MP4
+  return cacheKey ? `${base}?v=${encodeURIComponent(cacheKey)}` : base;
 }
 
 function formatSec(s) {
@@ -170,7 +173,7 @@ export default function ReviewPanel() {
   });
 
   const decisionBadge = detail?.latestDecision?.decision;
-  const videoUrl = detail ? fileToUrl(detail.outputFilePath) : null;
+  const videoUrl = detail ? fileToUrl(detail.outputFilePath, detail.updatedAt ?? detail.createdAt) : null;
   const hasMetadata = !!(detail?.publishJob || titleVariants);
   const allChecked = CHECKLIST_ITEMS.every(item => checklist[item.id]);
   const canApprove = editTitle.trim().length > 0 && allChecked;
@@ -302,10 +305,32 @@ export default function ReviewPanel() {
 
             {/* Video preview */}
             <div className="glass" style={{ marginBottom: 20, padding: 12, borderRadius: 'var(--r-sm)' }}>
-              <div style={{ ...labelStyle, marginBottom: 10 }}>PREVIEW</div>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10 }}>
+                <div style={labelStyle}>PREVIEW</div>
+                {videoUrl && (
+                  <a
+                    href={videoUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      marginLeft: 'auto',
+                      fontSize: '0.6rem',
+                      fontFamily: 'var(--font-mono)',
+                      color: 'var(--gold)',
+                      textDecoration: 'none',
+                      padding: '2px 8px',
+                      border: '1px solid var(--gold)44',
+                      borderRadius: 'var(--r-sm)',
+                    }}
+                  >
+                    ↗ Open in new tab
+                  </a>
+                )}
+              </div>
               {videoUrl ? (
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
                   <video
+                    key={videoUrl}
                     src={videoUrl}
                     controls
                     style={{
@@ -316,6 +341,9 @@ export default function ReviewPanel() {
                       background: '#000',
                     }}
                   />
+                  <div style={{ ...monoStyle, fontSize: '0.6rem', wordBreak: 'break-all', textAlign: 'center' }}>
+                    {videoUrl.split('?')[0]}
+                  </div>
                 </div>
               ) : (
                 <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', ...monoStyle }}>

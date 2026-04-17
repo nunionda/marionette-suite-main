@@ -38,7 +38,7 @@ export const assetsRoutes = new Elysia()
   })
 
   // GET /api/assets/:id
-  .get("/api/assets/:id", async ({ params, error }) => {
+  .get("/api/assets/:id", async ({ params, status }) => {
     const rows = await db
       .select({
         id: assets.id,
@@ -59,7 +59,7 @@ export const assetsRoutes = new Elysia()
       .from(assets)
       .leftJoin(sources, eq(assets.sourceId, sources.id))
       .where(eq(assets.id, Number(params.id)));
-    if (rows.length === 0) return error(404, { error: "Asset not found" });
+    if (rows.length === 0) return status(404, { error: "Asset not found" });
     return rows[0];
   })
 
@@ -74,12 +74,12 @@ export const assetsRoutes = new Elysia()
   )
 
   // POST /api/assets/:id/download — queue yt-dlp download
-  .post("/api/assets/:id/download", async ({ params, error }) => {
+  .post("/api/assets/:id/download", async ({ params, status }) => {
     const [asset] = await db
       .select()
       .from(assets)
       .where(eq(assets.id, Number(params.id)));
-    if (!asset) return error(404, { error: "Asset not found" });
+    if (!asset) return status(404, { error: "Asset not found" });
 
     if (asset.downloadStatus === "downloading") {
       return { success: false, message: "Already downloading" };
@@ -100,12 +100,12 @@ export const assetsRoutes = new Elysia()
   // PATCH /api/assets/:id — update status/path (called by Python worker via API)
   .patch(
     "/api/assets/:id",
-    async ({ params, body, error }) => {
+    async ({ params, body, status }) => {
       const [asset] = await db
         .select()
         .from(assets)
         .where(eq(assets.id, Number(params.id)));
-      if (!asset) return error(404, { error: "Asset not found" });
+      if (!asset) return status(404, { error: "Asset not found" });
 
       await db
         .update(assets)

@@ -133,8 +133,13 @@ def patch_job(job_id: int, payload: dict):
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="replace")
+        print(f"[worker] PATCH /api/render/{job_id} HTTP {e.code}: {body}", file=sys.stderr)
+        raise
     except Exception as e:
         print(f"[worker] PATCH /api/render/{job_id} failed: {e}", file=sys.stderr)
+        raise
 
 
 # ─── Pipeline ─────────────────────────────────────────────────────────────

@@ -1,6 +1,7 @@
 import { Elysia, t } from "elysia";
 import { db, renderJobs, candidateClips, assets } from "../db";
 import { eq, desc, and } from "drizzle-orm";
+import { triggerRender } from "../lib/worker-bridge";
 
 export const renderRoutes = new Elysia()
 
@@ -42,7 +43,7 @@ export const renderRoutes = new Elysia()
   })
 
   // GET /api/render/:id
-  .get("/api/render/:id", async ({ params, error }) => {
+  .get("/api/render/:id", async ({ params, status }) => {
     const rows = await db
       .select({
         id: renderJobs.id,
@@ -71,24 +72,24 @@ export const renderRoutes = new Elysia()
       .leftJoin(assets, eq(candidateClips.assetId, assets.id))
       .where(eq(renderJobs.id, Number(params.id)));
 
-    if (rows.length === 0) return error(404, { error: "Render job not found" });
+    if (rows.length === 0) return status(404, { error: "Render job not found" });
     return rows[0];
   })
 
   // PATCH /api/render/:id — called by Python worker to update status
   .patch(
     "/api/render/:id",
-    async ({ params, body, headers, error }) => {
+    async ({ params, body, headers, status }) => {
       const secret = process.env.WORKER_SECRET;
       if (secret && headers["x-worker-secret"] !== secret) {
-        return error(401, { error: "Unauthorized" });
+        return status(401, { error: "Unauthorized" });
       }
 
       const [job] = await db
         .select()
         .from(renderJobs)
         .where(eq(renderJobs.id, Number(params.id)));
-      if (!job) return error(404, { error: "Render job not found" });
+      if (!job) return status(404, { error: "Render job not found" });
 
       await db
         .update(renderJobs)
@@ -141,13 +142,13 @@ export const renderRoutes = new Elysia()
   )
 
   // GET /api/render/:id/subtitles — fetch parsed subtitle entries for editing
-  .get("/api/render/:id/subtitles", async ({ params, error }) => {
+  .get("/api/render/:id/subtitles", async ({ params, status }) => {
     const [job] = await db
       .select({ subtitleEntries: renderJobs.subtitleEntries, status: renderJobs.status })
       .from(renderJobs)
       .where(eq(renderJobs.id, Number(params.id)));
 
-    if (!job) return error(404, { error: "Render job not found" });
+    if (!job) return status(404, { error: "Render job not found" });
 
     const entries = job.subtitleEntries ? JSON.parse(job.subtitleEntries) : [];
     return { entries, status: job.status };
@@ -156,15 +157,15 @@ export const renderRoutes = new Elysia()
   // POST /api/render/:id/confirm-subtitles — save edited entries + trigger composite
   .post(
     "/api/render/:id/confirm-subtitles",
-    async ({ params, body, error }) => {
+    async ({ params, body, status }) => {
       const [job] = await db
         .select()
         .from(renderJobs)
         .where(eq(renderJobs.id, Number(params.id)));
 
-      if (!job) return error(404, { error: "Render job not found" });
+      if (!job) return status(404, { error: "Render job not found" });
       if (job.status !== "subtitle_review") {
-        return error(400, { error: `Job is not in subtitle_review status (current: ${job.status})` });
+        return status(400, { error: `Job is not in subtitle_review status (current: ${job.status})` });
       }
 
       await db
@@ -176,6 +177,9 @@ export const renderRoutes = new Elysia()
           updatedAt: new Date().toISOString(),
         })
         .where(eq(renderJobs.id, job.id));
+
+      // Spawn worker to run composite stage
+      triggerRender(job.id);
 
       return { ok: true, message: "Subtitles confirmed — composite will start shortly" };
     },

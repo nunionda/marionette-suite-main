@@ -16,38 +16,38 @@ export const candidatesRoutes = new Elysia()
   })
 
   // GET /api/candidates/:id
-  .get("/api/candidates/:id", async ({ params, error }) => {
+  .get("/api/candidates/:id", async ({ params, status }) => {
     const [row] = await db
       .select()
       .from(candidateClips)
       .where(eq(candidateClips.id, Number(params.id)));
-    if (!row) return error(404, { error: "Candidate not found" });
+    if (!row) return status(404, { error: "Candidate not found" });
     return row;
   })
 
   // POST /api/candidates
   .post(
     "/api/candidates",
-    async ({ body, error }) => {
+    async ({ body, status }) => {
       const [asset] = await db
         .select()
         .from(assets)
         .where(eq(assets.id, body.assetId));
-      if (!asset) return error(404, { error: "Asset not found" });
+      if (!asset) return status(404, { error: "Asset not found" });
       if (asset.downloadStatus !== "done") {
-        return error(400, { error: "Asset must be downloaded before adding candidates" });
+        return status(400, { error: "Asset must be downloaded before adding candidates" });
       }
 
       const clipDuration = body.endSec - body.startSec;
       if (clipDuration <= 0) {
-        return error(400, { error: "endSec must be greater than startSec" });
+        return status(400, { error: "endSec must be greater than startSec" });
       }
 
       const isLong = (body.contentType ?? "short") === "long";
       if (!isLong && asset.sourceId) {
         const [source] = await db.select().from(sources).where(eq(sources.id, asset.sourceId));
         if (source?.maxClipSeconds && clipDuration > source.maxClipSeconds) {
-          return error(400, {
+          return status(400, {
             error: `Clip duration ${clipDuration}s exceeds source limit of ${source.maxClipSeconds}s`,
           });
         }
@@ -82,12 +82,12 @@ export const candidatesRoutes = new Elysia()
   // PATCH /api/candidates/:id
   .patch(
     "/api/candidates/:id",
-    async ({ params, body, error }) => {
+    async ({ params, body, status }) => {
       const [existing] = await db
         .select()
         .from(candidateClips)
         .where(eq(candidateClips.id, Number(params.id)));
-      if (!existing) return error(404, { error: "Candidate not found" });
+      if (!existing) return status(404, { error: "Candidate not found" });
 
       await db
         .update(candidateClips)
@@ -118,24 +118,24 @@ export const candidatesRoutes = new Elysia()
   )
 
   // DELETE /api/candidates/:id
-  .delete("/api/candidates/:id", async ({ params, error }) => {
+  .delete("/api/candidates/:id", async ({ params, status }) => {
     const [existing] = await db
       .select()
       .from(candidateClips)
       .where(eq(candidateClips.id, Number(params.id)));
-    if (!existing) return error(404, { error: "Candidate not found" });
+    if (!existing) return status(404, { error: "Candidate not found" });
 
     await db.delete(candidateClips).where(eq(candidateClips.id, existing.id));
     return { success: true };
   })
 
   // POST /api/candidates/:id/render — create renderJob + spawn worker
-  .post("/api/candidates/:id/render", async ({ params, query, error }) => {
+  .post("/api/candidates/:id/render", async ({ params, query, status }) => {
     const [candidate] = await db
       .select()
       .from(candidateClips)
       .where(eq(candidateClips.id, Number(params.id)));
-    if (!candidate) return error(404, { error: "Candidate not found" });
+    if (!candidate) return status(404, { error: "Candidate not found" });
 
     // Get the default template
     const [template] = await db
