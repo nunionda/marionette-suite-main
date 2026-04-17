@@ -1,0 +1,22 @@
+{
+  "name": "@marionette/prompt-adapters",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@marionette/pipeline-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@marionette/tsconfig": "workspace:*",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
