@@ -24,6 +24,7 @@ def test_prefix_none_is_no_op(tmp_path):
     fake_bytes = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
     result = gen._save_image(fake_bytes, "SC001_bong.png")
     assert os.path.basename(result) == "SC001_bong.png"
+    assert os.path.exists(result)
 
 
 def test_empty_prefix_is_no_op(tmp_path):
@@ -31,3 +32,4 @@ def test_empty_prefix_is_no_op(tmp_path):
     fake_bytes = b"\x89PNG\r\n\x1a\n" + b"\x00" * 100
     result = gen._save_image(fake_bytes, "SC001_bong.png")
     assert os.path.basename(result) == "SC001_bong.png"
+    assert os.path.exists(result)
