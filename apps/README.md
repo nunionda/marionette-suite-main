@@ -1,200 +1,218 @@
 # marionette-suite `/apps` 인벤토리
 
-`marionette-suite` 모노레포의 `apps/` 하위 12개 디렉토리를 한 페이지로 정리한 문서.
-외부 GitHub 4개 저장소를 통합한 결과물 + 자체 개발 앱 + 정적/문서/스텁이 섞여 있다.
+`marionette-suite`는 nunionda 영상 제작 스튜디오의 여러 제품을 한 모노레포에 모아둔 작업 공간. 다만 **각 제품은 독립적으로 개발/운영/배포되어야** 하고, 통합은 별도 레이어로 나중에 연결한다.
 
 마지막 업데이트: 2026-04-17
 
 ---
 
-## 빠른 인덱스
+## 🎯 전략: Independent-First, Integrate-Later
 
-| # | 앱 | 카테고리 | 포트 | 상태 |
-|---|---|---|---|---|
-| 1 | [`analysis-system`](#1-analysis-system) | 외부 통합 | (vite default :5173) | 🟡 6d |
-| 2 | [`production-pipeline-system`](#2-production-pipeline-system) | 외부 통합 (submodule) | :3000 + Postgres :5432 | 🟢 active |
-| 3 | [`script-writer`](#3-script-writer) | 외부 통합 | :5174 / :3006 | 🟢 active |
-| 4 | [`storyboard-maker`](#4-storyboard-maker) | 외부 통합 | :3007 | 🟡 3d |
-| 5 | [`shorts-factory`](#5-shorts-factory) | 자체 개발 | :5178 / :3008 | 🟢 active |
-| 6 | [`studio`](#6-studio) | 자체 개발 | :3001 | 🟢 active |
-| 7 | [`contents-studio`](#7-contents-studio) | 자체 개발 (워크스페이스) | (sub-apps 별도) | 🔴 0 commits |
-| 8 | [`marionette-web`](#8-marionette-web) | 자체 개발 (별도 git) | :3000 | 🟡 6d |
-| 9 | [`homepage`](#9-homepage) | 정적 사이트 | (Cloudflare Pages) | 🟡 7d |
-| 10 | [`art-department`](#10-art-department) | 단일 HTML 에이전트 | — | 🔴 stub |
-| 11 | [`mobile-app`](#11-mobile-app) | 계획서 (README only) | — | 🔴 stub |
-| 12 | [`console`](#12-console) | 빈 폴더 | — | 🔴 empty |
+처음엔 모든 앱을 한 번에 통합하려 했지만, 다음 이유로 전략을 바꿨다:
+
+- 각 앱의 도메인이 다르다 (시나리오 분석 vs 스케줄 관리 vs 숏폼 자동화 등)
+- 각자 독립적인 사용자/고객/배포 사이클을 가질 수 있다
+- 통합을 미리 그리면 각 제품의 진화 속도가 느려진다
+
+**현재 원칙**:
+1. 5개 제품은 각자 독립 제품으로 개발 (자체 DB, 자체 API, 자체 UI)
+2. 모노레포는 단지 코드 보관소 (workspace dependency 강제 X)
+3. 통합/연동은 명시적 API 레이어로 나중에 연결 (제품 간 직접 import 금지)
 
 ---
 
-## A. 외부 통합 프로젝트 (4개)
+## 1️⃣ 핵심 독립 제품 (5개)
 
-원래 별도 GitHub 저장소였던 프로젝트를 모노레포로 끌어온 것. 4개 중 `production-pipeline-system`만 git submodule 형태로 별도 `.git`을 유지하고, 나머지 3개는 history-merge되어 `.git`이 제거됐다.
+### 1. `analysis-system` — 시나리오 분석 시스템
+> 시나리오 PDF/DOCX/MD 파일을 분석해서 **투자사 평가용 PDF 최종 보고서**를 생성
 
-### 1. `analysis-system`
-> **시나리오 지능 시스템**: 헐리우드 시나리오를 ingest해서 분석하고 흥행을 예측하는 AI-native 도구
+| 항목 | 값 |
+|---|---|
+| 입력 | 시나리오 파일 (PDF/DOCX/MD/Fountain) |
+| 출력 | 투자사 평가 형식 PDF 보고서 (캐릭터/내러티브/시장성/제작 타당성) |
+| 스택 | TypeScript (Bun), Vite, 워크스페이스 (`apps/api`, `apps/web`, `packages/core`) |
+| 포트 | (명시 없음 — vite default `:5173`) |
+| DB | SQLite (추정) |
+| 외부 출처 | `cine-analysys-system` / 브랜치 `feat/free-llm-provider-swap` |
+| `.git` | ❌ history-merged |
+| 상태 | 🟡 통합 후 3 commits (6일 전) |
+| 독립성 | ✅ 단독 실행 가능. 다른 앱과 직접 의존 X |
 
-- **원본**: `cine-analysys-system` (외부 브랜치 `feat/free-llm-provider-swap`)
-- **역할**: Fountain parser, character extraction, market predictor, production feasibility engine
-- **스택**: TypeScript (Bun), Vite, monorepo 내부 워크스페이스 (`apps/api`, `apps/web`, `packages/core`)
-- **포트**: vite default `:5173` (구체 명시 없음)
-- **DB**: 추정 SQLite (script DB)
-- **상태**: 🟡 모노레포 통합 후 commit 3건, 마지막 6일 전. `.git` 미보유 (history-merged)
-- **의존**: 독립 동작. `production-pipeline-system`이 분석 결과를 소비할 가능성
-
-### 2. `production-pipeline-system`
-> **누니온다 영상 제작 파이프라인 관리 시스템**: 프로젝트 → 시나리오 → 스케줄 → 촬영 → 포스트 → 납품 6단계 관리
-
-- **원본**: `production_pipeline` (외부 브랜치 `main`)
-- **역할**: 영상 프로덕션 풀-사이클 관리 (Sprint 1~6) — 대시보드, 프로젝트 CRUD, 단계별 워크스페이스
-- **스택**: Next.js 16 (App Router) + React 19, Tailwind 4, Prisma 7, NextAuth v5 beta
-- **포트**: `:3000` (Postgres `:5432`, DB명 `nunionda`)
-- **엔트리**: `src/app/`, `prisma/schema.prisma`
-- **상태**: 🟢 활성. Git submodule 형태로 `.git` 보유 (`https://github.com/nunionda/production-pipeline-system`), 모노레포 작업본 브랜치 `feat/team-directory`
-- **의존**: 시나리오 단계에서 `analysis-system` 결과 활용 가능
-
-### 3. `script-writer`
-> **시네마틱 스크립트 작성 워크스테이션**: 시나리오 개발 → 씬 파싱 → 자동 스토리보드 연동까지
-
-- **원본**: `cine-script-writer` (외부 브랜치 `develop`)
-- **역할**: Feature Film/Drama/YouTube/Ad 카테고리별 sequential writing room, 씬 자동 파싱
-- **스택**: Frontend Vite + React 19 (Recharts) / Backend Bun + Elysia + Drizzle
-- **포트**: Frontend `:5174`, Backend `:3006` (vite proxy `/api → 127.0.0.1:3006`)
-- **DB**: SQLite (`script_writer.db`, WAL 모드)
-- **엔트리**: `server/index.ts`, `vite.config.js` (root `src/`)
-- **상태**: 🟢 가장 활발 (42 commits, 2일 전) — UX 재설계 (ProjectHub/WritingRoom/ProductionDeck) 완료
-- **의존**: `storyboard-maker` (:3007) 호출, `studio` (:3001)와 양방향 어댑터 (`api.ts`, `flow-data.ts`, `pipeline-client.ts`)
-
-### 4. `storyboard-maker`
-> **스토리보드 자동 생성기**: 씬 텍스트 → 스타일 선택 → 이미지 생성 → 시트 합성
-
-- **원본**: `storyboard-concept-maker` (외부 브랜치 `main`)
-- **역할**: Scene parser → style selector → image generator → PDF sheet composer
-- **스택**: Python (click CLI), `google-genai`/`huggingface_hub`/`ollama`, Pillow, OpenCV, fpdf2
-- **포트**: `:3007` (script-writer가 호출하는 주소)
-- **엔트리**: `main.py` (CLI), `src/{scene_parser, style_selector, prompt_engine, image_generator, post_processor, sheet_composer}.py`
-- **설정**: `config/concept_designers.yaml`, `config/styles.yaml`
-- **저장**: 파일 시스템 (`gallery/` 출력)
-- **상태**: 🟡 5 commits (3일 전) — 갤러리 ↔ 파이프라인 연동 버그 fix 완료
+**핵심 미션**: 시나리오를 넣으면 → 투자 의사결정에 쓸 수 있는 PDF가 나온다.
 
 ---
 
-## B. 모노레포 자체 개발 앱 (4개)
+### 2. `script-writer` — 시나리오 창작 스튜디오
+> AI 보조를 받으면서 시나리오를 처음부터 끝까지 쓰는 창작 워크스테이션
 
-### 5. `shorts-factory`
-> **K-pop 팬튜브 숏폼 자동화**: 공식 채널 모니터링 → 하이라이트 추출 → 자막 → 메타데이터 → 검수 → YouTube 업로드
+| 항목 | 값 |
+|---|---|
+| 역할 | Feature Film/Drama/YouTube/Ad 카테고리별 sequential writing room, 씬 자동 파싱 |
+| 스택 | Frontend Vite + React 19 (Recharts) / Backend Bun + Elysia + Drizzle |
+| 포트 | Frontend `:5174`, Backend `:3006` |
+| DB | SQLite (`script_writer.db`, WAL 모드) |
+| 외부 출처 | `cine-script-writer` / 브랜치 `develop` |
+| `.git` | ❌ history-merged |
+| 상태 | 🟢 가장 활발 (42 commits, 2일 전) |
+| 독립성 | ⚠️ 현재 storyboard-maker(:3007)와 studio(:3001)에 어댑터 코드 존재 — **분리 필요** |
 
-- **역할**: YouTube Shorts 자동 제작 파이프라인 (MVP: NCT WISH/aespa, 48 K-pop 그룹 DB)
-- **스택**: Frontend Vite + React / Backend Bun + Elysia 1.4 + Drizzle / Worker Python (FFmpeg + Whisper-Groq + Gemini)
-- **포트**: Frontend `:5178`, Backend `:3008`, Python worker (DB 폴링 별도 프로세스)
-- **DB**: SQLite (`shorts_factory.db`)
-- **엔트리**: `server/src/index.ts`, `src/App.jsx`, `worker/worker.py`
-- **8개 탭**: Dashboard / Sources / Assets / Subtitles / Review / Publish / Analytics / K-pop DB
-- **외부 API**: YouTube Data API v3, Groq STT, Gemini 번역, (옵션) Submagic / DaVinci Resolve
-- **상태**: 🟢 가장 최근 (commit 71cefdb — Elysia 1.4 호환 + composite 자동 트리거 fix)
-
-### 6. `studio`
-> **마리오네트 스튜디오 메인 UI**: ReactFlow 노드 기반 파이프라인 시각화
-
-- **역할**: 노드 기반 파이프라인 편집기 (이미지/오디오/비디오 노드), 디자인 시스템 호스트
-- **스택**: Next.js 15+, React 19, `@xyflow/react` (ReactFlow), Supabase, TanStack Query, Framer Motion
-- **포트**: `:3001` (`next dev -p 3001`)
-- **엔트리**: `app/`, `components/`, `lib/`
-- **DB**: Supabase
-- **상태**: 🟢 활성 (25 commits, 4일 전) — "전체 파이프라인 레이아웃 완성 — UX 재설계"
-- **의존**: 워크스페이스 패키지 `@marionette/config`, `@marionette/ui`, script-writer (:3006) 어댑터
-
-### 7. `contents-studio`
-> **마리오네트 컨텐츠 스튜디오**: api/web/scenario/finance 멀티 워크스페이스
-
-- **역할**: 콘텐츠 + 시나리오 + 재무를 통합한 비즈니스 백오피스 (계획)
-- **스택**: Bun workspace, Prisma, TypeScript
-- **sub-apps**: `@marionette/api`, `@marionette/web`, `@marionette/scenario-api`, `@marionette/scenario-web`, `@marionette/finance-api`
-- **상태**: 🔴 모노레포 git에 0 commits — CLAUDE.md는 Boris Cherny 데모 잔재 그대로. **사용 여부 결정 필요**
-
-### 8. `marionette-web`
-> **마리오네트 web 프론트**: Next.js + base-ui + shadcn
-
-- **역할**: 외부 공개용 웹 (홈페이지 외 추가 마케팅 페이지 추정)
-- **스택**: Next.js, `@base-ui/react`, shadcn, tailwind-merge, lucide-react
-- **포트**: Next.js default `:3000` (production-pipeline-system과 충돌 가능)
-- **엔트리**: `app/page.tsx` (App Router)
-- **상태**: 🟡 1 commit (6일 전, "archive legacy production-pipeline/web Vite app") — 자체 `.git` 디렉토리 보유 (remote 미설정, 로컬 전용)
-- ⚠️ **모노레포 commit 시 매번 "modified content, untracked content"로 표시**됨 → submodule 등록 또는 `.git` 정리 필요
+**핵심 미션**: 시나리오 한 편을 처음부터 끝까지 쓸 수 있는 단독 도구.
 
 ---
 
-## C. 정적/문서/스텁 (4개)
+### 3. `storyboard-maker` — 스토리보드 자동 생성기
+> 씬 텍스트 → 스타일 선택 → 이미지 생성 → 시트 합성, Python 기반 단독 도구
 
-### 9. `homepage`
-> Marionette Studios 공식 홈페이지 (정적 HTML)
+| 항목 | 값 |
+|---|---|
+| 역할 | Scene parser → style selector → image generator → PDF sheet composer |
+| 스택 | Python (click CLI), `google-genai` / `huggingface_hub` / `ollama`, Pillow, OpenCV, fpdf2 |
+| 포트 | `:3007` (script-writer가 호출하는 주소 — 분리 후 변경 가능) |
+| 엔트리 | `main.py` (CLI), `src/{scene_parser, style_selector, prompt_engine, image_generator, post_processor, sheet_composer}.py` |
+| 설정 | `config/concept_designers.yaml`, `config/styles.yaml` |
+| 저장 | 파일 시스템 (`gallery/` 출력) |
+| 외부 출처 | `storyboard-concept-maker` / 브랜치 `main` |
+| `.git` | ❌ history-merged |
+| 상태 | 🟡 5 commits (3일 전) |
+| 독립성 | ✅ CLI로 단독 실행 가능. script-writer가 클라이언트로 쓸 뿐 |
 
-- 정적 `index.html` + `assets/` + `_redirects` (Cloudflare Pages 배포 추정)
-- 한국어/영어 i18n (`data-i18n-en` 속성)
-- 운영 도메인: `https://www.marionette-studios.com`
-- **상태**: 🟡 3 commits (7일 전), 운영 중
-
-### 10. `art-department`
-> Claude Desktop Cowork용 단일 HTML 에이전트
-
-- `art_department_agent.html` 단일 파일 + `COWORK_INSTRUCTIONS.md`
-- Claude Desktop의 "Work in a Folder" 기능으로 동작
-- **상태**: 🔴 1 commit (8일 전), 코드라기보다 콘셉트/문서 자료. `docs/proposals/` 등으로 이동 검토
-
-### 11. `mobile-app`
-> Expo Webview 래퍼 계획서 (README만)
-
-- React Native + Expo로 `marionette-studio.pages.dev`를 webview wrap
-- Polar (글로벌 결제) + Stripe Atlas (델라웨어 C-Corp) 전략 문서 포함
-- **상태**: 🔴 README only, 실제 프로젝트 코드 없음. Phase 27 계획서. `docs/proposals/`로 이동 검토
-
-### 12. `console`
-> 빈 디렉토리
-
-- **상태**: 🔴 완전 비어있음. 의도된 placeholder인지 확인 필요
+**핵심 미션**: 씬을 넣으면 → 스토리보드 시트(이미지 + PDF)가 나온다. 단독 사용 가능.
 
 ---
 
-## D. 의존 관계 다이어그램
+### 4. `shorts-factory` — 유튜브 창작 스튜디오
+> K-pop 팬튜브 숏폼 자동 제작 파이프라인 (소스 모니터링 → 편집 → 자막 → 검수 → 업로드)
 
-```
-                     [marionette-web]   [homepage]
-                      (외부 마케팅)       (정적 SEO)
-                              │                │
-                              └──── 사용자 ────┘
-                                     │
-                              ┌──────┴───────┐
-                              ▼              ▼
-                          [studio :3001]  [production-pipeline-system :3000]
-                          (UX/노드편집)    (프로젝트 풀-사이클 관리)
-                              │                │
-                              ├────────────────┤
-                              ▼                ▼
-                        [script-writer :5174]
-                        backend       :3006 ─┐
-                              │              │
-                              ▼              ▼
-                  [storyboard-maker :3007]  [analysis-system]
-                  (Python 이미지 생성)       (시나리오 분석)
+| 항목 | 값 |
+|---|---|
+| 역할 | YouTube Shorts 자동 제작 (MVP: NCT WISH/aespa, 48 K-pop 그룹 DB) |
+| 스택 | Frontend Vite + React / Backend Bun + Elysia 1.4 + Drizzle / Worker Python (FFmpeg + Whisper-Groq + Gemini) |
+| 포트 | Frontend `:5178`, Backend `:3008`, Python worker (DB 폴링 별도 프로세스) |
+| DB | SQLite (`shorts_factory.db`) |
+| 외부 API | YouTube Data API v3, Groq STT, Gemini 번역, (옵션) Submagic / DaVinci Resolve |
+| 8개 탭 | Dashboard / Sources / Assets / Subtitles / Review / Publish / Analytics / K-pop DB |
+| 외부 출처 | (자체 개발) |
+| 상태 | 🟢 가장 최근 (commit 5c6fa62 — 인벤토리 README 추가, 직전 71cefdb — Elysia 1.4 호환 + composite 자동 트리거 fix) |
+| 독립성 | ✅ 완전 독립. 다른 앱과 의존 X |
 
-
-  [shorts-factory :5178/:3008]   ← 독립 파이프라인
-   worker.py (FFmpeg/Whisper)      (K-pop YouTube 자동화)
-```
+**핵심 미션**: 공식 채널 신곡 발견 → 숏폼 자동 제작 → YouTube 업로드까지.
 
 ---
 
-## E. 운영 상태 요약 (2026-04-17 기준)
+### 5. `production-pipeline-system` — 영화제작사 메인 프로덕션 스케줄 관리 시스템
+> 프로젝트 → 시나리오 → 스케줄 → 촬영 → 포스트 → 납품 6단계 관리 백오피스
 
-| Active 🟢 | Maintenance 🟡 | Inactive/Stub 🔴 |
+| 항목 | 값 |
+|---|---|
+| 역할 | 영상 프로덕션 풀-사이클 관리 (Sprint 1~6) — 대시보드, 프로젝트 CRUD, 단계별 워크스페이스, 팀 디렉토리 |
+| 스택 | Next.js 16 (App Router) + React 19, Tailwind 4, Prisma 7, NextAuth v5 beta |
+| 포트 | `:3000` (Postgres `:5432`, DB명 `nunionda`) |
+| 엔트리 | `src/app/`, `prisma/schema.prisma` |
+| 외부 출처 | `production_pipeline` (`https://github.com/nunionda/production-pipeline-system`) / 브랜치 `main` (모노레포 작업본은 `feat/team-directory`) |
+| `.git` | ✅ submodule 형태로 보존 |
+| 상태 | 🟢 활성 |
+| 독립성 | ✅ 자체 GitHub 저장소 + 자체 PostgreSQL DB. 가장 분리 정리된 상태 |
+
+**핵심 미션**: 영화 한 편이 기획부터 납품까지 가는 전 과정을 관리.
+
+---
+
+## 2️⃣ 통합 레이어 (미래 작업, 현재 우선순위 낮음)
+
+5개 독립 제품을 사용자에게 한 화면으로 노출하기 위한 통합 UI/연결 레이어. **현재는 보류**, 각 제품이 안정화된 뒤에 다시 검토.
+
+### `studio` — 노드 기반 통합 UI 후보
+- ReactFlow 노드 편집기 (이미지/오디오/비디오 노드)
+- Next.js 15+, React 19, `@xyflow/react`, Supabase, TanStack Query
+- 포트 `:3001`
+- 상태: 🟢 25 commits (4일 전)
+- ⚠️ 현재 script-writer(:3006) 어댑터를 가지고 있음 → **독립 제품화 후 통합 레이어로 격리** 결정 필요
+
+### `contents-studio` — 미정 워크스페이스
+- Bun workspace, Prisma — sub-apps (`@marionette/api`, `@marionette/web`, `@marionette/scenario-api`, `@marionette/scenario-web`, `@marionette/finance-api`)
+- 상태: 🔴 모노레포 git에 0 commits, CLAUDE.md는 Boris Cherny 데모 잔재
+- **결정 필요**: archive vs 통합 레이어로 재활용
+
+### `marionette-web` — 외부 공개 웹
+- Next.js, `@base-ui/react`, shadcn
+- 포트 `:3000` (production-pipeline-system과 충돌!)
+- 상태: 🟡 1 commit (6일 전), 자체 `.git` 보유 (remote 미설정)
+- **이슈**: 매 모노레포 commit마다 dirty 표시, `.git` 정리 필요
+
+---
+
+## 3️⃣ 부속 자산 (정적/문서/스텁)
+
+| 항목 | 설명 | 상태 |
 |---|---|---|
-| shorts-factory (오늘) | analysis-system (6d) | contents-studio (0 commits) |
-| script-writer (2d) | storyboard-maker (3d) | art-department (정적 HTML) |
-| studio (4d) | marionette-web (6d) | mobile-app (README only) |
-| production-pipeline-system (submodule) | homepage (7d) | console (빈 폴더) |
+| `homepage` | Marionette Studios 공식 홈페이지 (정적 HTML, Cloudflare Pages, `marionette-studios.com`) | 🟡 운영 중 |
+| `art-department` | Claude Desktop Cowork용 단일 HTML 에이전트. `docs/proposals/`로 이동 검토 | 🔴 1 commit |
+| `mobile-app` | Expo Webview 래퍼 계획서 (README만, 코드 없음). `docs/proposals/`로 이동 검토 | 🔴 README only |
+| `console` | 빈 디렉토리. 의도 확인 필요 | 🔴 empty |
 
 ---
 
-## F. 외부 통합 출처 메타데이터
+## 4️⃣ 의존 관계 — 현재 vs 목표
+
+### 현재 (얽혀있음)
+
+```
+[script-writer :5174 / :3006] ─────► [storyboard-maker :3007]
+        ▲                                   (Python CLI)
+        │ adapter (api.ts, flow-data.ts,
+        │          pipeline-client.ts)
+        ▼
+[studio :3001]
+(ReactFlow UX)
+
+[shorts-factory :5178 / :3008]   ← 독립
+[analysis-system]                ← 독립
+[production-pipeline-system :3000] ← 독립
+```
+
+### 목표 (Independent-First)
+
+```
+독립 제품 5개 (각자 자기 DB, 자기 API, 자기 UI):
+
+  [analysis-system]          [script-writer]         [storyboard-maker]
+  PDF in → PDF out           시나리오 작성             씬 in → 보드 PDF out
+
+  [shorts-factory]           [production-pipeline-system]
+  YouTube 자동화              영화 제작 스케줄
+
+       ▼ ▼ ▼ ▼ ▼  (명시적 HTTP API만으로 통신)
+       
+  [통합 레이어 (미래)]
+  - studio: 노드 UI?
+  - 새 게이트웨이?
+  - (제품 안정화 후 결정)
+```
+
+---
+
+## 5️⃣ Independent-First 마이그레이션 백로그
+
+### Priority 1 — 의존성 끊기
+- [ ] `script-writer` → `storyboard-maker` 직접 호출 분리. 명시적 client 모듈로 격리
+- [ ] `studio`의 `script-writer` 어댑터 제거 또는 별도 통합 레이어로 이동
+- [ ] `shorts-factory` 독립성 유지 확인 (현재 OK, regression 방지)
+
+### Priority 2 — 모노레포 위생
+- [ ] `marionette-web` 자체 `.git` 정리 (submodule 등록 또는 history merge)
+- [ ] `contents-studio` 사용 여부 결정 (archive vs 통합 레이어)
+- [ ] `console` 빈 폴더 처리 (placeholder vs 삭제)
+- [ ] `art-department`, `mobile-app` → `docs/proposals/`로 이동
+
+### Priority 3 — 독립 배포 준비
+- [ ] 각 제품 독립 Docker / 배포 스크립트
+- [ ] 각 제품 자체 README (현재 일부 미흡)
+- [ ] 포트 충돌 해결 (`marionette-web` `:3000` ↔ `production-pipeline-system` `:3000`)
+- [ ] 각 제품을 다시 별도 GitHub 저장소로 split할지 결정
+
+---
+
+## 6️⃣ 외부 통합 출처 메타데이터
 
 | 모노레포 경로 | 외부 저장소 | 외부 브랜치 | `.git` 보존? |
 |---|---|---|---|
@@ -207,10 +225,10 @@
 
 ---
 
-## G. 권장 다음 단계
+## 7️⃣ 운영 상태 요약 (2026-04-17 기준)
 
-1. **`marionette-web` `.git` 정리**: 로컬 전용 `.git` 보유 → 매 commit마다 dirty 표시. submodule 등록 또는 `.git` 제거 결정.
-2. **`contents-studio` 결정**: 0 commits, Boris Cherny 데모 잔재 → 사용 중이면 정리, 아니면 archive
-3. **`console/` 처리**: 빈 폴더 → 미래 슬롯이면 `README.md` placeholder 추가, 아니면 삭제
-4. **`art-department/`, `mobile-app/`**: 코드 없는 문서 폴더 → `docs/proposals/`로 이동 검토
-5. **포트 충돌 방지**: `marionette-web` `:3000` ↔ `production-pipeline-system` `:3000` 둘 다 default. 동시 실행 불가.
+| 카테고리 | Active 🟢 | Maintenance 🟡 | Inactive 🔴 |
+|---|---|---|---|
+| 핵심 5 제품 | shorts-factory, script-writer, production-pipeline-system | analysis-system, storyboard-maker | — |
+| 통합 레이어 | studio | marionette-web | contents-studio |
+| 부속 자산 | — | homepage | art-department, mobile-app, console |
