@@ -23,6 +23,12 @@
   --studio-accent-dim:    rgba(99, 102, 241, 0.15);
   --studio-accent-glow:   rgba(99, 102, 241, 0.4);
 
+  /* ── Cross-app accent variants (promoted from script-writer Obsidian) ── */
+  --accent-violet:        #8B5CF6;  /* script-writer Signal Violet */
+  --accent-violet-dim:    rgba(139, 92, 246, 0.15);
+  --accent-mint:          #10B981;  /* script-writer Cinema Mint */
+  --accent-mint-dim:      rgba(16, 185, 129, 0.15);
+
   /* ── Brand (Investor / High-value) ── */
   --investor-gold:        #d4af37;
   --investor-gold-dim:    rgba(212, 175, 55, 0.15);
