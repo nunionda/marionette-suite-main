@@ -1,0 +1,307 @@
+"use client";
+
+import { useState } from "react";
+import type {
+  PostProject,
+  EditCut,
+  VFXShot,
+  SoundReel,
+  ColorReel,
+  DeliveryItem,
+} from "@/lib/mock-data";
+
+type TabKey = "edit" | "vfx" | "sound" | "color" | "delivery";
+
+const TABS: { key: TabKey; label: string; icon: string }[] = [
+  { key: "edit", label: "Edit", icon: "✂️" },
+  { key: "vfx", label: "VFX", icon: "✨" },
+  { key: "sound", label: "Sound", icon: "🎚" },
+  { key: "color", label: "Color", icon: "🎨" },
+  { key: "delivery", label: "Delivery", icon: "📦" },
+];
+
+interface Props {
+  projects: PostProject[];
+  edit: EditCut[];
+  vfx: VFXShot[];
+  sound: SoundReel[];
+  color: ColorReel[];
+  delivery: DeliveryItem[];
+}
+
+export function PostStudioClient(props: Props) {
+  const [activeProject, setActiveProject] = useState(props.projects[0]?.id ?? "");
+  const [tab, setTab] = useState<TabKey>("edit");
+
+  const project = props.projects.find((p) => p.id === activeProject);
+  const filter = <T extends { projectId: string }>(arr: T[]) =>
+    arr.filter((x) => x.projectId === activeProject);
+
+  return (
+    <div className="min-h-screen">
+      {/* Header */}
+      <header
+        className="border-b px-6 py-4"
+        style={{ borderColor: "var(--studio-border)" }}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-lg font-bold tracking-wider">POST STUDIO</h1>
+            <p className="text-xs" style={{ color: "var(--studio-text-dim)" }}>
+              편집 · VFX · 사운드 · 컬러 · 납품
+            </p>
+          </div>
+          <a
+            href="http://localhost:4001/projects"
+            className="text-xs underline opacity-70 hover:opacity-100"
+          >
+            ← Hub
+          </a>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-[240px_1fr] gap-0">
+        {/* Project sidebar */}
+        <aside
+          className="border-r p-4"
+          style={{ borderColor: "var(--studio-border)", minHeight: "calc(100vh - 69px)" }}
+        >
+          <h2 className="mb-3 text-[10px] font-bold uppercase tracking-wider opacity-60">
+            Projects in POST
+          </h2>
+          {props.projects.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => setActiveProject(p.id)}
+              className="mb-2 w-full rounded p-3 text-left text-sm transition"
+              style={{
+                backgroundColor:
+                  p.id === activeProject ? "var(--studio-bg-hover)" : "transparent",
+                border: "1px solid",
+                borderColor:
+                  p.id === activeProject
+                    ? "var(--studio-accent)"
+                    : "var(--studio-border)",
+              }}
+            >
+              <div className="font-semibold">{p.title}</div>
+              <div
+                className="mt-1 flex items-center gap-2 text-[10px]"
+                style={{ color: "var(--studio-text-dim)" }}
+              >
+                <span>{p.category}</span>
+                <span>· {p.studio}</span>
+                <span>· edit {p.editProgress}%</span>
+              </div>
+            </button>
+          ))}
+        </aside>
+
+        {/* Main */}
+        <main className="p-6">
+          {project ? (
+            <>
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-2xl font-bold">{project.title}</h2>
+                <span
+                  className="rounded px-2 py-1 text-[10px] font-bold uppercase tracking-wider"
+                  style={{
+                    backgroundColor: "var(--studio-accent-muted, #2d2d5a)",
+                    color: "var(--studio-accent)",
+                  }}
+                >
+                  POST
+                </span>
+              </div>
+
+              {/* Tabs */}
+              <div
+                className="mb-6 flex gap-1 border-b"
+                style={{ borderColor: "var(--studio-border)" }}
+              >
+                {TABS.map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => setTab(t.key)}
+                    className="px-4 py-2 text-sm transition"
+                    style={{
+                      borderBottom: "2px solid",
+                      borderBottomColor:
+                        tab === t.key ? "var(--studio-accent)" : "transparent",
+                      color: tab === t.key ? "var(--studio-text)" : "var(--studio-text-dim)",
+                    }}
+                  >
+                    {t.icon} {t.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab content */}
+              {tab === "edit" && <EditTab rows={filter(props.edit)} />}
+              {tab === "vfx" && <VFXTab rows={filter(props.vfx)} />}
+              {tab === "sound" && <SoundTab rows={filter(props.sound)} />}
+              {tab === "color" && <ColorTab rows={filter(props.color)} />}
+              {tab === "delivery" && <DeliveryTab rows={filter(props.delivery)} />}
+            </>
+          ) : (
+            <p style={{ color: "var(--studio-text-dim)" }}>No project selected.</p>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+/* --- Tab implementations --- */
+
+function StatusPill({ status }: { status: string }) {
+  const colors: Record<string, string> = {
+    approved: "#4ade80",
+    locked: "#4ade80",
+    delivered: "#4ade80",
+    done: "#4ade80",
+    review: "#fbbf24",
+    online: "#fbbf24",
+    encoding: "#fbbf24",
+    "in-progress": "#fbbf24",
+    wip: "#60a5fa",
+    offline: "#a78bfa",
+    brief: "#a78bfa",
+    pending: "#a78bfa",
+    queued: "#a78bfa",
+    rejected: "#f87171",
+  };
+  const c = colors[status] ?? "var(--studio-text-dim)";
+  return (
+    <span
+      className="rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+      style={{ color: c, border: `1px solid ${c}44`, backgroundColor: `${c}11` }}
+    >
+      {status}
+    </span>
+  );
+}
+
+function Table({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className="overflow-hidden rounded border"
+      style={{ borderColor: "var(--studio-border)" }}
+    >
+      <table className="w-full text-sm">{children}</table>
+    </div>
+  );
+}
+
+function Th({ children }: { children: React.ReactNode }) {
+  return (
+    <th
+      className="px-3 py-2 text-left text-[10px] font-bold uppercase tracking-wider"
+      style={{
+        backgroundColor: "var(--studio-bg-hover)",
+        color: "var(--studio-text-dim)",
+      }}
+    >
+      {children}
+    </th>
+  );
+}
+
+function Td({ children }: { children: React.ReactNode }) {
+  return <td className="border-t px-3 py-2" style={{ borderColor: "var(--studio-border)" }}>{children}</td>;
+}
+
+function EditTab({ rows }: { rows: EditCut[] }) {
+  return (
+    <Table>
+      <thead><tr><Th>Scene</Th><Th>Duration</Th><Th>Status</Th><Th>Editor</Th><Th>Note</Th></tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.id}>
+            <Td>#{r.sceneNumber}</Td>
+            <Td>{r.duration}s</Td>
+            <Td><StatusPill status={r.status} /></Td>
+            <Td>{r.editor}</Td>
+            <Td style={{ color: "var(--studio-text-dim)" }}>{r.note ?? "—"}</Td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+}
+
+function VFXTab({ rows }: { rows: VFXShot[] }) {
+  return (
+    <Table>
+      <thead><tr><Th>Shot</Th><Th>Complexity</Th><Th>Vendor</Th><Th>Status</Th></tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.id}>
+            <Td>{r.shotCode}</Td>
+            <Td>{r.complexity}</Td>
+            <Td>{r.vendor}</Td>
+            <Td><StatusPill status={r.status} /></Td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+}
+
+function SoundTab({ rows }: { rows: SoundReel[] }) {
+  return (
+    <Table>
+      <thead><tr><Th>Reel</Th><Th>ADR</Th><Th>Foley</Th><Th>Mix</Th><Th>Status</Th></tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.id}>
+            <Td>R{r.reelNumber}</Td>
+            <Td>{r.adr.recorded}/{r.adr.total}</Td>
+            <Td><StatusPill status={r.foley} /></Td>
+            <Td>{r.mix}</Td>
+            <Td><StatusPill status={r.status} /></Td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+}
+
+function ColorTab({ rows }: { rows: ColorReel[] }) {
+  return (
+    <Table>
+      <thead><tr><Th>Reel</Th><Th>Pass</Th><Th>Colorist</Th><Th>LUT</Th><Th>Status</Th></tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.id}>
+            <Td>R{r.reelNumber}</Td>
+            <Td>{r.pass}</Td>
+            <Td>{r.colorist}</Td>
+            <Td>{r.lut}</Td>
+            <Td><StatusPill status={r.status} /></Td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+}
+
+function DeliveryTab({ rows }: { rows: DeliveryItem[] }) {
+  return (
+    <Table>
+      <thead><tr><Th>Format</Th><Th>Resolution</Th><Th>Codec</Th><Th>To</Th><Th>Date</Th><Th>Status</Th></tr></thead>
+      <tbody>
+        {rows.map((r) => (
+          <tr key={r.id}>
+            <Td>{r.format}</Td>
+            <Td>{r.resolution}</Td>
+            <Td>{r.codec}</Td>
+            <Td>{r.deliveredTo ?? "—"}</Td>
+            <Td style={{ color: "var(--studio-text-dim)" }}>{r.deliveryDate ?? "—"}</Td>
+            <Td><StatusPill status={r.status} /></Td>
+          </tr>
+        ))}
+      </tbody>
+    </Table>
+  );
+}

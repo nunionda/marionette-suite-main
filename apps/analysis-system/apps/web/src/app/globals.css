@@ -1,12 +1,11 @@
-@import './studio-tokens.css';
+@import "@marionette/design-tokens/tokens.css";
+@import "@marionette/design-tokens/fonts.css";
 
 :root {
   --background: var(--studio-bg-base);
   --foreground: var(--studio-text);
 
-  /* Cine-specific: gold reserved for investor verdict / ROI only */
-  --investor-gold:       #d4af37;
-  --investor-gold-dim:   rgba(212, 175, 55, 0.15);
+  /* Additional gold variant unique to analysis system */
   --investor-gold-glow:  rgba(212, 175, 55, 0.35);
 }
 
