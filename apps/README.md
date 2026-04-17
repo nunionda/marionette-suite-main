@@ -105,13 +105,13 @@
 | 항목 | 값 |
 |---|---|
 | 역할 | 영상 프로덕션 풀-사이클 관리 (Sprint 1~6) — 대시보드, 프로젝트 CRUD, 단계별 워크스페이스, 팀 디렉토리 |
-| 스택 | Next.js 16 (App Router) + React 19, Tailwind 4, Prisma 7, NextAuth v5 beta |
-| 포트 | `:3000` (Postgres `:5432`, DB명 `nunionda`) |
+| 스택 | Next.js 16 (App Router) + React 19, Tailwind 4, Prisma 7, **NextAuth v5 beta**, **better-sqlite3** |
+| 포트 | `:3000` (외부 DB 서버 없음 — SQLite `dev.db` 단일 파일) |
 | 엔트리 | `src/app/`, `prisma/schema.prisma` |
-| 외부 출처 | `production_pipeline` (`https://github.com/nunionda/production-pipeline-system`) / 브랜치 `main` (모노레포 작업본은 `feat/team-directory`) |
-| `.git` | ✅ submodule 형태로 보존 |
-| 상태 | 🟢 활성 |
-| 독립성 | ✅ 자체 GitHub 저장소 + 자체 PostgreSQL DB. 가장 분리 정리된 상태 |
+| 외부 출처 | `production_pipeline` (`https://github.com/nunionda/production-pipeline-system`) / 브랜치 `feat/team-directory` |
+| `.git` | ✅ 자체 git 보유 (별도 repo, 부모 monorepo는 추적 안 함) |
+| 상태 | 🟢 활성. **2026-04-17 SQLite 마이그레이션 완료 — 외부 의존성 0** |
+| 독립성 | ✅ 완전 독립. `bun install && bun run db:setup && bun run dev` 만으로 가동 |
 
 **핵심 미션**: 영화 한 편이 기획부터 납품까지 가는 전 과정을 관리.
 
@@ -217,7 +217,7 @@
 | 모노레포 경로 | 외부 저장소 | 외부 브랜치 | `.git` 보존? |
 |---|---|---|---|
 | `apps/analysis-system/` | `cine-analysys-system` | `feat/free-llm-provider-swap` | ❌ history-merged |
-| `apps/production-pipeline-system/` | `production_pipeline` | `main` | ✅ submodule |
+| `apps/production-pipeline-system/` | `production_pipeline` | `feat/team-directory` | ✅ 자체 git (별도 repo) |
 | `apps/script-writer/` | `cine-script-writer` | `develop` | ❌ history-merged |
 | `apps/storyboard-maker/` | `storyboard-concept-maker` | `main` | ❌ history-merged |
 
