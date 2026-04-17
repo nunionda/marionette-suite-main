@@ -40,15 +40,19 @@ def cli():
 @click.option("--output", type=click.Choice(["png", "pdf", "both"]),
               default="both", help="Output format")
 @click.option("--output-dir", type=str, default="output", help="Output directory")
-def generate(scene, script, style, fmt, output, output_dir):
+@click.option("--paperclip-id", "paperclip_id", type=str, default=None,
+              help="Paperclip project ID — prefixes output files for hub tracking")
+def generate(scene, script, style, fmt, output, output_dir, paperclip_id):
     """Generate storyboard frames from scene descriptions."""
     if not scene and not script:
         raise click.UsageError("--scene 또는 --script 중 하나를 지정하세요.")
 
+    file_prefix = paperclip_id.replace("-", "_").lower() if paperclip_id else None
+
     parser = SceneParser()
     selector = StyleSelector()
     engine = PromptEngine()
-    generator = ImageGenerator(output_dir=output_dir)
+    generator = ImageGenerator(output_dir=output_dir, file_prefix=file_prefix)
     processor = PostProcessor()
     defaults = selector.get_defaults()
     composer = SheetComposer(
