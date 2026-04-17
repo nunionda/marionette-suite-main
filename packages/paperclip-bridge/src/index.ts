@@ -58,14 +58,15 @@ export function recommendStudio(
   category: ContentCategory,
   budgetKRW?: number,
 ): StudioCode {
+  // MAR는 creative dispatch에서 제외 — 앱 유지보수 전용.
   if (category === "film") {
-    // Big-budget film → IMP (Disney-standard), otherwise STE
-    if (budgetKRW && budgetKRW >= 30_000_000_000) return "IMP";
+    const threshold = Number(
+      process.env.PAPERCLIP_IMP_BUDGET_THRESHOLD_KRW ?? "30000000000",
+    );
+    if (budgetKRW && budgetKRW >= threshold) return "IMP";
     return "STE";
   }
-  if (category === "drama") return "STE";
-  if (category === "commercial") return "STE";
-  return "MAR";
+  return "STE";
 }
 
 /* ─── Paperclip HQ current projects (Phase 1 → 2 완료) ─── */
@@ -132,7 +133,18 @@ export async function dispatch(req: DispatchRequest): Promise<DispatchResponse> 
   };
 }
 
-/** Health check stub — real implementation will curl :3100/api/health. */
 export async function health(): Promise<{ status: "ok" | "offline"; host: string }> {
-  return { status: "offline", host: "http://127.0.0.1:3100" };
+  const host = "http://127.0.0.1:3100";
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 1500);
+    const res = await fetch(`${host}/api/health`, { signal: ctrl.signal });
+    clearTimeout(timer);
+    return { status: res.ok ? "ok" : "offline", host };
+  } catch {
+    return { status: "offline", host };
+  }
 }
+
+export { readRegistry, findProject, getRegistryPath } from "./registry";
+export type { PaperclipRegistryEntry } from "./registry";
