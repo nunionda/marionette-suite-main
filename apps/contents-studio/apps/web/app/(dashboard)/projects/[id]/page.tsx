@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { findProject } from "@marionette/paperclip-bridge";
+import { findProject } from "@marionette/paperclip-bridge/registry";
 import { PipelineClient } from "./pipeline-client";
 import type { ProjectMeta } from "@marionette/ui";
 
