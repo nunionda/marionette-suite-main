@@ -161,3 +161,33 @@ export const props = sqliteTable("props", {
   visualAnchors: text("visual_anchors"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
+
+export const imagePrompts = sqliteTable("image_prompts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  cutId: integer("cut_id").references(() => cuts.id),
+  projectId: integer("project_id").references(() => projects.id),
+  characters: text("characters"),
+  location: text("location"),
+  props: text("props"),
+  camera: text("camera"),
+  lighting: text("lighting"),
+  style: text("style"),
+  rawPrompt: text("raw_prompt"),
+  version: integer("version").default(1),
+  status: text("status").default("draft"),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
+export const videoPrompts = sqliteTable("video_prompts", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  cutId: integer("cut_id").references(() => cuts.id),
+  imagePromptId: integer("image_prompt_id").references(() => imagePrompts.id),
+  projectId: integer("project_id").references(() => projects.id),
+  motion: text("motion"),
+  cameraMove: text("camera_move"),
+  duration: integer("duration").default(4),
+  rawPrompt: text("raw_prompt"),
+  version: integer("version").default(1),
+  status: text("status").default("draft"),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});

@@ -149,6 +149,36 @@ sqlite.exec(`
     visual_anchors TEXT,
     created_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS image_prompts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cut_id INTEGER REFERENCES cuts(id),
+    project_id INTEGER REFERENCES projects(id),
+    characters TEXT,
+    location TEXT,
+    props TEXT,
+    camera TEXT,
+    lighting TEXT,
+    style TEXT,
+    raw_prompt TEXT,
+    version INTEGER DEFAULT 1,
+    status TEXT DEFAULT 'draft',
+    created_at TEXT DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE IF NOT EXISTS video_prompts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    cut_id INTEGER REFERENCES cuts(id),
+    image_prompt_id INTEGER REFERENCES image_prompts(id),
+    project_id INTEGER REFERENCES projects(id),
+    motion TEXT,
+    camera_move TEXT,
+    duration INTEGER DEFAULT 4,
+    raw_prompt TEXT,
+    version INTEGER DEFAULT 1,
+    status TEXT DEFAULT 'draft',
+    created_at TEXT DEFAULT (datetime('now'))
+  );
 `);
 
 // Seed default projects if DB is empty
