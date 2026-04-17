@@ -1206,6 +1206,46 @@ const app = new Elysia()
           return { success: false, error: `PDF generation failed: ${e.message}` };
         }
       })
+      .get("/api/progress", ({ query }) => {
+        const paperclipId = (query as Record<string, string>).paperclipId;
+        if (!paperclipId) return { error: "paperclipId required" };
+
+        const project = db
+          .select()
+          .from(projects)
+          .where(eq(projects.paperclipId, paperclipId))
+          .get();
+
+        if (!project) return { paperclipId, found: false, steps: null };
+
+        const projectId = project.id;
+
+        const sceneCount = (db
+          .select({ count: sql<number>`COUNT(*)` })
+          .from(scenes)
+          .where(eq(scenes.projectId, projectId))
+          .get() as { count: number } | undefined)?.count ?? 0;
+
+        const cutCount = (db
+          .select({ count: sql<number>`COUNT(*)` })
+          .from(cuts)
+          .where(eq(cuts.projectId, projectId))
+          .get() as { count: number } | undefined)?.count ?? 0;
+
+        return {
+          paperclipId,
+          found: true,
+          projectId,
+          steps: {
+            logline:   !!project.logline,
+            synopsis:  !!project.concept,
+            treatment: !!project.treatment,
+            script:    !!project.scenario,
+            scenes:    sceneCount > 0,
+            cuts:      cutCount > 0,
+          },
+        };
+      })
   )
   // ─── Gallery static files (storyboard-maker gallery pages) ───
   .get("/gallery/*", async ({ params, set }) => {
