@@ -1,27 +1,33 @@
 :root {
-  /* Core palette */
-  --bg-dark: #0a0a0c;
-  --panel-bg: rgba(25, 25, 30, 0.6);
-  --panel-bg-hover: rgba(30, 30, 38, 0.8);
-  --accent-gold: #d4af37;
-  --accent-gold-dim: rgba(212, 175, 55, 0.15);
-  --accent-blue: #0070f3;
-  --accent-blue-dim: rgba(0, 112, 243, 0.12);
-  --text-dim: #a0a0a0;
-  --border-glass: rgba(255, 255, 255, 0.1);
-  --border-glass-hover: rgba(255, 255, 255, 0.18);
+  /* Core palette — aliased to studio tokens for design unification.
+     Cine component code keeps its local names; values point to shared studio tokens. */
+  --bg-dark:              var(--studio-bg-base);
+  --panel-bg:             rgba(26, 26, 36, 0.6);     /* derived from --studio-bg-elevated */
+  --panel-bg-hover:       rgba(34, 34, 58, 0.8);     /* derived from --studio-bg-hover */
 
-  /* Semantic colors */
-  --color-success: #2ecc71;
-  --color-success-dark: #27ae60;
-  --color-warning: #f39c12;
-  --color-warning-dark: #e67e22;
-  --color-danger: #e74c3c;
-  --color-danger-dark: #c0392b;
-  --color-purple: #9b59b6;
-  --color-muted: #7f8c8d;
-  --color-muted-light: #95a5a6;
-  --text-secondary: #d0d0d4;
+  /* Investor-specific gold — reserved for verdict/ROI/score-ring semantics */
+  --accent-gold:          var(--investor-gold);
+  --accent-gold-dim:      var(--investor-gold-dim);
+
+  /* Interactive accent: switch from cine blue to studio indigo */
+  --accent-blue:          var(--studio-accent);
+  --accent-blue-dim:      var(--studio-accent-dim);
+
+  --text-dim:             var(--studio-text-dim);
+  --border-glass:         rgba(255, 255, 255, 0.08);
+  --border-glass-hover:   var(--studio-border-accent);
+
+  /* Semantic colors — Tailwind palette to match studio */
+  --color-success:        var(--studio-success);         /* #22c55e */
+  --color-success-dark:   #16a34a;
+  --color-warning:        var(--studio-warning);         /* #f59e0b */
+  --color-warning-dark:   #d97706;
+  --color-danger:         var(--studio-danger);          /* #ef4444 */
+  --color-danger-dark:    #dc2626;
+  --color-purple:         #a855f7;
+  --color-muted:          var(--studio-text-muted);
+  --color-muted-light:    #8888aa;
+  --text-secondary:       #d4d4e0;
 
   /* Typography */
   --font-size-xs: 0.65rem;
@@ -80,9 +86,9 @@ input:focus-visible {
 }
 
 .dashboard-container {
-  color: white;
+  color: var(--studio-text);
   padding: 2rem 2rem 4rem;
-  font-family: 'Inter', sans-serif;
+  font-family: inherit;
   max-width: 1400px;
   margin: 0 auto;
 }

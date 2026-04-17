@@ -19,8 +19,6 @@ import {
 } from 'lucide-react';
 import './DraftComparison.css';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4006';
-
 /* ─── Types ─── */
 
 interface DraftComparisonProps {
@@ -84,7 +82,7 @@ export default function DraftComparison({
     setComparisonResult(null);
 
     try {
-      const res = await fetch(`${API}/compare`, {
+      const res = await fetch('http://localhost:4006/compare', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

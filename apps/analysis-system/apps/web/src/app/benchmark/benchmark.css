@@ -1,14 +1,14 @@
 /* ─── LLM Benchmark Dashboard ─── */
 
 .bench-root {
-  --bg-primary: #0a0a12;
-  --bg-card: #12121e;
-  --bg-elevated: #1a1a2e;
-  --border: #2a2a3e;
-  --text-primary: #e8e8f0;
-  --text-secondary: #8888aa;
-  --text-dim: #55556e;
-  --accent: #4285F4;
+  --bg-primary:      var(--studio-bg-base);
+  --bg-card:         var(--studio-bg-surface);
+  --bg-elevated:     var(--studio-bg-elevated);
+  --border:          var(--studio-border);
+  --text-primary:    var(--studio-text);
+  --text-secondary:  var(--studio-text-dim);
+  --text-dim:        var(--studio-text-muted);
+  --accent:          var(--studio-accent);
 
   min-height: 100vh;
   background: var(--bg-primary);
@@ -16,7 +16,7 @@
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
-  font-family: var(--font-geist-sans), -apple-system, sans-serif;
+  font-family: inherit;
 }
 
 /* ─── Header ─── */

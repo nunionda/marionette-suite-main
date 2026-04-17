@@ -21,6 +21,20 @@
       "runtimeArgs": ["vite", "--port", "5178", "--host", "0.0.0.0"],
       "port": 5178,
       "cwd": "apps/shorts-factory"
+    },
+    {
+      "name": "analysis-web",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "dev"],
+      "port": 4007,
+      "cwd": "apps/analysis-system/apps/web"
+    },
+    {
+      "name": "analysis-api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--watch", "src/index.ts"],
+      "port": 4006,
+      "cwd": "apps/analysis-system/apps/api"
     }
   ]
 }

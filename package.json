@@ -20,9 +20,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.2",
   "workspaces": [
-    "apps/*",
+    "apps/contents-studio",
+    "apps/marionette-web",
+    "apps/production-pipeline-system",
+    "apps/script-writer",
+    "apps/shorts-factory",
+    "apps/studio",
     "packages/*",
-    "apps/production-pipeline/packages/*",
-    "apps/analysis-system/packages/*"
+    "apps/production-pipeline/packages/*"
   ]
 }
