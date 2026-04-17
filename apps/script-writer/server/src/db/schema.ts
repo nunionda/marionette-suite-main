@@ -133,3 +133,31 @@ export const loglineIdeas = sqliteTable("logline_ideas", {
   category: text("category"),
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
 });
+
+export const characters = sqliteTable("characters", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").references(() => projects.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  appearance: text("appearance"),
+  visualAnchors: text("visual_anchors"),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
+export const locations = sqliteTable("locations", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").references(() => projects.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  visualAnchors: text("visual_anchors"),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
+
+export const props = sqliteTable("props", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").references(() => projects.id),
+  name: text("name").notNull(),
+  description: text("description"),
+  visualAnchors: text("visual_anchors"),
+  createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
+});
