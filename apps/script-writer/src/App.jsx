@@ -84,6 +84,23 @@ function AppContent() {
     return () => window.removeEventListener('hashchange', handler);
   }, []);
 
+  // Deep-link from hub: ?paperclipId=ID-001 → auto-open matching project
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paperclipId = params.get('paperclipId');
+    if (!paperclipId) return;
+    fetch(`http://localhost:3006/api/progress?paperclipId=${encodeURIComponent(paperclipId)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.found && data.projectId) {
+          const id = String(data.projectId);
+          setCurrentProjectId(id);
+          localStorage.setItem('lastProjectId', id);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Handle Export Rendering Route
   const path = window.location.pathname;
   if (path.startsWith('/render/project/')) {
