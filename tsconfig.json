@@ -11,6 +11,7 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
+      "@marionette/pipeline-core": ["./packages/pipeline-core/src"],
       "@marionette/analysis-core": ["./packages/analysis-core"],
       "@marionette/agent-rules": ["./packages/agent-rules"],
       "@marionette/shared": ["./apps/production-pipeline/packages/shared/src"],
