@@ -11,3 +11,4 @@ output/subtitles/
 youtube-tokens.json
 __pycache__/
 *.pyc
+output/*.md
