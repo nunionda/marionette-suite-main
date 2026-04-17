@@ -407,9 +407,10 @@ class OllamaProvider(ImageProvider):
 
 
 class ImageGenerator:
-    def __init__(self, output_dir: str = "output"):
+    def __init__(self, output_dir: str = "output", file_prefix: str | None = None):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.file_prefix = file_prefix or ""
         self.providers: list[ImageProvider] = [
             Gemini31FlashImageProvider(),   # 1st: Gemini 3.1 Flash Image (ELO 1257, free)
             GeminiProvider(),               # 2nd: Gemini 2.5 Flash Image (free)
@@ -476,6 +477,8 @@ class ImageGenerator:
         return results
 
     def _save_image(self, image_bytes: bytes, filename: str) -> str:
+        if self.file_prefix:
+            filename = f"{self.file_prefix}_{filename}"
         filepath = self.output_dir / filename
         with open(filepath, "wb") as f:
             f.write(image_bytes)
