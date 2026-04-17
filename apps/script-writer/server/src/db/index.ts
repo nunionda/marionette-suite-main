@@ -181,6 +181,12 @@ sqlite.exec(`
   );
 `);
 
+try {
+  sqlite.exec("ALTER TABLE projects ADD COLUMN paperclip_id TEXT;");
+} catch {
+  // column already exists on subsequent startups — safe to ignore
+}
+
 // Seed default projects if DB is empty
 const count = sqlite.query("SELECT COUNT(*) as cnt FROM projects").get() as { cnt: number };
 if (count.cnt === 0) {

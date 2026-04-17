@@ -31,6 +31,7 @@ export const projects = sqliteTable("projects", {
 
   createdAt: text("created_at").$defaultFn(() => new Date().toISOString()),
   updated: text("updated_at").$defaultFn(() => new Date().toISOString()),
+  paperclipId: text("paperclip_id"),
 });
 
 export const sceneVersions = sqliteTable("scene_versions", {
