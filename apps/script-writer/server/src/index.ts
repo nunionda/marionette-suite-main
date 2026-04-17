@@ -686,7 +686,7 @@ const app = new Elysia()
 
             // YouTube projects store content in analysisData.youtube, not scenario
             const ytData = project?.analysisData?.youtube;
-            if (category === 'YouTube' && ytData && !screenplayText) {
+            if (project?.category === 'YouTube' && ytData && !screenplayText) {
               screenplayText = [
                 ytData.conceptBrief && `[콘셉트] ${ytData.conceptBrief}`,
                 ytData.hook && `[훅] ${ytData.hook}`,
