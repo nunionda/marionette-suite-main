@@ -46,3 +46,4 @@ export type { AgentStatus, MasteringMode, PipelineState } from "./PipelineProvid
 export { default as NodeGraphViewer } from "./NodeGraphViewer";
 export type { PipelineNode, PipelineEdge } from "./NodeGraphViewer";
 export { default as ProjectCreator } from "./ProjectCreator";
+export * from "./creative-pipeline";
