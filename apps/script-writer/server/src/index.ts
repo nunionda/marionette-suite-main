@@ -1206,7 +1206,7 @@ const app = new Elysia()
           return { success: false, error: `PDF generation failed: ${e.message}` };
         }
       })
-      .get("/api/progress", ({ query }) => {
+      .get("/progress", ({ query }) => {
         const paperclipId = (query as Record<string, string>).paperclipId;
         if (!paperclipId) return { error: "paperclipId required" };
 
