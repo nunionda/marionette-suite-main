@@ -26,13 +26,10 @@
   "license": "ISC",
   "packageManager": "pnpm@10.28.2",
   "workspaces": [
+    "apps/*",
     "apps/contents-studio/apps/*",
     "apps/contents-studio/packages/*",
-    "apps/post-studio",
-    "apps/content-library",
-    "apps/script-writer",
-    "apps/shorts-factory",
-    "apps/studio",
-    "packages/*"
+    "packages/*",
+    "apps/analysis-system/packages/*"
   ]
 }
