@@ -11,6 +11,13 @@ from src.job_store import JobStore
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
 _store = JobStore(os.path.join(OUTPUT_DIR, "jobs.db"))
 
+ALLOWED_ORIGINS = [
+    o.strip() for o in os.environ.get(
+        "CORS_ALLOWED_ORIGINS",
+        "http://localhost:4001,http://localhost:5174",
+    ).split(",") if o.strip()
+]
+
 
 def _detect_image_done(output_dir: str, paperclip_id: str) -> bool:
     prefix = paperclip_id.replace("-", "_").lower() + "_"
@@ -110,7 +117,12 @@ class Handler(BaseHTTPRequestHandler):
         payload = json.dumps(body).encode()
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
-        self.send_header("Access-Control-Allow-Origin", "*")
+        origin = self.headers.get("Origin")
+        if origin and origin in ALLOWED_ORIGINS:
+            self.send_header("Access-Control-Allow-Origin", origin)
+        else:
+            # Preserve existing permissive default for non-browser / unmatched origins
+            self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(payload)))
         self.end_headers()
         self.wfile.write(payload)
@@ -120,7 +132,7 @@ class Handler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", "3007"))
+    port = int(os.environ.get("STORYBOARD_PORT", os.environ.get("PORT", "3007")))
     server = HTTPServer(("0.0.0.0", port), Handler)
     print(f"storyboard-maker server listening on :{port}")
     server.serve_forever()

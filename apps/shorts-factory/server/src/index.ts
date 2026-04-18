@@ -15,10 +15,12 @@ import { startDetectorLoop } from "./services/detector";
 // DB import triggers table creation + seed
 import "./db";
 
-const PORT = Number(process.env.PORT) || 3008;
+const PORT = Number(process.env.SHORTS_FACTORY_BACKEND_PORT ?? process.env.PORT ?? 3008);
+const CORS_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS ?? process.env.ALLOWED_ORIGINS ?? `http://localhost:4001,http://localhost:5174,${process.env.NEXT_PUBLIC_SHORTS_FACTORY_URL ?? "http://localhost:5178"}`)
+  .split(",").map((s) => s.trim()).filter(Boolean);
 
 const app = new Elysia()
-  .use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(",") ?? [(process.env.NEXT_PUBLIC_SHORTS_FACTORY_URL ?? "http://localhost:5178")] }))
+  .use(cors({ origin: CORS_ORIGINS }))
   .use(staticPlugin({ prefix: "/output", assets: "./output" }))
   .use(sourcesRoutes)
   .use(templatesRoutes)

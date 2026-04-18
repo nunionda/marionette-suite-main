@@ -15,9 +15,12 @@ import { getProviderStatus, getProvidersByType, setProviderEnabled } from "./ser
 import fs from "fs";
 import path from "path";
 import puppeteer from "puppeteer";
-const API_BASE = `http://localhost:${process.env.PORT || "3006"}/api`;
+const PORT = Number(process.env.SCRIPT_ENGINE_PORT ?? process.env.PORT ?? 3006);
+const CORS_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS ?? "http://localhost:4001,http://localhost:5174")
+  .split(",").map((s) => s.trim()).filter(Boolean);
+const API_BASE = `http://localhost:${PORT}/api`;
 const app = new Elysia()
-  .use(cors())
+  .use(cors({ origin: CORS_ORIGINS }))
   .use(staticPlugin({
     assets: "public",
     prefix: "/public",
@@ -1282,7 +1285,7 @@ const app = new Elysia()
     return 'Gallery file not found';
   })
   .listen({
-    port: 3006,
+    port: PORT,
     hostname: "0.0.0.0"
   });
 

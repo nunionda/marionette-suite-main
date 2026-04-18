@@ -43,6 +43,10 @@ import { generateScriptId, getVersionSearchPattern } from "./utils/naming";
 
 const reportRepo = new AnalysisReportRepository();
 
+const PORT = Number(process.env.ANALYSIS_API_PORT ?? process.env.PORT ?? 4006);
+const CORS_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS ?? "http://localhost:4001,http://localhost:5174")
+  .split(",").map((s) => s.trim()).filter(Boolean);
+
 // ─── Reusable Full Analysis Pipeline ───
 
 interface AnalysisPipelineOptions {
@@ -300,7 +304,7 @@ async function runFullAnalysis(opts: AnalysisPipelineOptions) {
 }
 
 const app = new Elysia()
-  .use(cors())
+  .use(cors({ origin: CORS_ORIGINS }))
   .get("/", () => ({ status: "online", version: "1.0.0" }))
 
   // Available providers and strategies for dashboard UI
@@ -770,7 +774,7 @@ Rules:
     })
   })
 
-  .listen(4006);
+  .listen(PORT);
 
 console.log(
   `🦊 Elysia is running at ${app.server?.hostname}:${app.server?.port}`
