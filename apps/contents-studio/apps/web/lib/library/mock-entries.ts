@@ -25,6 +25,36 @@ export const mockEntries: LibraryEntry[] = [
       admissions: 1_052_400,
       festival_selections: ["BIFF 2026 · Opening", "Sitges 2026"],
     },
+    // Charter #69 Streaming/VOD: theatrical → Netflix global (day-and-date excluding KR)
+    streaming: {
+      exclusivity: "day-and-date",
+      windowEnd: "2027-05-20",
+      platforms: [
+        {
+          platform: "Netflix Korea",
+          status: "scheduled",
+          liveDate: "2026-09-20", // 4 months after theatrical
+          regions: ["KR"],
+          drm: ["widevine", "fairplay", "playready"],
+          bitrates: [
+            { resolution: "4K", codec: "h265", hdr: "dolby_vision", audio: "atmos", bitrateMbps: 18 },
+            { resolution: "1080p", codec: "h264", hdr: "hdr10", audio: "5_1", bitrateMbps: 8 },
+            { resolution: "720p", codec: "h264", audio: "stereo", bitrateMbps: 4 },
+          ],
+        },
+        {
+          platform: "Wavve",
+          status: "scheduled",
+          liveDate: "2026-10-20",
+          regions: ["KR"],
+          drm: ["widevine", "fairplay"],
+          bitrates: [
+            { resolution: "1080p", codec: "h264", audio: "5_1", bitrateMbps: 7 },
+            { resolution: "720p", codec: "h264", audio: "stereo", bitrateMbps: 4 },
+          ],
+        },
+      ],
+    },
   },
   {
     id: "L-002",
@@ -56,6 +86,26 @@ export const mockEntries: LibraryEntry[] = [
       rating: 8.4,
       ott_rank: 3,
       episode_completion_rate: 0.81,
+    },
+    // Charter #69: Netflix exclusive, live globally
+    streaming: {
+      exclusivity: "exclusive",
+      platforms: [
+        {
+          platform: "Netflix Global",
+          status: "live",
+          liveDate: "2026-03-01",
+          regions: ["global"],
+          drm: ["widevine", "fairplay", "playready"],
+          bitrates: [
+            { resolution: "4K", codec: "h265", hdr: "dolby_vision", audio: "atmos", bitrateMbps: 18 },
+            { resolution: "4K", codec: "av1", hdr: "hdr10", audio: "5_1", bitrateMbps: 12 },
+            { resolution: "1080p", codec: "h264", hdr: "hdr10", audio: "5_1", bitrateMbps: 8 },
+            { resolution: "720p", codec: "h264", audio: "stereo", bitrateMbps: 4 },
+            { resolution: "480p", codec: "h264", audio: "stereo", bitrateMbps: 2 },
+          ],
+        },
+      ],
     },
   },
   {

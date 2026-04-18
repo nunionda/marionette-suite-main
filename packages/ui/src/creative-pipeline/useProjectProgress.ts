@@ -31,6 +31,27 @@ export interface DistributionStatus {
     deliverables: string[];
     releaseDate?: string;
   } | null;
+  /** Charter #69: Streaming/VOD release detail — null for theatrical-only or unreleased. */
+  streaming: {
+    exclusivity: "exclusive" | "non-exclusive" | "day-and-date" | null;
+    windowEnd: string | null;
+    platforms: Array<{
+      platform: string;
+      status: "scheduled" | "live" | "ended" | "withdrawn";
+      liveDate: string | null;
+      endDate: string | null;
+      regions: string[];
+      drm: Array<"widevine" | "fairplay" | "playready" | "none">;
+      maxResolution: "480p" | "720p" | "1080p" | "4K";
+      hasHDR: boolean;
+      hasAtmos: boolean;
+      codecs: Array<"h264" | "h265" | "av1" | "vp9">;
+      variantCount: number;
+    }>;
+  } | null;
+  /** Charter #69 step flags (derived in progress endpoint) */
+  streamingScheduled: boolean;
+  streamingLive: boolean;
 }
 
 export interface ScheduleStatus {

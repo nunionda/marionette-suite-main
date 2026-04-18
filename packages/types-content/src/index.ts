@@ -87,6 +87,49 @@ export interface ContentMetrics {
   thumbnail_ctr?: number;
 }
 
+// ─── Streaming / VOD Release (Phase 5 Distribution, Charter #69) ───
+
+export type StreamingReleaseStatus =
+  | "scheduled" // announced, not yet available
+  | "live" // currently streamable
+  | "ended" // release window closed
+  | "withdrawn"; // taken down early
+
+export type DRMScheme = "widevine" | "fairplay" | "playready" | "none";
+
+export type HDRFormat = "sdr" | "hdr10" | "hdr10_plus" | "dolby_vision";
+
+export type AudioFormat = "stereo" | "5_1" | "7_1" | "atmos";
+
+export type Codec = "h264" | "h265" | "av1" | "vp9";
+
+export type Resolution = "480p" | "720p" | "1080p" | "4K";
+
+export interface StreamingBitrate {
+  resolution: Resolution;
+  codec: Codec;
+  hdr?: HDRFormat;
+  audio: AudioFormat;
+  bitrateMbps?: number;
+  cdnUrl?: string; // master manifest URL (HLS/DASH), optional
+}
+
+export interface StreamingPlatform {
+  platform: string; // "Netflix Global", "Disney+ Korea", "Wavve", "Tving", etc.
+  status: StreamingReleaseStatus;
+  liveDate?: string; // ISO — when the release went/goes live
+  endDate?: string; // ISO — windowing end, if any
+  regions: string[]; // ISO country codes or ["global"]
+  drm: DRMScheme[];
+  bitrates: StreamingBitrate[];
+}
+
+export interface StreamingRelease {
+  platforms: StreamingPlatform[];
+  exclusivity?: "exclusive" | "non-exclusive" | "day-and-date";
+  windowEnd?: string; // ISO — overall release window close
+}
+
 export interface LibraryEntry {
   id: string;
   projectId: string;
@@ -98,4 +141,6 @@ export interface LibraryEntry {
   deliverables: string[];
   metrics: ContentMetrics;
   studio: StudioCode;
+  /** Streaming/VOD release spec — Charter #69. Optional; absent for theatrical-only or unreleased. */
+  streaming?: StreamingRelease;
 }

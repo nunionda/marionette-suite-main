@@ -228,6 +228,9 @@ export async function GET(
         paperclipId: cl.paperclipId,
         published: !!cl.steps?.publish,
         entry: cl.entry ?? null,
+        streaming: cl.streaming ?? null,
+        streamingScheduled: !!cl.steps?.streamingScheduled,
+        streamingLive: !!cl.steps?.streamingLive,
       }
     : null;
 

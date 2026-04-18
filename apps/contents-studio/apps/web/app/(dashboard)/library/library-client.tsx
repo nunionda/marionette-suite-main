@@ -175,7 +175,7 @@ export function LibraryClient({ entries }: { entries: LibraryEntry[] }) {
                 </div>
               </section>
 
-              <section>
+              <section className="mb-6">
                 <h3 className="mb-3 text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--studio-text-dim)" }}>
                   Deliverables
                 </h3>
@@ -195,6 +195,131 @@ export function LibraryClient({ entries }: { entries: LibraryEntry[] }) {
                   ))}
                 </div>
               </section>
+
+              {/* Charter #69 Streaming / VOD Release */}
+              {active.streaming && active.streaming.platforms.length > 0 && (
+                <section>
+                  <h3 className="mb-3 text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--studio-text-dim)" }}>
+                    Streaming / VOD
+                    {active.streaming.exclusivity && (
+                      <span className="ml-2 normal-case" style={{ color: "var(--studio-text-dim)" }}>
+                        · {active.streaming.exclusivity}
+                      </span>
+                    )}
+                    {active.streaming.windowEnd && (
+                      <span className="ml-2 font-mono normal-case" style={{ color: "var(--studio-text-dim)" }}>
+                        · window ends {active.streaming.windowEnd}
+                      </span>
+                    )}
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    {active.streaming.platforms.map((p) => {
+                      const statusColor = {
+                        scheduled: "#f59e0b",
+                        live: "#00FF41",
+                        ended: "#707070",
+                        withdrawn: "#ef4444",
+                      }[p.status];
+                      const statusLabel = {
+                        scheduled: "예정",
+                        live: "공개중",
+                        ended: "종료",
+                        withdrawn: "철수",
+                      }[p.status];
+                      const maxRes = p.bitrates.reduce((best, b) => {
+                        const rank: Record<string, number> = { "480p": 1, "720p": 2, "1080p": 3, "4K": 4 };
+                        return (rank[b.resolution] ?? 0) > (rank[best] ?? 0) ? b.resolution : best;
+                      }, "480p" as "480p" | "720p" | "1080p" | "4K");
+                      const hasHDR = p.bitrates.some((b) => b.hdr && b.hdr !== "sdr");
+                      const hasAtmos = p.bitrates.some((b) => b.audio === "atmos");
+                      return (
+                        <div
+                          key={p.platform}
+                          className="rounded border p-3"
+                          style={{
+                            borderColor: "var(--studio-border)",
+                            backgroundColor: "var(--studio-bg-surface)",
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className="rounded px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                                style={{
+                                  color: statusColor,
+                                  border: `1px solid ${statusColor}44`,
+                                  backgroundColor: `${statusColor}11`,
+                                }}
+                              >
+                                {statusLabel}
+                              </span>
+                              <span className="font-medium text-sm">{p.platform}</span>
+                              <span className="text-[11px]" style={{ color: "var(--studio-text-dim)" }}>
+                                · {p.regions.join(", ")}
+                              </span>
+                              {p.liveDate && (
+                                <span className="font-mono text-[11px]" style={{ color: "var(--studio-text-dim)" }}>
+                                  · {p.liveDate}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span
+                                className="rounded px-1.5 py-0.5 font-mono text-[10px] font-bold"
+                                style={{
+                                  color: maxRes === "4K" ? "#fbbf24" : "var(--studio-text)",
+                                  border: "1px solid var(--studio-border)",
+                                }}
+                              >
+                                {maxRes}
+                              </span>
+                              {hasHDR && (
+                                <span
+                                  className="rounded px-1 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                                  style={{ color: "#a78bfa", border: "1px solid #a78bfa44", backgroundColor: "#a78bfa11" }}
+                                >
+                                  HDR
+                                </span>
+                              )}
+                              {hasAtmos && (
+                                <span
+                                  className="rounded px-1 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+                                  style={{ color: "#4ade80", border: "1px solid #4ade8044", backgroundColor: "#4ade8011" }}
+                                >
+                                  ATMOS
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {p.bitrates.map((b, i) => (
+                              <span
+                                key={i}
+                                className="rounded px-1.5 py-0.5 font-mono text-[10px]"
+                                style={{
+                                  border: "1px solid var(--studio-border)",
+                                  color: "var(--studio-text-dim)",
+                                }}
+                              >
+                                {b.resolution} · {b.codec.toUpperCase()}
+                                {b.hdr && b.hdr !== "sdr" && ` · ${b.hdr}`}
+                                {b.audio !== "stereo" && ` · ${b.audio.replace("_", ".")}`}
+                                {b.bitrateMbps && ` · ${b.bitrateMbps}Mbps`}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="mt-1.5 flex gap-1.5 text-[10px]" style={{ color: "var(--studio-text-dim)" }}>
+                            <span>DRM:</span>
+                            {p.drm.map((d) => (
+                              <span key={d} className="font-mono">{d}</span>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
             </>
           ) : (
             <p style={{ color: "var(--studio-text-dim)" }}>Select an entry.</p>
