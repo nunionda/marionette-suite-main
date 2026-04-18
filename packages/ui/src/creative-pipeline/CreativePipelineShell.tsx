@@ -10,9 +10,10 @@ interface Props {
   meta: ProjectMeta;
   /** Map of stepKey → external app URL. Phase 1: static, passed in by app. */
   deepLinks?: Partial<Record<StepKey, DeepLink>>;
+  onExport?: () => void;
 }
 
-export function CreativePipelineShell({ meta, deepLinks }: Props) {
+export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
   const { progress, currentStep } = useProjectProgress(meta.id);
 
   return (
@@ -79,13 +80,29 @@ export function CreativePipelineShell({ meta, deepLinks }: Props) {
               {meta.budgetKRW && ` · ₩${(meta.budgetKRW / 1_000_000_000).toFixed(1)}B`}
             </p>
           </div>
-          <a
-            href="/paperclip"
-            className="text-xs underline opacity-70 hover:opacity-100"
-            style={{ color: "var(--studio-text-dim)" }}
-          >
-            ← Paperclip HQ
-          </a>
+          <div className="flex items-center gap-3">
+            {onExport && (
+              <button
+                onClick={onExport}
+                className="rounded px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                style={{
+                  backgroundColor: "var(--accent-violet)",
+                  color: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                Export to Higgsfield ↓
+              </button>
+            )}
+            <a
+              href="/paperclip"
+              className="text-xs underline opacity-70 hover:opacity-100"
+              style={{ color: "var(--studio-text-dim)" }}
+            >
+              ← Paperclip HQ
+            </a>
+          </div>
         </div>
       </header>
 

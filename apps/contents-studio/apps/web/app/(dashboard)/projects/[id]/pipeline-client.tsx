@@ -1,5 +1,6 @@
 "use client";
 
+import { useCallback } from "react";
 import { CreativePipelineShell, type ProjectMeta, type StepKey, type DeepLink } from "@marionette/ui";
 
 interface Props {
@@ -32,5 +33,28 @@ function buildDeepLinks(projectId: string): Partial<Record<StepKey, DeepLink>> {
 
 export function PipelineClient({ meta }: Props) {
   const deepLinks = buildDeepLinks(meta.id);
-  return <CreativePipelineShell meta={meta} deepLinks={deepLinks} />;
+
+  const handleExport = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/projects/${encodeURIComponent(meta.id)}/export`);
+      if (!res.ok) throw new Error(`Export failed: HTTP ${res.status}`);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${meta.id}-higgsfield-export.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("[Export] Failed:", err);
+    }
+  }, [meta.id]);
+
+  return (
+    <CreativePipelineShell
+      meta={meta}
+      deepLinks={deepLinks}
+      onExport={handleExport}
+    />
+  );
 }
