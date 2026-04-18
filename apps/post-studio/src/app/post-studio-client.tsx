@@ -207,8 +207,8 @@ function Th({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="border-t px-3 py-2" style={{ borderColor: "var(--studio-border)" }}>{children}</td>;
+function Td({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
+  return <td className="border-t px-3 py-2" style={{ borderColor: "var(--studio-border)", ...style }}>{children}</td>;
 }
 
 function EditTab({ rows }: { rows: EditCut[] }) {
