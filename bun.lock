@@ -115,6 +115,7 @@
         "@marionette/design-tokens": "workspace:*",
         "@marionette/paperclip-bridge": "workspace:*",
         "@marionette/pipeline-core": "workspace:*",
+        "@marionette/prompt-adapters": "workspace:*",
         "@marionette/shared": "workspace:*",
         "@marionette/types-content": "workspace:*",
         "@marionette/ui": "workspace:*",

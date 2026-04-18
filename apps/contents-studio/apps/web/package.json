@@ -20,6 +20,7 @@
     "@marionette/content-profiles": "workspace:*",
     "@marionette/types-content": "workspace:*",
     "@marionette/paperclip-bridge": "workspace:*",
+    "@marionette/prompt-adapters": "workspace:*",
     "@marionette/ui": "workspace:*"
   },
   "devDependencies": {
