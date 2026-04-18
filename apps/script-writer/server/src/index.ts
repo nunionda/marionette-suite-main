@@ -8,6 +8,7 @@ import { syncProjectToFileSystem } from "./lib/sync";
 import { addJob, getJob } from "./services/pdfQueue";
 import { analyzeScript, analyzeProduction } from "./services/analysisEngine";
 import { generateImage, buildCinematicPrompt, generateImageCandidates, buildPromptByCategory, buildSpecializedPrompt } from "./services/imageGenerator";
+import { generateDesignDocument, TEXT_DESIGN_NODE_SPECS } from "./services/textDesigner";
 import { generateVideo, buildVideoPrompt } from "./services/videoGenerator";
 import { getFormatForProject } from "./services/videoFormats";
 import { generateTTS } from "./services/audioGenerator";
@@ -648,6 +649,92 @@ const app = new Elysia()
               success: imgResult.success,
               assetId,
               result: { imageUrl: imgUrl, category, prompt, specialist: nodeId },
+            };
+          } catch (e: any) {
+            await db.update(productionAssets).set({
+              status: 'error',
+              errorMessage: e.message,
+              updatedAt: new Date().toISOString(),
+            }).where(eq(productionAssets.id, assetId));
+            return { success: false, error: e.message };
+          }
+        }
+
+        // ─── Track A text-document design nodes ───
+        // Sprint 2 scope C: character_arc, lookbook, visual_world, color_script,
+        // set_dressing, shot_list, art_bible — all produce structured JSON docs
+        // via the free-tier LLM chain (Gemini → Groq → OpenRouter).
+        if (nodeId in TEXT_DESIGN_NODE_SPECS) {
+          try {
+            // Gather scene + screenplay context from the project
+            const [project] = await db.select().from(projects).where(eq(projects.id, projectId));
+            const screenplay = project?.scenario || project?.script || '';
+            const rawDescription = b.description || b.inputData?.description || '';
+
+            // For art_bible, synthesize from all prior 'done' design assets
+            let priorAssetsContext = '';
+            if (nodeId === 'art_bible') {
+              const priors = await db.select().from(productionAssets)
+                .where(and(
+                  eq(productionAssets.projectId, projectId),
+                  eq(productionAssets.track, 'design'),
+                  eq(productionAssets.status, 'done'),
+                ));
+              const summaries = priors
+                .filter(p => p.nodeId !== 'art_bible' && p.outputData)
+                .map(p => {
+                  try {
+                    const data = JSON.parse(p.outputData!);
+                    // Keep it tight: first-level keys + ~300 chars of stringified content
+                    const preview = JSON.stringify(data).slice(0, 300);
+                    return `[${p.nodeId}] ${preview}`;
+                  } catch {
+                    return `[${p.nodeId}] (unparseable)`;
+                  }
+                })
+                .join('\n\n');
+              priorAssetsContext = summaries ? `\n\nPRIOR DESIGN ASSETS:\n${summaries}` : '';
+            }
+
+            // Build context: explicit user description wins over generic screenplay
+            const scriptExcerpt = screenplay ? screenplay.slice(0, 3000) : '';
+            const context = [
+              rawDescription && `REQUEST: ${rawDescription}`,
+              scriptExcerpt && `SCREENPLAY EXCERPT:\n${scriptExcerpt}`,
+              priorAssetsContext,
+            ].filter(Boolean).join('\n\n');
+
+            if (!context.trim()) {
+              await db.update(productionAssets).set({
+                status: 'error',
+                errorMessage: 'No screenplay or description provided',
+                updatedAt: new Date().toISOString(),
+              }).where(eq(productionAssets.id, assetId));
+              return { success: false, error: 'No context available for design document generation' };
+            }
+
+            const docResult = await generateDesignDocument(nodeId, context);
+            await db.update(productionAssets).set({
+              status: docResult.success ? 'done' : 'error',
+              outputData: JSON.stringify({
+                doc: docResult.doc ?? null,
+                raw: docResult.raw ?? null,
+                provider: docResult.provider ?? null,
+                specialist: nodeId,
+              }),
+              provider: docResult.provider ?? null,
+              errorMessage: docResult.error || null,
+              updatedAt: new Date().toISOString(),
+            }).where(eq(productionAssets.id, assetId));
+            return {
+              success: docResult.success,
+              assetId,
+              result: {
+                doc: docResult.doc ?? null,
+                provider: docResult.provider ?? null,
+                specialist: nodeId,
+                error: docResult.error,
+              },
             };
           } catch (e: any) {
             await db.update(productionAssets).set({
