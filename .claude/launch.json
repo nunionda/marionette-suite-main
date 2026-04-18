@@ -73,13 +73,6 @@
       "cwd": "apps/post-studio"
     },
     {
-      "name": "content-library",
-      "runtimeExecutable": "bunx",
-      "runtimeArgs": ["next", "dev", "--turbopack", "--port", "4003"],
-      "port": 4003,
-      "cwd": "apps/content-library"
-    },
-    {
       "name": "storyboard-maker-server",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["server.py"],

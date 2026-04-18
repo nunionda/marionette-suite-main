@@ -12,7 +12,6 @@
 |---|---|---|---|
 | contents-studio-web | 4001 | `NEXT_PUBLIC_HUB_URL` | Web |
 | post-studio | 4002 | `NEXT_PUBLIC_POST_STUDIO_URL` | Web |
-| content-library | 4003 | `NEXT_PUBLIC_CONTENT_LIBRARY_URL` | Web |
 | script-writer-frontend | 5174 | `NEXT_PUBLIC_SCRIPT_WRITER_URL` | Web (Vite) |
 | storyboard-maker | 3007 | `NEXT_PUBLIC_STORYBOARD_URL` | Web+API |
 | studio | 3001 | `NEXT_PUBLIC_STUDIO_URL` | Web |
@@ -33,3 +32,7 @@
 
 production target은 단일 origin (`app.marionette.studio`). dev에서도 결국 `:3000`로 통일할 예정.
 이 표는 Phase 5.1에서 갱신될 예정이며, 그때도 코드 변경 없이 .env만 바꾸면 적용됨.
+
+## 변경 이력
+
+- **Phase 5a**: `content-library` (`:4003`) 서비스를 hub `/library` 경로로 흡수. 독립 앱 및 `NEXT_PUBLIC_CONTENT_LIBRARY_URL` 제거.

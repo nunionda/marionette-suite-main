@@ -370,7 +370,7 @@ function DeliveryTab({ rows, project }: { rows: DeliveryItem[]; project: PostPro
         )}
         {publishState === "error" && (
           <span className="text-[11px]" style={{ color: "#f87171" }}>
-            Content Library offline? Check that :4003 is running.
+            Content Library offline? Check that hub (:4001) is running.
           </span>
         )}
       </div>
