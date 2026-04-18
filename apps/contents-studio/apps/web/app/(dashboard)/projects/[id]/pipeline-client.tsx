@@ -7,8 +7,8 @@ interface Props {
   meta: ProjectMeta;
 }
 
-const SCRIPT_WRITER_BASE = process.env.NEXT_PUBLIC_SCRIPT_WRITER_URL ?? "http://localhost:5174";
-const STORYBOARD_BASE = process.env.NEXT_PUBLIC_STORYBOARD_URL ?? "http://localhost:3007";
+const SCRIPT_WRITER_BASE = process.env.NEXT_PUBLIC_SCRIPT_WRITER_URL ?? (process.env.NEXT_PUBLIC_SCRIPT_WRITER_URL ?? "http://localhost:5174");
+const STORYBOARD_BASE = process.env.NEXT_PUBLIC_STORYBOARD_URL ?? (process.env.NEXT_PUBLIC_STORYBOARD_URL ?? "http://localhost:3007");
 
 function buildDeepLinks(projectId: string): Partial<Record<StepKey, DeepLink>> {
   const sw = (step: string): DeepLink => ({
