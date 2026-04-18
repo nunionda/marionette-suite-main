@@ -82,7 +82,11 @@ const statusStyles: Record<StepStatus, string> = {
   "Revision": "bg-[var(--ms-crimson)] text-white",
 };
 
-export default function ShotMatrix() {
+interface ShotMatrixProps {
+  onShotClick?: (id: string) => void;
+}
+
+export default function ShotMatrix({ onShotClick }: ShotMatrixProps) {
   return (
     <div className="w-full flex flex-col bg-[var(--ms-bg-surface)] border border-[var(--ms-gold-border)] rounded-[var(--ms-radius-lg)] overflow-hidden gstack-glass shadow-[var(--ms-glass-shadow)] mt-6">
       {/* Matrix Controls */}
@@ -112,7 +116,7 @@ export default function ShotMatrix() {
           </thead>
           <tbody className="divide-y divide-[var(--ms-gold-border)]/50">
             {mockShots.map((shot) => (
-              <tr key={shot.id} className="hover:bg-[var(--ms-gold-haze)] transition-all group cursor-default">
+              <tr key={shot.id} onClick={() => onShotClick?.(shot.id)} className="hover:bg-[var(--ms-gold-haze)] transition-all group cursor-pointer">
                 <td className="px-6 py-6 border-r border-[var(--ms-gold-border)] sticky left-0 z-10 bg-[var(--ms-bg-elevated)] group-hover:bg-[var(--ms-bg-surface)]">
                   <div className="flex flex-col min-w-[200px]">
                     <span className="text-[10px] font-mono text-[var(--ms-gold)] opacity-70 mb-1">{shot.id}</span>

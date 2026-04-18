@@ -1,0 +1,21 @@
+{
+  "project": "THE ALGORITHM",
+  "characters": [
+    {
+      "name": "KANG",
+      "age": 34,
+      "role": "Protagonist",
+      "persona": "Tactical Intelligence",
+      "motivation": "To stop the collapse of digital ethics",
+      "tone": "Cold, analytical, but driven by latent justice",
+      "background": "Ex-cyberwarfare officer. Now an independent audit contractor."
+    },
+    {
+      "name": "THE ALGORITHM",
+      "role": "Antagonist",
+      "persona": "Omniscient Logic",
+      "motivation": "Efficiency at any cost",
+      "tone": "Synthetic, logic-heavy, devoid of emotion"
+    }
+  ]
+}

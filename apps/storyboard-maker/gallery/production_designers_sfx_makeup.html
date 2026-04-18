@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SFX Makeup — Hollywood Makeup Effects Artists 10</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #8b9dc3; }</style>
+</head>
+<body>
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab active">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab">VFX</a>
+</nav>
+<div class="topbar">
+  <div>
+    <h1>SFX MAKEUP DESIGN</h1>
+    <div class="subtitle">10 Special Effects Makeup Masters &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate SFX Makeup</button>
+  </div>
+</div>
+<div class="layout">
+  <div class="artist-panel" id="artistPanel"></div>
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">SFX MAKEUP</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/2f/4b/74/2f4b741e286790c0ad8d8c6768318837.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>SFX Makeup Gallery</h2>
+          <p>10명의 특수분장 거장 — Rick Baker, Stan Winston, Dick Smith 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 아티스트를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+    <div class="filmstrip-wrapper"><div class="filmstrip" id="filmstrip"></div></div>
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 SFX makeup artists loaded</span>
+    </div>
+  </div>
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#127917;</p>
+      <p style="font-size:0.85em;">Select an artist from the left panel</p>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate SFX Makeup Concept</h3>
+    <label>Creature / Character Description</label>
+    <textarea id="modalScene" placeholder="e.g. 늑대인간 변신 중간 단계, 달빛 아래 고통스러운 변형"></textarea>
+    <label>Artist Style</label>
+    <select id="modalStyle"><option value="all">All Styles (Compare)</option></select>
+    <label>Technique</label>
+    <input id="modalCamera" type="text" placeholder="e.g. prosthetic, animatronic, foam latex, silicone" />
+    <label>Mood / Horror Level</label>
+    <input id="modalMood" type="text" placeholder="e.g. grotesque, subtle aging, alien beauty, body horror" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+<script src="gallery-api.js"></script>
+<script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
+const DESIGNERS = [
+  {
+    id: 'rick_baker', rank: '01', name: 'Rick Baker (릭 베이커)',
+    subtitle: 'Makeup Effects Artist · 미국 · 1950-',
+    styleType: 'transformation', styleLabel: 'Transformation Master',
+    desc: '아카데미상 7회 수상 — 역대 최다 수상 메이크업 아티스트. 런던의 미국 늑대인간의 변신 씬은 영화 역사상 가장 위대한 특수분장으로 꼽힌다. MiB, 그린치, 말레피센트까지 40년간 할리우드를 지배.',
+    styleDesc: '실시간 변신 메이크업의 창시자. 기계적 프로스테틱과 폼 라텍스를 결합한 혁명적 변신 효과. 인간에서 비인간으로의 전환을 물리적으로 구현.',
+    technique: 'Mechanical Prosthetics: 내부 메커니즘으로 실시간 변형 구현.\nFoam Latex Sculpture: 폼 라텍스를 이용한 정밀 조각.\nCharacter Transformation: 배우를 완전히 다른 존재로 변환.',
+    aiPrompt: 'Rick Baker makeup effects, American Werewolf London transformation, practical prosthetic makeup, foam latex creature, realistic werewolf mid-transformation, Oscar-winning special effects',
+    films: ['런던의 미국 늑대인간 (1981)', '맨 인 블랙 (1997)', '그린치 (2000)', '말레피센트 (2014)'],
+    characters: ['늑대인간 변신', 'MiB 외계인들', '그린치 전신분장', '말레피센트 뿔'],
+    links: [{ text: 'Wikipedia: Rick Baker', url: 'https://en.wikipedia.org/wiki/Rick_Baker_(makeup_artist)' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/1c/bd/8d/1cbd8dc59dcfb18557c6709869fba2fc.jpg', label: 'Baker — reference 1' },
+      { src: 'https://i.pinimg.com/736x/8d/68/ea/8d68ea6226c54ecc56ebfd97a078a318.jpg', label: 'Baker — reference 2' },
+      { src: 'https://i.pinimg.com/736x/82/bc/84/82bc8430d0ba8a3fc49594de9aab3619.jpg', label: 'Baker — reference 3' },
+      { src: 'https://i.pinimg.com/736x/55/60/68/55606861ea96989c4af70853dc2b6728.jpg', label: 'Baker — reference 4' },
+      { src: 'https://i.pinimg.com/736x/6c/0f/5f/6c0f5f5c9f67f65c658b46cab9e68454.jpg', label: 'Baker — reference 5' },
+      { src: 'https://i.pinimg.com/736x/53/94/bc/5394bc58bed7ccfe5e2f12ab9657760d.jpg', label: 'Baker — reference 6' },
+      { src: 'https://i.pinimg.com/736x/dc/e8/90/dce8905783fbda12e385be1ada609c54.jpg', label: 'Baker — reference 7' },
+      { src: 'https://i.pinimg.com/736x/5b/7e/3f/5b7e3f9dc29dded2e0e098a1f4846e17.jpg', label: 'Baker — reference 8' },
+      { src: 'https://i.pinimg.com/736x/c2/69/95/c269952a9819d8f7bce20822ca6ae795.jpg', label: 'Baker — reference 9' },
+      { src: 'https://i.pinimg.com/736x/42/3b/fb/423bfbd8ecdc6cffb1a48655a0e6ea0a.jpg', label: 'Baker — reference 10' },
+      { src: 'https://i.pinimg.com/736x/f5/4d/da/f54dda138310b981910ac8389b80e9ea.jpg', label: 'Baker — reference 11' },
+      { src: 'https://i.pinimg.com/736x/bf/32/52/bf3252fb62859e8d147f25fc8beddf18.jpg', label: 'Baker — reference 12' },
+    ],
+  },
+  {
+    id: 'stan_winston', rank: '02', name: 'Stan Winston (스탠 윈스턴)',
+    subtitle: 'Creature & Effects Designer · 미국 · 1946-2008',
+    styleType: 'creature', styleLabel: 'Creature Animatronics',
+    desc: '아카데미상 4회 수상. 터미네이터의 엔도스켈레톤, 프레데터, 쥬라기 공원의 공룡을 물리적으로 창조한 전설. Stan Winston Studio는 할리우드 크리처 이펙트의 성지.',
+    styleDesc: '애니마트로닉스와 로봇 공학을 결합한 실물 크리처 제작의 황제. 실제로 움직이고 숨쉬는 것처럼 보이는 기계 생명체를 만드는 기술의 정점.',
+    technique: 'Full-Scale Animatronics: 실물 크기 로봇 크리처 제작.\nHybrid FX: 실물 메이크업과 CG의 유기적 결합.\nPuppet Engineering: 복잡한 내부 메커니즘의 퍼펫 설계.',
+    aiPrompt: 'Stan Winston creature design, Terminator endoskeleton, Predator alien warrior, Jurassic Park T-Rex animatronic, practical creature effects, full-scale mechanical puppet',
+    films: ['터미네이터 2 (1991)', '쥬라기 공원 (1993)', '프레데터 (1987)', '에일리언 2 (1986)'],
+    characters: ['T-800 엔도스켈레톤', 'T-Rex 실물 애니마트로닉', '프레데터 전사', '에일리언 퀸'],
+    links: [{ text: 'Stan Winston School', url: 'https://www.stanwinstonschool.com/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/2f/4b/74/2f4b741e286790c0ad8d8c6768318837.jpg', label: 'Winston — reference 1' },
+      { src: 'https://i.pinimg.com/736x/25/29/b0/2529b0d5f6cf67a9c9c71fab22c4a4bf.jpg', label: 'Winston — reference 2' },
+      { src: 'https://i.pinimg.com/736x/ed/19/ef/ed19eff8f18f76a7d2e933027435a3bb.jpg', label: 'Winston — reference 3' },
+      { src: 'https://i.pinimg.com/736x/31/b6/dd/31b6dd8d14b94571b3cf558762b198bc.jpg', label: 'Winston — reference 4' },
+      { src: 'https://i.pinimg.com/736x/c6/3b/0f/c63b0fdd55013503b53d7caef1684acb.jpg', label: 'Winston — reference 5' },
+      { src: 'https://i.pinimg.com/736x/0b/94/e6/0b94e616829427ccb879032fb0a53135.jpg', label: 'Winston — reference 6' },
+      { src: 'https://i.pinimg.com/736x/51/ca/d1/51cad1f96b932b06b05702266907eba8.jpg', label: 'Winston — reference 7' },
+      { src: 'https://i.pinimg.com/736x/a7/b7/bd/a7b7bdbc411b6ba979b176490e2e0563.jpg', label: 'Winston — reference 8' },
+      { src: 'https://i.pinimg.com/736x/70/62/cb/7062cbcfd2150212f87d5feffeb61336.jpg', label: 'Winston — reference 9' },
+      { src: 'https://i.pinimg.com/736x/6c/e9/30/6ce930cda9a8873d234a0169b9ab2a0c.jpg', label: 'Winston — reference 10' },
+      { src: 'https://i.pinimg.com/736x/b3/15/06/b3150695417d5a66c37fb1efc382be65.jpg', label: 'Winston — reference 11' },
+      { src: 'https://i.pinimg.com/736x/bc/26/f6/bc26f60a9f14c6010b9bb019ae11a13c.jpg', label: 'Winston — reference 12' },
+    ],
+  },
+  {
+    id: 'dick_smith', rank: '03', name: 'Dick Smith (딕 스미스)',
+    subtitle: 'Makeup Artist · 미국 · 1922-2014',
+    styleType: 'aging', styleLabel: 'Aging & Prosthetic Pioneer',
+    desc: '"현대 메이크업의 대부." 엑소시스트의 악마 분장, 아마데우스의 노년 살리에리를 창조. 폼 라텍스 프로스테틱 기법의 발명자이자, 릭 베이커를 포함한 수많은 후배를 양성한 교육자.',
+    styleDesc: '노화 분장과 프로스테틱의 선구자. 폼 라텍스 어플라이언스를 영화에 처음 도입. 젊은 배우를 노인으로, 정상을 악마로 변환하는 기술을 체계화.',
+    technique: 'Foam Latex Innovation: 폼 라텍스 프로스테틱의 최초 개발.\nSubtle Aging: 자연스러운 노화 효과를 위한 미세 디테일.\nDemonic Transformation: 공포 영화의 악마적 변형 메이크업.',
+    aiPrompt: 'Dick Smith makeup effects, The Exorcist possessed Regan, realistic aging prosthetic, foam latex appliance, Amadeus old age makeup, practical horror transformation',
+    films: ['엑소시스트 (1973)', '아마데우스 (1984)', '대부 (1972)', '택시 드라이버 (1976)'],
+    characters: ['리건 악마 분장', '노년 살리에리', '비토 코를레오네 노화', '트래비스 비클 상처'],
+    links: [{ text: 'Academy: Dick Smith Legacy', url: 'https://www.oscars.org/governors/dick-smith' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/be/b6/62/beb662459c891dcf1cbd6a22ab2e8936.jpg', label: 'D.Smith — reference 1' },
+      { src: 'https://i.pinimg.com/736x/83/7f/59/837f59b5ac23e04d4e18efdb8622da44.jpg', label: 'D.Smith — reference 2' },
+      { src: 'https://i.pinimg.com/736x/0a/f4/65/0af46514d17883814e71f48b37809d88.jpg', label: 'D.Smith — reference 3' },
+      { src: 'https://i.pinimg.com/736x/93/9f/06/939f060b02da22a2e78025cc8ec5a12f.jpg', label: 'D.Smith — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ed/48/73/ed48732d74f15b0137e9d2f43472cd0b.jpg', label: 'D.Smith — reference 5' },
+      { src: 'https://i.pinimg.com/736x/3c/eb/04/3ceb04d95cc0db1b2705c241f845d5c4.jpg', label: 'D.Smith — reference 6' },
+      { src: 'https://i.pinimg.com/736x/bd/01/c8/bd01c8704f26cb46f97ad88d87de3594.jpg', label: 'D.Smith — reference 7' },
+      { src: 'https://i.pinimg.com/736x/bd/3b/ee/bd3beec3c081709e4a3996e0b8b1ac25.jpg', label: 'D.Smith — reference 8' },
+      { src: 'https://i.pinimg.com/736x/a5/2a/c4/a52ac4e0fcd53ec6115599092031d71f.jpg', label: 'D.Smith — reference 9' },
+      { src: 'https://i.pinimg.com/736x/a9/b7/34/a9b7344e2b19988394cbfeb1494bc0ce.jpg', label: 'D.Smith — reference 10' },
+      { src: 'https://i.pinimg.com/736x/4d/8d/e3/4d8de3dd9429dbff44f07ae30fb7c777.jpg', label: 'D.Smith — reference 11' },
+      { src: 'https://i.pinimg.com/736x/72/70/03/727003531e71a10de8c519233956c4f4.jpg', label: 'D.Smith — reference 12' },
+    ],
+  },
+  {
+    id: 'greg_nicotero', rank: '04', name: 'Greg Nicotero (그렉 니코테로)',
+    subtitle: 'Makeup Effects & Director · 미국 · 1963-',
+    styleType: 'gore', styleLabel: 'Gore & Zombie Specialist',
+    desc: 'KNB EFX Group 공동 창립자. 워킹 데드 시리즈의 좀비 아미를 10년간 창조. 킬 빌, 신 시티, 이블 데드 등 고어 이펙트의 현대 마스터. 연출까지 겸하는 멀티 아티스트.',
+    styleDesc: '고어와 좀비 특수분장의 현대적 기준을 정립. 대량 생산과 일관된 품질을 유지하면서도 각각 개성 있는 좀비를 만드는 시스템을 구축.',
+    technique: 'Mass Production Quality: 수백 명의 좀비를 일관된 품질로 제작.\nStory-Driven Gore: 서사에 봉사하는 고어 효과.\nPractical-Digital Blend: 실물 분장과 디지털 보강의 하이브리드.',
+    aiPrompt: 'Greg Nicotero makeup effects, Walking Dead zombie prosthetic, KNB gore effects, practical undead makeup, horror creature design, decomposing corpse prosthetic',
+    films: ['워킹 데드 (2010-2022)', '킬 빌 (2003)', '이블 데드 2 (1987)', '신 시티 (2005)'],
+    characters: ['워커 좀비 아미', '크레이지 88 전투', '데드아이트', '옐로우 바스타드'],
+    links: [{ text: 'KNB EFX Group', url: 'https://knbefxgroup.com/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/4a/95/1c/4a951c9d1ca7b7dcc8abb6a5485b08ad.jpg', label: 'Nicotero — reference 1' },
+      { src: 'https://i.pinimg.com/736x/4d/01/ae/4d01ae30fd63f8f0b93300ed06f1b4a3.jpg', label: 'Nicotero — reference 2' },
+      { src: 'https://i.pinimg.com/736x/8a/4f/00/8a4f0028e7154f07b487e5f8bab4d619.jpg', label: 'Nicotero — reference 3' },
+      { src: 'https://i.pinimg.com/736x/78/e3/dd/78e3dd158c68064ec2e577203783cf1d.jpg', label: 'Nicotero — reference 4' },
+      { src: 'https://i.pinimg.com/736x/78/c4/fd/78c4fd5a2ec7acd1c80321f768a93c16.jpg', label: 'Nicotero — reference 5' },
+      { src: 'https://i.pinimg.com/736x/be/9d/51/be9d513a214ddfbf3b62db1d4619f0c2.jpg', label: 'Nicotero — reference 6' },
+      { src: 'https://i.pinimg.com/736x/c1/62/be/c162be0ec5e2c0f0ad44a0c027248360.jpg', label: 'Nicotero — reference 7' },
+      { src: 'https://i.pinimg.com/736x/33/48/a3/3348a37ed5a980834aa84e733ac5b34c.jpg', label: 'Nicotero — reference 8' },
+      { src: 'https://i.pinimg.com/736x/b2/88/05/b288058b8fb116d293163a8b10521d78.jpg', label: 'Nicotero — reference 9' },
+      { src: 'https://i.pinimg.com/736x/53/e8/31/53e8319e7ec94c51d70ccfaeae01dbcf.jpg', label: 'Nicotero — reference 10' },
+      { src: 'https://i.pinimg.com/736x/c4/af/18/c4af18dedd27a7fee3f6b2f321dcb258.jpg', label: 'Nicotero — reference 11' },
+      { src: 'https://i.pinimg.com/736x/e8/a1/0c/e8a10cf150504bfc7852463072a5244c.jpg', label: 'Nicotero — reference 12' },
+    ],
+  },
+  {
+    id: 've_neill', rank: '05', name: 'Ve Neill (비 닐)',
+    subtitle: 'Makeup Artist · 미국 · 1951-',
+    styleType: 'character_sfx', styleLabel: 'Character Transformation',
+    desc: '아카데미상 3회 수상. 비틀주스, 가위손, 캐리비안의 해적 시리즈의 분장을 담당. 팀 버튼의 기묘한 캐릭터들과 잭 스패로우의 아이코닉한 룩을 창조한 거장.',
+    styleDesc: '캐릭터 변환 메이크업의 마스터. 유머러스한 판타지 캐릭터부터 해적의 거친 분장까지, 캐릭터의 개성을 극대화하는 분장 디자인.',
+    technique: 'Character Enhancement: 배우의 특성을 살리면서 캐릭터를 극대화.\nWhimsical Horror: 기묘하면서도 유머러스한 분장.\nWeathering & Aging: 자연스러운 풍화와 노화 효과.',
+    aiPrompt: 'Ve Neill makeup design, Beetlejuice ghost character makeup, Edward Scissorhands pale scarred face, Captain Jack Sparrow pirate weathered look, Tim Burton character transformation',
+    films: ['비틀주스 (1988)', '가위손 (1990)', '캐리비안의 해적 (2003-2017)', '배트맨 리턴즈 (1992)'],
+    characters: ['비틀주스 분장', '에드워드 창백한 얼굴', '잭 스패로우 해적룩', '펭귄맨 분장'],
+    links: [{ text: 'IMDb: Ve Neill', url: 'https://www.imdb.com/name/nm0624679/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/b0/fa/0e/b0fa0e9c3f91d626f44626f55d64059a.jpg', label: 'Neill — reference 1' },
+      { src: 'https://i.pinimg.com/736x/81/dd/e5/81dde5e52a5ecbb223ce2786cb2102bc.jpg', label: 'Neill — reference 2' },
+      { src: 'https://i.pinimg.com/736x/13/eb/0c/13eb0c703b282ff6511cb36209d87133.jpg', label: 'Neill — reference 3' },
+      { src: 'https://i.pinimg.com/736x/8c/f2/67/8cf2677edc4ef618b9ba7ada2b33ebee.jpg', label: 'Neill — reference 4' },
+      { src: 'https://i.pinimg.com/736x/1f/da/2c/1fda2c8fa1c91040b6898886ea1be997.jpg', label: 'Neill — reference 5' },
+      { src: 'https://i.pinimg.com/736x/6f/9e/86/6f9e86084dfddb871a41858a9d375985.jpg', label: 'Neill — reference 6' },
+      { src: 'https://i.pinimg.com/736x/10/34/a9/1034a999faf37c5d8305a1ee9fccc49a.jpg', label: 'Neill — reference 7' },
+      { src: 'https://i.pinimg.com/736x/d2/8b/0b/d28b0b487ee68112e961984f02c5a3e6.jpg', label: 'Neill — reference 8' },
+      { src: 'https://i.pinimg.com/736x/06/ab/d4/06abd49c369df05e786d50841441b44d.jpg', label: 'Neill — reference 9' },
+      { src: 'https://i.pinimg.com/736x/be/06/85/be06858c5ac7aeeef50cca220db6f8b5.jpg', label: 'Neill — reference 10' },
+      { src: 'https://i.pinimg.com/736x/3e/20/60/3e206035df4c4080a9df938bcfa81767.jpg', label: 'Neill — reference 11' },
+      { src: 'https://i.pinimg.com/736x/17/7a/a3/177aa346228f964d2b9ef0736f7c03b5.jpg', label: 'Neill — reference 12' },
+    ],
+  },
+  {
+    id: 'rob_bottin', rank: '06', name: 'Rob Bottin (롭 보틴)',
+    subtitle: 'Makeup Effects Artist · 미국 · 1959-',
+    styleType: 'bodyhorror', styleLabel: 'Body Horror Pioneer',
+    desc: '존 카펜터의 더 씽에서 영화 역사상 가장 충격적인 바디 호러 이펙트를 창조. 로보캅의 슈트도 그의 작품. 23세에 더 씽을 완성한 천재로, 작업 강도로 인해 병원에 입원할 정도로 몰입.',
+    styleDesc: '바디 호러의 극한을 추구. 인체의 변형, 분열, 융합을 실물 이펙트로 구현. 관객의 육체적 공포를 자극하는 그로테스크한 실물 효과의 대가.',
+    technique: 'Practical Body Horror: 인체 변형을 100% 실물로 구현.\nMechanical Gore: 기계 장치를 이용한 신체 분열 효과.\nThing Effect: 외계 생명체의 세포 단위 변형 표현.',
+    aiPrompt: 'Rob Bottin makeup effects, The Thing alien transformation body horror, RoboCop suit design, practical creature effects, grotesque body mutation, mechanical gore prosthetic',
+    films: ['더 씽 (1982)', '로보캅 (1987)', '토탈 리콜 (1990)', '하울링 (1981)'],
+    characters: ['씽 변형체들', '로보캅 갑옷', '머리 스파이더', '화성 변이 인간'],
+    links: [{ text: 'Wikipedia: Rob Bottin', url: 'https://en.wikipedia.org/wiki/Rob_Bottin' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/88/c4/aa/88c4aa126da5757dc92c8ec85acad6b8.jpg', label: 'Bottin — reference 1' },
+      { src: 'https://i.pinimg.com/736x/07/65/e8/0765e8bc7c61e9eb202727e308110bc0.jpg', label: 'Bottin — reference 2' },
+      { src: 'https://i.pinimg.com/736x/ae/a3/6e/aea36e9143f6efd2b8b68c26ab144421.jpg', label: 'Bottin — reference 3' },
+      { src: 'https://i.pinimg.com/736x/45/68/3f/45683f81d1553e913c402d244d67ed5d.jpg', label: 'Bottin — reference 4' },
+      { src: 'https://i.pinimg.com/736x/a1/ef/c9/a1efc9ddc7fd1a081a9c6a1bf96a4298.jpg', label: 'Bottin — reference 5' },
+      { src: 'https://i.pinimg.com/736x/c4/01/6f/c4016f76373385c18bc9dbde689d6281.jpg', label: 'Bottin — reference 6' },
+      { src: 'https://i.pinimg.com/736x/0d/a7/7c/0da77c88d99cc467930c6ed266c34354.jpg', label: 'Bottin — reference 7' },
+      { src: 'https://i.pinimg.com/736x/81/d9/61/81d961c5e3c721a0e813edb040946208.jpg', label: 'Bottin — reference 8' },
+      { src: 'https://i.pinimg.com/736x/9e/d7/f2/9ed7f29847db46608221a7a92e7043a5.jpg', label: 'Bottin — reference 9' },
+      { src: 'https://i.pinimg.com/736x/13/5b/9d/135b9d897cd83f0d670e2ce3704b793f.jpg', label: 'Bottin — reference 10' },
+      { src: 'https://i.pinimg.com/736x/6a/2c/33/6a2c332eb17e26e28b0e8d61fc47d3c6.jpg', label: 'Bottin — reference 11' },
+      { src: 'https://i.pinimg.com/736x/99/7a/cf/997acf5f086d691f84a078ceccaaddb7.jpg', label: 'Bottin — reference 12' },
+    ],
+  },
+  {
+    id: 'kazuhiro_tsuji', rank: '07', name: 'Kazuhiro Tsuji (辻 一弘)',
+    subtitle: 'Prosthetic Makeup Artist · 일본/미국 · 1969-',
+    styleType: 'hyperreal', styleLabel: 'Hyper-Realistic Prosthetics',
+    desc: '아카데미상 수상 (다키스트 아워). 게리 올드먼을 윈스턴 처칠로 완벽히 변환한 초사실적 프로스테틱의 거장. 메이크업을 은퇴하고 순수미술 조각가로 활동하다가 올드먼의 요청으로 복귀.',
+    styleDesc: '초사실적(Hyper-Realistic) 프로스테틱의 극한. 배우의 모든 표정이 프로스테틱을 통해 자연스럽게 전달되도록 설계. 실리콘 어플라이언스의 기술적 정점.',
+    technique: 'Silicone Perfection: 초정밀 실리콘 프로스테틱 제작.\nExpression Transfer: 프로스테틱을 통한 자연스러운 표정 전달.\nAnatomical Accuracy: 해부학적 정확성에 기반한 얼굴 재구성.',
+    aiPrompt: 'Kazuhiro Tsuji prosthetic makeup, Darkest Hour Churchill transformation, hyper-realistic silicone prosthetic, Gary Oldman character change, anatomically accurate face rebuild',
+    films: ['다키스트 아워 (2017)', '봄쉘 (2019)', '로치 (2004)', '클릭 (2006)'],
+    characters: ['윈스턴 처칠 (게리 올드먼)', '로저 에일스 (존 리스고)', '에디 머피 분장'],
+    links: [{ text: 'Wired: Kazuhiro Tsuji', url: 'https://www.wired.com/story/kazuhiro-tsuji-darkest-hour/' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/51/62/fe/5162fe57cff4ebdab108cddbaab2e748.jpg', label: 'Tsuji — reference 1' },
+      { src: 'https://i.pinimg.com/736x/de/28/e2/de28e2d5a3359d4b327acbae49232dd1.jpg', label: 'Tsuji — reference 2' },
+      { src: 'https://i.pinimg.com/736x/42/17/ec/4217ec14e3e36ba55a783e94187c64d9.jpg', label: 'Tsuji — reference 3' },
+      { src: 'https://i.pinimg.com/736x/d3/48/2b/d3482b64c73619dc6965b65bc027443c.jpg', label: 'Tsuji — reference 4' },
+      { src: 'https://i.pinimg.com/736x/43/d2/08/43d208bac39e7fcfd2946c46a83a2444.jpg', label: 'Tsuji — reference 5' },
+      { src: 'https://i.pinimg.com/736x/41/9e/25/419e258a3f572b3df9e6b019af128b1b.jpg', label: 'Tsuji — reference 6' },
+      { src: 'https://i.pinimg.com/736x/5d/04/bd/5d04bd869458cfc478992ad413fb9161.jpg', label: 'Tsuji — reference 7' },
+      { src: 'https://i.pinimg.com/736x/ee/7b/46/ee7b461b12d7fa461f50b6b9fb3a2c81.jpg', label: 'Tsuji — reference 8' },
+      { src: 'https://i.pinimg.com/736x/02/63/9f/02639f8df146b46e78f9c1796648cbfd.jpg', label: 'Tsuji — reference 9' },
+      { src: 'https://i.pinimg.com/736x/74/22/3c/74223cb5ebfefdcbcb1e4b66c5be2f15.jpg', label: 'Tsuji — reference 10' },
+      { src: 'https://i.pinimg.com/736x/36/77/93/36779347ffff31fb8f22b5f11aac3980.jpg', label: 'Tsuji — reference 11' },
+      { src: 'https://i.pinimg.com/736x/93/c4/ae/93c4ae41ec11a5f3f863bb380e9a77ee.jpg', label: 'Tsuji — reference 12' },
+    ],
+  },
+  {
+    id: 'jack_pierce', rank: '08', name: 'Jack Pierce (잭 피어스)',
+    subtitle: 'Makeup Artist · 그리스/미국 · 1889-1968',
+    styleType: 'classic', styleLabel: 'Classic Monster Design',
+    desc: '유니버설 몬스터의 창조자. 프랑켄슈타인, 미라, 늑대인간의 아이코닉한 외형을 설계한 할리우드 메이크업의 시조. 그의 디자인은 100년이 지난 지금도 몬스터의 원형으로 남아있다.',
+    styleDesc: '클래식 호러 몬스터의 시각적 원형 창조. 현대적 재료 없이 그리스페인트, 접착제, 면직물만으로 영화 역사상 가장 상징적인 몬스터들을 탄생시켰다.',
+    technique: 'Greasepaint Mastery: 기본 재료만으로 극적 변환 달성.\nIconic Silhouette: 한눈에 인식되는 몬스터 실루엣 설계.\nEndurance Application: 6-8시간 소요되는 정밀 분장 프로세스.',
+    aiPrompt: 'Jack Pierce classic monster makeup, Frankenstein flat-top monster, Universal Monsters horror design, The Mummy bandage wrapping, Wolfman transformation, 1930s practical makeup effects',
+    films: ['프랑켄슈타인 (1931)', '미라 (1932)', '늑대인간 (1941)', '프랑켄슈타인의 신부 (1935)'],
+    characters: ['프랑켄슈타인 몬스터', '임호텝 미라', '래리 탤봇 늑대인간', '프랑켄슈타인의 신부'],
+    links: [{ text: 'Wikipedia: Jack Pierce', url: 'https://en.wikipedia.org/wiki/Jack_Pierce_(makeup_artist)' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/d8/f5/8e/d8f58ee4bea8d2936a53f01b9f34006a.jpg', label: 'Pierce — reference 1' },
+      { src: 'https://i.pinimg.com/736x/c8/8c/54/c88c547540f81889b4bdff061390ff8f.jpg', label: 'Pierce — reference 2' },
+      { src: 'https://i.pinimg.com/736x/84/af/41/84af41afeb7aca89c522df191935f588.jpg', label: 'Pierce — reference 3' },
+      { src: 'https://i.pinimg.com/736x/b7/e2/22/b7e22209f948f9833f9fcab9f2fcbe67.jpg', label: 'Pierce — reference 4' },
+      { src: 'https://i.pinimg.com/736x/03/93/46/0393461f8080ec3c3bed0cea8b1e79c6.jpg', label: 'Pierce — reference 5' },
+      { src: 'https://i.pinimg.com/736x/64/46/63/6446636d335b5958e7a238e7ccb9363d.jpg', label: 'Pierce — reference 6' },
+      { src: 'https://i.pinimg.com/736x/11/b2/91/11b29117a5fa854ccb88b215d6e50696.jpg', label: 'Pierce — reference 7' },
+      { src: 'https://i.pinimg.com/736x/e1/02/56/e102564745a3cce3b66721bc93ba7f60.jpg', label: 'Pierce — reference 8' },
+      { src: 'https://i.pinimg.com/736x/b6/a7/81/b6a78180b16da226d07b081f53bf39c9.jpg', label: 'Pierce — reference 9' },
+      { src: 'https://i.pinimg.com/736x/e7/42/cb/e742cbfd0d56a981e297867c0be75898.jpg', label: 'Pierce — reference 10' },
+      { src: 'https://i.pinimg.com/736x/6d/21/af/6d21af2c50a2208ff32520e27e2af12f.jpg', label: 'Pierce — reference 11' },
+      { src: 'https://i.pinimg.com/736x/f5/4d/da/f54dda138310b981910ac8389b80e9ea.jpg', label: 'Pierce — reference 12' },
+    ],
+  },
+  {
+    id: 'stuart_freeborn', rank: '09', name: 'Stuart Freeborn (스튜어트 프리본)',
+    subtitle: 'Makeup Artist · 영국 · 1914-2013',
+    styleType: 'puppet', styleLabel: 'Puppet & Alien Creation',
+    desc: '스타워즈의 요다, 츄바카, 잡바 더 헛을 창조한 거장. 2001 스페이스 오디세이의 유인원 분장도 그의 작품. 조지 루카스가 "요다의 아버지"라 부른 영국 특수분장의 대부.',
+    styleDesc: '퍼펫과 마스크를 통한 캐릭터 창조의 대가. 요다의 얼굴에 아인슈타인의 이미지를 투영한 것으로 유명. 고무와 라텍스만으로 감정을 전달하는 캐릭터를 만듦.',
+    technique: 'Expressive Puppet: 감정을 전달하는 퍼펫 얼굴 설계.\nPortrait Sculpture: 실존 인물의 특징을 캐릭터에 투영.\nApe Suit Design: 전신 유인원 슈트의 사실적 설계.',
+    aiPrompt: 'Stuart Freeborn makeup design, Star Wars Yoda puppet creation, Chewbacca Wookiee suit, 2001 Space Odyssey ape makeup, expressive puppet face, classic sci-fi practical effects',
+    films: ['스타워즈 (1977-1983)', '2001 스페이스 오디세이 (1968)', '슈퍼맨 (1978)', '올리버 트위스트 (1948)'],
+    characters: ['요다', '츄바카', '잡바 더 헛', '유인원 (2001)'],
+    links: [{ text: 'StarWars.com: Stuart Freeborn', url: 'https://www.starwars.com/databank/stuart-freeborn' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/a9/10/0c/a9100c1319a4e9dde80478b6b0a797ed.jpg', label: 'Freeborn — reference 1' },
+      { src: 'https://i.pinimg.com/736x/35/7e/04/357e048c21294c3f1a15f9f4dd42dc88.jpg', label: 'Freeborn — reference 2' },
+      { src: 'https://i.pinimg.com/736x/0b/2b/e2/0b2be2f9c9de767a034490df85321694.jpg', label: 'Freeborn — reference 3' },
+      { src: 'https://i.pinimg.com/736x/92/d1/95/92d195f38fcc6b9a77fbf43fbb160949.jpg', label: 'Freeborn — reference 4' },
+      { src: 'https://i.pinimg.com/736x/f0/8d/d2/f08dd284b1bb99d5daa4b82e00b120f4.jpg', label: 'Freeborn — reference 5' },
+      { src: 'https://i.pinimg.com/736x/91/d4/7f/91d47f506c979e2d0f651e0151014e28.jpg', label: 'Freeborn — reference 6' },
+      { src: 'https://i.pinimg.com/736x/17/6f/dc/176fdc849a7ee7cd24ea21d40cafac5f.jpg', label: 'Freeborn — reference 7' },
+      { src: 'https://i.pinimg.com/736x/38/40/9d/38409d28cf3ea836ac7a18c571adcd72.jpg', label: 'Freeborn — reference 8' },
+      { src: 'https://i.pinimg.com/736x/60/5b/04/605b04ebb0db6f62b2aa447945651282.jpg', label: 'Freeborn — reference 9' },
+      { src: 'https://i.pinimg.com/736x/49/83/be/4983bee1976b70806ff4abe6d8977a67.jpg', label: 'Freeborn — reference 10' },
+      { src: 'https://i.pinimg.com/736x/cb/e5/04/cbe504801b03b048e9e84bfba6612952.jpg', label: 'Freeborn — reference 11' },
+      { src: 'https://i.pinimg.com/736x/db/4f/2d/db4f2dad6f81b3311fc093b2d2250543.jpg', label: 'Freeborn — reference 12' },
+    ],
+  },
+  {
+    id: 'joel_harlow', rank: '10', name: 'Joel Harlow (조엘 할로우)',
+    subtitle: 'Makeup Effects Designer · 미국 · 1970s-',
+    styleType: 'alien', styleLabel: 'Alien & Multi-Character',
+    desc: '아카데미상 수상 (스타트렉). J.J. 에이브럼스의 스타트렉 시리즈에서 수십 종의 외계 종족을 디자인. 캐리비안의 해적에서 데비 존스 크루의 해양 크리처 분장도 담당.',
+    styleDesc: '다수의 외계 종족을 동시에 창조하는 멀티 캐릭터 디자인의 전문가. 각 종족의 고유한 생물학적 논리와 문화를 프로스테틱에 반영.',
+    technique: 'Species Design: 생물학적 논리에 기반한 외계 종족 설계.\nMultiple Characters: 단일 작품에 수십 개의 서로 다른 디자인 동시 진행.\nMarine Creature FX: 해양 생물 기반 크리처 분장.',
+    aiPrompt: 'Joel Harlow alien makeup design, Star Trek alien species prosthetic, Pirates of the Caribbean Davy Jones crew, multiple alien race design, sci-fi creature prosthetic makeup',
+    films: ['스타트렉 (2009)', '캐리비안의 해적 (2006-2017)', '스타트렉 비욘드 (2016)', '론 레인저 (2013)'],
+    characters: ['크링온 전사', '데비 존스 해적단', '제이라 외계인', '발라즈 종족'],
+    links: [{ text: 'Stan Winston School: Joel Harlow', url: 'https://www.stanwinstonschool.com/blog/joel-harlow-star-trek' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/ca/32/9a/ca329a469e8fa2f482128f1f54d278e1.jpg', label: 'Harlow — reference 1' },
+      { src: 'https://i.pinimg.com/736x/27/92/2a/27922ae84d2850e3afd563e4800fb247.jpg', label: 'Harlow — reference 2' },
+      { src: 'https://i.pinimg.com/736x/19/4d/b0/194db0ca769fccf6d454409ab3946232.jpg', label: 'Harlow — reference 3' },
+      { src: 'https://i.pinimg.com/736x/14/d4/c8/14d4c8c427f89cb854431953d921ac90.jpg', label: 'Harlow — reference 4' },
+      { src: 'https://i.pinimg.com/736x/00/72/b7/0072b71442eefe212c77c8285db20333.jpg', label: 'Harlow — reference 5' },
+      { src: 'https://i.pinimg.com/736x/bd/47/39/bd4739809c1f2b9fcf63583f3660856e.jpg', label: 'Harlow — reference 6' },
+      { src: 'https://i.pinimg.com/736x/01/81/ab/0181abf1697c8517bd9420d1dfa217ca.jpg', label: 'Harlow — reference 7' },
+      { src: 'https://i.pinimg.com/736x/bd/62/4b/bd624bbeee5bf4c047586ae35f009f39.jpg', label: 'Harlow — reference 8' },
+      { src: 'https://i.pinimg.com/736x/01/e4/1f/01e41f183b3b0de1a7fcad1369037c54.jpg', label: 'Harlow — reference 9' },
+      { src: 'https://i.pinimg.com/736x/02/63/9f/02639f8df146b46e78f9c1796648cbfd.jpg', label: 'Harlow — reference 10' },
+      { src: 'https://i.pinimg.com/736x/64/d2/c0/64d2c0e566c0d059208a5359d317cd7b.jpg', label: 'Harlow — reference 11' },
+      { src: 'https://i.pinimg.com/736x/63/08/ee/6308eef90ebf275d299cc086c458d802.jpg', label: 'Harlow — reference 12' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+function buildArtistPanel() { document.getElementById('artistPanel').innerHTML = DESIGNERS.map(a => `<div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')"><span class="artist-rank">${a.rank}</span><div><div class="name">${a.name}</div><div class="role">${a.styleLabel}</div></div></div>`).join(''); }
+function selectArtist(id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; currentArtist = artist; currentImageIdx = 0; document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active')); document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active'); updateInfoPanel(artist); updateFilmstrip(artist); updateViewer(artist); }
+function updateInfoPanel(a) { let techniqueSec = ''; if (a.technique) { techniqueSec = `<div class="info-section"><h4>Technique</h4><p>${a.technique.replace(/\n/g, '<br>')}</p></div>`; } document.getElementById('infoPanel').innerHTML = `<h3>${a.name}</h3><div class="meta">${a.subtitle}</div><span class="style-indicator ${a.styleType}">${a.styleLabel}</span><div class="desc">${a.desc}</div><div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div><div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div><div class="info-section"><h4>Style</h4><p>${a.styleDesc}</p></div>${techniqueSec}<div class="info-section"><h4>AI Prompt</h4><div class="prompt-box" onclick="copyPrompt(this, '${a.id}')"><span class="copy-hint">click to copy</span>${a.aiPrompt}</div></div><div class="info-section"><h4>References</h4><div class="link-list">${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}</div></div>`; }
+function copyPrompt(el, id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; navigator.clipboard.writeText(artist.aiPrompt).then(() => { el.classList.add('copied'); el.querySelector('.copy-hint').textContent = 'copied!'; setTimeout(() => { el.classList.remove('copied'); el.querySelector('.copy-hint').textContent = 'click to copy'; }, 1500); }); }
+function updateFilmstrip(a) { const strip = document.getElementById('filmstrip'); strip.innerHTML = a.images.length === 0 ? Array.from({length: 4}, (_, i) => `<div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}"><div class="no-image">No image</div></div>`).join('') : a.images.map((img, i) => `<div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})"><img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" /><div class="thumb-label">${img.label}</div></div>`).join(''); }
+function updateViewer(a) { const img = document.getElementById('mainImage'); const ph = document.getElementById('viewerPlaceholder'); const counter = document.getElementById('imageCounter'); const badge = document.getElementById('artistBadge'); badge.style.display = 'block'; document.getElementById('badgeName').textContent = a.name; document.getElementById('badgeStyle').textContent = a.styleLabel; if (a.images.length > 0 && a.images[currentImageIdx]) { img.style.opacity='0'; img.style.display='block'; ph.style.display='none'; img.onload=()=>{img.style.opacity='1';}; img.onerror=function(){img.style.display='none'; ph.style.display='flex'; ph.style.flexDirection='column'; ph.style.alignItems='center'; ph.style.justifyContent='center'; ph.innerHTML='<div style=\"text-align:center;color:var(--text-dim)\">'+`<div style=\"font-size:2em;margin-bottom:8px\">&#9888;</div>`+`<div style=\"font-size:0.85em;color:#888\">${a.images[currentImageIdx].label}</div>`+`<div style=\"font-size:0.75em;margin-top:4px;color:#555\">이미지를 불러올 수 없습니다</div>`+`<button onclick=\"selectImage(${currentImageIdx})\" style=\"margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em\">재시도</button>`+'</div>';}; img.src=a.images[currentImageIdx].src; counter.style.display = 'block'; counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`; } else { img.style.display = 'none'; ph.style.display = 'block'; counter.style.display = 'none'; } }
+function selectImage(idx) { if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return; currentImageIdx = idx; updateViewer(currentArtist); document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx)); }
+function prevImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length; selectImage(currentImageIdx); }
+function nextImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length; selectImage(currentImageIdx); }
+function openModal() { const sel = document.getElementById('modalStyle'); if (sel.options.length <= 1) { DESIGNERS.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`; sel.appendChild(opt); }); } document.getElementById('modalOverlay').classList.add('show'); document.getElementById('modalScene').focus(); if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function handleGenerate() { const scene = document.getElementById('modalScene').value; const style = document.getElementById('modalStyle').value; if (!scene.trim()) { alert('Description is required.'); return; } closeModal(); setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`); generateConcept('sfx_makeup', { description: scene, style }).then(data => { if (data.success && data.url) { showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`); setStatus('ready', 'Generation complete ✓'); } else { setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`); } }).catch(err => { setStatus('ready', `API error: ${err.message}`); }); }
+function setStatus(state, text) { document.getElementById('statusDot').className = 'status-dot ' + state; document.getElementById('statusText').textContent = text; }
+document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return; if (e.key === 'ArrowLeft') prevImage(); if (e.key === 'ArrowRight') nextImage(); if (e.key === 'g' || e.key === 'G') openModal(); if (e.key === 'Escape') closeModal(); const num = parseInt(e.key); if (!isNaN(num)) { const idx = num === 0 ? 9 : num - 1; if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id); } });
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

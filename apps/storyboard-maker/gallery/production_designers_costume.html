@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Costume Design — Hollywood Costume Designers 10</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #b868a8; }</style>
+</head>
+<body>
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab active">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab">VFX</a>
+</nav>
+<div class="topbar">
+  <div>
+    <h1>COSTUME DESIGN</h1>
+    <div class="subtitle">10 Costume Design Masters &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Costume</button>
+  </div>
+</div>
+<div class="layout">
+  <div class="artist-panel" id="artistPanel"></div>
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">COSTUME DESIGN</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/50/9c/1f/509c1fc2a40a10cbad7399939e839077.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Costume Design Gallery</h2>
+          <p>10명의 코스튬 디자인 거장 — Edith Head, Colleen Atwood, Eiko Ishioka 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+    <div class="filmstrip-wrapper"><div class="filmstrip" id="filmstrip"></div></div>
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 costume designers loaded</span>
+    </div>
+  </div>
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128087;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Costume Concept</h3>
+    <label>Character / Scene Description</label>
+    <textarea id="modalScene" placeholder="e.g. 1920년대 재즈 시대 여성 가수, 화려한 플래퍼 드레스"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle"><option value="all">All Styles (Compare)</option></select>
+    <label>Era / Period</label>
+    <input id="modalCamera" type="text" placeholder="e.g. Victorian, Art Deco, Futuristic, Medieval" />
+    <label>Mood / Character</label>
+    <input id="modalMood" type="text" placeholder="e.g. regal, rebellious, elegant, battle-worn" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+<script src="gallery-api.js"></script>
+<script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
+const DESIGNERS = [
+  {
+    id: 'edith_head', rank: '01', name: 'Edith Head (에디스 헤드)',
+    subtitle: 'Costume Designer · 미국 · 1897-1981',
+    styleType: 'glamour', styleLabel: 'Hollywood Glamour',
+    desc: '아카데미상 8회 수상, 영화 역사상 가장 많은 오스카를 받은 의상 디자이너. 파라마운트와 유니버설에서 50년간 활동하며 오드리 헵번, 그레이스 켈리, 엘리자베스 테일러의 아이코닉한 룩을 창조했다.',
+    styleDesc: '할리우드 황금기의 글래머 정의. 배우의 체형과 성격을 완벽히 분석한 맞춤형 디자인. 우아함과 실용성의 완벽한 균형.',
+    technique: 'Star Tailoring: 배우 개인의 체형과 매력을 극대화하는 맞춤 설계.\nNarrative Costume: 의상으로 캐릭터의 성장과 변화를 표현.\nTimeless Elegance: 시대를 초월하는 우아한 실루엣.',
+    aiPrompt: 'Edith Head costume design, classic Hollywood glamour, elegant tailored gown, Audrey Hepburn style, Grace Kelly sophistication, golden age fashion, black and white era couture',
+    films: ['로마의 휴일 (1953)', '사브리나 (1954)', '이창 (1954)', '스팅 (1973)'],
+    characters: ['앤 공주 (오드리 헵번)', '사브리나 드레스', '리사 프리몬트', '1930년대 사기꾼 슈트'],
+    links: [{ text: 'Academy Museum: Edith Head', url: 'https://www.academymuseum.org/en/collection/edith-head' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/ba/d5/aa/bad5aa96b74118fc2b555b9a7e47fe8c.jpg', label: 'Head — reference 1' },
+      { src: 'https://i.pinimg.com/736x/cd/9d/c0/cd9dc05ffe0c50414c3af328543129c1.jpg', label: 'Head — reference 2' },
+      { src: 'https://i.pinimg.com/736x/2f/df/0e/2fdf0ead257dc1d8cf1baf4ce0d0e113.jpg', label: 'Head — reference 3' },
+      { src: 'https://i.pinimg.com/736x/c8/8c/54/c88c547540f81889b4bdff061390ff8f.jpg', label: 'Head — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ba/3d/64/ba3d64e2b26a726e57f3b1a7a7d56228.jpg', label: 'Head — reference 5' },
+      { src: 'https://i.pinimg.com/736x/99/5e/7e/995e7e767adc45624706ade5e3a5e838.jpg', label: 'Head — reference 6' },
+      { src: 'https://i.pinimg.com/736x/93/a0/50/93a0501f1b6e9583683dccf9fc81c3fa.jpg', label: 'Head — reference 7' },
+      { src: 'https://i.pinimg.com/736x/9c/d2/c7/9cd2c70f78a749481f3eed82fa153450.jpg', label: 'Head — reference 8' },
+      { src: 'https://i.pinimg.com/736x/98/f6/a6/98f6a62cb296c2ce38c98afc15b134b0.jpg', label: 'Head — reference 9' },
+      { src: 'https://i.pinimg.com/736x/68/48/49/68484922c710ab75eac800ac085b853a.jpg', label: 'Head — reference 10' },
+      { src: 'https://i.pinimg.com/736x/c9/d0/ae/c9d0ae9bfe9c88a2456b784d16e39b7c.jpg', label: 'Head — reference 11' },
+      { src: 'https://i.pinimg.com/736x/14/28/a7/1428a75d63a9fee6b88936c5748c808b.jpg', label: 'Head — reference 12' },
+    ],
+  },
+  {
+    id: 'colleen_atwood', rank: '02', name: 'Colleen Atwood (콜린 앳우드)',
+    subtitle: 'Costume Designer · 미국 · 1948-',
+    styleType: 'fantasy', styleLabel: 'Dark Fantasy Couture',
+    desc: '아카데미상 4회 수상. 팀 버튼의 오랜 협력자로서 가위손, 이상한 나라의 앨리스, 시카고 등의 의상을 디자인. 판타지와 고딕의 세계를 패브릭으로 구현하는 마법사.',
+    styleDesc: '어두운 판타지와 고딕 로맨스를 의상으로 표현. 역사적 시대복의 정확성 위에 초현실적 디테일을 더하는 독특한 스타일.',
+    technique: 'Gothic Romanticism: 고딕 실루엣에 로맨틱한 디테일 결합.\nTexture Layering: 다양한 소재와 질감의 층위적 구성.\nCharacter Embodiment: 캐릭터의 내면을 외형으로 완벽히 표현.',
+    aiPrompt: 'Colleen Atwood costume design, dark fantasy Gothic couture, Tim Burton collaboration, elaborate period costume with surreal details, Alice in Wonderland, theatrical fashion',
+    films: ['시카고 (2002)', '이상한 나라의 앨리스 (2010)', '위대한 쇼맨 (2017)', '가위손 (1990)'],
+    characters: ['벨마 켈리 (시카고)', '붉은 여왕', '쇼맨 서커스 의상', '에드워드 가죽 슈트'],
+    links: [{ text: 'Vogue: Colleen Atwood', url: 'https://www.vogue.com/article/colleen-atwood-costume-designer' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/29/0c/71/290c71dcced872438b7372c2eeb6699d.jpg', label: 'Atwood — reference 1' },
+      { src: 'https://i.pinimg.com/736x/94/98/44/9498448ec0bcce218d41cd5ee9b64c4a.jpg', label: 'Atwood — reference 2' },
+      { src: 'https://i.pinimg.com/736x/c9/0a/47/c90a476bab8154f88c322273246f961f.jpg', label: 'Atwood — reference 3' },
+      { src: 'https://i.pinimg.com/736x/55/b4/51/55b451cdc27b132006072bc523d5573f.jpg', label: 'Atwood — reference 4' },
+      { src: 'https://i.pinimg.com/736x/53/8d/a3/538da33057b0c10cb83229550ff18c09.jpg', label: 'Atwood — reference 5' },
+      { src: 'https://i.pinimg.com/736x/34/96/35/34963505f73fee26203cb36ac0d9ff26.jpg', label: 'Atwood — reference 6' },
+      { src: 'https://i.pinimg.com/736x/0d/5d/ee/0d5dee7afc39f76f14af2df32476d9a1.jpg', label: 'Atwood — reference 7' },
+      { src: 'https://i.pinimg.com/736x/bc/73/29/bc7329327e6845e6b8951396036878cf.jpg', label: 'Atwood — reference 8' },
+      { src: 'https://i.pinimg.com/736x/91/7b/9c/917b9ca5ca3e01195180030eda631adf.jpg', label: 'Atwood — reference 9' },
+      { src: 'https://i.pinimg.com/736x/80/88/cd/8088cd5696037eba13f107e380e3f858.jpg', label: 'Atwood — reference 10' },
+      { src: 'https://i.pinimg.com/736x/64/3b/e9/643be9ab5088d864986e16cec8fcd231.jpg', label: 'Atwood — reference 11' },
+      { src: 'https://i.pinimg.com/736x/62/a2/d5/62a2d5ef96d6f04fb33831dec4e4e02f.jpg', label: 'Atwood — reference 12' },
+    ],
+  },
+  {
+    id: 'sandy_powell', rank: '03', name: 'Sandy Powell (샌디 파웰)',
+    subtitle: 'Costume Designer · 영국 · 1960-',
+    styleType: 'period', styleLabel: 'Period Reinvention',
+    desc: '아카데미상 3회 수상. 스코세이지, 토드 헤인즈와의 협업으로 유명. 셰익스피어 인 러브, 에비에이터, 신데렐라의 의상을 디자인. 역사적 의상에 현대적 감각을 결합.',
+    styleDesc: '시대극 의상의 혁신적 재해석. 역사적 정확성을 유지하면서도 현대적 감각과 팝적 색채를 주입하는 대담한 접근.',
+    technique: 'Period Subversion: 시대복의 규칙을 알면서도 의도적으로 비트는 기법.\nColor Storytelling: 색상의 변화로 캐릭터 아크를 시각화.\nModern Anachronism: 의도적 시대착오를 통한 현대성 부여.',
+    aiPrompt: 'Sandy Powell costume design, reinvented period costume, Shakespeare in Love Renaissance fashion, bold color palette, Cinderella ball gown, Martin Scorsese period film',
+    films: ['셰익스피어 인 러브 (1998)', '에비에이터 (2004)', '신데렐라 (2015)', '아이리시맨 (2019)'],
+    characters: ['바이올라 남장 의상', '캐서린 헵번 바지 슈트', '신데렐라 블루 가운', '1950년대 마피아 슈트'],
+    links: [{ text: 'BAFTA: Sandy Powell', url: 'https://www.bafta.org/person/sandy-powell' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/77/f3/f7/77f3f7e8f62771ea9173285a787f5759.jpg', label: 'Powell — reference 1' },
+      { src: 'https://i.pinimg.com/736x/a2/4b/5c/a24b5c3efa12ff84b17175fd366bef6e.jpg', label: 'Powell — reference 2' },
+      { src: 'https://i.pinimg.com/736x/74/7d/8c/747d8cf7532edaee7b10e770b89cbb6d.jpg', label: 'Powell — reference 3' },
+      { src: 'https://i.pinimg.com/736x/ec/e2/d8/ece2d81c72db309ce335c1de9da3bf4a.jpg', label: 'Powell — reference 4' },
+      { src: 'https://i.pinimg.com/736x/32/83/d7/3283d7eddedbd6a4957e0353a01bbb14.jpg', label: 'Powell — reference 5' },
+      { src: 'https://i.pinimg.com/736x/8f/bd/73/8fbd73a56fccd0978143460d5f8c9dbc.jpg', label: 'Powell — reference 6' },
+      { src: 'https://i.pinimg.com/736x/84/15/56/84155674a03b730da4c82ea5adce28c3.jpg', label: 'Powell — reference 7' },
+      { src: 'https://i.pinimg.com/736x/06/6c/90/066c90b78ccc4ea68824cc44b029b7ff.jpg', label: 'Powell — reference 8' },
+      { src: 'https://i.pinimg.com/736x/7e/c3/95/7ec395dd5866f0acf65905b63456fb9e.jpg', label: 'Powell — reference 9' },
+      { src: 'https://i.pinimg.com/736x/ae/70/00/ae70001f0f08651eabc4cdf3e5359f12.jpg', label: 'Powell — reference 10' },
+      { src: 'https://i.pinimg.com/736x/9c/a4/df/9ca4dfef634b2f6fe73911f7b82c22d3.jpg', label: 'Powell — reference 11' },
+      { src: 'https://i.pinimg.com/736x/91/e3/45/91e3450fbdddf183ac7b64ec3799c611.jpg', label: 'Powell — reference 12' },
+    ],
+  },
+  {
+    id: 'milena_canonero', rank: '04', name: 'Milena Canonero (밀레나 카노네로)',
+    subtitle: 'Costume Designer · 이탈리아 · 1946-',
+    styleType: 'auteur', styleLabel: 'Auteur Collaboration',
+    desc: '아카데미상 4회 수상. 스탠리 큐브릭의 배리 린든, 시계태엽 오렌지의 의상을 설계한 거장. 웨스 앤더슨의 그랜드 부다페스트 호텔도 그녀의 작품.',
+    styleDesc: '감독의 비전을 완벽히 이해하고 의상으로 구현하는 오뜨르 협업의 정수. 시대적 정확성과 영화적 과장의 균형.',
+    technique: 'Director Symbiosis: 감독의 시각적 비전과 완벽히 동기화.\nPeriod Accuracy: 직물, 염색, 재단 기법까지 시대적 정확성 추구.\nSymbolic Costume: 의상에 서사적 상징성을 내장.',
+    aiPrompt: 'Milena Canonero costume design, Stanley Kubrick collaboration, Barry Lyndon 18th century fashion, A Clockwork Orange dystopian outfit, Grand Budapest Hotel uniform, auteur film costume',
+    films: ['배리 린든 (1975)', '시계태엽 오렌지 (1971)', '그랜드 부다페스트 호텔 (2014)', '마리 앙투아네트 (2006)'],
+    characters: ['배리 린든 18세기 복식', '알렉스의 흰 슈트', '로비 컨시어지 유니폼', '마리 앙투아네트 드레스'],
+    links: [{ text: 'Academy: Milena Canonero', url: 'https://www.oscars.org/collection-highlights/milena-canonero' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/71/53/a9/7153a9484bc0d780f9686a69e9cc9962.jpg', label: 'Canonero — reference 1' },
+      { src: 'https://i.pinimg.com/736x/1e/59/1e/1e591e9a1b5fcd6e563820c010f9f6da.jpg', label: 'Canonero — reference 2' },
+      { src: 'https://i.pinimg.com/736x/67/e8/4e/67e84e1c732020dbbc2797a860cfc549.jpg', label: 'Canonero — reference 3' },
+      { src: 'https://i.pinimg.com/736x/b9/91/6c/b9916c8956945a0bc7a3471340534826.jpg', label: 'Canonero — reference 4' },
+      { src: 'https://i.pinimg.com/736x/af/2e/6e/af2e6efbd1abf885ffdd0d721c0281b3.jpg', label: 'Canonero — reference 5' },
+      { src: 'https://i.pinimg.com/736x/e8/05/9d/e8059d0757160366a894d56bed8a5447.jpg', label: 'Canonero — reference 6' },
+      { src: 'https://i.pinimg.com/736x/85/51/39/8551396358903364f9afd8f2a0ba3d14.jpg', label: 'Canonero — reference 7' },
+      { src: 'https://i.pinimg.com/736x/ed/f6/22/edf62204804c7239d16056523a8f4365.jpg', label: 'Canonero — reference 8' },
+      { src: 'https://i.pinimg.com/736x/bb/35/15/bb3515406871eb857eef4de6c34feedb.jpg', label: 'Canonero — reference 9' },
+      { src: 'https://i.pinimg.com/736x/72/15/89/721589e62a002de3507d210d1f160446.jpg', label: 'Canonero — reference 10' },
+      { src: 'https://i.pinimg.com/736x/08/d1/4a/08d14a2525cb9332ab6630cf685dfefb.jpg', label: 'Canonero — reference 11' },
+      { src: 'https://i.pinimg.com/736x/11/25/b6/1125b6d48a0e1242291c22da28d6f113.jpg', label: 'Canonero — reference 12' },
+    ],
+  },
+  {
+    id: 'ruth_carter', rank: '05', name: 'Ruth E. Carter (루스 E. 카터)',
+    subtitle: 'Costume Designer · 미국 · 1960-',
+    styleType: 'afrofuturist', styleLabel: 'Afrofuturist Fashion',
+    desc: '아카데미상 2회 수상 (블랙 팬서, 와칸다 포에버). 아프리카 전통 직물과 미래 기술을 결합한 와칸다 의상을 창조. 말콤 X, 아미스타드 등 스파이크 리·스필버그와도 협업.',
+    styleDesc: '아프로퓨처리즘 패션의 선구자. 아프리카 각 부족의 전통 문양, 직물, 비딩 기법을 리서치하여 미래적 패션으로 재탄생시키는 문화적 디자인.',
+    technique: 'Cultural Research: 아프리카 54개국의 전통 의상 심층 연구.\nTech Integration: 3D 프린팅과 전통 비딩의 결합.\nTribal Identity: 부족별 정체성을 의상 색상과 패턴으로 구분.',
+    aiPrompt: 'Ruth E. Carter costume design, Black Panther Wakanda fashion, Afrofuturist costume, African tribal pattern meets future technology, vibranium armor suit, Dora Milaje warrior outfit',
+    films: ['블랙 팬서 (2018)', '와칸다 포에버 (2022)', '말콤 X (1992)', '아미스타드 (1997)'],
+    characters: ['트찰라 의식 복장', '도라 밀라제 전투복', '와칸다 왕실 의상', '말콤 X 슈트'],
+    links: [{ text: 'Vogue: Ruth Carter Wakanda', url: 'https://www.vogue.com/article/ruth-carter-black-panther-costumes' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/49/c7/be/49c7be443fef601f488e39ef45b27345.jpg', label: 'R.Carter — reference 1' },
+      { src: 'https://i.pinimg.com/736x/27/73/6b/27736b18c712e5ed3ffd926f68b30913.jpg', label: 'R.Carter — reference 2' },
+      { src: 'https://i.pinimg.com/736x/6c/dc/1a/6cdc1a3763e425b31dc8dab20d2e68e0.jpg', label: 'R.Carter — reference 3' },
+      { src: 'https://i.pinimg.com/736x/92/88/d7/9288d768d582abbadc05ab2fc7e13552.jpg', label: 'R.Carter — reference 4' },
+      { src: 'https://i.pinimg.com/736x/63/e6/a5/63e6a5aa6fe95faf68de5b1f8c1b3cd5.jpg', label: 'R.Carter — reference 5' },
+      { src: 'https://i.pinimg.com/736x/06/76/fe/0676fe18f7c288c9730e2f0b07fac21d.jpg', label: 'R.Carter — reference 6' },
+      { src: 'https://i.pinimg.com/736x/43/6f/20/436f20c13c69a0ce9db420a8602f4d7d.jpg', label: 'R.Carter — reference 7' },
+      { src: 'https://i.pinimg.com/736x/aa/05/a5/aa05a5b5e92aef285332e76e67d54aff.jpg', label: 'R.Carter — reference 8' },
+      { src: 'https://i.pinimg.com/736x/0d/89/2c/0d892c402f2912312bbb169e1cbaf80b.jpg', label: 'R.Carter — reference 9' },
+      { src: 'https://i.pinimg.com/736x/33/29/bf/3329bfeee5faf9dadf81bb126ee6d480.jpg', label: 'R.Carter — reference 10' },
+      { src: 'https://i.pinimg.com/736x/26/87/d5/2687d57d98ad0e3a6cb54d40a2ea5609.jpg', label: 'R.Carter — reference 11' },
+      { src: 'https://i.pinimg.com/736x/b4/d4/cc/b4d4cc5b01b017a1ca7b8cde58a6f783.jpg', label: 'R.Carter — reference 12' },
+    ],
+  },
+  {
+    id: 'jacqueline_durran', rank: '06', name: 'Jacqueline Durran (재클린 듀란)',
+    subtitle: 'Costume Designer · 영국 · 1966-',
+    styleType: 'romantic', styleLabel: 'Romantic Period Design',
+    desc: '아카데미상 2회 수상. 조 라이트 감독과의 안나 카레니나, 프라이드 앤 프레쥬디스, 그레타 거윅의 작은 아씨들의 의상을 디자인. 로맨틱한 시대극 의상의 현대적 거장.',
+    styleDesc: '로맨틱 시대극의 정수. 역사적 정확성을 기반으로 하되, 현대 관객의 감성에 호소하는 부드럽고 따뜻한 색감과 질감을 구사.',
+    technique: 'Lived-In Costume: 새 옷이 아닌 "살아온" 느낌의 자연스러운 질감.\nEmotional Palette: 캐릭터 감정에 따라 변화하는 색상 팔레트.\nPractical Beauty: 실제로 입을 수 있는 아름다움 추구.',
+    aiPrompt: 'Jacqueline Durran costume design, romantic period film fashion, Anna Karenina Russian aristocracy dress, Little Women 1860s New England costume, Joe Wright collaboration, warm natural fabrics',
+    films: ['안나 카레니나 (2012)', '작은 아씨들 (2019)', '어톤먼트 (2007)', '1917 (2019)'],
+    characters: ['안나 카레니나 무도회 드레스', '조 마치 일상복', '세실리아 그린 드레스', '1차 대전 군복'],
+    links: [{ text: 'British Vogue: Jacqueline Durran', url: 'https://www.vogue.co.uk/article/jacqueline-durran-costume-designer' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/f1/96/eb/f196eba40ac94f2d58553d11aca5a2c3.jpg', label: 'Durran — reference 1' },
+      { src: 'https://i.pinimg.com/736x/be/84/8d/be848dfda25c06a36273661c17a1e73b.jpg', label: 'Durran — reference 2' },
+      { src: 'https://i.pinimg.com/736x/e7/23/37/e72337369e73cdd645ba14d835c6b6d4.jpg', label: 'Durran — reference 3' },
+      { src: 'https://i.pinimg.com/736x/ee/34/20/ee34206088e9aea57de4905df948be60.jpg', label: 'Durran — reference 4' },
+      { src: 'https://i.pinimg.com/736x/9c/c0/c0/9cc0c084bef8b38d513d8bb5002f1256.jpg', label: 'Durran — reference 5' },
+      { src: 'https://i.pinimg.com/736x/29/dc/41/29dc41fb5dcea01bacd97f15f3531a4f.jpg', label: 'Durran — reference 6' },
+      { src: 'https://i.pinimg.com/736x/51/e7/41/51e741283f82bafafbe2f05dc6131b9b.jpg', label: 'Durran — reference 7' },
+      { src: 'https://i.pinimg.com/736x/a3/e1/11/a3e11101a328e67c5847575ea568e550.jpg', label: 'Durran — reference 8' },
+      { src: 'https://i.pinimg.com/736x/c9/a0/40/c9a0409c0c07eecad4e6df030fa742fd.jpg', label: 'Durran — reference 9' },
+      { src: 'https://i.pinimg.com/736x/d6/19/36/d619366931b4c890954754a5e3693e2b.jpg', label: 'Durran — reference 10' },
+      { src: 'https://i.pinimg.com/736x/bd/54/88/bd54887f4cf09628ddadd46e44107b06.jpg', label: 'Durran — reference 11' },
+      { src: 'https://i.pinimg.com/736x/8a/a5/2e/8aa52ecbe5381e24332b01a8d227197f.jpg', label: 'Durran — reference 12' },
+    ],
+  },
+  {
+    id: 'jenny_beavan', rank: '07', name: 'Jenny Beavan (제니 비번)',
+    subtitle: 'Costume Designer · 영국 · 1950-',
+    styleType: 'punk', styleLabel: 'Post-Apocalyptic Punk',
+    desc: '아카데미상 2회 수상. 전통적 시대극(전망 좋은 방)에서 매드 맥스: 분노의 도로, 크루엘라까지 장르를 넘나드는 놀라운 범위의 디자이너.',
+    styleDesc: '포스트 아포칼립스 펑크에서 빅토리안 엘레강스까지. 장르의 경계를 무시하는 범용적 디자인 능력. 매드 맥스의 전사 의상은 패션 역사를 새로 썼다.',
+    technique: 'Found Material: 폐자재와 재활용 소재로 세계관 구축.\nGenre Fusion: 전혀 다른 장르를 넘나드는 적응력.\nPractical Stunt Wear: 액션 촬영에서도 기능하는 의상 설계.',
+    aiPrompt: 'Jenny Beavan costume design, Mad Max Fury Road post-apocalyptic punk fashion, Cruella punk couture, wasteland warrior outfit, distressed leather and metal accessories, functional action costume',
+    films: ['매드 맥스: 분노의 도로 (2015)', '크루엘라 (2021)', '전망 좋은 방 (1985)', '킹스 스피치 (2010)'],
+    characters: ['임모탄 조 갑옷', '퓨리오사 전투복', '크루엘라 펑크 패션', '빅토리안 드레스'],
+    links: [{ text: 'Guardian: Jenny Beavan Mad Max', url: 'https://www.theguardian.com/film/jenny-beavan' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/12/70/0a/12700ad39e124b068a574999fa354564.jpg', label: 'Beavan — reference 1' },
+      { src: 'https://i.pinimg.com/736x/69/38/b7/6938b7bb7eb5a9bdcdd6dcaf7f27b1db.jpg', label: 'Beavan — reference 2' },
+      { src: 'https://i.pinimg.com/736x/0c/1c/2f/0c1c2f7cce90ed738f34af9eee4cb4e9.jpg', label: 'Beavan — reference 3' },
+      { src: 'https://i.pinimg.com/736x/77/f3/f7/77f3f7e8f62771ea9173285a787f5759.jpg', label: 'Beavan — reference 4' },
+      { src: 'https://i.pinimg.com/736x/47/07/e0/4707e0739e8a3d61d40b11e8f6c17649.jpg', label: 'Beavan — reference 5' },
+      { src: 'https://i.pinimg.com/736x/c8/8c/54/c88c547540f81889b4bdff061390ff8f.jpg', label: 'Beavan — reference 6' },
+      { src: 'https://i.pinimg.com/736x/7f/fa/3d/7ffa3dd6388ee19339d08d6a4e2b5856.jpg', label: 'Beavan — reference 7' },
+      { src: 'https://i.pinimg.com/736x/f9/4a/3c/f94a3c67011979b01175e388233a8ef8.jpg', label: 'Beavan — reference 8' },
+      { src: 'https://i.pinimg.com/736x/55/2c/bb/552cbb981c5e452f9aa9ec9f72ad89eb.jpg', label: 'Beavan — reference 9' },
+      { src: 'https://i.pinimg.com/736x/01/00/fc/0100fc3fa34ad258ef337713a28527ed.jpg', label: 'Beavan — reference 10' },
+      { src: 'https://i.pinimg.com/736x/d7/65/8f/d7658fc42a2c60ee2fbacdd3e6c19f3c.jpg', label: 'Beavan — reference 11' },
+      { src: 'https://i.pinimg.com/736x/01/81/ab/0181abf1697c8517bd9420d1dfa217ca.jpg', label: 'Beavan — reference 12' },
+    ],
+  },
+  {
+    id: 'michael_kaplan', rank: '08', name: 'Michael Kaplan (마이클 카플란)',
+    subtitle: 'Costume Designer · 미국 · 1954-',
+    styleType: 'scifi', styleLabel: 'Sci-Fi / Urban Fashion',
+    desc: '블레이드 러너, 파이트 클럽, 스타워즈: 깨어난 포스의 의상을 디자인. SF 미래 패션과 현대 도시 스타일의 대가. 리들리 스콧, 데이비드 핀처, J.J. 에이브럼스와 협업.',
+    styleDesc: 'SF 세계관의 의상 설계. 미래적이면서도 기능적인 디자인. 블레이드 러너의 레이첼 트렌치코트는 SF 패션의 아이콘이 되었다.',
+    technique: 'Future Realism: 미래지만 실제로 입을 수 있는 의상.\nUrban Edge: 도시적 엣지와 스트리트 패션의 결합.\nCharacter Psychology: 의상으로 캐릭터의 심리 상태를 표현.',
+    aiPrompt: 'Michael Kaplan costume design, Blade Runner futuristic noir fashion, Fight Club urban grunge style, Star Wars Force Awakens costume, sci-fi realistic clothing, noir trench coat',
+    films: ['블레이드 러너 (1982)', '파이트 클럽 (1999)', '스타워즈: 깨어난 포스 (2015)', '미션 임파서블 (2018)'],
+    characters: ['레이첼 트렌치코트', '타일러 더든 재킷', '레이 사막 의상', '이단 헌트 택티컬'],
+    links: [{ text: 'Fashionista: Michael Kaplan', url: 'https://fashionista.com/michael-kaplan' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/1c/61/b3/1c61b3db39ad7f988573aab1bf79b1df.jpg', label: 'Kaplan — reference 1' },
+      { src: 'https://i.pinimg.com/736x/73/43/01/7343016287d32cfb4853949670e95bfb.jpg', label: 'Kaplan — reference 2' },
+      { src: 'https://i.pinimg.com/736x/c5/4c/d2/c54cd21c68142a7b6f4201684b725de8.jpg', label: 'Kaplan — reference 3' },
+      { src: 'https://i.pinimg.com/736x/7e/30/d0/7e30d003efe19c297bf2cbc03642bf6d.jpg', label: 'Kaplan — reference 4' },
+      { src: 'https://i.pinimg.com/736x/cc/78/3d/cc783d01e1b40ff20775bc1d8b447dc1.jpg', label: 'Kaplan — reference 5' },
+      { src: 'https://i.pinimg.com/736x/80/12/00/801200d3e3567fdc3a044d5f960af0b7.jpg', label: 'Kaplan — reference 6' },
+      { src: 'https://i.pinimg.com/736x/7f/86/f2/7f86f20527a6e9bdfa0b9ab41e8ab5a9.jpg', label: 'Kaplan — reference 7' },
+      { src: 'https://i.pinimg.com/736x/f3/01/a8/f301a80cf3a5b1227bb9e682f493f783.jpg', label: 'Kaplan — reference 8' },
+      { src: 'https://i.pinimg.com/736x/71/8e/97/718e97d66a062880e47f9bcde8899856.jpg', label: 'Kaplan — reference 9' },
+      { src: 'https://i.pinimg.com/736x/7a/37/71/7a37713522f1bf0ec93ef367789b5e5d.jpg', label: 'Kaplan — reference 10' },
+      { src: 'https://i.pinimg.com/736x/37/37/34/373734f0d902bd7158833804d0d77371.jpg', label: 'Kaplan — reference 11' },
+      { src: 'https://i.pinimg.com/736x/23/1c/c9/231cc9c9bf02511e877aa483406d79eb.jpg', label: 'Kaplan — reference 12' },
+    ],
+  },
+  {
+    id: 'eiko_ishioka', rank: '09', name: 'Eiko Ishioka (石岡 瑛子)',
+    subtitle: 'Costume & Visual Designer · 일본 · 1938-2012',
+    styleType: 'avantgarde', styleLabel: 'Avant-Garde Sculpture',
+    desc: '아카데미상 수상 (브람 스토커의 드라큘라). 의상을 넘어 조각적 아트피스로 승화시킨 전위적 디자이너. 더 셀, 태양의 서커스, 올림픽 의상까지 장르를 초월.',
+    styleDesc: '의상을 입는 조각으로 변환. 신체와 직물의 관계를 근본적으로 재정의. 동양과 서양, 전통과 아방가르드의 충돌에서 탄생하는 초현실적 비주얼.',
+    technique: 'Sculptural Fabric: 직물을 3차원 조각처럼 다루는 기법.\nCultural Fusion: 동서양 미학의 전위적 결합.\nSymbolic Excess: 과장과 상징을 통한 감정의 시각적 폭발.',
+    aiPrompt: 'Eiko Ishioka costume design, Bram Stoker Dracula avant-garde red armor, The Cell surreal sculptural costume, Japanese avant-garde fashion, theatrical sculptural wearable art',
+    films: ['브람 스토커의 드라큘라 (1992)', '더 셀 (2000)', '더 폴 (2006)', '백설공주 (2012)'],
+    characters: ['드라큘라 붉은 갑옷', '더 셀 초현실 드레스', '알렉산드리아 판타지 의상', '사악한 여왕 가운'],
+    links: [{ text: 'MoMA: Eiko Ishioka', url: 'https://www.moma.org/artists/2916' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/a0/e7/ed/a0e7edfcb2f9e3e70e41df5405274a94.jpg', label: 'Ishioka — reference 1' },
+      { src: 'https://i.pinimg.com/736x/49/e0/9a/49e09a0e4733f3f6ce9a5e5554f306d9.jpg', label: 'Ishioka — reference 2' },
+      { src: 'https://i.pinimg.com/736x/a4/97/33/a497332261f35c69a42ce4bf43076b6b.jpg', label: 'Ishioka — reference 3' },
+      { src: 'https://i.pinimg.com/736x/bf/b4/46/bfb4464a5e979eb868a386d46d5700eb.jpg', label: 'Ishioka — reference 4' },
+      { src: 'https://i.pinimg.com/736x/00/c3/ed/00c3ed8f7a75cbdea224f89494c04b6e.jpg', label: 'Ishioka — reference 5' },
+      { src: 'https://i.pinimg.com/736x/bb/3a/0e/bb3a0ec11f109e646fd2d9b993ebf6d0.jpg', label: 'Ishioka — reference 6' },
+      { src: 'https://i.pinimg.com/736x/47/69/40/47694048750bc836c90c24d39d1284d6.jpg', label: 'Ishioka — reference 7' },
+      { src: 'https://i.pinimg.com/736x/8a/b4/e8/8ab4e82d40ee6bd78196196cdec7b205.jpg', label: 'Ishioka — reference 8' },
+      { src: 'https://i.pinimg.com/736x/7e/4e/b8/7e4eb8e3a3189307e8a02630d5274623.jpg', label: 'Ishioka — reference 9' },
+      { src: 'https://i.pinimg.com/736x/19/b0/ea/19b0eaa9e7dd450220241b7ac48b98f9.jpg', label: 'Ishioka — reference 10' },
+      { src: 'https://i.pinimg.com/736x/ad/21/70/ad21705a8faf2025ad83ab28a1566d1f.jpg', label: 'Ishioka — reference 11' },
+      { src: 'https://i.pinimg.com/736x/c9/e9/dc/c9e9dc119d904457d9873aee16a4ddd1.jpg', label: 'Ishioka — reference 12' },
+    ],
+  },
+  {
+    id: 'lindy_hemming', rank: '10', name: 'Lindy Hemming (린디 헤밍)',
+    subtitle: 'Costume Designer · 영국 · 1948-',
+    styleType: 'action', styleLabel: 'Action Hero Wardrobe',
+    desc: '아카데미상 수상 (토파지). 다크 나이트 트릴로지의 배트맨 슈트, 제임스 본드 시리즈의 의상을 디자인. 액션 히어로의 기능적이면서 상징적인 의상의 대가.',
+    styleDesc: '액션 히어로 워드로브의 정의. 슈퍼히어로 슈트의 기능성과 미학을 동시에 해결. 007의 세비로 룩부터 배트맨의 전투복까지.',
+    technique: 'Functional Design: 스턴트와 액션에서 실제로 작동하는 의상.\nIconic Silhouette: 한눈에 캐릭터를 알아볼 수 있는 실루엣.\nMaterial Innovation: 새로운 소재와 제작 기법의 도입.',
+    aiPrompt: 'Lindy Hemming costume design, Dark Knight Batman tactical suit, James Bond tailored tuxedo, action hero functional wardrobe, superhero practical costume, British spy elegant fashion',
+    films: ['다크 나이트 (2008)', '카지노 로얄 (2006)', '토파지 (1999)', '원더우먼 (2017)'],
+    characters: ['배트맨 전투 슈트', '007 턱시도', '조커 퍼플 슈트', '원더우먼 전투복'],
+    links: [{ text: 'ADG: Lindy Hemming', url: 'https://adg.org/article/lindy-hemming' }],
+    images: [
+      { src: 'https://i.pinimg.com/736x/43/86/40/438640e384f1e87e80af46cac6d4f56b.jpg', label: 'Hemming — reference 1' },
+      { src: 'https://i.pinimg.com/736x/dd/8f/f5/dd8ff573e699fe1287e202929330910e.jpg', label: 'Hemming — reference 2' },
+      { src: 'https://i.pinimg.com/736x/41/9d/75/419d75e98bef554f8e324a6a5a19cc4b.jpg', label: 'Hemming — reference 3' },
+      { src: 'https://i.pinimg.com/736x/70/cf/6d/70cf6d41ae7dd8b8feeac226aafac1cf.jpg', label: 'Hemming — reference 4' },
+      { src: 'https://i.pinimg.com/736x/a8/e0/95/a8e095010c98fa96776fde6740ef9729.jpg', label: 'Hemming — reference 5' },
+      { src: 'https://i.pinimg.com/736x/b4/30/fc/b430fc92769618c6c0b80864d59e49d8.jpg', label: 'Hemming — reference 6' },
+      { src: 'https://i.pinimg.com/736x/e8/7d/00/e87d00d23fbb765525aa45973723c813.jpg', label: 'Hemming — reference 7' },
+      { src: 'https://i.pinimg.com/736x/40/83/cc/4083cc76fa457a00d395003bf1c233ef.jpg', label: 'Hemming — reference 8' },
+      { src: 'https://i.pinimg.com/736x/4b/67/79/4b67792a75bced8018cdde09371ff20b.jpg', label: 'Hemming — reference 9' },
+      { src: 'https://i.pinimg.com/736x/31/c5/de/31c5de1748c0062148ef3c633f70c6f2.jpg', label: 'Hemming — reference 10' },
+      { src: 'https://i.pinimg.com/736x/5b/4d/8d/5b4d8d2b089e9d29a879b053e119f9ae.jpg', label: 'Hemming — reference 11' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+function buildArtistPanel() { document.getElementById('artistPanel').innerHTML = DESIGNERS.map(a => `<div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')"><span class="artist-rank">${a.rank}</span><div><div class="name">${a.name}</div><div class="role">${a.styleLabel}</div></div></div>`).join(''); }
+function selectArtist(id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; currentArtist = artist; currentImageIdx = 0; document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active')); document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active'); updateInfoPanel(artist); updateFilmstrip(artist); updateViewer(artist); }
+function updateInfoPanel(a) { let techniqueSec = ''; if (a.technique) { techniqueSec = `<div class="info-section"><h4>Technique</h4><p>${a.technique.replace(/\n/g, '<br>')}</p></div>`; } document.getElementById('infoPanel').innerHTML = `<h3>${a.name}</h3><div class="meta">${a.subtitle}</div><span class="style-indicator ${a.styleType}">${a.styleLabel}</span><div class="desc">${a.desc}</div><div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div><div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div><div class="info-section"><h4>Style</h4><p>${a.styleDesc}</p></div>${techniqueSec}<div class="info-section"><h4>AI Prompt</h4><div class="prompt-box" onclick="copyPrompt(this, '${a.id}')"><span class="copy-hint">click to copy</span>${a.aiPrompt}</div></div><div class="info-section"><h4>References</h4><div class="link-list">${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}</div></div>`; }
+function copyPrompt(el, id) { const artist = DESIGNERS.find(a => a.id === id); if (!artist) return; navigator.clipboard.writeText(artist.aiPrompt).then(() => { el.classList.add('copied'); el.querySelector('.copy-hint').textContent = 'copied!'; setTimeout(() => { el.classList.remove('copied'); el.querySelector('.copy-hint').textContent = 'click to copy'; }, 1500); }); }
+function updateFilmstrip(a) { const strip = document.getElementById('filmstrip'); strip.innerHTML = a.images.length === 0 ? Array.from({length: 4}, (_, i) => `<div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}"><div class="no-image">No image</div></div>`).join('') : a.images.map((img, i) => `<div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})"><img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" /><div class="thumb-label">${img.label}</div></div>`).join(''); }
+function updateViewer(a) { const img = document.getElementById('mainImage'); const ph = document.getElementById('viewerPlaceholder'); const counter = document.getElementById('imageCounter'); const badge = document.getElementById('artistBadge'); badge.style.display = 'block'; document.getElementById('badgeName').textContent = a.name; document.getElementById('badgeStyle').textContent = a.styleLabel; if (a.images.length > 0 && a.images[currentImageIdx]) { img.style.opacity='0'; img.style.display='block'; ph.style.display='none'; img.onload=()=>{img.style.opacity='1';}; img.onerror=function(){img.style.display='none'; ph.style.display='flex'; ph.style.flexDirection='column'; ph.style.alignItems='center'; ph.style.justifyContent='center'; ph.innerHTML='<div style=\"text-align:center;color:var(--text-dim)\">'+`<div style=\"font-size:2em;margin-bottom:8px\">&#9888;</div>`+`<div style=\"font-size:0.85em;color:#888\">${a.images[currentImageIdx].label}</div>`+`<div style=\"font-size:0.75em;margin-top:4px;color:#555\">이미지를 불러올 수 없습니다</div>`+`<button onclick=\"selectImage(${currentImageIdx})\" style=\"margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em\">재시도</button>`+'</div>';}; img.src=a.images[currentImageIdx].src; counter.style.display = 'block'; counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`; } else { img.style.display = 'none'; ph.style.display = 'block'; counter.style.display = 'none'; } }
+function selectImage(idx) { if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return; currentImageIdx = idx; updateViewer(currentArtist); document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx)); }
+function prevImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length; selectImage(currentImageIdx); }
+function nextImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length; selectImage(currentImageIdx); }
+function openModal() { const sel = document.getElementById('modalStyle'); if (sel.options.length <= 1) { DESIGNERS.forEach(d => { const opt = document.createElement('option'); opt.value = d.id; opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`; sel.appendChild(opt); }); } document.getElementById('modalOverlay').classList.add('show'); document.getElementById('modalScene').focus(); if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function handleGenerate() { const scene = document.getElementById('modalScene').value; const style = document.getElementById('modalStyle').value; if (!scene.trim()) { alert('Description is required.'); return; } closeModal(); setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`); generateConcept('costume', { description: scene, style }).then(data => { if (data.success && data.url) { showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`); setStatus('ready', 'Generation complete ✓'); } else { setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`); } }).catch(err => { setStatus('ready', `API error: ${err.message}`); }); }
+function setStatus(state, text) { document.getElementById('statusDot').className = 'status-dot ' + state; document.getElementById('statusText').textContent = text; }
+document.addEventListener('keydown', e => { if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return; if (e.key === 'ArrowLeft') prevImage(); if (e.key === 'ArrowRight') nextImage(); if (e.key === 'g' || e.key === 'G') openModal(); if (e.key === 'Escape') closeModal(); const num = parseInt(e.key); if (!isNaN(num)) { const idx = num === 0 ? 9 : num - 1; if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id); } });
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

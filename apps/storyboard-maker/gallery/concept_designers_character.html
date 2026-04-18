@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Character Design — 10 Masters</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #d06858; }</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab active">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab">VFX</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>CHARACTER DESIGN</h1>
+    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Character</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle"></div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/85/04/0a/85040aba075488a1dc160c37ecb5cd6c.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Character Design Gallery</h2>
+          <p>10명의 캐릭터 디자인 거장 — McCaig, Giger, McCreery, Barlowe 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 character designers loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128396;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Character Concept</h3>
+    <label>Character Description</label>
+    <textarea id="modalScene" placeholder="e.g. 어둠의 기사, 갑옷 아래 문신이 드러나는 전사"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+    </select>
+    <label>Pose / Action</label>
+    <input id="modalCamera" type="text" placeholder="e.g. standing pose, action stance, portrait" />
+    <label>Mood</label>
+    <input id="modalMood" type="text" placeholder="e.g. menacing, heroic, mysterious" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script src="gallery-api.js"></script>
+<script>
+// Embed mode detection (when loaded inside ProductionDeck iframe)
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
+const DESIGNERS = [
+  {
+    id: 'iain_mccaig', rank: '01', name: 'Iain McCaig',
+    subtitle: 'Character & Creature Designer \u00b7 \ubbf8\uad6d \u00b7 1957-',
+    styleType: 'pencil', styleLabel: 'Pencil / Ink / Watercolor',
+    desc: '\uc2a4\ud0c0\uc6cc\uc988 \ud504\ub9ac\ud014\uc758 \uc544\uc774\ucf54\ub2c9 \uce90\ub9ad\ud130\ub4e4\uc744 \ud0c4\uc0dd\uc2dc\ud0a8 \uc804\uc124. \uc870\uc9c0 \ub8e8\uce74\uc2a4\ub85c\ubd80\ud130 "\ub2e4\uc2a4 \ubab0\uc774\ub77c\ub294 \uc0c8 \uc2dc\uc2a4 \ub85c\ub4dc\uac00 \uc788\ub2e4"\ub294 \ud55c \ub9c8\ub514\ub9cc \ub4e3\uace0 \uc601\ud654\uc0ac\uc5d0 \ub0a8\uc744 \ube4c\ub7f0\uc744 \ub514\uc790\uc778\ud588\ub2e4. \uacf5\ud3ec\uc640 \uc544\ub984\ub2e4\uc6c0\uc758 \uade0\ud615, \ub0b4\uba74\uc758 \uc774\uc57c\uae30\uac00 \uc678\ud615\uc5d0 \ub4dc\ub7ec\ub098\ub294 \uce90\ub9ad\ud130 \ub514\uc790\uc778 \ucca0\ud559\uc758 \uad50\uacfc\uc11c.',
+    styleDesc: '\uc5f0\ud544\uacfc \uc789\ud06c \uae30\ubc18\uc758 \uc804\ud1b5\uc801 \uc77c\ub7ec\uc2a4\ud2b8\ub808\uc774\uc158. \uce90\ub9ad\ud130\uc758 \ub0b4\uba74 \uc2ec\ub9ac\uac00 \uc678\ud615\uc5d0 \ubc18\uc601\ub418\ub294 "\uc601\ud63c\uc758 \uc2a4\ucf00\uce58\ubd81" \uc811\uadfc\ubc95. \ub2e4\uc2a4 \ubab0\uc758 \uacbd\uc6b0 \ubc97\uaca8\uc9c4 \uc0b4\uacfc \uadfc\uc721 \ud328\ud134\uc744 \uae30\ubc18\uc73c\ub85c \uc804\uc2e0 \ud0c0\ud22c\ub97c \ub514\uc790\uc778\ud558\uc5ec "\uc5b4\ub460\uc758 \uc720\ud639"\uc744 \uc2dc\uac01\uc801\uc73c\ub85c \ud45c\ud604.',
+    technique: 'Fear as Foundation: "\ucd5c\uc545\uc758 \uc545\ubab5"\uc5d0\uc11c \uc2dc\uc791\ud558\uc5ec \uce90\ub9ad\ud130\uc758 \uacf5\ud3ec \uc694\uc18c\ub97c \uc815\uc758\ud55c \ud6c4, \uc544\ub984\ub2e4\uc6c0\uacfc \uc720\ud639\uc758 \uc694\uc18c\ub97c \ud63c\ud569.\nHelmet-Off Method: \ub2e4\uc2a4 \ubca0\uc774\ub354\uc758 \ud5ec\uba5b\uc744 \ub2a5\uac00\ud558\ub824\ub2e4 \ud3ec\uae30\ud558\uace0, \ud5ec\uba5b\uc744 \ubc97\uae30\uace0 "\uadf8 \uc544\ub798\uc758 \uc5bc\uad74"\uc5d0\uc11c \uacf5\ud3ec\ub97c \ucc3e\ub294 \uc5ed\ubc1c\uc0c1.\nNarrative Design: \ubaa8\ub4e0 \ub514\uc790\uc778 \uc694\uc18c\uc5d0 \uc11c\uc0ac\uc801 \uc774\uc720\uac00 \uc788\uc5b4\uc57c \ud55c\ub2e4.',
+    aiPrompt: 'Iain McCaig style character concept, pencil and ink illustration, narrative-driven design, psychological depth in visual appearance, fear and beauty balance, detailed facial tattoo patterns inspired by muscle anatomy, dramatic lighting on character portrait, film-quality character sheet',
+    films: ['Star Wars Ep I-III, VII', 'Terminator 2', 'Guardians of the Galaxy', 'The Avengers'],
+    characters: ['Darth Maul', 'Queen Amidala/Padme'],
+    links: [
+      { text: 'StarWars.com: McCaig on Darth Maul', url: 'https://www.starwars.com/news/iain-mccaig-the-phantom-menace' },
+      { text: 'Gnomon Workshop Tutorials', url: 'https://www.thegnomonworkshop.com/instructors/iain-mccaig' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/37/b0/52/37b052130b5305efb46b1b1c82f983ea.jpg', label: 'McCaig — reference 1' },
+      { src: 'https://i.pinimg.com/736x/49/ff/24/49ff24bd186ced09f7cc7441d6964041.jpg', label: 'McCaig — reference 2' },
+      { src: 'https://i.pinimg.com/736x/7c/ef/ca/7cefcaaae207044d43c28b45f0f9963d.jpg', label: 'McCaig — reference 3' },
+      { src: 'https://i.pinimg.com/736x/74/c1/82/74c18245ddf36f79eeb1afcefd960287.jpg', label: 'McCaig — reference 4' },
+      { src: 'https://i.pinimg.com/736x/b5/19/59/b519595a4e453b27f4806a31b64ffd21.jpg', label: 'McCaig — reference 5' },
+      { src: 'https://i.pinimg.com/736x/9f/0a/e2/9f0ae2120f92d29eaca73f505049f079.jpg', label: 'McCaig — reference 6' },
+      { src: 'https://i.pinimg.com/736x/49/29/8e/49298efa1a0f5ec8b5c5da890088f09a.jpg', label: 'McCaig — reference 7' },
+      { src: 'https://i.pinimg.com/736x/78/1f/6b/781f6b416b9179ea7a4442b53d2ab404.jpg', label: 'McCaig — reference 8' },
+      { src: 'https://i.pinimg.com/736x/e6/7a/34/e67a34502d58ccc6673d9a1d792a5b73.jpg', label: 'McCaig — reference 9' },
+      { src: 'https://i.pinimg.com/736x/10/41/6e/10416e3533e3867055147726fbc8a73c.jpg', label: 'McCaig — reference 10' },
+      { src: 'https://i.pinimg.com/736x/93/42/6a/93426a13c4ea2bfdbcecb46502aa95a2.jpg', label: 'McCaig — reference 11' },
+      { src: 'https://i.pinimg.com/736x/78/2e/6f/782e6f451dd4311df78f4825ae77e36b.jpg', label: 'McCaig — reference 12' },
+    ],
+  },
+  {
+    id: 'hr_giger', rank: '02', name: 'H.R. Giger',
+    subtitle: 'Biomechanical Creature Designer \u00b7 \uc2a4\uc704\uc2a4 \u00b7 1940-2014',
+    styleType: 'biomech', styleLabel: 'Airbrush / Ink / Sculpture',
+    desc: '\ubc14\uc774\uc624\uba54\uce74\ub2c8\uceec \uc544\ud2b8\uc758 \ucc3d\uc2dc\uc790. 1976\ub144 \uadf8\uc758 \uadf8\ub9bc "Necronom IV"\ub97c \ubcf8 \ub9ac\ub4e4\ub9ac \uc2a4\ucf67\uc774 \uc5d0\uc774\ub9ac\uc5b8\uc758 \ud06c\ub9ac\ucc98 \ub514\uc790\uc778\uc744 \uc758\ub8b0\ud588\ub2e4. \uc720\uae30\uccb4\uc640 \uae30\uacc4\uc758 \uc735\ud569, \ub208 \uc5c6\ub294 \uacf5\ud3ec, \uc131\uc801 \uacf5\ud3ec\uc640 \uc8fd\uc74c\uc758 \ubbf8\ud559\uc774 \uacb0\ud569\ub41c \uc81c\ub178\ubaa8\ud504\ub294 \uc601\ud654\uc0ac\uc0c1 \uac00\uc7a5 \uc704\ub300\ud55c \ud06c\ub9ac\ucc98 \ub514\uc790\uc778\uc73c\ub85c \ud3c9\uac00\ubc1b\ub294\ub2e4.',
+    styleDesc: '\ubc14\uc774\uc624\uba54\uce74\ub2c8\uceec(Biomechanical) \u2014 \uc720\uae30\uc801 \uc0dd\uccb4 \uc870\uc9c1\uacfc \uae30\uacc4 \ubd80\ud488\uc774 \ud558\ub098\ub85c \uc735\ud569\ub41c \ud615\ud0dc. \uc5d0\uc5b4\ube0c\ub7ec\uc2dc\ub85c \uadf8\ub9b0 \ucd08\ud604\uc2e4\uc801\uc774\uace0 \uc545\ubab5\uc801\uc778 \uc774\ubbf8\uc9c0.',
+    technique: 'Eyeless Horror: \uc758\ub3c4\uc801\uc73c\ub85c \ub208\uc744 \uc81c\uac70\ud558\uc5ec \ud06c\ub9ac\ucc98\ub97c "\uc54c \uc218 \uc5c6\ub294 \uc874\uc7ac"\ub85c \ub9cc\ub4e6.\nSexual Morphology: \uc0dd\uc2dd\uacfc \uae30\uc0dd\uc758 \uc774\ubbf8\uc9c0\ub97c \ud06c\ub9ac\ucc98 \uc0dd\uc560\uc8fc\uae30\uc5d0 \ub0b4\uc7a5.\nTexture Layering: \ubf08, \ud30c\uc774\ud504, \ud29c\ube0c, \uadfc\uc721 \uc12c\uc720\uc758 \ubc18\ubcf5\uc801 \ub808\uc774\uc5b4\ub9c1.',
+    aiPrompt: 'H.R. Giger biomechanical style, dark surreal creature concept, airbrush technique, organic-mechanical fusion, elongated skull, eyeless alien, ribbed exoskeleton, industrial bone texture, monochrome nightmare aesthetic',
+    films: ['Alien (1979)', 'Species (1995)', 'Poltergeist II'],
+    characters: ['Xenomorph', 'Facehugger / Chestburster', 'Space Jockey'],
+    links: [
+      { text: 'Artsy: Giger\'s Nightmarish Works', url: 'https://www.artsy.net/article/artsy-editorial-nightmarish-works-hr-giger-artist-alien' },
+      { text: 'Science Museum: Designing Fear', url: 'https://blog.scienceandmediamuseum.org.uk/designing-fear-in-alien-the-art-of-gigers-xenomorph/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/e2/1f/2e/e21f2e89fe3d24560ac40dac82a2d44e.jpg', label: 'Giger — reference 1' },
+      { src: 'https://i.pinimg.com/736x/45/3e/c1/453ec1beef4246b16a25418455ce3e5a.jpg', label: 'Giger — reference 2' },
+      { src: 'https://i.pinimg.com/736x/79/bf/ec/79bfec4e69ce623905313085e91e5d65.jpg', label: 'Giger — reference 3' },
+      { src: 'https://i.pinimg.com/736x/bb/97/eb/bb97eb09b74e8260818cabc696f945b7.jpg', label: 'Giger — reference 4' },
+      { src: 'https://i.pinimg.com/736x/db/29/30/db29302142f6bf002e78e88f6dff8710.jpg', label: 'Giger — reference 5' },
+      { src: 'https://i.pinimg.com/736x/31/77/5d/31775d06005969d07ef24df15bb3aacf.jpg', label: 'Giger — reference 6' },
+      { src: 'https://i.pinimg.com/736x/c8/9c/4f/c89c4fe4bda2db3361d697d2c2d4f123.jpg', label: 'Giger — reference 7' },
+      { src: 'https://i.pinimg.com/736x/e3/2a/37/e32a377316280f8b4257c57521c1f5a4.jpg', label: 'Giger — reference 8' },
+      { src: 'https://i.pinimg.com/736x/0e/24/ef/0e24efce38b230c961137e7683797bec.jpg', label: 'Giger — reference 9' },
+      { src: 'https://i.pinimg.com/736x/12/a2/55/12a255dd16ed0076f8d63c6b7a5f20a1.jpg', label: 'Giger — reference 10' },
+      { src: 'https://i.pinimg.com/736x/f2/c0/95/f2c09520aaeaf56a521ff6a318ef5385.jpg', label: 'Giger — reference 11' },
+      { src: 'https://i.pinimg.com/736x/cd/81/28/cd812802b55f7e3728ddc2f125abc5bd.jpg', label: 'Giger — reference 12' },
+    ],
+  },
+  {
+    id: 'crash_mccreery', rank: '03', name: 'Mark "Crash" McCreery',
+    subtitle: 'Creature & Character Designer \u00b7 \ubbf8\uad6d',
+    styleType: 'pencil', styleLabel: 'Pencil / Graphite / Sculpture',
+    desc: '\uc2a4\ud0c4 \uc708\uc2a4\ud134 \uc2a4\ud29c\ub514\uc624\uc758 \ub9ac\ub4dc \uc544\ud2f0\uc2a4\ud2b8\ub85c 35\ub144\uac04 \ud65c\ub3d9. \uc950\ub77c\uae30 \uacf5\uc6d0\uc758 T-Rex\ub97c "\uc628\ud608 \uc870\ub958\ud615 \ud3ec\uc2dd\uc790"\ub85c \uc7ac\ud574\uc11d\ud558\uc5ec \uacf5\ub8e1 \uc774\ubbf8\uc9c0\ub97c \uc601\uc6d0\ud788 \ubc14\uafc8\ub2e4.',
+    styleDesc: '\uc815\ubc00 \uc5f0\ud544 \ub4dc\ub85c\uc789 \uae30\ubc18. \ube5b, \uadf8\ub9bc\uc790, \ud615\ud0dc\uc758 \uc21c\uc218\ud55c \ud45c\ud604. \uacfc\ud559\uc801 \uc815\ud655\uc131\uacfc \uc601\ud654\uc801 \ub4dc\ub77c\ub9c8\uc758 \uade0\ud615.',
+    technique: 'Motion Study First: \uc815\uc801 \ud3ec\uc988\uac00 \uc544\ub2cc \uc6b4\ub3d9 \uc5f0\uad6c\uc5d0\uc11c \uc2dc\uc791.\nBird-of-Prey Stance: \uacf5\ub8e1\uc744 \ub9f9\uae08\ub958\uc758 \uacf5\uaca9 \uc790\uc138\ub85c \uc7ac\ud574\uc11d.\nLuminous Pencil Work: \uc5f0\ud544\ub9cc\uc73c\ub85c \ube5b\uc758 \ubc29\ud5a5, \ud53c\ubd80 \uc9c8\uac10, \uadfc\uc721 \uad6c\uc870\ub97c \uc815\ubc00 \ub80c\ub354\ub9c1.',
+    aiPrompt: 'Crash McCreery style creature concept, detailed pencil rendering, anatomical accuracy, luminous graphite work, dynamic motion study pose, bird-of-prey stance, warm-blooded dinosaur interpretation, cinematic lighting on creature',
+    films: ['Jurassic Park (1993)', 'Pirates of the Caribbean', 'Terminator 2', 'Edward Scissorhands'],
+    characters: ['T-Rex / Velociraptors', 'Davy Jones'],
+    links: [
+      { text: 'Concept Art Association: McCreery', url: 'https://www.conceptartassociation.com/2022-judges/2wcng-0-aaz4d-we94c' },
+      { text: 'Playgrounds: Crash McCreery', url: 'https://weareplaygrounds.nl/artist/crash-mccreery/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/f3/a4/95/f3a495927e2e9b43c2bacb5cecf812c0.jpg', label: 'McCreery — reference 1' },
+      { src: 'https://i.pinimg.com/736x/42/1b/cb/421bcba59f7aeb6733743aa17e1eb1fb.jpg', label: 'McCreery — reference 2' },
+      { src: 'https://i.pinimg.com/736x/b9/f7/38/b9f738ce55c86e235691fb76f3218b2c.jpg', label: 'McCreery — reference 3' },
+      { src: 'https://i.pinimg.com/736x/ec/ab/7d/ecab7d88696059af9ea3ddbd43630d9d.jpg', label: 'McCreery — reference 4' },
+      { src: 'https://i.pinimg.com/736x/8c/e6/ba/8ce6ba1f096b69cba51de09fba8b760d.jpg', label: 'McCreery — reference 5' },
+      { src: 'https://i.pinimg.com/736x/df/9e/52/df9e526ff8d1189684d77ee696b9f139.jpg', label: 'McCreery — reference 6' },
+      { src: 'https://i.pinimg.com/736x/ee/3a/6b/ee3a6b165fa2ad6ae7e9c47f4985ff79.jpg', label: 'McCreery — reference 7' },
+      { src: 'https://i.pinimg.com/736x/3e/fc/b8/3efcb81f38fbb7079b9581959844c8c0.jpg', label: 'McCreery — reference 8' },
+      { src: 'https://i.pinimg.com/736x/cd/8e/33/cd8e33b675d1afcda6297fd33025f214.jpg', label: 'McCreery — reference 9' },
+      { src: 'https://i.pinimg.com/736x/48/51/6d/48516d76c6c457bef2b9b8bb514990c3.jpg', label: 'McCreery — reference 10' },
+      { src: 'https://i.pinimg.com/736x/4f/5a/49/4f5a49ca33e18148764edb7bd1baa369.jpg', label: 'McCreery — reference 11' },
+      { src: 'https://i.pinimg.com/736x/75/40/44/7540447f5ba90a5942f72e9bd23fad29.jpg', label: 'McCreery — reference 12' },
+    ],
+  },
+  {
+    id: 'neville_page', rank: '04', name: 'Neville Page',
+    subtitle: 'Creature & Character Designer \u00b7 \uc601\uad6d/\ubbf8\uad6d \u00b7 1964-',
+    styleType: 'zbrush', styleLabel: 'ZBrush / Digital / Pencil',
+    desc: '\uc544\ubc14\ud0c0\uc758 \ubc34\uc2dc, \ud504\ub85c\uba54\ud14c\uc6b0\uc2a4\uc758 \uc5d4\uc9c0\ub2c8\uc5b4, \ud074\ub85c\ubc84\ud544\ub4dc\uc758 \ubaac\uc2a4\ud130\ub97c \ub514\uc790\uc778\ud55c \ud604\ub300 \ud560\ub9ac\uc6b0\ub4dc \ucd5c\uace0\uc758 \ud06c\ub9ac\ucc98 \ub514\uc790\uc774\ub108. \ubaa8\ub4e0 \ud06c\ub9ac\ucc98\uc5d0 "\uc0dd\ubb3c\ud559\uc801, \uc9c4\ud654\uc801 \uadfc\uac70"\ub97c \ubd80\uc5ec\ud558\ub294 \uacfc\ud559\uc801 \uc811\uadfc\ubc95.',
+    styleDesc: '\uacfc\ud559 \uae30\ubc18 \ud06c\ub9ac\ucc98 \ub514\uc790\uc778. \uc0b0\uc5c5 \ub514\uc790\uc778\uc758 \uae30\ub2a5\uc8fc\uc758\ub97c \uc0dd\ubb3c\uc5d0 \uc801\uc6a9. ZBrush \ub514\uc9c0\ud138 \uc2a4\ucef0\ud504\ud305\uacfc \uc804\ud1b5 \ub4dc\ub85c\uc789 \ubcd1\ud589.',
+    technique: 'Biological Basis: \ubaa8\ub4e0 \ud06c\ub9ac\ucc98\uc5d0 \uc9c4\ud654\uc801 \uadfc\uac70\ub97c \ubd80\uc5ec.\nBiomechanical Research: \uc2e4\uc81c \ub3d9\ubb3c \ud574\ubd80, \ub450\uac1c\uace8 \uc218\uc9d1, \ube44\ud589 \uc5ed\ud559 \uc5f0\uad6c.\nIndustrial Design Thinking: \uae30\ub2a5\uc774 \ud615\ud0dc\ub97c \uacb0\uc815.',
+    aiPrompt: 'Neville Page style creature concept, biologically plausible alien design, evolutionary design basis, ZBrush digital sculpture render, detailed anatomical study, functional creature anatomy, bioluminescent skin texture',
+    films: ['Avatar (2009)', 'Prometheus (2012)', 'Cloverfield (2008)', 'Star Trek (2009-2016)', 'TRON: Legacy'],
+    characters: ['Banshee (Avatar)', 'Engineer / Trilobite', 'Cloverfield Monster'],
+    links: [
+      { text: 'Blue Screen: Neville Page', url: 'https://bluescreenreveals.com/neville-page-designing-sci-fi-creatures-characters/' },
+      { text: 'ArtCenter: Page Interview', url: 'https://www.artcenter.edu/connect/dot-magazine/articles/concept-designer-neville-page-on-critiques-directors-and-gaboon-vipers.html' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/49/e4/a5/49e4a52908d596edd12faee118ffe3cc.jpg', label: 'Page — reference 1' },
+      { src: 'https://i.pinimg.com/736x/93/7e/50/937e502de6aa3aa9dacd8880a0dc955e.jpg', label: 'Page — reference 2' },
+      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'Page — reference 3' },
+      { src: 'https://i.pinimg.com/736x/a5/63/ed/a563ed7583b0036fd0bd96a8c4b3f0fa.jpg', label: 'Page — reference 4' },
+      { src: 'https://i.pinimg.com/736x/66/75/45/66754570a2e39e0f9db74734c16190fd.jpg', label: 'Page — reference 5' },
+      { src: 'https://i.pinimg.com/736x/0d/a7/1a/0da71abd1ec33c8ce19a27261604dd44.jpg', label: 'Page — reference 6' },
+      { src: 'https://i.pinimg.com/736x/86/12/7d/86127d32b48b0a7e9e15cda5cc58ca46.jpg', label: 'Page — reference 7' },
+      { src: 'https://i.pinimg.com/736x/b3/36/62/b33662d6d03cce81190d6a55c262971c.jpg', label: 'Page — reference 8' },
+      { src: 'https://i.pinimg.com/736x/38/99/0c/38990c61433931c1e104fcbcd0fa2f5c.jpg', label: 'Page — reference 9' },
+      { src: 'https://i.pinimg.com/736x/c5/b3/3d/c5b33da4d8358ba7e1b74d5c589c12d7.jpg', label: 'Page — reference 10' },
+      { src: 'https://i.pinimg.com/736x/d4/60/b4/d460b469ca43aaae7516a0d8d64f2a66.jpg', label: 'Page — reference 11' },
+      { src: 'https://i.pinimg.com/736x/49/6a/fa/496afa810325cb4752d96f096274e2e0.jpg', label: 'Page — reference 12' },
+    ],
+  },
+  {
+    id: 'wayne_barlowe', rank: '05', name: 'Wayne Barlowe',
+    subtitle: 'Creature & Environment Designer \u00b7 \ubbf8\uad6d',
+    styleType: 'oil', styleLabel: 'Oil Painting / Digital',
+    desc: '\uc81c\uc784\uc2a4 \uce74\uba54\ub860\uc774 "\uac00\uc7a5 \ud658\uac01\uc801\uc778 \uc678\uacc4 \uc0dd\ubb3c\uc744 \ub514\uc790\uc778\ud558\ub294 \uc0ac\ub78c"\uc774\ub77c \ud3c9\ud55c \uc791\uac00. \uc544\ubc14\ud0c0\uc758 \ud310\ub3c4\ub77c \uc0dd\ud0dc\uacc4 \ud575\uc2ec \uc0dd\ubb3c\uc744 \ub514\uc790\uc778\ud588\ub2e4.',
+    styleDesc: '\uc720\ud654 \uae30\ubc18\uc758 \uc0ac\uc2e4\uc801 \ud658\uc0c1 \uc0dd\ubb3c\ud654. \uc804\uccb4 \uc0dd\ud0dc\uacc4\ub97c \uad6c\uc0c1\ud55c \ub4a4 \uac1c\ubcc4 \ud06c\ub9ac\ucc98\ub97c \ub514\uc790\uc778\ud558\ub294 "\ud558\ud5a5\uc2dd \uc138\uacc4\uad00 \uc811\uadfc\ubc95".',
+    technique: 'Ecosystem-First Design: \uc804\uccb4 \uc0dd\ud0dc\uacc4\ub97c \uba3c\uc800 \uad6c\ucd95.\nConvergent Evolution: \uc218\ub834 \uc9c4\ud654\uc801 \uc720\uc0ac\uc131\uc744 \ubd80\uc5ec.\nFine Art Quality: \ubbf8\uc220\uad00\uc5d0 \uac78\ub9b4 \uc218 \uc788\ub294 \uc720\ud654 \uc218\uc900\uc758 \uc644\uc131\ub3c4.',
+    aiPrompt: 'Wayne Barlowe style creature concept, oil painting quality alien wildlife, ecosystem-driven design, rich color palette, detailed texture rendering, convergent evolution alien biology, exotic bioluminescent creature',
+    films: ['Avatar (2009)', 'Hellboy 1 & 2', 'Pacific Rim', 'Harry Potter 3 & 4', 'Blade II'],
+    characters: ['Great Leonopteryx', 'Direhorse / Stingbat'],
+    links: [
+      { text: 'Wayne Barlowe Official: Film Art', url: 'https://waynebarlowe.com/artwork/film-tv-game/' },
+      { text: 'Avatar Wiki: Barlowe', url: 'https://james-camerons-avatar.fandom.com/wiki/Wayne_Douglas_Barlowe' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'Barlowe — reference 1' },
+      { src: 'https://i.pinimg.com/736x/1d/02/c4/1d02c4c51315bab231dbe187b1eec2a7.jpg', label: 'Barlowe — reference 2' },
+      { src: 'https://i.pinimg.com/736x/45/07/01/450701fe9f3849ecb5ac6f39511abe80.jpg', label: 'Barlowe — reference 3' },
+      { src: 'https://i.pinimg.com/736x/65/73/56/65735676dae66545f6ce47a78656a4bc.jpg', label: 'Barlowe — reference 4' },
+      { src: 'https://i.pinimg.com/736x/a7/d0/b6/a7d0b612f5154a876ba613d530df9718.jpg', label: 'Barlowe — reference 5' },
+      { src: 'https://i.pinimg.com/736x/32/da/01/32da0135a6e879a8b964f1c4edd029b2.jpg', label: 'Barlowe — reference 6' },
+      { src: 'https://i.pinimg.com/736x/9a/e9/eb/9ae9eb4a1f7ce19c20591dbdbe6225f7.jpg', label: 'Barlowe — reference 7' },
+      { src: 'https://i.pinimg.com/736x/b6/02/b7/b602b74c761e6fbf40168ca4bbc3b20f.jpg', label: 'Barlowe — reference 8' },
+      { src: 'https://i.pinimg.com/736x/d7/fa/a2/d7faa27041dd93b7b60f60ff4cee1869.jpg', label: 'Barlowe — reference 9' },
+      { src: 'https://i.pinimg.com/736x/20/de/df/20dedf908d260ad32d067d00cf94e9dc.jpg', label: 'Barlowe — reference 10' },
+      { src: 'https://i.pinimg.com/736x/b0/dd/d7/b0ddd78efef82a20b4c36b4a1e529ce4.jpg', label: 'Barlowe — reference 11' },
+      { src: 'https://i.pinimg.com/736x/1e/7a/49/1e7a495e00ebf48ec57b374779bbea4e.jpg', label: 'Barlowe — reference 12' },
+    ],
+  },
+  {
+    id: 'ralph_mcquarrie', rank: '06', name: 'Ralph McQuarrie',
+    subtitle: 'Character / Environment / Vehicle Designer \u00b7 \ubbf8\uad6d \u00b7 1929-2012',
+    styleType: 'gouache', styleLabel: 'Gouache / Acrylic / Oil',
+    desc: '\uc2a4\ud0c0\uc6cc\uc988 \ube44\uc8fc\uc5bc \uc720\ub2c8\ubc84\uc2a4\uc758 \uc544\ubc84\uc9c0. \ub2e4\uc2a4 \ubca0\uc774\ub354\uc758 \ud5ec\uba5b, C-3PO, \ubc00\ub808\ub2c8\uc5c4 \ud314\ucf58 \u2014 \ud604\ub300 SF\uc758 \uc2dc\uac01\uc801 \uc5b4\ud718 \uc790\uccb4\ub97c \ucc3d\uc870\ud55c \uc778\ubb3c.',
+    styleDesc: '\uad6c\uc544\uc288\uc640 \uc544\ud06c\ub9b4 \ud68c\ud654 \uae30\ubc18\uc758 \uc2dc\ub124\ub9c8\ud2f1 \uc77c\ub7ec\uc2a4\ud2b8\ub808\uc774\uc158. \uc2e4\ub8e8\uc5ff\uc774 \uc989\uc2dc \uc778\uc2dd \uac00\ub2a5\ud55c \uc544\uc774\ucf54\ub2c9 \ud615\ud0dc \uc5b8\uc5b4.',
+    technique: 'Iconic Silhouette: \uba40\ub9ac\uc11c\ub3c4 \uc989\uc2dc \uc778\uc2dd \uac00\ub2a5\ud55c \uc2e4\ub8e8\uc5ff \ub514\uc790\uc778.\nCharacter-in-World: \uce90\ub9ad\ud130\ub97c \ud56d\uc0c1 \ubc30\uacbd\uacfc \ud568\uaed8.\nEmotional Lighting: \uc870\uba85\uc73c\ub85c \uce90\ub9ad\ud130\uc758 \uc131\uaca9\uacfc \uc815\uc11c\ub97c \uc804\ub2ec.',
+    aiPrompt: 'Ralph McQuarrie style concept art, gouache painting, iconic character silhouette, character in cinematic environment, atmospheric lighting, sci-fi retro-futurism, Star Wars aesthetic',
+    films: ['Star Wars OT (1977-1983)', 'E.T. (1982)', 'Battlestar Galactica', 'Cocoon'],
+    characters: ['Darth Vader', 'C-3PO / R2-D2', 'Chewbacca'],
+    links: [
+      { text: 'Academy of Art: Visual Dev Masters', url: 'https://blog.academyart.edu/know-your-visual-development-famous-concept-artists/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/b4/46/db/b446db4165384d1e394698974c6920d2.jpg', label: 'McQuarrie — reference 1' },
+      { src: 'https://i.pinimg.com/736x/3f/3d/15/3f3d154535940ed98ec751c0b78778ce.jpg', label: 'McQuarrie — reference 2' },
+      { src: 'https://i.pinimg.com/736x/1a/ce/71/1ace713244862edfc6f7156efcc8aa09.jpg', label: 'McQuarrie — reference 3' },
+      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'McQuarrie — reference 4' },
+      { src: 'https://i.pinimg.com/736x/a3/26/57/a32657105d0db0b9ff6b06172898728f.jpg', label: 'McQuarrie — reference 5' },
+      { src: 'https://i.pinimg.com/736x/31/de/90/31de90852300421081c1ef4ba9bb68f4.jpg', label: 'McQuarrie — reference 6' },
+      { src: 'https://i.pinimg.com/736x/01/13/18/0113187c953bde91057b2d8b41506cea.jpg', label: 'McQuarrie — reference 7' },
+      { src: 'https://i.pinimg.com/736x/76/88/15/7688152959c59e4c3492bb8fd0cc63a0.jpg', label: 'McQuarrie — reference 8' },
+      { src: 'https://i.pinimg.com/736x/bd/70/83/bd708308aa680a69a7212ac482fc427d.jpg', label: 'McQuarrie — reference 9' },
+      { src: 'https://i.pinimg.com/736x/d8/67/36/d867363a1a77406a4032637d558590d7.jpg', label: 'McQuarrie — reference 10' },
+      { src: 'https://i.pinimg.com/736x/fd/87/13/fd87137cdcd75727f8450b6954e49f32.jpg', label: 'McQuarrie — reference 11' },
+      { src: 'https://i.pinimg.com/736x/05/d7/6c/05d76c07c97a6adbeecbbd62c9a32ee0.jpg', label: 'McQuarrie — reference 12' },
+    ],
+  },
+  {
+    id: 'moebius', rank: '07', name: 'Moebius (Jean Giraud)',
+    subtitle: 'Character / Environment / Costume Designer \u00b7 \ud504\ub791\uc2a4 \u00b7 1938-2012',
+    styleType: 'pencil', styleLabel: 'Pen & Ink / Watercolor',
+    desc: '\ud604\ub300 SF \ube44\uc8fc\uc5bc\uc758 \uc6d0\ud615\uc744 \ub9cc\ub4e0 \ud504\ub791\uc2a4 \uc544\ud2f0\uc2a4\ud2b8. \uc5d0\uc774\ub9ac\uc5b8\uc5d0\uc11c \ub178\uc2a4\ud2b8\ub85c\ubaa8 \uc2b9\ubb34\uc6d0\uc758 \ubcf5\uc7a5\uacfc \uc6b0\uc8fc\ubcf5\uc744 \ub514\uc790\uc778. "\ub0a1\uace0 \uc0ac\ub78c \uc0ac\ub294 \ub0c4\uc0c8\ub098\ub294 \ubbf8\ub798"\ub77c\ub294 \uc0c8\ub85c\uc6b4 SF \ubbf8\ud559\uc744 \uc815\ub9bd.',
+    styleDesc: '\uc815\uad50\ud55c \ud39c \ub77c\uc778\uc6cc\ud06c\uc5d0 \ucd08\ud604\uc2e4\uc801 \uc0c1\uc0c1\ub825\uc774 \uacb0\ud569. "\uc0b4\uc544 \uc788\ub294, \ub0a1\uc740 \ubbf8\ub798"\uc758 \uce90\ub9ad\ud130\ub4e4.',
+    technique: 'Lived-In Future: \uce90\ub9ad\ud130 \uc758\uc0c1\uacfc \uc7a5\ube44\uc5d0 \uc0ac\uc6a9\uac10, \uc218\ub9ac \ud754\uc801\uc744 \ubd80\uc5ec.\nIntricate Line Work: \ud39c\uc73c\ub85c \uadf9\ub3c4\ub85c \uc815\uad50\ud55c \ub77c\uc778\uc6cc\ud06c.\nCulture Through Costume: \uc758\uc0c1\uc774 \uacf3 \uc138\uacc4\uad00.',
+    aiPrompt: 'Moebius Jean Giraud style character concept, intricate pen and ink line work, surreal science fiction, lived-in futuristic costume design, retro-futuristic fashion, French bande dessinee aesthetic',
+    films: ['Alien (1979)', 'The Fifth Element (1997)', 'Tron (1982)', 'The Abyss (1989)'],
+    characters: ['Nostromo Crew Attire', 'Fifth Element Characters'],
+    links: [
+      { text: 'Smithsonian: How Sci-Fi Looks', url: 'https://www.smithsonianmag.com/smart-news/meet-the-man-who-helped-define-how-science-fiction-looks-180959080/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/19/8b/d6/198bd6c7990b546b24b243644eda3e1c.jpg', label: 'Moebius — reference 1' },
+      { src: 'https://i.pinimg.com/736x/6b/fd/81/6bfd81a16fffb91443b384bde4e4211b.jpg', label: 'Moebius — reference 2' },
+      { src: 'https://i.pinimg.com/736x/60/4e/e6/604ee6f6e414441cfbb5d9b8e447440d.jpg', label: 'Moebius — reference 3' },
+      { src: 'https://i.pinimg.com/736x/53/f9/73/53f973d6f52375e5bcd3752a6e00a161.jpg', label: 'Moebius — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ff/48/50/ff4850dfbbb0e1ef094d20c79ec4c151.jpg', label: 'Moebius — reference 5' },
+      { src: 'https://i.pinimg.com/736x/67/25/00/672500411fce36da0dfcfab175590b17.jpg', label: 'Moebius — reference 6' },
+      { src: 'https://i.pinimg.com/736x/88/b6/8d/88b68d6b4c62a64b525b2e10c5c57fdb.jpg', label: 'Moebius — reference 7' },
+      { src: 'https://i.pinimg.com/736x/1f/57/be/1f57beeb3e1d37347f4ac28b0ddde05d.jpg', label: 'Moebius — reference 8' },
+      { src: 'https://i.pinimg.com/736x/be/4b/f6/be4bf6b393eccb589568d6f840b08501.jpg', label: 'Moebius — reference 9' },
+      { src: 'https://i.pinimg.com/736x/90/ed/a0/90eda09326b2829b981bc775d8951c70.jpg', label: 'Moebius — reference 10' },
+      { src: 'https://i.pinimg.com/736x/c5/6e/10/c56e1002c439991a88db0190ce1c9d94.jpg', label: 'Moebius — reference 11' },
+      { src: 'https://i.pinimg.com/736x/fe/21/81/fe2181c0af7ddb336029680eea6b7846.jpg', label: 'Moebius — reference 12' },
+    ],
+  },
+  {
+    id: 'doug_chiang', rank: '08', name: 'Doug Chiang',
+    subtitle: 'Production Design / Character / Vehicle \u00b7 \ub300\ub9cc\uacc4 \ubbf8\uad6d \u00b7 1962-',
+    styleType: 'digital', styleLabel: 'Digital Painting / Gouache',
+    desc: '\ub8e8\uce74\uc2a4\ud544\ub984 \ubd80\uc0ac\uc7a5\uc774\uc790 \ud06c\ub9ac\uc5d0\uc774\ud2f0\ube0c \ub514\ub809\ud130. \uc2a4\ud0c0\uc6cc\uc988 \ud504\ub9ac\ud014 \uc804\uccb4\uc758 \ube44\uc8fc\uc5bc \uc6d4\ub4dc\ub97c \uc124\uacc4\ud588\uc73c\uba70, "3\ucd08 \uaddc\uce59"\uacfc \ud329\uc158\ubcc4 \ucef4\ub7ec \ucf54\ub529\uc774\ub77c\ub294 \uccb4\uacc4\uc801 \ub514\uc790\uc778 \uc5b8\uc5b4\ub97c \ud655\ub9bd.',
+    styleDesc: '\uccb4\uacc4\uc801 \ub514\uc790\uc778 \uc5b8\uc5b4 \uae30\ubc18. \uc2e4\uc81c \ubb38\ud654\uc801 \uc624\ube0c\uc81c\uc5d0\uc11c \ud615\ud0dc \uc5b8\uc5b4\ub97c \ucd94\ucd9c\ud558\uc5ec SF\ub85c \ubcc0\ud658.',
+    technique: 'Three-Second Rule: \ub514\uc790\uc778\uc740 3\ucd08 \uc548\uc5d0 \uc774\ud574 \uac00\ub2a5\ud574\uc57c.\nFaction Color Coding: \uc81c\uad6d=\uac80\uc815+\ube68\uac15, \ubc18\ub780\uad70=\uac08\uc0c9+\ucd08\ub85d.\nCultural Fusion: \uc2e4\uc138\uacc4 \ubb38\ud654 \uc720\uc0b0\uc5d0\uc11c \ud615\ud0dc\ub97c \ucc28\uc6a9\ud558\ub418 SF\uc801\uc73c\ub85c \ubcc0\ud658.',
+    aiPrompt: 'Doug Chiang style concept design, systematic design language, strong silhouette character, faction color coding, cultural reference fusion in sci-fi, three-second recognizable shape, Star Wars prequel aesthetic',
+    films: ['Star Wars Ep I-II', 'Rogue One / Solo', 'The Mandalorian', 'Forrest Gump (VFX)'],
+    characters: ['Battle Droids', 'General Grievous'],
+    links: [
+      { text: 'StarWars.com: Doug Chiang', url: 'https://www.starwars.com/news/we-set-the-bar-so-high-doug-chiang-on-designing-rogue-one' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/89/06/ad/8906adb36444cda01884dcea4aed9247.jpg', label: 'Chiang — reference 1' },
+      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'Chiang — reference 2' },
+      { src: 'https://i.pinimg.com/736x/33/e4/90/33e4905deb29054acd7b941a474ab979.jpg', label: 'Chiang — reference 3' },
+      { src: 'https://i.pinimg.com/736x/7a/1b/6b/7a1b6b2513c4c74cad4af3dcf8d2891e.jpg', label: 'Chiang — reference 4' },
+      { src: 'https://i.pinimg.com/736x/d7/46/ac/d746acdfc52cf1adbd2ada2cf9f43544.jpg', label: 'Chiang — reference 5' },
+      { src: 'https://i.pinimg.com/736x/34/75/6b/34756b2f5390c2093c5f8c5e5ebda937.jpg', label: 'Chiang — reference 6' },
+      { src: 'https://i.pinimg.com/736x/7b/c7/db/7bc7dbd14945efdc98c81b328516abc9.jpg', label: 'Chiang — reference 7' },
+      { src: 'https://i.pinimg.com/736x/cd/04/10/cd0410d3e22cfd0e173b58a4b0b10630.jpg', label: 'Chiang — reference 8' },
+      { src: 'https://i.pinimg.com/736x/22/bf/f5/22bff5c0a4f1180f6f69c6ee97c75240.jpg', label: 'Chiang — reference 9' },
+      { src: 'https://i.pinimg.com/736x/c3/65/d9/c365d91227e92129fe0071778cd8a089.jpg', label: 'Chiang — reference 10' },
+      { src: 'https://i.pinimg.com/736x/2b/04/33/2b0433d2f2b468da63a024b08df11b84.jpg', label: 'Chiang — reference 11' },
+      { src: 'https://i.pinimg.com/736x/30/e6/33/30e63304e14e0a89a10c9a5cf2d0b635.jpg', label: 'Chiang — reference 12' },
+    ],
+  },
+  {
+    id: 'syd_mead', rank: '09', name: 'Syd Mead',
+    subtitle: 'Visual Futurist / Industrial Designer \u00b7 \ubbf8\uad6d \u00b7 1933-2019',
+    styleType: 'gouache', styleLabel: 'Gouache / Prismacolor / Ink',
+    desc: '"\ube44\uc8fc\uc5bc \ud4e8\ucc98\ub9ac\uc2a4\ud2b8". \ube14\ub808\uc774\ub4dc \ub7ec\ub108\uc758 \uc138\uacc4\ub97c \uc2dc\uac01\ud654\ud588\uace0, \uc5d0\uc774\ub9ac\uc5b8\uc988\uc758 \ud30c\uc6cc \ub85c\ub354 \uac19\uc740 "\uc778\uac04\uc774 \ucc29\uc6a9/\ud0d1\uc2b9\ud558\ub294 \uae30\uacc4" \ub514\uc790\uc778\uc5d0\uc11c \uce90\ub9ad\ud130\uc640 \uc7a5\ube44\uc758 \uacbd\uacc4\ub97c \ud5c8\ubb3c\uc5c8\ub2e4.',
+    styleDesc: '\uce90\ub9ad\ud130\uc640 \uc7a5\ube44\uc758 \uacbd\uacc4\ub97c \ud5c8\ubb34\ub294 \ub514\uc790\uc778. \uc0b0\uc5c5 \ub514\uc790\uc778\uc758 \uae30\ub2a5\uc8fc\uc758\uac00 \uce90\ub9ad\ud130 \uc758\uc0c1/\uc7a5\ube44\uc5d0 \uc801\uc6a9.',
+    technique: '',
+    aiPrompt: 'Syd Mead visual futurist style, industrial design character concept, human-machine interface design, gouache painting, functional futuristic costume, chrome and neon aesthetic',
+    films: ['Blade Runner (1982)', 'Aliens (1986)', 'Tron (1982)', 'Elysium (2013)'],
+    characters: ['Power Loader (Aliens)', 'Tron Characters'],
+    links: [
+      { text: 'Bold Entrance: Visual Futurist Legacy', url: 'https://boldentrance.com/syd-mead-visual-futurist-dead-legacy/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/e9/8a/e4/e98ae4e18696f050c51afd5abbdee9ba.jpg', label: 'Mead — reference 1' },
+      { src: 'https://i.pinimg.com/736x/9d/4a/ec/9d4aec465a199ffc30b1123f18f9f5d3.jpg', label: 'Mead — reference 2' },
+      { src: 'https://i.pinimg.com/736x/08/e2/60/08e2609fbaeb2070f81b078c6029a798.jpg', label: 'Mead — reference 3' },
+      { src: 'https://i.pinimg.com/736x/d2/5b/42/d25b4255e5fb05c0924c74f86b40cd08.jpg', label: 'Mead — reference 4' },
+      { src: 'https://i.pinimg.com/736x/eb/6f/45/eb6f452a2e3593624bc1b77b8ca89cb7.jpg', label: 'Mead — reference 5' },
+      { src: 'https://i.pinimg.com/736x/b0/10/f5/b010f54f0c38724a4ffe168ca959c797.jpg', label: 'Mead — reference 6' },
+      { src: 'https://i.pinimg.com/736x/68/20/f8/6820f87a0777adbe7ff3f837b25bdccf.jpg', label: 'Mead — reference 7' },
+      { src: 'https://i.pinimg.com/736x/3c/a0/61/3ca06115b5748434c2fdd768c49fe63b.jpg', label: 'Mead — reference 8' },
+      { src: 'https://i.pinimg.com/736x/2b/e7/72/2be772279e75e084e51b905fd0893241.jpg', label: 'Mead — reference 9' },
+      { src: 'https://i.pinimg.com/736x/5f/a4/87/5fa487d8e834c442de20996ac132bd9d.jpg', label: 'Mead — reference 10' },
+      { src: 'https://i.pinimg.com/736x/2c/eb/64/2ceb64b65794d82a05cee2f59d0ec630.jpg', label: 'Mead — reference 11' },
+      { src: 'https://i.pinimg.com/736x/07/01/80/070180dcd188d92644a7377468e60be3.jpg', label: 'Mead — reference 12' },
+    ],
+  },
+  {
+    id: 'ron_cobb', rank: '10', name: 'Ron Cobb',
+    subtitle: 'Environment / Vehicle / Prop Designer \u00b7 \ubbf8\uad6d/\ud638\uc8fc \u00b7 1937-2020',
+    styleType: 'pencil', styleLabel: 'Pen & Ink / Technical Drawing',
+    desc: '\uc5d0\uc774\ub9ac\uc5b8\uc5d0\uc11c \uc778\uac04 \uce21\uc744 \ub2f4\ub2f9. \uae54\ub054\ud55c \uc120\uacfc \ud22c\ubc15\ud558\uace0 \uc0ac\uc6a9\uac10 \uc788\ub294 \ubbf8\ud559\uc73c\ub85c \uc6b0\uc8fc\uc120\uacfc \ub85c\ubd07\uc774 \uc9c4\uc9dc\ucc98\ub7fc \ub290\uaef4\uc9c0\uac8c \ub9cc\ub4e0\ub2e4.',
+    styleDesc: '\uae30\ub2a5\uc801\uc774\uace0 \uc0ac\uc2e4\uc801\uc778 \uc811\uadfc. \uc778\uac04 \uce90\ub9ad\ud130\uc758 \uacbd\uc6b0 \ud658\uacbd\uacfc \uc7a5\ube44\ub97c \ud1b5\ud574 \uce90\ub9ad\ud130\ub97c \uac04\uc811\uc801\uc73c\ub85c \ud45c\ud604.',
+    technique: '',
+    aiPrompt: 'Ron Cobb style concept design, clean technical line drawing, bulky lived-in industrial aesthetic, functional alien creature design, utilitarian sci-fi character equipment, believable mechanical detail',
+    films: ['Alien (1979)', 'Star Wars (1977)', 'Back to the Future (1985)', 'Conan the Barbarian'],
+    characters: ['Cantina Aliens (Star Wars)', 'Nostromo Crew Environment'],
+    links: [
+      { text: 'Screen Rant: Ron Cobb Art', url: 'https://screenrant.com/ron-cobbs-best-pieces-of-movie-concept-art/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/b5/b6/c1/b5b6c1ef9bc2265718c8e3cb7818daa5.jpg', label: 'Cobb — reference 1' },
+      { src: 'https://i.pinimg.com/736x/ad/bd/6f/adbd6fc2e92ed8ccab6b411d1ff4dafe.jpg', label: 'Cobb — reference 2' },
+      { src: 'https://i.pinimg.com/736x/1f/fb/86/1ffb86b074e6df084054c9dd83c397d6.jpg', label: 'Cobb — reference 3' },
+      { src: 'https://i.pinimg.com/736x/b5/55/cb/b555cbe34910f0aa14967f6efc6466a9.jpg', label: 'Cobb — reference 4' },
+      { src: 'https://i.pinimg.com/736x/46/80/48/468048a6c5e5b7036cba3b12c8833159.jpg', label: 'Cobb — reference 5' },
+      { src: 'https://i.pinimg.com/736x/9b/ef/97/9bef970a010c298ae67b549d50bb4832.jpg', label: 'Cobb — reference 6' },
+      { src: 'https://i.pinimg.com/736x/54/83/8e/54838e6214bdf6f67b8863dd580a7a85.jpg', label: 'Cobb — reference 7' },
+      { src: 'https://i.pinimg.com/736x/40/d1/99/40d199e5625ce27b06a479983ec131cd.jpg', label: 'Cobb — reference 8' },
+      { src: 'https://i.pinimg.com/736x/70/03/b8/7003b85377f233d0b74c01be72f4b04a.jpg', label: 'Cobb — reference 9' },
+      { src: 'https://i.pinimg.com/736x/28/98/d8/2898d8119f2efaa1af3bbd00e4caa62f.jpg', label: 'Cobb — reference 10' },
+      { src: 'https://i.pinimg.com/736x/16/92/d6/1692d60a7e4e61b56ce729447b851051.jpg', label: 'Cobb — reference 11' },
+      { src: 'https://i.pinimg.com/736x/aa/72/25/aa7225c9515f65d1f79e8ffbcd9218a3.jpg', label: 'Cobb — reference 12' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+// Build left panel
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = DESIGNERS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+
+  // Update active state
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+  if (typeof isMobile === "function" && isMobile()) switchMobileTab("viewer");
+}
+
+function updateInfoPanel(a) {
+  let techniqueSec = '';
+  if (a.technique) {
+    techniqueSec = `
+      <div class="info-section">
+        <h4>Technique</h4>
+        <p>${a.technique.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    ${techniqueSec}
+    <div class="info-section">
+      <h4>AI Prompt</h4>
+      <div class="prompt-box" onclick="copyPrompt(this, '${a.id}')">
+        <span class="copy-hint">click to copy</span>
+        ${a.aiPrompt}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function copyPrompt(el, id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  navigator.clipboard.writeText(artist.aiPrompt).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.copy-hint').textContent = 'copied!';
+    setTimeout(() => {
+      el.classList.remove('copied');
+      el.querySelector('.copy-hint').textContent = 'click to copy';
+    }, 1500);
+  });
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 4}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image available</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.parentElement.querySelector('.no-image')||this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.style.opacity = '0';
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.onerror = function() {
+      img.style.display = 'none';
+      ph.style.display = 'flex';
+      ph.style.flexDirection = 'column';
+      ph.style.alignItems = 'center';
+      ph.style.justifyContent = 'center';
+      ph.innerHTML = `<div style="text-align:center;color:var(--text-dim)">`
+        + `<div style="font-size:2em;margin-bottom:8px">&#9888;</div>`
+        + `<div style="font-size:0.85em;color:#888">${a.images[currentImageIdx].label}</div>`
+        + `<div style="font-size:0.75em;margin-top:4px;color:#555">이미지를 불러올 수 없습니다</div>`
+        + `<button onclick="selectImage(${currentImageIdx})" style="margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em">재시도</button>`
+        + `</div>`;
+    };
+    img.src = a.images[currentImageIdx].src;
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#127912;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available for this designer.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+// Modal
+function openModal() {
+  const sel = document.getElementById('modalStyle');
+  if (sel.options.length <= 1) {
+    DESIGNERS.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const pose = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+
+  if (!scene.trim()) { alert('Character description is required.'); return; }
+
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+
+  generateConcept('character', { description: scene, style, pose, mood })
+    .then(data => {
+      if (data.success && data.url) {
+        showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`);
+        setStatus('ready', 'Generation complete ✓');
+      } else {
+        setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`);
+      }
+    })
+    .catch(err => {
+      setStatus('ready', `API error: ${err.message}`);
+    });
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  // Number keys 1-9, 0 to select artist
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id);
+  }
+});
+
+// Click outside modal to close
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

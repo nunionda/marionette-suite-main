@@ -1,0 +1,34 @@
+/* ─── Studio Cinematic Dark Tokens ─── */
+:root {
+  /* Backgrounds */
+  --studio-bg-base:     #0a0a0f;
+  --studio-bg-surface:  #111118;
+  --studio-bg-elevated: #1a1a24;
+  --studio-bg-hover:    #22223a;
+
+  /* Borders */
+  --studio-border:      #2a2a3a;
+  --studio-border-accent: #3f3f5a;
+
+  /* Text */
+  --studio-text:        #f0f0f8;
+  --studio-text-dim:    #8888aa;
+  --studio-text-muted:  #55556a;
+
+  /* Accent */
+  --studio-accent:      #6366f1;
+  --studio-accent-dim:  rgba(99, 102, 241, 0.15);
+  --studio-accent-glow: rgba(99, 102, 241, 0.4);
+
+  /* Status */
+  --studio-success:     #22c55e;
+  --studio-warning:     #f59e0b;
+  --studio-danger:      #ef4444;
+  --studio-info:        #38bdf8;
+
+  /* Layout */
+  --studio-nav-h:       56px;
+  --studio-sidebar-w:   220px;
+  --studio-radius:      8px;
+  --studio-radius-sm:   4px;
+}

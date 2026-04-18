@@ -24,6 +24,7 @@ export interface PipelineState {
   globalHealthScore: number;
   engines: Engine[];
   agentBindings: Record<string, string>;
+  projectId: string;
 }
 
 interface PipelineContextType extends PipelineState {
@@ -35,6 +36,7 @@ interface PipelineContextType extends PipelineState {
   updateBinding: (agent: string, engineId: string) => void;
   getEngineForAgent: (agent: string) => Engine | undefined;
   getAgentMeta: (agentId: string) => AgentMeta | undefined;
+  setProjectId: (id: string) => void;
 }
 
 const PipelineContext = createContext<PipelineContextType | undefined>(undefined);
@@ -94,7 +96,7 @@ const INITIAL_BINDINGS: Record<string, string> = {
   "MSTR": "gemini-2.5",
 };
 
-export function PipelineProvider({ children }: { children: ReactNode }) {
+export function PipelineProvider({ children, onApprove4K }: { children: ReactNode; onApprove4K?: (projectId: string) => Promise<void> }) {
   const [state, setState] = useState<PipelineState>({
     activeShotId: "TK_01",
     activeSceneId: "SC_001",
@@ -111,6 +113,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
     globalHealthScore: 100,
     engines: INITIAL_ENGINES,
     agentBindings: INITIAL_BINDINGS,
+    projectId: "",
   });
 
   // Mock Telemetry Feed
@@ -138,8 +141,15 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
     setState(prev => ({ ...prev, masteringMode: mode }));
   };
 
-  const approve4K = () => {
+  const approve4K = async () => {
     setState(prev => ({ ...prev, is4KApproved: true, masteringMode: "MASTERING_4K" }));
+    if (onApprove4K && state.projectId) {
+      await onApprove4K(state.projectId);
+    }
+  };
+
+  const setProjectId = (id: string) => {
+    setState(prev => ({ ...prev, projectId: id }));
   };
 
   const updateBinding = (agent: string, engineId: string) => {
@@ -192,6 +202,7 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       globalHealthScore: 100,
       engines: INITIAL_ENGINES,
       agentBindings: INITIAL_BINDINGS,
+      projectId: state.projectId,
     });
   };
 
@@ -205,7 +216,8 @@ export function PipelineProvider({ children }: { children: ReactNode }) {
       resetPipeline,
       updateBinding,
       getEngineForAgent,
-      getAgentMeta
+      getAgentMeta,
+      setProjectId
     }}>
       {children}
     </PipelineContext.Provider>

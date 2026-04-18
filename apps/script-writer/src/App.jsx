@@ -1,0 +1,200 @@
+import React, { useState, useContext } from 'react';
+import './styles/Theme.css';
+import Dashboard from './components/Dashboard';
+import ProjectHub from './components/ProjectHub';
+import WritingRoom from './components/WritingRoom';
+import ProductionDeck from './components/ProductionDeck';
+import ProjectDetail from './components/ProjectDetail';
+import AdProjectDetail from './components/AdProjectDetail';
+import DramaProjectDetail from './components/DramaProjectDetail';
+import YouTubeProjectDetail from './components/YouTubeProjectDetail';
+import ExportRenderView from './components/ExportRenderView';
+import { ProjectProvider, ProjectContext } from './context/ProjectContext';
+
+/**
+ * App routing — hash-based URL navigation.
+ *
+ * Hash format:
+ *   #/                         → Dashboard
+ *   #/project/123              → ProjectHub
+ *   #/project/123/writing      → WritingRoom
+ *   #/project/123/production   → ProductionDeck
+ *   #/project/123/pipeline     → ProductionDeck (pipeline tab)
+ *   #/project/123/legacy       → ProjectDetail
+ *
+ * State is synced to the URL hash so refreshing restores the current view.
+ */
+
+function parseHash() {
+  const hash = window.location.hash.replace('#', '');
+  const match = hash.match(/^\/project\/(\d+)(?:\/(\w+))?/);
+  return match ? { projectId: match[1], subPage: match[2] || null } : { projectId: null, subPage: null };
+}
+
+function AppContent() {
+  const { projects } = useContext(ProjectContext);
+  const [currentProjectId, setCurrentProjectId] = React.useState(() => {
+    const { projectId } = parseHash();
+    return projectId || localStorage.getItem('lastProjectId') || null;
+  });
+  // Sub-page navigation: null = hub, 'writing' = WritingRoom, 'production' = ProductionDeck, 'pipeline' = ProductionDeck(pipeline), 'legacy' = old ProjectDetail
+  const [subPage, setSubPage] = useState(() => parseHash().subPage);
+  const [subPageParam, setSubPageParam] = useState(null); // e.g. initial step key
+  const [isSyncing, setIsSyncing] = React.useState(true);
+
+  React.useEffect(() => {
+    // Check if we can find the saved project in the current project list
+    if (currentProjectId) {
+      const found = projects.find(p => String(p.id) === String(currentProjectId));
+      if (found) {
+        setIsSyncing(false);
+      }
+      // else: keep syncing until found or timeout
+    } else {
+      if (projects.length > 0) setIsSyncing(false);
+    }
+  }, [projects, currentProjectId]);
+
+  // Safety timeout — always stop syncing after 3s
+  React.useEffect(() => {
+    const timer = setTimeout(() => setIsSyncing(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Sync navigation state → URL hash
+  React.useEffect(() => {
+    if (!currentProjectId) {
+      window.location.hash = '';
+    } else if (!subPage) {
+      window.location.hash = `/project/${currentProjectId}`;
+    } else {
+      window.location.hash = `/project/${currentProjectId}/${subPage}`;
+    }
+  }, [currentProjectId, subPage]);
+
+  // Browser back/forward support
+  React.useEffect(() => {
+    const handler = () => {
+      const { projectId, subPage: sp } = parseHash();
+      setCurrentProjectId(projectId);
+      setSubPage(sp);
+      setSubPageParam(null);
+    };
+    window.addEventListener('hashchange', handler);
+    return () => window.removeEventListener('hashchange', handler);
+  }, []);
+
+  // Deep-link from hub: ?paperclipId=ID-001 → auto-open matching project
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const paperclipId = params.get('paperclipId');
+    if (!paperclipId) return;
+    fetch(`${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/api/progress?paperclipId=${encodeURIComponent(paperclipId)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.found && data.projectId) {
+          const id = String(data.projectId);
+          setCurrentProjectId(id);
+          localStorage.setItem('lastProjectId', id);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  // Handle Export Rendering Route
+  const path = window.location.pathname;
+  if (path.startsWith('/render/project/')) {
+    const renderProjectId = path.split('/').pop();
+    const renderProject = projects.find(p => String(p.id) === String(renderProjectId));
+    if (!renderProject && !isSyncing) {
+      return <div style={{ color: "white" }}>Project Not Found for Export</div>;
+    }
+    if (!renderProject) return null;
+    return <ExportRenderView project={renderProject} />;
+  }
+
+  const handleEnterLab = (id) => {
+    setCurrentProjectId(id);
+    setSubPage(null);
+    setSubPageParam(null);
+    localStorage.setItem('lastProjectId', id);
+  };
+
+  const activeProject = projects.find(p => String(p.id) === String(currentProjectId));
+
+  const handleBack = () => {
+    setCurrentProjectId(null);
+    setSubPage(null);
+    setSubPageParam(null);
+    localStorage.removeItem('lastProjectId');
+  };
+
+  const handleBackToHub = () => {
+    setSubPage(null);
+    setSubPageParam(null);
+  };
+
+  const handleNavigate = (page, param) => {
+    setSubPage(page);
+    setSubPageParam(param || null);
+  };
+
+  // All categories now use the Hub flow
+  const useNewFlow = !!activeProject;
+
+  return (
+    <div className="App">
+      {isSyncing && currentProjectId ? (
+        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-floor)', color: 'var(--gold)', gap: '16px', letterSpacing: '3px', fontSize: '0.8rem' }}>
+          <div style={{ width: '32px', height: '32px', border: '2px solid var(--gold)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+          RESTORING SESSION...
+        </div>
+      ) : !activeProject ? (
+        <Dashboard onEnterLab={handleEnterLab} />
+      ) : useNewFlow ? (
+        // ─── New Hub-based flow (Feature Film / Short Film) ───
+        subPage === 'writing' ? (
+          <WritingRoom
+            project={activeProject}
+            onBack={handleBackToHub}
+            onNavigate={handleNavigate}
+            initialStep={subPageParam}
+          />
+        ) : subPage === 'production' ? (
+          <ProductionDeck
+            project={activeProject}
+            onBack={handleBackToHub}
+            initialView="pipeline"
+          />
+        ) : subPage === 'pipeline' ? (
+          <ProductionDeck
+            project={activeProject}
+            onBack={handleBackToHub}
+            initialView="pipeline"
+          />
+        ) : subPage === 'legacy' ? (
+          <ProjectDetail
+            project={activeProject}
+            onBack={handleBackToHub}
+          />
+        ) : (
+          <ProjectHub
+            project={activeProject}
+            onBack={handleBack}
+            onNavigate={handleNavigate}
+          />
+        )
+      ) : null}
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <ProjectProvider>
+      <AppContent />
+    </ProjectProvider>
+  );
+}
+
+export default App;

@@ -1,0 +1,68 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "cine-analysys-system API",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/daniel/dev/claude-dev/marionette-dev/cine-analysys-system && /Users/daniel/.bun/bin/bun run dev:api"],
+      "port": 4006,
+      "autoPort": true
+    },
+    {
+      "name": "cine-analysys-system Web",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/daniel/dev/claude-dev/marionette-dev/cine-analysys-system && /Users/daniel/.bun/bin/bun run dev:web"],
+      "port": 4007,
+      "autoPort": true
+    },
+    {
+      "name": "cine-script-writer Backend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/daniel/dev/claude-dev/marionette-dev/cine-script-writer/server && /Users/daniel/.bun/bin/bun run src/index.ts"],
+      "port": 3006,
+      "autoPort": true
+    },
+    {
+      "name": "cine-script-writer Frontend",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "export PATH=/opt/homebrew/bin:/Users/daniel/.bun/bin:$PATH && cd /Users/daniel/dev/claude-dev/marionette-dev/cine-script-writer && npm run dev -- --port 5175"],
+      "port": 5175,
+      "autoPort": true
+    },
+    {
+      "name": "production_pipeline Main API",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/daniel/dev/claude-dev/marionette-dev/production_pipeline && /Users/daniel/.bun/bin/bun run dev:api"],
+      "port": 3005,
+      "autoPort": true
+    },
+    {
+      "name": "production_pipeline Scenario API",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/daniel/dev/claude-dev/marionette-dev/production_pipeline && /Users/daniel/.bun/bin/bun run dev:scenario-api"],
+      "port": 4005,
+      "autoPort": true
+    },
+    {
+      "name": "Storyboard Gallery",
+      "runtimeExecutable": "/Applications/Xcode.app/Contents/Developer/usr/bin/python3",
+      "runtimeArgs": ["-m", "http.server", "8090"],
+      "port": 8090,
+      "autoPort": true
+    },
+    {
+      "name": "production_pipeline Finance API",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/daniel/dev/claude-dev/marionette-dev/production_pipeline && /Users/daniel/.bun/bin/bun run dev:finance-api"],
+      "port": 4010,
+      "autoPort": true
+    },
+    {
+      "name": "production_pipeline Web",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": ["-c", "cd /Users/daniel/dev/claude-dev/marionette-dev/production_pipeline && /Users/daniel/.bun/bin/bun run dev:web"],
+      "port": 5173,
+      "autoPort": true
+    }
+  ]
+}

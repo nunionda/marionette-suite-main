@@ -1,3 +1,6 @@
 packages:
   - 'apps/*'
+  - 'apps/contents-studio/apps/*'
+  - 'apps/contents-studio/packages/*'
   - 'packages/*'
+  - 'apps/analysis-system/packages/*'

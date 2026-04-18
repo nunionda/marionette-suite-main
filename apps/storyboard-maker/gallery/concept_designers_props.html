@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prop Design — Hollywood Concept Designers 10</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #58a870; }</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab active">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab">VFX</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>PROP DESIGN</h1>
+    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Prop</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle"></div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/83/cb/44/83cb443a457f791915336950c021d3b0.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Prop Design Gallery</h2>
+          <p>10명의 프랍 디자인 전문가 — Roger Christian, Daniel Simon, Phil Saunders 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 prop designers loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128295;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Prop Concept</h3>
+    <label>Prop Description</label>
+    <textarea id="modalScene" placeholder="e.g. 미래형 비행 경찰차, 홀로그램 대시보드 장착"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+    </select>
+    <label>View / Angle</label>
+    <input id="modalCamera" type="text" placeholder="e.g. 3/4 view, orthographic, exploded view" />
+    <label>Mood / Context</label>
+    <input id="modalMood" type="text" placeholder="e.g. worn/battle-damaged, pristine, prototype" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script src="gallery-api.js"></script>
+<script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
+const DESIGNERS = [
+  {
+    id: 'roger_christian', rank: '01', name: 'Roger Christian',
+    subtitle: 'Set Decorator / Prop Maker · 영국 · 1944-',
+    styleType: 'practical', styleLabel: 'Found-Object Assemblage',
+    desc: '라이트세이버, 한 솔로의 블라스터, 스톰트루퍼 라이플을 직접 만든 장인. 1930년대 그라플렉스 카메라 플래시 핸들로 라이트세이버를 제작. 스타워즈 세트 데코레이션으로 아카데미상 수상.',
+    styleDesc: '폐기된 산업용·사진 장비 부품을 조합해 실제 질감과 무게감이 있는 프랍 제작. "used universe" 미학의 핵심 창조자.',
+    technique: `Found-Object Assembly: 기존 부품을 재조합하여 새로운 프랍 창조.
+Used Universe: 닳고 긁힌 질감으로 사용감 있는 미래 표현.
+Tactile Reality: 실제로 들고 조작할 수 있는 무게와 질감.`,
+    aiPrompt: 'Roger Christian Star Wars prop style, found-object assembled weapon, Graflex lightsaber, worn industrial parts, used universe aesthetic, practical sci-fi prop',
+    films: ['스타워즈: 새로운 희망 (1977)', '에일리언 (1979)', '제다이의 귀환 (1983)'],
+    characters: ['라이트세이버', '한 솔로 블라스터', '스톰트루퍼 라이플'],
+    links: [
+      { text: 'StarWars.com: Roger Christian', url: 'https://www.starwars.com/news/roger-christian-on-forging-the-lightsaber-hans-blaster-and-more' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/56/e6/07/56e6075f53b21751f5198e2a9c5b7e71.jpg', label: 'Christian — reference 1' },
+      { src: 'https://i.pinimg.com/736x/f4/e8/b6/f4e8b63811dbe97aeef29ba174d7f067.jpg', label: 'Christian — reference 2' },
+      { src: 'https://i.pinimg.com/736x/a9/81/f9/a981f9c1be6e6725923a54a24e2f160f.jpg', label: 'Christian — reference 3' },
+      { src: 'https://i.pinimg.com/736x/e3/13/7c/e3137cdd06d4ddc84fcd4e487a113a4b.jpg', label: 'Christian — reference 4' },
+      { src: 'https://i.pinimg.com/736x/a9/fa/ac/a9faac7fab9ef404a0977e3cfdb3c4f5.jpg', label: 'Christian — reference 5' },
+      { src: 'https://i.pinimg.com/736x/91/37/52/913752078d39b1f2d77afed90808856c.jpg', label: 'Christian — reference 6' },
+      { src: 'https://i.pinimg.com/736x/fd/70/78/fd70788d31bd600750778b9da5ebfebc.jpg', label: 'Christian — reference 7' },
+      { src: 'https://i.pinimg.com/736x/20/cd/57/20cd57e2e115b9856e4043e20da9b78e.jpg', label: 'Christian — reference 8' },
+      { src: 'https://i.pinimg.com/736x/25/59/2f/25592f88dd06cd3b69d1a23b76929b28.jpg', label: 'Christian — reference 9' },
+      { src: 'https://i.pinimg.com/736x/32/64/eb/3264ebbbb3c08be6e8d8df888e48e1fc.jpg', label: 'Christian — reference 10' },
+      { src: 'https://i.pinimg.com/736x/76/fe/db/76fedb5e34d15f6593ba79036bad691f.jpg', label: 'Christian — reference 11' },
+      { src: 'https://i.pinimg.com/736x/e3/73/0e/e3730e0520fe8f017173616e506b4863.jpg', label: 'Christian — reference 12' },
+    ],
+  },
+  {
+    id: 'daniel_simon', rank: '02', name: 'Daniel Simon',
+    subtitle: 'Vehicle Designer · 독일',
+    styleType: 'digital', styleLabel: 'Automotive-Grade Digital Rendering',
+    desc: '폭스바겐·부가티 출신의 자동차 디자이너가 할리우드로 전향. 트론: 레거시의 라이트 사이클, 오블리비언의 버블십 등 영화사에 남을 차량을 디자인했다.',
+    styleDesc: '실제 자동차 산업의 엔지니어링 미학을 SF 영화에 적용. 초정밀 디지털 차량 렌더링으로 기능적으로 설득력 있는 미래 차량 창조.',
+    technique: `Automotive Engineering: 실제 자동차 설계 원리를 SF 차량에 적용.
+Functional Design: 모든 라인과 표면에 기능적 이유가 존재.
+Precision Rendering: 자동차 산업 수준의 초정밀 렌더링.`,
+    aiPrompt: 'Daniel Simon vehicle concept art, Tron Legacy light cycle, automotive-grade sci-fi vehicle rendering, sleek futuristic motorcycle, Oblivion Bubbleship, precision engineering design',
+    films: ['트론: 레거시 (2010)', '오블리비언 (2013)', '캡틴 아메리카 (2011)', '프로메테우스 (2012)'],
+    characters: ['라이트 사이클', '라이트 러너', '버블십'],
+    links: [
+      { text: 'Daniel Simon Official', url: 'https://danielsimon.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/83/cb/44/83cb443a457f791915336950c021d3b0.jpg', label: 'Simon — reference 1' },
+      { src: 'https://i.pinimg.com/736x/19/2e/36/192e36892b7fc042ddc0bc09ee6cf35d.jpg', label: 'Simon — reference 2' },
+      { src: 'https://i.pinimg.com/736x/7f/f5/62/7ff5624052f02a20e81cb5b347508b6c.jpg', label: 'Simon — reference 3' },
+      { src: 'https://i.pinimg.com/736x/e4/4c/15/e44c155fd92e9a5092f5b2002d3ed712.jpg', label: 'Simon — reference 4' },
+      { src: 'https://i.pinimg.com/736x/63/65/8f/63658ff9ca2c1d80201a526d2adeacee.jpg', label: 'Simon — reference 5' },
+      { src: 'https://i.pinimg.com/736x/d8/c6/5b/d8c65ba0d940813c4b2b4e926dd6f61f.jpg', label: 'Simon — reference 6' },
+      { src: 'https://i.pinimg.com/736x/67/c0/3f/67c03fb167fb8fcf81280363cbbc861f.jpg', label: 'Simon — reference 7' },
+      { src: 'https://i.pinimg.com/736x/7f/09/b7/7f09b71a7d57d57ec70389cca4eb9086.jpg', label: 'Simon — reference 8' },
+      { src: 'https://i.pinimg.com/736x/ac/35/f9/ac35f93fd8a7923e898e47c3fbc9d670.jpg', label: 'Simon — reference 9' },
+      { src: 'https://i.pinimg.com/736x/3f/cf/f6/3fcff6ec3520f99edad88e86ab407508.jpg', label: 'Simon — reference 10' },
+      { src: 'https://i.pinimg.com/736x/9c/80/1c/9c801c1a364e5ce2da0a260b3e65df15.jpg', label: 'Simon — reference 11' },
+      { src: 'https://i.pinimg.com/736x/1f/15/f6/1f15f6ec122d6e86542c88b0aefe5e80.jpg', label: 'Simon — reference 12' },
+    ],
+  },
+  {
+    id: 'phil_saunders', rank: '03', name: 'Phil Saunders',
+    subtitle: 'Hard-Surface Concept Designer · 미국',
+    styleType: 'digital', styleLabel: 'Industrial Design / Digital',
+    desc: '닛산 디자인 인터내셔널 출신으로 아이언맨의 모든 슈트를 디자인한 인물. Mark I부터 엔드게임까지 워머신, 울트론, 헐크버스터까지 마블의 핵심 프랍을 창조했다.',
+    styleDesc: '산업 디자인 배경의 하드서피스 디지털 컨셉 디자인. 메카니컬하게 설득력 있는 슈트와 장비를 창조하는 데 특화.',
+    technique: `Industrial Plausibility: 모든 파츠에 기계적 논리 부여.
+Iterative Armor Design: 수십 번의 반복을 통해 아이코닉한 슈트 완성.
+Mechanical Functionality: 실제로 작동할 것 같은 메커니즘 설계.`,
+    aiPrompt: 'Phil Saunders Iron Man armor concept art, mechanical suit design, industrial design inspired, hard-surface digital concept, Marvel superhero prop, War Machine HulkBuster',
+    films: ['아이언맨 1-3', '어벤져스 시리즈', '트론: 레거시 (2010)', '스파이더맨: 홈커밍 (2017)'],
+    characters: ['아이언맨 슈트', '워머신', '울트론', '헐크버스터'],
+    links: [
+      { text: 'Concept Art Association: Phil Saunders', url: 'https://www.conceptartassociation.com/2023-judges/phil-saunders' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/eb/0c/74/eb0c7400541cf7431baba96a86ca795c.jpg', label: 'Saunders — reference 1' },
+      { src: 'https://i.pinimg.com/736x/9a/39/40/9a3940ba0908f479237e35fd09dbfa25.jpg', label: 'Saunders — reference 2' },
+      { src: 'https://i.pinimg.com/736x/58/83/b7/5883b7b2a3b3a2319eb197dc46906a56.jpg', label: 'Saunders — reference 3' },
+      { src: 'https://i.pinimg.com/736x/55/b8/c3/55b8c30f3a8b1f795d543a37966fcba9.jpg', label: 'Saunders — reference 4' },
+      { src: 'https://i.pinimg.com/736x/cd/bd/91/cdbd91fd252eb00ce2a50b96a5b642c7.jpg', label: 'Saunders — reference 5' },
+      { src: 'https://i.pinimg.com/736x/48/58/ac/4858ac535b1d4d8faef5b5108353bfd7.jpg', label: 'Saunders — reference 6' },
+      { src: 'https://i.pinimg.com/736x/73/67/7f/73677ffa9120c85ae04c21a991eb544d.jpg', label: 'Saunders — reference 7' },
+      { src: 'https://i.pinimg.com/736x/61/50/d2/6150d26ab4d3b301c2ee98e20f7a7cae.jpg', label: 'Saunders — reference 8' },
+      { src: 'https://i.pinimg.com/736x/ca/70/68/ca7068093370f7185c5c046ec659ce70.jpg', label: 'Saunders — reference 9' },
+      { src: 'https://i.pinimg.com/736x/e0/6e/7b/e06e7be2554017142b0af74c2f8925a4.jpg', label: 'Saunders — reference 10' },
+      { src: 'https://i.pinimg.com/736x/d2/31/ee/d231eed94b952904ce4cee2fc623de38.jpg', label: 'Saunders — reference 11' },
+      { src: 'https://i.pinimg.com/736x/b7/f1/e2/b7f1e2192a780d710c46eb9fd2f9fd6d.jpg', label: 'Saunders — reference 12' },
+    ],
+  },
+  {
+    id: 'harald_belker', rank: '04', name: 'Harald Belker',
+    subtitle: 'Vehicle Concept Designer · 독일/미국',
+    styleType: 'digital', styleLabel: 'Automotive Concept Art',
+    desc: '메르세데스-벤츠 어드밴스드 디자인 출신으로 스마트카 팀에 참여한 후 할리우드로 전향. 배트모빌(배트맨 & 로빈), 마이너리티 리포트의 렉서스 2054를 디자인했다.',
+    styleDesc: '매끄럽고 공기역학적인 차량 컨셉 아트. 실제 자동차 디자인의 원리를 영화 차량에 적용하는 전문가.',
+    technique: `Aerodynamic Sculpting: 공기역학에 기반한 차량 형태 조형.
+Brand Integration: 실제 브랜드(렉서스)와 협업한 미래 차량.
+Cinematic Proportion: 화면에서 인상적으로 보이는 비율 설계.`,
+    aiPrompt: 'Harald Belker vehicle concept, Batmobile design, Minority Report Lexus 2054, sleek aerodynamic sci-fi car, Mercedes-Benz inspired futuristic vehicle, automotive concept art',
+    films: ['배트맨 & 로빈 (1997)', '마이너리티 리포트 (2002)', '토탈 리콜 (2012)', '아이언맨 2 (2010)'],
+    characters: ['배트모빌', '렉서스 2054', '호버 카'],
+    links: [
+      { text: 'Wikipedia: Harald Belker', url: 'https://en.wikipedia.org/wiki/Harald_Belker' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/43/4f/08/434f0817868ee8ea0fb81d1df9d7244c.jpg', label: 'Belker — reference 1' },
+      { src: 'https://i.pinimg.com/736x/bf/f9/5b/bff95baa20a7a7257f9563a92473d3fb.jpg', label: 'Belker — reference 2' },
+      { src: 'https://i.pinimg.com/736x/e1/d5/4b/e1d54b3a5387d1584e3fd910435e24f2.jpg', label: 'Belker — reference 3' },
+      { src: 'https://i.pinimg.com/736x/cc/cf/db/cccfdbf40bb69b89e0a04fc837446203.jpg', label: 'Belker — reference 4' },
+      { src: 'https://i.pinimg.com/736x/8a/6d/79/8a6d79b5ac61093f7501536631b7d566.jpg', label: 'Belker — reference 5' },
+      { src: 'https://i.pinimg.com/736x/cc/88/69/cc8869ff9e6642ccdc6672356603d621.jpg', label: 'Belker — reference 6' },
+      { src: 'https://i.pinimg.com/736x/d8/b8/c9/d8b8c92ecf649bc4cd41f33a3aae8795.jpg', label: 'Belker — reference 7' },
+      { src: 'https://i.pinimg.com/736x/cb/ee/a0/cbeea08497e64ff903ee20ab207a7cef.jpg', label: 'Belker — reference 8' },
+      { src: 'https://i.pinimg.com/736x/58/6e/e3/586ee3f93a21018ea769dc79d5c56f90.jpg', label: 'Belker — reference 9' },
+      { src: 'https://i.pinimg.com/736x/01/db/ad/01dbad2a101f1597642a85ad7146f7d6.jpg', label: 'Belker — reference 10' },
+      { src: 'https://i.pinimg.com/736x/22/f8/3f/22f83f159d0b90b04caa017fe34a1558.jpg', label: 'Belker — reference 11' },
+      { src: 'https://i.pinimg.com/736x/e1/63/0b/e1630b7080c777f252c4dd04c9091dd8.jpg', label: 'Belker — reference 12' },
+    ],
+  },
+  {
+    id: 'vitaly_bulgarov', rank: '05', name: 'Vitaly Bulgarov',
+    subtitle: 'Mech & Hard-Surface Designer · 몰도바/미국',
+    styleType: '3d', styleLabel: 'ZBrush / KeyShot / 3D',
+    desc: '트랜스포머, 로보캅(2014), 공각기동대, 알리타를 위한 로봇과 메카닉 디자인 전문가. 실제 로봇 공학 특허 10건 이상 보유한 엔지니어이기도 하다.',
+    styleDesc: 'ZBrush와 KeyShot을 사용한 초정밀 3D 하드서피스 메카 디자인. 영화 프랍과 실제 엔지니어링의 경계를 넘나드는 작업.',
+    technique: `3D Hard-Surface: ZBrush를 활용한 초정밀 메카 모델링.
+Real Engineering: 실제 로봇 공학 지식을 디자인에 적용.
+Photo-Real Rendering: 실사와 구분 불가능한 렌더링.`,
+    aiPrompt: 'Vitaly Bulgarov mech design concept art, hyper-detailed 3D robot, ZBrush hard-surface modeling, Transformers mechanical design, RoboCop suit, photorealistic mech rendering',
+    films: ['트랜스포머: 사라진 시대 (2014)', '로보캅 (2014)', '공각기동대 (2017)', '알리타: 배틀 엔젤 (2019)'],
+    characters: ['트랜스포머 메카', '로보캅 슈트', '공각기동대 사이보그'],
+    links: [
+      { text: 'Vitaly Bulgarov Official', url: 'https://vitalybulgarov.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/6a/30/bb/6a30bb3ca285edc4eb1fbb8d9eaab98d.jpg', label: 'Bulgarov — reference 1' },
+      { src: 'https://i.pinimg.com/736x/48/43/6a/48436aaf165ddfb160f35c23d61f0099.jpg', label: 'Bulgarov — reference 2' },
+      { src: 'https://i.pinimg.com/736x/29/b1/49/29b149410980217e890ccbc32a97f23e.jpg', label: 'Bulgarov — reference 3' },
+      { src: 'https://i.pinimg.com/736x/58/77/42/5877427e70643bbc00f926562305df12.jpg', label: 'Bulgarov — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ec/55/2e/ec552e1aab484a10b46260cb0980d244.jpg', label: 'Bulgarov — reference 5' },
+      { src: 'https://i.pinimg.com/736x/a1/db/3d/a1db3d5f15fe03f9774ed68468769fd6.jpg', label: 'Bulgarov — reference 6' },
+      { src: 'https://i.pinimg.com/736x/8f/e3/dd/8fe3dd83ab9e00d0f440d4918e72a2a6.jpg', label: 'Bulgarov — reference 7' },
+      { src: 'https://i.pinimg.com/736x/6e/f6/fb/6ef6fbb223d1a16cc0f89b4d96edd38a.jpg', label: 'Bulgarov — reference 8' },
+      { src: 'https://i.pinimg.com/736x/f6/22/de/f622dee49014b28b86fa19e8e0b7a9ff.jpg', label: 'Bulgarov — reference 9' },
+      { src: 'https://i.pinimg.com/736x/7c/cf/71/7ccf7178731d70e99a2385a54cf902bc.jpg', label: 'Bulgarov — reference 10' },
+      { src: 'https://i.pinimg.com/736x/7b/4a/a1/7b4aa1164c56f4db09468eb6dcc68a3b.jpg', label: 'Bulgarov — reference 11' },
+      { src: 'https://i.pinimg.com/736x/9a/9c/e5/9a9ce5ddd297c06e3ab5210dece961d4.jpg', label: 'Bulgarov — reference 12' },
+    ],
+  },
+  {
+    id: 'tim_flattery', rank: '06', name: 'Tim Flattery',
+    subtitle: 'Prop Concept Illustrator · 미국',
+    styleType: 'illustration', styleLabel: 'Traditional & Digital Illustration',
+    desc: '40년 경력, 100편 이상의 영화에서 프랍과 차량 컨셉을 디자인한 레전드. 인피니티 건틀릿, MiB 무기, BTTF2 차량, 배트모빌을 디자인했다.',
+    styleDesc: '전통 일러스트레이션과 디지털 페인팅을 결합한 깔끔한 프로덕션 레디 컨셉 아트. 아이코닉 히어로 프랍에 특화.',
+    technique: `Hero Prop Focus: 영화의 아이콘이 될 핵심 프랍에 집중.
+Production-Ready Art: 제작팀이 바로 사용할 수 있는 완성도.
+Timeless Design: 시대를 초월하는 디자인 감각.`,
+    aiPrompt: 'Tim Flattery prop concept illustration, Infinity Gauntlet design, Men in Black weapon, iconic movie prop, clean production-ready concept art, hero prop design',
+    films: ['어벤져스: 인피니티 워/엔드게임', '맨 인 블랙 I-II', '백 투 더 퓨처 II', '배트맨 포에버'],
+    characters: ['인피니티 건틀릿', 'MiB 뉴럴라이저', 'BTTF 차량'],
+    links: [
+      { text: 'Concept Art World: Tim Flattery', url: 'https://conceptartworld.com/artists/tim-flattery/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/31/59/de/3159ded743f0242ea91a0255e9681ea6.jpg', label: 'Flattery — reference 1' },
+      { src: 'https://i.pinimg.com/736x/ac/73/ea/ac73ea75699ddf1c9ffc400247ec95ea.jpg', label: 'Flattery — reference 2' },
+      { src: 'https://i.pinimg.com/736x/63/3c/2e/633c2e3ef6667003a5ed60fbaddfd403.jpg', label: 'Flattery — reference 3' },
+      { src: 'https://i.pinimg.com/736x/4b/91/9f/4b919fc4fffac705dad0cc3dd6431995.jpg', label: 'Flattery — reference 4' },
+      { src: 'https://i.pinimg.com/736x/76/70/76/767076508fc10751b19b1b13bffb0bac.jpg', label: 'Flattery — reference 5' },
+      { src: 'https://i.pinimg.com/736x/01/e4/1f/01e41f183b3b0de1a7fcad1369037c54.jpg', label: 'Flattery — reference 6' },
+      { src: 'https://i.pinimg.com/736x/01/42/98/014298bc113570e9ef58480106067872.jpg', label: 'Flattery — reference 7' },
+      { src: 'https://i.pinimg.com/736x/02/32/56/023256decd256300199af9df3c332546.jpg', label: 'Flattery — reference 8' },
+      { src: 'https://i.pinimg.com/736x/00/37/11/003711cfe08b2b55c878a63dd0bdeedb.jpg', label: 'Flattery — reference 9' },
+      { src: 'https://i.pinimg.com/736x/e1/ab/cc/e1abcced0accfa6c77930a304d10b10c.jpg', label: 'Flattery — reference 10' },
+      { src: 'https://i.pinimg.com/736x/ea/51/d4/ea51d4596aff282d76bdd15e3929d3db.jpg', label: 'Flattery — reference 11' },
+      { src: 'https://i.pinimg.com/736x/01/99/ea/0199eab77c1b9d2afbc91c00132c3300.jpg', label: 'Flattery — reference 12' },
+    ],
+  },
+  {
+    id: 'richard_taylor', rank: '07', name: 'Richard Taylor',
+    subtitle: 'Prop Fabricator / Weta Workshop · 뉴질랜드 · 1965-',
+    styleType: 'practical', styleLabel: 'Practical Fabrication / Sculpting',
+    desc: 'Weta Workshop 공동설립자. 반지의 제왕 트릴로지에서 48,000개의 갑옷, 수천 개의 실제 강철 무기를 제작 감독. 아카데미상 4회 수상.',
+    styleDesc: '전통 대장장이 기술, 조각, 몰딩을 결합한 대규모 실용 프랍 제작. 산업적 스케일로 중세 무기와 갑옷을 재현.',
+    technique: `Industrial Scale: 수만 개의 프랍을 체계적으로 제작 관리.
+Real Materials: 실제 강철, 가죽, 체인메일 사용.
+Historical Accuracy: 역사적 고증에 기반한 무기와 갑옷 제작.`,
+    aiPrompt: 'Weta Workshop Richard Taylor prop fabrication, Lord of the Rings sword armor, practical medieval weapon, real steel forged prop, epic fantasy armor set, massive scale prop production',
+    films: ['반지의 제왕 트릴로지 (2001-03)', '호빗 트릴로지 (2012-14)', '킹콩 (2005)', '매드 맥스: 퓨리 로드 (2015)'],
+    characters: ['안두릴 검', '미스릴 갑옷', '나즈굴 갑옷'],
+    links: [
+      { text: 'Weta Workshop', url: 'https://www.wetaworkshop.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/17/1e/10/171e107fdb52d15f400f6652f2622954.jpg', label: 'Taylor — reference 1' },
+      { src: 'https://i.pinimg.com/736x/62/79/9e/62799e0b97cfdce744def25e69f99551.jpg', label: 'Taylor — reference 2' },
+      { src: 'https://i.pinimg.com/736x/9d/04/76/9d047634e23606caa5a3e617fb1b5605.jpg', label: 'Taylor — reference 3' },
+      { src: 'https://i.pinimg.com/736x/9b/1d/e5/9b1de55b2bdb8713a40bd203be088c87.jpg', label: 'Taylor — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ea/e0/eb/eae0eb55fae21b287490cdd06e8ae59a.jpg', label: 'Taylor — reference 5' },
+      { src: 'https://i.pinimg.com/736x/61/0d/0f/610d0f54a5bf02abdca3a618cafe7584.jpg', label: 'Taylor — reference 6' },
+      { src: 'https://i.pinimg.com/736x/3d/72/b1/3d72b11e13354b95e2cd37802289d25a.jpg', label: 'Taylor — reference 7' },
+      { src: 'https://i.pinimg.com/736x/a6/21/76/a62176e9da3eaeab3a914d26cbd22575.jpg', label: 'Taylor — reference 8' },
+      { src: 'https://i.pinimg.com/736x/1a/b2/ff/1ab2ff4dc4843c67c409d108e654bfff.jpg', label: 'Taylor — reference 9' },
+      { src: 'https://i.pinimg.com/736x/a9/41/0a/a9410a216fa0f8918166282a6c2c7079.jpg', label: 'Taylor — reference 10' },
+      { src: 'https://i.pinimg.com/736x/c0/dd/16/c0dd167a2602dcded696d825ad9f0992.jpg', label: 'Taylor — reference 11' },
+      { src: 'https://i.pinimg.com/736x/7c/c6/63/7cc66334aa289fd86900247fd690a1b6.jpg', label: 'Taylor — reference 12' },
+    ],
+  },
+  {
+    id: 'john_eaves', rank: '08', name: 'John Eaves',
+    subtitle: 'Starship & Prop Designer · 미국',
+    styleType: 'technical', styleLabel: 'Technical Illustration / Blueprint',
+    desc: '30년 이상 스타트렉의 프랍과 우주선을 디자인한 전문가. 엔터프라이즈-E, 페이저, 트라이코더 등 스타트렉 유니버스의 핵심 프랍을 창조했다.',
+    styleDesc: '엔지니어링 도면 수준의 정밀한 기술 일러스트레이션. 프랍 마스터가 현장에서 조작할 수 있도록 기능 설명서까지 포함한 설계.',
+    technique: `Blueprint Precision: 설계도 수준의 정밀한 기술 도면.
+Operational Design: 실제 작동 방식을 포함한 프랍 설계.
+Universe Consistency: 30년간 일관된 디자인 언어 유지.`,
+    aiPrompt: 'John Eaves Star Trek prop design, Enterprise-E starship blueprint, phaser weapon technical illustration, tricorder concept, sci-fi prop engineering drawing',
+    films: ['스타트렉 TNG 영화 시리즈', '스타트렉: 디스커버리', '스타트렉: 피카드', '에일리언 3 (1992)'],
+    characters: ['엔터프라이즈-E', '페이저', '트라이코더'],
+    links: [
+      { text: 'Memory Alpha: John Eaves', url: 'https://memory-alpha.fandom.com/wiki/John_Eaves' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/34/47/97/3447973a6ba3b7173dbac37fc289b743.jpg', label: 'Eaves — reference 1' },
+      { src: 'https://i.pinimg.com/736x/81/62/32/81623289d45019b0443d1d4e6e2106af.jpg', label: 'Eaves — reference 2' },
+      { src: 'https://i.pinimg.com/736x/ee/bd/ea/eebdeaf034cf8f1224eedd86359cf1d4.jpg', label: 'Eaves — reference 3' },
+      { src: 'https://i.pinimg.com/736x/ee/4d/a7/ee4da7b2e1a3241364eebdb02aa6eabc.jpg', label: 'Eaves — reference 4' },
+      { src: 'https://i.pinimg.com/736x/74/86/e4/7486e4edb605f3eb469fd343d67f4299.jpg', label: 'Eaves — reference 5' },
+      { src: 'https://i.pinimg.com/736x/9c/60/62/9c606283a50fffe310461c7b5ee988dd.jpg', label: 'Eaves — reference 6' },
+      { src: 'https://i.pinimg.com/736x/b2/06/27/b2062785abaaf7933d03f84ab20b4b3e.jpg', label: 'Eaves — reference 7' },
+      { src: 'https://i.pinimg.com/736x/b1/3a/a5/b13aa52cce90487ffe07a432c83f7ad9.jpg', label: 'Eaves — reference 8' },
+      { src: 'https://i.pinimg.com/736x/86/6d/50/866d50249e74909b70737fda6961167b.jpg', label: 'Eaves — reference 9' },
+      { src: 'https://i.pinimg.com/736x/aa/a7/55/aaa755b4519fcf4260acbd2c1a336044.jpg', label: 'Eaves — reference 10' },
+      { src: 'https://i.pinimg.com/736x/65/7c/0c/657c0c3c9a0fa2b1f91cadfb5ffdf07e.jpg', label: 'Eaves — reference 11' },
+      { src: 'https://i.pinimg.com/736x/a3/d6/c1/a3d6c16758e4a94941f75e0cb63d5a94.jpg', label: 'Eaves — reference 12' },
+    ],
+  },
+  {
+    id: 'annie_atkins', rank: '09', name: 'Annie Atkins',
+    subtitle: 'Graphic Prop Designer · 아일랜드',
+    styleType: 'handcraft', styleLabel: 'Hand-Crafted Graphic Design',
+    desc: '그랜드 부다페스트 호텔의 모든 여권, 화폐, 신문, 편지를 수작업으로 제작한 그래픽 프랍 전문가. 웨스 앤더슨, 스필버그와 협업.',
+    styleDesc: '시대 고증에 맞는 타이포그래피와 기법으로 인쇄물 프랍을 수작업 제작. 가짜 여권, 위조 화폐, 감옥 탈출 지도 등 유니크한 전문 분야.',
+    technique: `Period-Accurate Typography: 시대별 정확한 서체와 인쇄 기법.
+Hand-Crafted Detail: 모든 문서를 손으로 제작.
+World-Building Through Paper: 종이 프랍으로 세계관 구축.`,
+    aiPrompt: 'Annie Atkins graphic prop design, Grand Budapest Hotel passport, hand-crafted movie documents, vintage typography, period-accurate printed prop, Wes Anderson film ephemera',
+    films: ['그랜드 부다페스트 호텔 (2014)', '개들의 섬 (2018)', '프렌치 디스패치 (2021)', '브릿지 오브 스파이 (2015)'],
+    characters: ['주브로프카 여권', '멘들의 제과점 상자', '가짜 화폐'],
+    links: [
+      { text: 'Annie Atkins Official', url: 'https://www.annieatkins.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/9e/42/6d/9e426d1f9a162d77c2ab472395f24e49.jpg', label: 'Atkins — reference 1' },
+      { src: 'https://i.pinimg.com/736x/31/ef/27/31ef275164c0187e0e38438b287ee12f.jpg', label: 'Atkins — reference 2' },
+      { src: 'https://i.pinimg.com/736x/0b/b4/45/0bb445da93750f7720b050e656b0cf35.jpg', label: 'Atkins — reference 3' },
+      { src: 'https://i.pinimg.com/736x/4c/dc/e7/4cdce700691db11461dd6a1ca7a750f0.jpg', label: 'Atkins — reference 4' },
+      { src: 'https://i.pinimg.com/736x/1a/d5/be/1ad5be80e8fba3aa2f90d6a0aa774bea.jpg', label: 'Atkins — reference 5' },
+      { src: 'https://i.pinimg.com/736x/c4/1b/90/c41b90c1171168cf8975a856338fc8ef.jpg', label: 'Atkins — reference 6' },
+      { src: 'https://i.pinimg.com/736x/4f/bc/e6/4fbce63f7450c2614cf9e2fa9c21b31f.jpg', label: 'Atkins — reference 7' },
+      { src: 'https://i.pinimg.com/736x/4d/75/b4/4d75b4e51d71ff075ce73feeb8b6e5b3.jpg', label: 'Atkins — reference 8' },
+      { src: 'https://i.pinimg.com/736x/df/e2/e8/dfe2e8013d07cee2307ba8b76be2ee44.jpg', label: 'Atkins — reference 9' },
+      { src: 'https://i.pinimg.com/736x/73/71/c3/7371c301d97240c78d3876322fbf930e.jpg', label: 'Atkins — reference 10' },
+      { src: 'https://i.pinimg.com/736x/e4/dc/8c/e4dc8c555adf0861d51577adbb83a0c2.jpg', label: 'Atkins — reference 11' },
+      { src: 'https://i.pinimg.com/736x/7e/c9/74/7ec974eb3eb4206364a6b7639341545c.jpg', label: 'Atkins — reference 12' },
+    ],
+  },
+  {
+    id: 'scott_robertson', rank: '10', name: 'Scott Robertson',
+    subtitle: 'Vehicle & Prop Design Educator · 미국',
+    styleType: 'industrial', styleLabel: 'Industrial Design / Marker Rendering',
+    desc: '프랍·차량 컨셉 디자인 교육의 아버지. 아트센터에서 엔터테인먼트 디자인 학과장을 역임하며 산업디자인 60% + 일러스트 40%의 커리큘럼을 확립. 13권의 디자인 서적 저술.',
+    styleDesc: '산업 디자인 기반의 차량·프랍 렌더링. 엄격한 투시도법, 마커 렌더링, 디지털 기법을 결합한 체계적 접근.',
+    technique: `Perspective Mastery: 정밀한 투시도 기반 차량 드로잉.
+Marker Rendering: 전통 마커 렌더링의 정수.
+Design Education: 차세대 프랍 디자이너 양성 체계 구축.`,
+    aiPrompt: 'Scott Robertson vehicle concept design, industrial design rendering, perspective drawing, marker rendered spaceship, DRIVE BLAST book style, clean technical concept art',
+    films: ['마이너리티 리포트 (2002)', 'Hot Wheels: Battle Force Five', 'MiB 유니버설 라이드'],
+    characters: ['컨셉 차량', '우주선 디자인', '산업 프랍'],
+    links: [
+      { text: 'Design Studio Press', url: 'https://www.designstudiopress.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/1a/66/c0/1a66c0d82e4ebd87e8246980b738f364.jpg', label: 'Robertson — reference 1' },
+      { src: 'https://i.pinimg.com/736x/ac/d2/9d/acd29d072bf244706842b088a7daeb5d.jpg', label: 'Robertson — reference 2' },
+      { src: 'https://i.pinimg.com/736x/17/87/55/17875543fa1b9f052ec224c877cb01b8.jpg', label: 'Robertson — reference 3' },
+      { src: 'https://i.pinimg.com/736x/cd/01/28/cd012848465a1fb74272e420dbac599b.jpg', label: 'Robertson — reference 4' },
+      { src: 'https://i.pinimg.com/736x/d2/74/9e/d2749ed390d780f831c185c127ab2929.jpg', label: 'Robertson — reference 5' },
+      { src: 'https://i.pinimg.com/736x/9c/fb/26/9cfb26a7572fceea2e59c9a7b0c67521.jpg', label: 'Robertson — reference 6' },
+      { src: 'https://i.pinimg.com/736x/e7/36/e7/e736e76b6c3c38edda1d25e8e38bd02a.jpg', label: 'Robertson — reference 7' },
+      { src: 'https://i.pinimg.com/736x/30/9e/5c/309e5c32a8eb1de2acaa9dad5ac3241e.jpg', label: 'Robertson — reference 8' },
+      { src: 'https://i.pinimg.com/736x/c2/cc/1e/c2cc1ed6ae4ad9abb2c45dd7f99515ce.jpg', label: 'Robertson — reference 9' },
+      { src: 'https://i.pinimg.com/736x/46/16/51/461651e2c580919fccc22eb26b4e8182.jpg', label: 'Robertson — reference 10' },
+      { src: 'https://i.pinimg.com/736x/99/fe/b5/99feb547a2162c03792c3d74fa95a817.jpg', label: 'Robertson — reference 11' },
+      { src: 'https://i.pinimg.com/736x/ad/8a/a7/ad8aa7cd24fb1a0f473fcd3db8188cbb.jpg', label: 'Robertson — reference 12' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+// Build left panel
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = DESIGNERS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+
+  // Update active state
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+  if (typeof isMobile === "function" && isMobile()) switchMobileTab("viewer");
+}
+
+function updateInfoPanel(a) {
+  let techniqueSec = '';
+  if (a.technique) {
+    techniqueSec = `
+      <div class="info-section">
+        <h4>Technique</h4>
+        <p>${a.technique.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    ${techniqueSec}
+    <div class="info-section">
+      <h4>AI Prompt</h4>
+      <div class="prompt-box" onclick="copyPrompt(this, '${a.id}')">
+        <span class="copy-hint">click to copy</span>
+        ${a.aiPrompt}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function copyPrompt(el, id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  navigator.clipboard.writeText(artist.aiPrompt).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.copy-hint').textContent = 'copied!';
+    setTimeout(() => {
+      el.classList.remove('copied');
+      el.querySelector('.copy-hint').textContent = 'click to copy';
+    }, 1500);
+  });
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 4}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image available</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.parentElement.querySelector('.no-image')||this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.style.opacity = '0';
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.onerror = function() {
+      img.style.display = 'none';
+      ph.style.display = 'flex';
+      ph.style.flexDirection = 'column';
+      ph.style.alignItems = 'center';
+      ph.style.justifyContent = 'center';
+      ph.innerHTML = `<div style="text-align:center;color:var(--text-dim)">`
+        + `<div style="font-size:2em;margin-bottom:8px">&#9888;</div>`
+        + `<div style="font-size:0.85em;color:#888">${a.images[currentImageIdx].label}</div>`
+        + `<div style="font-size:0.75em;margin-top:4px;color:#555">이미지를 불러올 수 없습니다</div>`
+        + `<button onclick="selectImage(${currentImageIdx})" style="margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em">재시도</button>`
+        + `</div>`;
+    };
+    img.src = a.images[currentImageIdx].src;
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#128295;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available for this designer.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+// Modal
+function openModal() {
+  const sel = document.getElementById('modalStyle');
+  if (sel.options.length <= 1) {
+    DESIGNERS.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const view = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+
+  if (!scene.trim()) { alert('Prop description is required.'); return; }
+
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+
+  generateConcept('props', { description: scene, style, pose, mood })
+    .then(data => {
+      if (data.success && data.url) {
+        showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`);
+        setStatus('ready', 'Generation complete ✓');
+      } else {
+        setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`);
+      }
+    })
+    .catch(err => {
+      setStatus('ready', `API error: ${err.message}`);
+    });
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  // Number keys 1-9, 0 to select artist
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id);
+  }
+});
+
+// Click outside modal to close
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

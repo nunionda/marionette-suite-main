@@ -86,7 +86,7 @@ export default function PipelineIntegrityDashboard() {
                       <div 
                         key={id} 
                         className="px-2 py-1 bg-white/[0.02] border border-white/10 rounded flex items-center gap-1.5 group/agent cursor-default hover:bg-white/[0.05] transition-all"
-                        title={`${meta.description} (${meta.layer})`}
+                        title={`${meta.stageName} (${meta.layer})`}
                       >
                         <div className={`w-1 h-1 rounded-full ${engine ? 'bg-green-500 animate-pulse' : 'bg-zinc-600'}`} />
                         <span className="text-[8px] font-mono font-bold text-zinc-400 uppercase tracking-widest">{id}</span>

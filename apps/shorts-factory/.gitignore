@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.db
+*.db-shm
+*.db-wal
+output/downloads/
+output/clips/
+output/rendered/
+output/subtitles/
+.env
+youtube-tokens.json
+__pycache__/
+*.pyc
+output/*.md

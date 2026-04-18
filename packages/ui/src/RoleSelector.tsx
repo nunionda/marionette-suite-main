@@ -1,4 +1,4 @@
-export type Role = "producer" | "line-producer" | "director" | "production-designer" | "writer" | "system-admin" | "studio-ceo" | "production-crew" | "post-production";
+export type Role = "producer" | "line-producer" | "director" | "production-designer" | "writer" | "system-admin" | "studio-ceo" | "production-crew" | "post-production" | "legacy-lab";
 
 interface RoleSelectorProps {
   currentRole: Role;
@@ -53,6 +53,12 @@ const roles: { id: Role; label: string; icon: string; desc: string }[] = [
     label: "System Admin", 
     icon: "⚙️", 
     desc: "AI Engine Registry & Orchestration" 
+  },
+  { 
+    id: "legacy-lab", 
+    label: "Legacy Lab", 
+    icon: "🔬", 
+    desc: "Industrialization & Structure Analysis" 
   },
 ];
 

@@ -1,0 +1,76 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "script-writer-frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "5174", "--host", "0.0.0.0"],
+      "port": 5174,
+      "cwd": "apps/script-writer"
+    },
+    {
+      "name": "script-writer-backend",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "src/index.ts"],
+      "port": 3006,
+      "cwd": "apps/script-writer/server"
+    },
+    {
+      "name": "shorts-factory-frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["vite", "--port", "5178", "--host", "0.0.0.0"],
+      "port": 5178,
+      "cwd": "apps/shorts-factory"
+    },
+    {
+      "name": "analysis-web",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "dev"],
+      "port": 4007,
+      "cwd": "apps/analysis-system/apps/web"
+    },
+    {
+      "name": "analysis-api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--watch", "src/index.ts"],
+      "port": 4006,
+      "cwd": "apps/analysis-system/apps/api"
+    },
+    {
+      "name": "contents-studio-web",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "--turbopack", "--port", "3000"],
+      "port": 3000,
+      "autoPort": false,
+      "cwd": "apps/contents-studio/apps/web"
+    },
+    {
+      "name": "contents-studio-api",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "--watch", "src/index.ts"],
+      "port": 3005,
+      "cwd": "apps/contents-studio/apps/api"
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "-p", "3001"],
+      "port": 3001,
+      "cwd": "apps/studio"
+    },
+    {
+      "name": "contents-studio-scenario-web",
+      "runtimeExecutable": "bunx",
+      "runtimeArgs": ["next", "dev", "--port", "4000"],
+      "port": 4000,
+      "cwd": "apps/contents-studio/apps/scenario-web"
+    },
+    {
+      "name": "storyboard-maker-server",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["server.py"],
+      "port": 3007,
+      "cwd": "apps/storyboard-maker"
+    }
+  ]
+}

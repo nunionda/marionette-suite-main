@@ -1,0 +1,450 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import type { StepProgress, StepKey } from "./types";
+import { STEPS } from "./types";
+
+export interface PostProductionStatus {
+  paperclipId: string;
+  steps: {
+    edit: boolean;
+    vfx: boolean;
+    sound: boolean;
+    color: boolean;
+    delivery: boolean;
+  };
+  progress: {
+    edit: number;
+    vfx: { done: number; total: number };
+    sound: { done: number; total: number };
+    color: { done: number; total: number };
+  };
+}
+
+export interface DistributionStatus {
+  paperclipId: string;
+  published: boolean;
+  entry: {
+    id: string;
+    title: string;
+    channels: string[];
+    deliverables: string[];
+    releaseDate?: string;
+  } | null;
+  /** Charter #69: Streaming/VOD release detail — null for theatrical-only or unreleased. */
+  streaming: {
+    exclusivity: "exclusive" | "non-exclusive" | "day-and-date" | null;
+    windowEnd: string | null;
+    platforms: Array<{
+      platform: string;
+      status: "scheduled" | "live" | "ended" | "withdrawn";
+      liveDate: string | null;
+      endDate: string | null;
+      regions: string[];
+      drm: Array<"widevine" | "fairplay" | "playready" | "none">;
+      maxResolution: "480p" | "720p" | "1080p" | "4K";
+      hasHDR: boolean;
+      hasAtmos: boolean;
+      codecs: Array<"h264" | "h265" | "av1" | "vp9">;
+      variantCount: number;
+    }>;
+  } | null;
+  /** Charter #69 step flags (derived in progress endpoint) */
+  streamingScheduled: boolean;
+  streamingLive: boolean;
+}
+
+export interface ScheduleStatus {
+  paperclipId: string;
+  steps: {
+    scheduled: boolean;
+    shooting: boolean;
+    wrapped: boolean;
+  };
+  progress: {
+    totalDays: number;
+    wrappedDays: number;
+    inProgressDays: number;
+    scheduledDays: number;
+  };
+  nextDay: {
+    id: string;
+    day: number;
+    date: string;
+    location: string;
+    interior: boolean;
+    callTime: string;
+    wrapTime: string;
+  } | null;
+  activeDay: ScheduleStatus["nextDay"];
+}
+
+export interface BudgetStatus {
+  paperclipId: string;
+  steps: {
+    drafted: boolean;
+    approved: boolean;
+  };
+  status: "draft" | "submitted" | "approved" | "locked";
+  totalAllocated: number;
+  currency: "KRW";
+  summary: {
+    spent: number;
+    remaining: number;
+    burnRatePct: number;
+  };
+  departments: Array<{
+    department: string;
+    allocated: number;
+    spent: number;
+  }>;
+}
+
+export interface CastingStatus {
+  paperclipId: string;
+  steps: {
+    started: boolean;
+    auditioning: boolean;
+    locked: boolean;
+  };
+  summary: {
+    total: number;
+    signed: number;
+    auditioning: number;
+    open: number;
+  };
+  leads: Array<{
+    characterName: string;
+    actorName: string | null;
+    state: "open" | "audition" | "offer" | "confirmed" | "signed";
+  }>;
+}
+
+export interface LocationsStatus {
+  paperclipId: string;
+  steps: {
+    scouting: boolean;
+    permitted: boolean;
+    locked: boolean;
+  };
+  summary: {
+    total: number;
+    confirmed: number;
+    permitted: number;
+    scouting: number;
+  };
+  topLocations: Array<{
+    name: string;
+    interior: boolean;
+    status: "scouting" | "shortlisted" | "permitted" | "confirmed" | "rejected";
+  }>;
+}
+
+export interface RehearsalsStatus {
+  paperclipId: string;
+  steps: {
+    scheduled: boolean;
+    started: boolean;
+    done: boolean;
+  };
+  summary: {
+    total: number;
+    completed: number;
+    inProgress: number;
+    scheduled: number;
+    totalHours: number;
+  };
+  next: {
+    id: string;
+    date: string;
+    type: string;
+    venue: string;
+    durationHours: number;
+    attendees: string[];
+  } | null;
+  active: RehearsalsStatus["next"];
+}
+
+export interface IngestStatus {
+  paperclipId: string;
+  steps: {
+    ingesting: boolean;
+    verified: boolean;
+    archived: boolean;
+  };
+  summary: {
+    total: number;
+    verified: number;
+    ingesting: number;
+    totalSizeGB: number;
+    totalTakes: number;
+    archived: number;
+  };
+  latestBatch: {
+    shootDate: string;
+    cameraRoll: string;
+    cameraModel: string;
+    codec: string;
+    sizeGB: number;
+    takes: number;
+  } | null;
+}
+
+export interface TitlesStatus {
+  paperclipId: string;
+  steps: {
+    drafted: boolean;
+    inReview: boolean;
+    approved: boolean;
+  };
+  summary: {
+    total: number;
+    approved: number;
+    review: number;
+    draft: number;
+  };
+  mainTitle: {
+    text: string | null;
+    font: string | null;
+    durationSec: number | null;
+    status: "draft" | "review" | "approved" | "locked";
+  } | null;
+}
+
+export interface FestivalsStatus {
+  paperclipId: string;
+  steps: {
+    planned: boolean;
+    submitted: boolean;
+    selected: boolean;
+  };
+  summary: {
+    total: number;
+    submitted: number;
+    selected: number;
+    awarded: number;
+    pending: number;
+    aListFestivals: number;
+  };
+  nextDeadline: {
+    festivalName: string;
+    deadline: string;
+    country: string;
+    tier: "A" | "B" | "specialty" | "regional";
+  } | null;
+}
+
+export interface MarketingStatus {
+  paperclipId: string;
+  steps: {
+    drafted: boolean;
+    inReview: boolean;
+    approved: boolean;
+  };
+  summary: {
+    total: number;
+    approved: number;
+    inReview: number;
+    aiGenerated: number;
+    videoAssets: number;
+    imageAssets: number;
+  };
+  flagship: {
+    trailer: {
+      label: string;
+      durationSec: number | null;
+      status: "draft" | "in_review" | "approved" | "delivered" | "live";
+      aiGenerated: boolean;
+    } | null;
+    poster: {
+      label: string;
+      kind: string;
+      status: "draft" | "in_review" | "approved" | "delivered" | "live";
+      aiGenerated: boolean;
+    } | null;
+  };
+}
+
+export interface BoxOfficeStatus {
+  paperclipId: string;
+  steps: {
+    released: boolean;
+    week1Done: boolean;
+    breakeven: boolean;
+  };
+  summary: {
+    krRevenue: number;
+    krAdmissions: number;
+    weeksInRelease: number;
+    peakScreens: number;
+    peakRank: number;
+    territoriesLive: number;
+    breakevenPct: number;
+    breakeven: boolean;
+  };
+  meta: {
+    releaseDate: string | null;
+    pattern: "wide" | "platform" | "limited" | "streaming" | "festival_only";
+    budgetKRW: number;
+  };
+  latestWeek: {
+    weekNumber: number;
+    weekStarting: string;
+    admissions: number;
+    revenue: number;
+    screens: number;
+    rank: number;
+    weekOverWeekPct: number | null;
+  } | null;
+}
+
+export interface AssemblyStatus {
+  paperclipId: string;
+  steps: {
+    queued: boolean;
+    rendering: boolean;
+    mastered: boolean;
+  };
+  summary: {
+    total: number;
+    done: number;
+    running: number;
+    failed: number;
+    queued: number;
+    mastered: number;
+    totalSizeGB: number;
+    pctOverall: number;
+    presetsDelivered: string[];
+  };
+  latestJob: {
+    id: string;
+    version: string;
+    status: "queued" | "running" | "done" | "failed";
+    preset: string;
+    resolution: "720p" | "1080p" | "2K" | "4K";
+    hdr: "sdr" | "hdr10" | "dolby_vision";
+    audioFormat: "stereo" | "5_1" | "atmos";
+    renderedSec: number;
+    durationSec: number;
+    pct: number;
+    outputSizeGB: number | null;
+    outputPath: string | null;
+    completedAt: string | null;
+  } | null;
+}
+
+export interface ReviewsStatus {
+  paperclipId: string;
+  steps: {
+    published: boolean;
+    criticsAggregated: boolean;
+    audienceAggregated: boolean;
+  };
+  summary: {
+    total: number;
+    avgScore: number | null;
+    criticsAvg: number | null;
+    audienceAvg: number | null;
+    criticsCount: number;
+    audienceCount: number;
+    positive: number;
+    mixed: number;
+    negative: number;
+    positivePct: number;
+  };
+  topReview: {
+    outlet: string;
+    reviewer: string | null;
+    score: number | null;
+    headline: string | null;
+    sentiment: "positive" | "mixed" | "negative";
+    publishedAt: string;
+  } | null;
+}
+
+interface AggregatorResponse {
+  creativeSteps: StepProgress[];
+  postProduction: PostProductionStatus | null;
+  distribution: DistributionStatus | null;
+  schedule: ScheduleStatus | null;
+  budget: BudgetStatus | null;
+  casting: CastingStatus | null;
+  locations: LocationsStatus | null;
+  rehearsals: RehearsalsStatus | null;
+  ingest: IngestStatus | null;
+  titles: TitlesStatus | null;
+  festivals: FestivalsStatus | null;
+  marketing: MarketingStatus | null;
+  boxOffice: BoxOfficeStatus | null;
+  reviews: ReviewsStatus | null;
+  assembly: AssemblyStatus | null;
+}
+
+/**
+ * Fetches progress for all 8 creative steps plus post-production and
+ * distribution status. Returns all-empty defaults on failure.
+ */
+export function useProjectProgress(projectId: string) {
+  const [progress, setProgress] = useState<StepProgress[]>(
+    STEPS.map((s) => ({ key: s.key, status: "not_started" })),
+  );
+  const [postProduction, setPostProduction] =
+    useState<PostProductionStatus | null>(null);
+  const [distribution, setDistribution] = useState<DistributionStatus | null>(
+    null,
+  );
+  const [schedule, setSchedule] = useState<ScheduleStatus | null>(null);
+  const [budget, setBudget] = useState<BudgetStatus | null>(null);
+  const [casting, setCasting] = useState<CastingStatus | null>(null);
+  const [locations, setLocations] = useState<LocationsStatus | null>(null);
+  const [rehearsals, setRehearsals] = useState<RehearsalsStatus | null>(null);
+  const [ingest, setIngest] = useState<IngestStatus | null>(null);
+  const [titles, setTitles] = useState<TitlesStatus | null>(null);
+  const [festivals, setFestivals] = useState<FestivalsStatus | null>(null);
+  const [marketing, setMarketing] = useState<MarketingStatus | null>(null);
+  const [boxOffice, setBoxOffice] = useState<BoxOfficeStatus | null>(null);
+  const [reviews, setReviews] = useState<ReviewsStatus | null>(null);
+  const [assembly, setAssembly] = useState<AssemblyStatus | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`/api/projects/${projectId}/progress`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = (await res.json()) as AggregatorResponse;
+        if (!cancelled) {
+          setProgress(data.creativeSteps);
+          setPostProduction(data.postProduction);
+          setDistribution(data.distribution);
+          setSchedule(data.schedule);
+          setBudget(data.budget);
+          setCasting(data.casting);
+          setLocations(data.locations);
+          setRehearsals(data.rehearsals);
+          setIngest(data.ingest);
+          setTitles(data.titles);
+          setFestivals(data.festivals);
+          setMarketing(data.marketing);
+          setBoxOffice(data.boxOffice);
+          setReviews(data.reviews);
+          setAssembly(data.assembly);
+        }
+      } catch {
+        // Silent fail: keep defaults
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [projectId]);
+
+  const currentStep: StepKey | undefined = progress.find(
+    (p) => p.status === "in_progress" || p.status === "review",
+  )?.key;
+
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing, boxOffice, reviews, assembly };
+}

@@ -5,7 +5,7 @@ interface SetEnvironment {
   id: string;
   name: string;
   type: "Interior" | "Exterior" | "Studio";
-  status: "Draft" | "3D Render" | "Pre-viz Ready";
+  status: "Draft" | "3D Render" | "Pre-viz Ready" | "Neural Synthesis Ready";
   tags: string[];
 }
 

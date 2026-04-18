@@ -1,0 +1,19 @@
+@import "@marionette/design-tokens/fonts.css";
+@import "tailwindcss";
+@import "@marionette/design-tokens/tokens.css";
+
+/* Legacy aliases — keep backward compat while migrating */
+:root {
+  --color-bg: var(--studio-bg-base);
+  --color-green: var(--studio-success);
+  --color-red: var(--studio-danger);
+  --color-white: var(--studio-text);
+  --color-muted: var(--studio-text-dim);
+  --color-subtle: var(--studio-text-muted);
+  --color-border: var(--studio-border);
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-white);
+}

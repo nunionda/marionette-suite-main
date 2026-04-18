@@ -1,0 +1,77 @@
+/* ─── Marionette Suite — Unified Design Tokens ─── */
+/* Single source of truth. All apps import this file. */
+/* Do NOT duplicate values in app-level CSS. */
+
+:root {
+  /* ── Backgrounds ── */
+  --studio-bg-base:       #0a0a0f;
+  --studio-bg-surface:    #111118;
+  --studio-bg-elevated:   #1a1a24;
+  --studio-bg-hover:      #22223a;
+
+  /* ── Borders ── */
+  --studio-border:        #2a2a3a;
+  --studio-border-accent: #3f3f5a;
+
+  /* ── Text ── */
+  --studio-text:          #f0f0f8;
+  --studio-text-dim:      #8888aa;
+  --studio-text-muted:    #55556a;
+
+  /* ── Accent (Interactive) ── */
+  --studio-accent:        #6366f1;  /* indigo */
+  --studio-accent-dim:    rgba(99, 102, 241, 0.15);
+  --studio-accent-glow:   rgba(99, 102, 241, 0.4);
+
+  /* ── Cross-app accent variants (promoted from script-writer Obsidian) ── */
+  --accent-violet:        #8B5CF6;  /* script-writer Signal Violet */
+  --accent-violet-dim:    rgba(139, 92, 246, 0.15);
+  --accent-mint:          #10B981;  /* script-writer Cinema Mint */
+  --accent-mint-dim:      rgba(16, 185, 129, 0.15);
+
+  /* ── Brand (Investor / High-value) ── */
+  --investor-gold:        #d4af37;
+  --investor-gold-dim:    rgba(212, 175, 55, 0.15);
+
+  /* ── Status ── */
+  --studio-success:       #22c55e;
+  --studio-warning:       #f59e0b;
+  --studio-danger:        #ef4444;
+  --studio-info:          #38bdf8;
+
+  /* ── Content Type Accents (category-specific) ── */
+  --content-film:         #a78bfa;  /* violet */
+  --content-drama:        #fb7185;  /* rose */
+  --content-commercial:   #facc15;  /* yellow */
+  --content-youtube:      #f87171;  /* red */
+
+  /* ── Layout ── */
+  --studio-nav-h:         56px;
+  --studio-sidebar-w:     220px;
+  --studio-radius:        8px;
+  --studio-radius-sm:     4px;
+  --studio-radius-lg:     12px;
+
+  /* ── Typography ── */
+  --font-sans:            "Pretendard Variable", "Pretendard", system-ui, -apple-system, sans-serif;
+  --font-mono:            "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* ── Spacing scale ── */
+  --space-1:              4px;
+  --space-2:              8px;
+  --space-3:              12px;
+  --space-4:              16px;
+  --space-6:              24px;
+  --space-8:              32px;
+
+  /* ── apps/studio compat aliases (@color-ms-* → --studio-*) ── */
+  /* Lets shared components use either naming convention.        */
+  /* apps/studio's @theme block may override these values.       */
+  --color-ms-bg:          var(--studio-bg-base);
+  --color-ms-bg-2:        var(--studio-bg-surface);
+  --color-ms-text:        var(--studio-text);
+  --color-ms-text-dim:    var(--studio-text-dim);
+  --color-ms-border:      var(--studio-border);
+  --color-ms-gold:        var(--investor-gold);
+  --color-ms-gold-light:  var(--investor-gold);
+}

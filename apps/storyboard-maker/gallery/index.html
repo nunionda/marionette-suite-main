@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Marionette Studios — Visual Reference Library</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
+<style>
+  :root {
+    --gold: #e8c872;
+    --gold-dim: #b89a4a;
+    --bg: #0b0b12;
+    --bg-deep: #06060a;
+    --bg-card: #111119;
+    --bg-elevated: #16161f;
+    --border: #1e1e2a;
+    --border-hover: #2e2e3e;
+    --text: #d8d4cf;
+    --text-bright: #f0ece6;
+    --text-muted: #706c66;
+    --text-dim: #4a4844;
+    --font-display: 'DM Serif Display', 'Noto Serif KR', Georgia, serif;
+    --font-body: 'Libre Franklin', 'Apple SD Gothic Neo', sans-serif;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg-deep);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* FILM GRAIN */
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9999; opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: overlay;
+  }
+
+  /* NAV */
+  .nav {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 32px; height: 48px;
+    background: var(--bg-deep); border-bottom: 1px solid var(--border);
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav .logo {
+    color: var(--gold); font-family: var(--font-display);
+    font-size: 0.9em; text-decoration: none; margin-right: 12px;
+    font-weight: 400; letter-spacing: 0.5px;
+  }
+  .nav .sep { color: var(--border); margin: 0 4px; user-select: none; }
+  .nav .tab {
+    padding: 5px 14px; border-radius: var(--radius-sm);
+    font-size: 0.75em; font-weight: 500; letter-spacing: 0.3px;
+    color: var(--text-muted); border: 1px solid transparent;
+    text-decoration: none; transition: all 0.25s var(--ease-out);
+  }
+  .nav .tab:hover { color: var(--text); background: var(--bg-elevated); border-color: var(--border); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    padding: 100px 40px 80px;
+    text-align: center;
+    background: radial-gradient(ellipse at 50% 0%, rgba(232,200,114,0.06) 0%, transparent 60%);
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 300px; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+  .hero .studio-label {
+    display: inline-block; padding: 6px 20px; border-radius: 20px;
+    font-size: 0.7em; font-weight: 600; letter-spacing: 3px; text-transform: uppercase;
+    color: var(--gold); border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
+    background: color-mix(in srgb, var(--gold) 6%, transparent);
+    margin-bottom: 28px;
+  }
+  .hero h1 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: clamp(2em, 5vw, 3.2em);
+    color: var(--text-bright); line-height: 1.3;
+    margin-bottom: 18px;
+  }
+  .hero h1 em {
+    font-style: italic; color: var(--gold);
+  }
+  .hero .subtitle {
+    color: var(--text-muted); font-size: 0.95em; line-height: 1.6;
+    max-width: 640px; margin: 0 auto 40px;
+  }
+  .hero .stats {
+    display: flex; justify-content: center; gap: 48px;
+    margin-top: 8px;
+  }
+  .hero .stat {
+    text-align: center;
+  }
+  .hero .stat-num {
+    font-family: var(--font-display); font-size: 2.2em;
+    color: var(--gold); line-height: 1;
+  }
+  .hero .stat-label {
+    font-size: 0.72em; color: var(--text-muted);
+    margin-top: 6px; letter-spacing: 0.5px;
+  }
+
+  /* SECTION */
+  .section {
+    padding: 60px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  .section-header h2 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: 1.8em; color: var(--text-bright);
+    margin-bottom: 10px;
+  }
+  .section-header p {
+    color: var(--text-muted); font-size: 0.88em; line-height: 1.5;
+  }
+  .section-divider {
+    width: 60px; height: 2px; margin: 0 auto 16px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  /* CATEGORY CARDS */
+  .categories {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 80px;
+  }
+  .cat-card {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 0;
+    text-decoration: none;
+    overflow: hidden;
+    transition: all 0.4s var(--ease-out);
+    display: flex; flex-direction: column;
+  }
+  .cat-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: var(--cat-color);
+    opacity: 0; transition: opacity 0.3s;
+    z-index: 2;
+  }
+  .cat-card:hover {
+    border-color: var(--cat-color);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+  .cat-card:hover::before { opacity: 1; }
+  .cat-card:hover .cat-thumb img { transform: scale(1.08); }
+  .cat-card .cat-thumb {
+    position: relative;
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    background: #0a0a14;
+  }
+  .cat-card .cat-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s var(--ease-out);
+  }
+  .cat-card .cat-thumb::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0; height: 60%;
+    background: linear-gradient(transparent, var(--bg-card));
+  }
+  .cat-card .cat-body {
+    padding: 20px 24px 24px;
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    flex: 1;
+  }
+  .cat-card .cat-name {
+    font-family: var(--font-display); font-size: 1.15em;
+    color: var(--cat-color); margin-bottom: 8px;
+  }
+  .cat-card .cat-desc {
+    font-size: 0.78em; color: var(--text-muted); line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .cat-card .cat-count {
+    font-size: 0.68em; color: var(--text-dim);
+    padding: 3px 10px; border-radius: 10px;
+    border: 1px solid var(--border);
+    margin-top: auto;
+  }
+
+  /* ARTIST GRID */
+  .artist-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .artist-chip {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    transition: all 0.25s var(--ease-out);
+    border-left: 3px solid transparent;
+  }
+  .artist-chip:hover {
+    background: var(--bg-elevated);
+    border-color: var(--border-hover);
+    border-left-color: var(--chip-color, var(--gold));
+    transform: translateX(4px);
+  }
+  .artist-chip .chip-rank {
+    font-family: var(--font-display);
+    font-size: 0.8em; color: var(--chip-color, var(--gold));
+    opacity: 0.5; min-width: 20px;
+  }
+  .artist-chip .chip-name {
+    font-size: 0.82em; color: var(--text); font-weight: 500;
+  }
+  .artist-chip .chip-role {
+    font-size: 0.68em; color: var(--text-muted); margin-top: 2px;
+  }
+
+  /* ROSTER SECTION */
+  .roster-section {
+    margin-bottom: 56px;
+  }
+  .roster-title {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .roster-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--roster-color);
+  }
+  .roster-title h3 {
+    font-family: var(--font-display); font-weight: 400;
+    font-size: 1.15em; color: var(--text-bright);
+  }
+  .roster-title .roster-link {
+    margin-left: auto;
+    font-size: 0.72em; color: var(--roster-color);
+    text-decoration: none; padding: 4px 12px;
+    border: 1px solid color-mix(in srgb, var(--roster-color) 30%, transparent);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+  }
+  .roster-title .roster-link:hover {
+    background: color-mix(in srgb, var(--roster-color) 10%, transparent);
+    border-color: var(--roster-color);
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 40px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 0.75em;
+  }
+  .footer a {
+    color: var(--gold-dim); text-decoration: none;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .categories { grid-template-columns: repeat(2, 1fr); }
+    .hero .stats { gap: 32px; }
+  }
+  @media (max-width: 600px) {
+    .categories { grid-template-columns: 1fr; }
+    .hero { padding: 60px 20px 50px; }
+    .section { padding: 40px 20px; }
+    .hero .stats { flex-wrap: wrap; gap: 24px; }
+  }
+
+  /* ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .cat-card { animation: fadeUp 0.6s var(--ease-out) both; }
+  .cat-card:nth-child(1) { animation-delay: 0.1s; }
+  .cat-card:nth-child(2) { animation-delay: 0.2s; }
+  .cat-card:nth-child(3) { animation-delay: 0.3s; }
+  .cat-card:nth-child(4) { animation-delay: 0.4s; }
+  .cat-card:nth-child(5) { animation-delay: 0.5s; }
+  .cat-card:nth-child(6) { animation-delay: 0.6s; }
+  .cat-card:nth-child(7) { animation-delay: 0.7s; }
+  .cat-card:nth-child(8) { animation-delay: 0.8s; }
+  .artist-chip { animation: fadeUp 0.4s var(--ease-out) both; }
+
+  /* Embed mode */
+  body.embed-mode .nav { display: none !important; }
+  body.embed-mode .hero { padding-top: 40px; }
+</style>
+</head>
+<body>
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+</script>
+
+<!-- NAV -->
+<nav class="nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab">VFX</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="studio-label">Marionette Studios</div>
+  <h1>Visual Reference <em>Library</em></h1>
+  <p class="subtitle">
+    할리우드 최고의 스토리보드 아티스트와 컨셉 디자이너들의<br>
+    기법, 철학, 프로세스를 분석한 비주얼 레퍼런스 컬렉션
+  </p>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num">80</div>
+      <div class="stat-label">Artists</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">8</div>
+      <div class="stat-label">Categories</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">836</div>
+      <div class="stat-label">References</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">60+</div>
+      <div class="stat-label">Films</div>
+    </div>
+  </div>
+</div>
+
+<!-- CATEGORIES -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-divider"></div>
+    <h2>Categories</h2>
+    <p>각 카테고리를 클릭하면 10명의 마스터 아티스트와 레퍼런스 이미지를 볼 수 있습니다</p>
+  </div>
+
+  <div class="categories">
+    <a class="cat-card" href="Famous_Storyboard_Artists_Reference.html" style="--cat-color: #e8c872;">
+      <div class="cat-thumb">
+        <img src="https://cdn8.openculture.com/wp-content/uploads/2015/10/Kurasawa-1.jpg" alt="Kurosawa storyboard" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">Storyboard</div>
+        <div class="cat-desc">구로사와, 리들리 스콧, 봉준호, 미야자키 등<br>영화를 그림으로 쓴 감독과 아티스트</div>
+        <div class="cat-count">10 Masters</div>
+      </div>
+    </a>
+    <a class="cat-card" href="concept_designers_character.html" style="--cat-color: #d06858;">
+      <div class="cat-thumb">
+        <img src="https://i.pinimg.com/736x/85/04/0a/85040aba075488a1dc160c37ecb5cd6c.jpg" alt="Iain McCaig Darth Maul concept" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">Character Design</div>
+        <div class="cat-desc">McCaig, Giger, McCreery, Barlowe 등<br>아이코닉 캐릭터와 크리처를 창조한 거장들</div>
+        <div class="cat-count">10 Masters</div>
+      </div>
+    </a>
+    <a class="cat-card" href="concept_designers_environment.html" style="--cat-color: #5890c8;">
+      <div class="cat-thumb">
+        <img src="https://i.pinimg.com/736x/3b/54/f6/3b54f61e3fdd02a82db5f1e837b05021.jpg" alt="Kazuo Oga Ghibli forest background" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">Environment Design</div>
+        <div class="cat-desc">Kazuo Oga, Eyvind Earle, Dylan Cole 등<br>영화·애니메이션 배경 디자인 전문가들</div>
+        <div class="cat-count">10 Masters</div>
+      </div>
+    </a>
+    <a class="cat-card" href="concept_designers_props.html" style="--cat-color: #58a870;">
+      <div class="cat-thumb">
+        <img src="https://i.pinimg.com/736x/83/cb/44/83cb443a457f791915336950c021d3b0.jpg" alt="Daniel Simon Tron Legacy vehicle" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">Prop Design</div>
+        <div class="cat-desc">Roger Christian, Daniel Simon, Phil Saunders 등<br>라이트세이버부터 아이언맨 슈트까지 프랍 전문가들</div>
+        <div class="cat-count">10 Masters</div>
+      </div>
+    </a>
+    <a class="cat-card" href="production_designers_set.html" style="--cat-color: #c87858;">
+      <div class="cat-thumb">
+        <img src="https://i.pinimg.com/736x/e0/80/5c/e0805cabdcf9e87d30249728df51d242.jpg" alt="Ken Adam Bond set design" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">Set Design</div>
+        <div class="cat-desc">Ken Adam, Dante Ferretti, Rick Carter 등<br>할리우드 프로덕션 디자인 거장 — 세트를 건축한 사람들</div>
+        <div class="cat-count">10 Masters</div>
+      </div>
+    </a>
+    <a class="cat-card" href="production_designers_costume.html" style="--cat-color: #b868a8;">
+      <div class="cat-thumb">
+        <img src="https://i.pinimg.com/736x/50/9c/1f/509c1fc2a40a10cbad7399939e839077.jpg" alt="Eiko Ishioka Dracula costume" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">Costume Design</div>
+        <div class="cat-desc">Edith Head, Colleen Atwood, Eiko Ishioka 등<br>캐릭터의 영혼을 직물로 빚는 의상 디자이너들</div>
+        <div class="cat-count">10 Masters</div>
+      </div>
+    </a>
+    <a class="cat-card" href="production_designers_sfx_makeup.html" style="--cat-color: #8b9dc3;">
+      <div class="cat-thumb">
+        <img src="https://i.pinimg.com/736x/2f/4b/74/2f4b741e286790c0ad8d8c6768318837.jpg" alt="Stan Winston creature effects" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">SFX Makeup</div>
+        <div class="cat-desc">Rick Baker, Stan Winston, Dick Smith 등<br>프랑켄슈타인부터 터미네이터까지 특수분장의 거장들</div>
+        <div class="cat-count">10 Masters</div>
+      </div>
+    </a>
+    <a class="cat-card" href="production_designers_vfx.html" style="--cat-color: #3ab8c0;">
+      <div class="cat-thumb">
+        <img src="https://www.ilm.com/wp-content/uploads/2023/06/crs1140.comp_.077355.abain_v27.1268-aspect-ratio-654-334.jpg" alt="ILM Avengers VFX" />
+      </div>
+      <div class="cat-body">
+        <div class="cat-name">VFX Studios</div>
+        <div class="cat-desc">ILM, Digital Domain, Weta FX 등<br>세계 정상 VFX 스튜디오와 대표작들</div>
+        <div class="cat-count">10 Studios</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- FULL ROSTER -->
+<div class="section">
+  <div class="section-header">
+    <div class="section-divider"></div>
+    <h2>All Artists</h2>
+    <p>전체 아티스트 목록 — 이름을 클릭하면 해당 카테고리 갤러리로 이동합니다</p>
+  </div>
+
+  <!-- Storyboard -->
+  <div class="roster-section" style="--roster-color: #e8c872;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>Storyboard Artists</h3>
+      <a class="roster-link" href="Famous_Storyboard_Artists_Reference.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">黒澤 明 (Akira Kurosawa)</div><div class="chip-role">Watercolor / Gouache</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">Ridley Scott</div><div class="chip-role">Ink + Pencil / Ridleygrams</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">봉준호 (Bong Joon-ho)</div><div class="chip-role">Pen Line / Graphic Novel</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">Saul Bass</div><div class="chip-role">Graphic / High Contrast B&W</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">宮崎 駿 (Hayao Miyazaki)</div><div class="chip-role">Monochrome Pencil / Ekonte</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">Martin Scorsese</div><div class="chip-role">Rough Sketch + Notes</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Mark Sexton + Brendan McCarthy</div><div class="chip-role">Action Comic / Full Coverage</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">J. Todd Anderson</div><div class="chip-role">Ink + Shadow Drawing</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">David Lowery</div><div class="chip-role">Cinematic Realism</div></div></a>
+      <a class="artist-chip" href="Famous_Storyboard_Artists_Reference.html" style="--chip-color: #e8c872; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Wes Anderson</div><div class="chip-role">Simple Line / Symmetry</div></div></a>
+    </div>
+  </div>
+
+  <!-- Character -->
+  <div class="roster-section" style="--roster-color: #d06858;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>Character Designers</h3>
+      <a class="roster-link" href="concept_designers_character.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">Iain McCaig</div><div class="chip-role">Pencil / Ink / Watercolor</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">H.R. Giger</div><div class="chip-role">Airbrush / Ink / Sculpture</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">Mark "Crash" McCreery</div><div class="chip-role">Pencil / Graphite / Sculpture</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">Neville Page</div><div class="chip-role">ZBrush / Digital / Pencil</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">Wayne Barlowe</div><div class="chip-role">Oil Painting / Digital</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">Ralph McQuarrie</div><div class="chip-role">Gouache / Acrylic / Oil</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Moebius (Jean Giraud)</div><div class="chip-role">Pen & Ink / Watercolor</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">Doug Chiang</div><div class="chip-role">Digital Painting / Gouache</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">Syd Mead</div><div class="chip-role">Gouache / Prismacolor / Ink</div></div></a>
+      <a class="artist-chip" href="concept_designers_character.html" style="--chip-color: #d06858; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Ron Cobb</div><div class="chip-role">Pen & Ink / Technical Drawing</div></div></a>
+    </div>
+  </div>
+
+  <!-- Environment -->
+  <div class="roster-section" style="--roster-color: #5890c8;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>Environment Designers</h3>
+      <a class="roster-link" href="concept_designers_environment.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">男鹿和雄 (Kazuo Oga)</div><div class="chip-role">Poster Color on Paper</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">Eyvind Earle</div><div class="chip-role">Gouache / Oil on Board</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">Peter Ellenshaw</div><div class="chip-role">Oil on Glass / Matte</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">Albert Whitlock</div><div class="chip-role">Oil on Glass</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">Tyrus Wong</div><div class="chip-role">Watercolor / Pastel</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">Maurice Noble</div><div class="chip-role">Gouache / Mixed Media</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Dylan Cole</div><div class="chip-role">Digital Matte Painting</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">Craig Mullins</div><div class="chip-role">Digital Painting</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">Yanick Dusseault</div><div class="chip-role">Digital Matte Painting</div></div></a>
+      <a class="artist-chip" href="concept_designers_environment.html" style="--chip-color: #5890c8; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Ralph Eggleston</div><div class="chip-role">Digital & Traditional</div></div></a>
+    </div>
+  </div>
+
+  <!-- Prop -->
+  <div class="roster-section" style="--roster-color: #58a870;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>Prop Designers</h3>
+      <a class="roster-link" href="concept_designers_props.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">Roger Christian</div><div class="chip-role">Found-Object Assemblage</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">Daniel Simon</div><div class="chip-role">Automotive Digital Rendering</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">Phil Saunders</div><div class="chip-role">Industrial Design / Digital</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">Harald Belker</div><div class="chip-role">Automotive Concept Art</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">Vitaly Bulgarov</div><div class="chip-role">ZBrush / KeyShot / 3D</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">Tim Flattery</div><div class="chip-role">Traditional & Digital</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Richard Taylor</div><div class="chip-role">Practical Fabrication</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">John Eaves</div><div class="chip-role">Technical Illustration</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">Annie Atkins</div><div class="chip-role">Hand-Crafted Graphic</div></div></a>
+      <a class="artist-chip" href="concept_designers_props.html" style="--chip-color: #58a870; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Scott Robertson</div><div class="chip-role">Industrial Design / Marker</div></div></a>
+    </div>
+  </div>
+
+  <!-- Costume Design -->
+  <div class="roster-section" style="--roster-color: #b868a8;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>Costume Designers</h3>
+      <a class="roster-link" href="production_designers_costume.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">Edith Head</div><div class="chip-role">Hollywood Glamour</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">Colleen Atwood</div><div class="chip-role">Dark Fantasy Couture</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">Sandy Powell</div><div class="chip-role">Period Reinvention</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">Milena Canonero</div><div class="chip-role">Auteur Collaboration</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">Ruth E. Carter</div><div class="chip-role">Afrofuturist Fashion</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">Jacqueline Durran</div><div class="chip-role">Romantic Period Design</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Jenny Beavan</div><div class="chip-role">Post-Apocalyptic Punk</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">Michael Kaplan</div><div class="chip-role">Sci-Fi / Urban Fashion</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">Eiko Ishioka</div><div class="chip-role">Avant-Garde Sculpture</div></div></a>
+      <a class="artist-chip" href="production_designers_costume.html" style="--chip-color: #b868a8; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Lindy Hemming</div><div class="chip-role">Action Hero Wardrobe</div></div></a>
+    </div>
+  </div>
+
+  <!-- SFX Makeup -->
+  <div class="roster-section" style="--roster-color: #8b9dc3;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>SFX Makeup Artists</h3>
+      <a class="roster-link" href="production_designers_sfx_makeup.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">Rick Baker</div><div class="chip-role">Transformation Master</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">Stan Winston</div><div class="chip-role">Creature Animatronics</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">Dick Smith</div><div class="chip-role">Aging & Prosthetic Pioneer</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">Greg Nicotero</div><div class="chip-role">Gore & Zombie Specialist</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">Ve Neill</div><div class="chip-role">Character Transformation</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">Rob Bottin</div><div class="chip-role">Body Horror Pioneer</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Kazuhiro Tsuji</div><div class="chip-role">Hyper-Realistic Prosthetics</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">Jack Pierce</div><div class="chip-role">Classic Monster Design</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">Stuart Freeborn</div><div class="chip-role">Puppet & Alien Creation</div></div></a>
+      <a class="artist-chip" href="production_designers_sfx_makeup.html" style="--chip-color: #8b9dc3; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Joel Harlow</div><div class="chip-role">Alien & Multi-Character</div></div></a>
+    </div>
+  </div>
+
+  <!-- Set Design -->
+  <div class="roster-section" style="--roster-color: #c87858;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>Production Designers (Set)</h3>
+      <a class="roster-link" href="production_designers_set.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">Ken Adam</div><div class="chip-role">Expressionist Set Design</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">Dante Ferretti</div><div class="chip-role">Theatrical Period Design</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">Rick Carter</div><div class="chip-role">Immersive World Building</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">Stuart Craig</div><div class="chip-role">Architectural Fantasy</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">Hannah Beachler</div><div class="chip-role">Afrofuturist Design</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">Catherine Martin</div><div class="chip-role">Maximalist Spectacle</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Dean Tavoularis</div><div class="chip-role">Atmospheric Realism</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">Bo Welch</div><div class="chip-role">Fantastical Suburbia</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">Jack Fisk</div><div class="chip-role">Naturalist Location Design</div></div></a>
+      <a class="artist-chip" href="production_designers_set.html" style="--chip-color: #c87858; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Nathan Crowley</div><div class="chip-role">Practical Large-Scale Build</div></div></a>
+    </div>
+  </div>
+  <div class="roster-section" style="--roster-color: #3ab8c0;">
+    <div class="roster-title">
+      <div class="roster-dot"></div>
+      <h3>VFX Studios</h3>
+      <a class="roster-link" href="production_designers_vfx.html">Gallery &rarr;</a>
+    </div>
+    <div class="artist-grid">
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.05s"><div><div class="chip-rank">01</div></div><div><div class="chip-name">ILM</div><div class="chip-role">Industrial Light &amp; Magic</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.08s"><div><div class="chip-rank">02</div></div><div><div class="chip-name">Digital Domain</div><div class="chip-role">Titanic · Avengers VFX</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.11s"><div><div class="chip-rank">03</div></div><div><div class="chip-name">Weta FX</div><div class="chip-role">LOTR · Avatar · Planet of the Apes</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.14s"><div><div class="chip-rank">04</div></div><div><div class="chip-name">DNEG</div><div class="chip-role">Interstellar · Inception VFX</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.17s"><div><div class="chip-rank">05</div></div><div><div class="chip-name">Framestore</div><div class="chip-role">Gravity · Paddington VFX</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.2s"><div><div class="chip-rank">06</div></div><div><div class="chip-name">MPC</div><div class="chip-role">The Jungle Book · Lion King</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.23s"><div><div class="chip-rank">07</div></div><div><div class="chip-name">Scanline VFX</div><div class="chip-role">Game of Thrones · Avengers</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.26s"><div><div class="chip-rank">08</div></div><div><div class="chip-name">Rising Sun Pictures</div><div class="chip-role">Harry Potter · X-Men VFX</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.29s"><div><div class="chip-rank">09</div></div><div><div class="chip-name">Pixomondo</div><div class="chip-role">Game of Thrones Dragons</div></div></a>
+      <a class="artist-chip" href="production_designers_vfx.html" style="--chip-color: #3ab8c0; animation-delay: 0.32s"><div><div class="chip-rank">10</div></div><div><div class="chip-name">Rodeo FX</div><div class="chip-role">Blade Runner 2049 · Dune</div></div></a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <p>Marionette Studios &mdash; Visual Reference Library</p>
+  <p style="margin-top: 6px;">AI 이미지 생성 파이프라인을 위한 스타일 레퍼런스 분석</p>
+</div>
+
+</body>
+</html>

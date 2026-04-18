@@ -1,0 +1,42 @@
+{
+  "project": "Nike - Just Do It (30s Ad)",
+  "style": "all",
+  "output_format": "both",
+  "scenes": [
+    {
+      "scene_id": "nike_01",
+      "description": "Extreme close-up of a running shoe hitting wet pavement at dawn, sweat drops and water splash in slow motion",
+      "camera_angle": "extreme close-up, low angle",
+      "mood": "intense, gritty",
+      "location": "urban street at dawn"
+    },
+    {
+      "scene_id": "nike_02",
+      "description": "Dynamic tracking shot of a male runner's profile, determination on his face, city lights blurring behind",
+      "camera_angle": "tracking shot, medium close-up",
+      "mood": "determined, powerful",
+      "location": "city bridge at sunrise"
+    },
+    {
+      "scene_id": "nike_03",
+      "description": "Female basketball player executing a powerful slam dunk, Nike shoes visible, arena lights exploding",
+      "camera_angle": "low angle, dynamic",
+      "mood": "triumphant, explosive",
+      "location": "basketball arena"
+    },
+    {
+      "scene_id": "nike_04",
+      "description": "Multiple athlete silhouettes leaping upward against golden sunset, Nike swoosh prominent in composition",
+      "camera_angle": "wide shot, backlit",
+      "mood": "inspirational, hopeful",
+      "location": "rooftop at sunset"
+    },
+    {
+      "scene_id": "nike_05",
+      "description": "Black screen, crisp white NIKE logo and Just Do It slogan with subtle glow effect",
+      "camera_angle": "centered, static",
+      "mood": "powerful, minimal",
+      "location": "black void"
+    }
+  ]
+}

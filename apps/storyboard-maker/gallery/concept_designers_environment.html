@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Environment Design — Hollywood Concept Designers 10</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #5890c8; }</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab active">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab">VFX</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>ENVIRONMENT DESIGN</h1>
+    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Environment</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">ENVIRONMENT DESIGN</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://i.pinimg.com/736x/3b/54/f6/3b54f61e3fdd02a82db5f1e837b05021.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Environment Design Gallery</h2>
+          <p>10명의 환경 디자인 전문가 — Kazuo Oga, Eyvind Earle, Dylan Cole 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 디자이너를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 environment designers loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128396;</p>
+      <p style="font-size:0.85em;">Select a designer from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Environment Concept</h3>
+    <label>Environment Description</label>
+    <textarea id="modalScene" placeholder="e.g. 네온 불빛이 비에 반사되는 미래 도시의 뒷골목"></textarea>
+    <label>Designer Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+    </select>
+    <label>Camera Angle</label>
+    <input id="modalCamera" type="text" placeholder="e.g. wide establishing shot, aerial view, street level" />
+    <label>Mood / Atmosphere</label>
+    <input id="modalMood" type="text" placeholder="e.g. dystopian, serene, ominous" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script src="gallery-api.js"></script>
+<script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
+const DESIGNERS = [
+  {
+    id: 'kazuo_oga', rank: '01', name: '男鹿和雄 (Kazuo Oga)',
+    subtitle: 'Background Art Director · 일본 · 1952-',
+    styleType: 'poster_color', styleLabel: 'Poster Color on Paper',
+    desc: '"토토로의 숲을 그린 남자." 스튜디오 지브리의 배경 미술을 정의한 거장. 미야자키 하야오, 다카하타 이사오와 협업하며 이웃집 토토로, 모노노케 히메, 센과 치히로 등의 자연 풍경을 창조했다.',
+    styleDesc: '닉카 포스터 컬러를 사용한 전통 회화 기법. 울창한 자연 풍경과 대기 깊이감이 특징. 베이스코트를 30-60분 내에 완성하는 엄격한 작업 방식.',
+    technique: 'Atmospheric Depth: 안개, 빛, 습기를 통한 깊이감 표현.\nOrganic Detail: 나무, 풀, 이끼의 초정밀 묘사.\nEmotional Landscape: 자연이 캐릭터의 감정을 반영하는 배경.',
+    aiPrompt: 'Kazuo Oga style background art, lush green forest landscape, Studio Ghibli aesthetic, poster color painting, atmospheric depth, detailed natural foliage, warm nostalgic Japanese countryside, Totoro forest',
+    films: ['이웃집 토토로 (1988)', '모노노케 히메 (1997)', '센과 치히로의 행방불명 (2001)', '하울의 움직이는 성 (2004)'],
+    characters: ['토토로의 숲', '시시가미의 숲', '유바바의 온천마을'],
+    links: [
+      { text: 'Animation Obsessive: Kazuo Oga', url: 'https://animationobsessive.substack.com/p/what-kazuo-oga-thinks-about-when' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/6b/96/e5/6b96e510a01abb2b15f3527d29ab557d.jpg', label: 'Oga — reference 1' },
+      { src: 'https://i.pinimg.com/736x/24/90/3a/24903aaa057a841efc6577b318756721.jpg', label: 'Oga — reference 2' },
+      { src: 'https://i.pinimg.com/736x/d4/06/03/d40603e7af07ddff35fdc66723d7e7bc.jpg', label: 'Oga — reference 3' },
+      { src: 'https://i.pinimg.com/736x/f4/14/a2/f414a2aeed5d2f1cf7a8ee28b327edab.jpg', label: 'Oga — reference 4' },
+      { src: 'https://i.pinimg.com/736x/95/13/ab/9513ab183fd4223937d028ca30181083.jpg', label: 'Oga — reference 5' },
+      { src: 'https://i.pinimg.com/736x/2d/7e/fc/2d7efc30f725a730502fb585fa02a4c5.jpg', label: 'Oga — reference 6' },
+      { src: 'https://i.pinimg.com/736x/a1/58/de/a158de3979773455e4716cb5301d994a.jpg', label: 'Oga — reference 7' },
+      { src: 'https://i.pinimg.com/736x/df/a3/e7/dfa3e74dd04d1f107ececd76d6d1487e.jpg', label: 'Oga — reference 8' },
+      { src: 'https://i.pinimg.com/736x/a2/07/1b/a2071b95b037dfe283339ad1d0c99c5c.jpg', label: 'Oga — reference 9' },
+      { src: 'https://i.pinimg.com/736x/40/be/5e/40be5e6dbc4884f0b19d0fe40acc744b.jpg', label: 'Oga — reference 10' },
+      { src: 'https://i.pinimg.com/736x/e7/46/76/e746764b815b3650b2da2c283ee62780.jpg', label: 'Oga — reference 11' },
+      { src: 'https://i.pinimg.com/736x/64/64/28/646428b69fc7db2c119e27018ce17bad.jpg', label: 'Oga — reference 12' },
+    ],
+  },
+  {
+    id: 'eyvind_earle', rank: '02', name: 'Eyvind Earle',
+    subtitle: 'Background & Styling Artist · 미국 · 1916-2000',
+    styleType: 'gouache', styleLabel: 'Gouache / Oil on Board',
+    desc: '월트 디즈니가 잠자는 숲속의 공주 전체의 시각적 스타일링을 맡긴 유일한 아티스트. 배경이 캐릭터 애니메이션보다 시각적으로 지배적인 혁명적 접근을 시도했다.',
+    styleDesc: '프리 르네상스 유럽 미술, 페르시아 세밀화, 일본 판화에서 영감받은 양식화된 구성. 단일 배경에 10일까지 투자한 극도의 디테일.',
+    technique: 'Stylized Flat Composition: 평면적이면서도 극도로 디테일한 구도.\nDark-to-Light Build: 어두운 블록에서 밝은 하이라이트로 쌓아가는 기법.\nPanoramic Widescreen: 와이드스크린을 활용한 파노라마 환경.',
+    aiPrompt: 'Eyvind Earle style background, stylized medieval forest, Disney Sleeping Beauty aesthetic, flattened composition with extreme detail, pre-Renaissance inspired, gothic trees, rich jewel colors',
+    films: ['잠자는 숲속의 공주 (1959)', '아가씨와 건달들 (1955)', '피터 팬 (1953)'],
+    characters: ['마법의 숲', '말레피센트의 성', '오로라의 왕국'],
+    links: [
+      { text: 'Walt Disney Family Museum: Eyvind Earle', url: 'https://www.waltdisney.org/blog/eyvind-earle-artistic-devotion-distinction-sleeping-beauty' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/b3/be/0e/b3be0e9a124d19c78d3338127e7da05f.jpg', label: 'Earle — reference 1' },
+      { src: 'https://i.pinimg.com/736x/63/b6/2b/63b62b98bb5d253ac573236e0906d986.jpg', label: 'Earle — reference 2' },
+      { src: 'https://i.pinimg.com/736x/8f/21/fe/8f21fe9bd4666c07718f8139c8f58853.jpg', label: 'Earle — reference 3' },
+      { src: 'https://i.pinimg.com/736x/96/9e/dd/969edd4f510dd47adc1f7d4f92afe6cd.jpg', label: 'Earle — reference 4' },
+      { src: 'https://i.pinimg.com/736x/12/85/43/1285435bfe9e58920441be3952b09bba.jpg', label: 'Earle — reference 5' },
+      { src: 'https://i.pinimg.com/736x/03/81/36/03813658a70ced2e186a6a7f406d7523.jpg', label: 'Earle — reference 6' },
+      { src: 'https://i.pinimg.com/736x/7c/3a/ca/7c3aca49c146cb86ed7bf02dc63a4ffa.jpg', label: 'Earle — reference 7' },
+      { src: 'https://i.pinimg.com/736x/f7/83/3d/f7833df10693d3908150468436a9ac12.jpg', label: 'Earle — reference 8' },
+      { src: 'https://i.pinimg.com/736x/12/6a/f0/126af0685196efe568c9ea916779bd38.jpg', label: 'Earle — reference 9' },
+      { src: 'https://i.pinimg.com/736x/0f/43/39/0f43392531a20320748504d0b41dead3.jpg', label: 'Earle — reference 10' },
+      { src: 'https://i.pinimg.com/736x/e8/af/5e/e8af5efbbbb1775dca1ef4858d4bb381.jpg', label: 'Earle — reference 11' },
+      { src: 'https://i.pinimg.com/736x/9e/2b/f4/9e2bf436dad6ab6c18575327a3b09b81.jpg', label: 'Earle — reference 12' },
+    ],
+  },
+  {
+    id: 'peter_ellenshaw', rank: '03', name: 'Peter Ellenshaw',
+    subtitle: 'Matte Painter · 영국/미국 · 1913-2007',
+    styleType: 'oil', styleLabel: 'Oil on Glass / Matte Painting',
+    desc: '디즈니의 전설적인 매트 페인터. 메리 포핀스에서 102개의 개별 매트 페인팅을 제작하여 아카데미상을 수상. 30년간 디즈니의 불가능한 환경들을 실현시켰다.',
+    styleDesc: '유리 위 유화를 사용한 전통적 매트 페인팅. 인상주의적 접근으로 실사 촬영과 자연스럽게 합성되는 환경을 창조.',
+    technique: 'Glass Matte Integration: 유리 위 그림을 실사와 합성.\nImpressionistic Realism: 사실적이면서도 회화적인 표현.\nScale Extension: 세트의 물리적 한계를 넘어선 환경 확장.',
+    aiPrompt: 'Peter Ellenshaw matte painting style, Edwardian London rooftops, Disney classic environment, oil on glass technique, impressionistic realism, seamless live-action integration, Mary Poppins skyline',
+    films: ['메리 포핀스 (1964)', '보물섬 (1950)', '해저 2만리 (1954)', '블랙홀 (1979)'],
+    characters: ['에드워드 시대 런던', '보물섬', '해저 세계'],
+    links: [
+      { text: 'D23: Peter Ellenshaw Disney Legend', url: 'https://d23.com/walt-disney-legend/peter-ellenshaw/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/08/0b/b4/080bb492c1cd444003a2b3fb59dd5b35.jpg', label: 'Ellenshaw — reference 1' },
+      { src: 'https://i.pinimg.com/736x/32/73/80/3273805412d1ffd858ff78b09cc76d77.jpg', label: 'Ellenshaw — reference 2' },
+      { src: 'https://i.pinimg.com/736x/cd/c0/10/cdc010bcd64af3f651ee4aa497444fcc.jpg', label: 'Ellenshaw — reference 3' },
+      { src: 'https://i.pinimg.com/736x/55/50/4d/55504d1d610d7ce550ba202cf57e9d86.jpg', label: 'Ellenshaw — reference 4' },
+      { src: 'https://i.pinimg.com/736x/9d/84/08/9d8408869bb7adbfebb714043b533b6f.jpg', label: 'Ellenshaw — reference 5' },
+      { src: 'https://i.pinimg.com/736x/72/3f/41/723f41017ea5be8a494ff526d7df7876.jpg', label: 'Ellenshaw — reference 6' },
+      { src: 'https://i.pinimg.com/736x/3f/ee/ad/3feeadbe9c0bce537504b9e35aca0e4c.jpg', label: 'Ellenshaw — reference 7' },
+      { src: 'https://i.pinimg.com/736x/c6/b6/a6/c6b6a61e8c7c92169bb06ce8cc426050.jpg', label: 'Ellenshaw — reference 8' },
+      { src: 'https://i.pinimg.com/736x/3a/bd/61/3abd6194b07372871fce302a4c356c61.jpg', label: 'Ellenshaw — reference 9' },
+      { src: 'https://i.pinimg.com/736x/3e/fa/f4/3efaf4c010171f5ba00c6cdba880aba2.jpg', label: 'Ellenshaw — reference 10' },
+      { src: 'https://i.pinimg.com/736x/de/aa/34/deaa34f9e01e240e569e7237fceffcc9.jpg', label: 'Ellenshaw — reference 11' },
+      { src: 'https://i.pinimg.com/736x/2e/7d/2a/2e7d2a629c053c5447cd6a8ef52de620.jpg', label: 'Ellenshaw — reference 12' },
+    ],
+  },
+  {
+    id: 'albert_whitlock', rank: '04', name: 'Albert Whitlock',
+    subtitle: 'Matte Painter · 영국/미국 · 1915-1999',
+    styleType: 'oil', styleLabel: 'Oil on Glass',
+    desc: '히치콕의 시각적 파트너이자 유니버설 스튜디오 매트 부서를 24년간 이끈 거장. Earthquake에서만 70개 이상의 매트 페인팅을 제작. 아카데미상 2회 수상.',
+    styleDesc: '유리 위 유화 매트 페인팅의 달인. 인상주의적이면서도 회화적인 품질로 실사 영상과 완벽히 통합되는 환경을 창조.',
+    technique: 'Invisible Integration: 관객이 그림인지 모를 정도의 자연스러운 합성.\nMass Production: 단일 영화에 수십 개의 매트 페인팅 제작.\nAtmospheric Painting: 대기 효과와 빛의 흐름을 통한 현실감.',
+    aiPrompt: 'Albert Whitlock matte painting, Hitchcock film environment, oil on glass technique, photorealistic landscape extension, atmospheric perspective, classic Hollywood golden age environment',
+    films: ['새 (1963)', '어스퀘이크 (1974)', '힌덴부르크 (1975)', '마니 (1964)'],
+    characters: ['보데가 베이', '지진 파괴 도시', '역사적 건축물'],
+    links: [
+      { text: 'Wikipedia: Albert Whitlock', url: 'https://en.wikipedia.org/wiki/Albert_Whitlock' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/45/b2/df/45b2df0dbba54863884e69a0f15a1692.jpg', label: 'Whitlock — reference 1' },
+      { src: 'https://i.pinimg.com/736x/f7/24/41/f724410be98c74ba27249ee9bb1bb3f6.jpg', label: 'Whitlock — reference 2' },
+      { src: 'https://i.pinimg.com/736x/a7/8f/60/a78f6083db49a89178411f15bcb891bf.jpg', label: 'Whitlock — reference 3' },
+      { src: 'https://i.pinimg.com/736x/e3/0a/64/e30a64ac2e14f62f7898169487c52570.jpg', label: 'Whitlock — reference 4' },
+      { src: 'https://i.pinimg.com/736x/92/aa/dc/92aadccbea796715af0e60648dd43dbb.jpg', label: 'Whitlock — reference 5' },
+      { src: 'https://i.pinimg.com/736x/36/7c/1d/367c1d38058a88892b6211fe80ec75ea.jpg', label: 'Whitlock — reference 6' },
+      { src: 'https://i.pinimg.com/736x/8d/76/57/8d76573a50c620bc90689da7dc19de1f.jpg', label: 'Whitlock — reference 7' },
+      { src: 'https://i.pinimg.com/736x/b1/9b/4b/b19b4b67e6cbdb1d1b8ff3212d8e5271.jpg', label: 'Whitlock — reference 8' },
+      { src: 'https://i.pinimg.com/736x/08/c0/99/08c099d262b7df7c356c6f8c9996fbf7.jpg', label: 'Whitlock — reference 9' },
+      { src: 'https://i.pinimg.com/736x/01/81/ab/0181abf1697c8517bd9420d1dfa217ca.jpg', label: 'Whitlock — reference 10' },
+      { src: 'https://i.pinimg.com/736x/00/73/2e/00732e61c5af824c1e635ba1c0f2562b.jpg', label: 'Whitlock — reference 11' },
+      { src: 'https://i.pinimg.com/736x/c2/15/82/c21582e5aa0ca2954c633e5a4a007bac.jpg', label: 'Whitlock — reference 12' },
+    ],
+  },
+  {
+    id: 'tyrus_wong', rank: '05', name: 'Tyrus Wong',
+    subtitle: 'Production Illustrator · 중국/미국 · 1910-2016',
+    styleType: 'watercolor', styleLabel: 'Watercolor / Pastel',
+    desc: '밤비의 시각적 스타일을 단독으로 변혁시킨 아티스트. 송나라 산수화에서 영감받아 디즈니 표준의 정밀한 배경 대신 인상주의적이고 절제된 수채화 배경을 창조했다.',
+    styleDesc: '부드러운 수채화와 파스텔. 디테일을 정의하기보다 암시하는 최소한의 붓질. 에테리얼한 색상 워시로 분위기를 표현.',
+    technique: 'Song Dynasty Influence: 중국 산수화의 여백과 안개 활용.\nSuggestive Minimalism: 최소한의 디테일로 최대의 분위기.\nEmotional Abstraction: 환경이 추상을 통해 감정적 무게를 전달.',
+    aiPrompt: 'Tyrus Wong style background art, Bambi forest aesthetic, Song dynasty Chinese landscape influence, soft watercolor pastel, misty atmospheric forest, minimalistic suggestive brushstrokes, ethereal color washes',
+    films: ['밤비 (1942)'],
+    characters: ['밤비의 숲', '사계절 풍경', '봄의 초원'],
+    links: [
+      { text: 'Walt Disney Family Museum: Tyrus Wong', url: 'https://www.waltdisney.org/blog/tyrus-wong-and-art-bambi' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/6c/c9/af/6cc9afeeb33287b866e85d142acb4557.jpg', label: 'Wong — reference 1' },
+      { src: 'https://i.pinimg.com/736x/ed/8e/af/ed8eaf4bde010c3f87696a10cd47c6f3.jpg', label: 'Wong — reference 2' },
+      { src: 'https://i.pinimg.com/736x/8c/58/ef/8c58ef43a47d54d596dca2013a51f839.jpg', label: 'Wong — reference 3' },
+      { src: 'https://i.pinimg.com/736x/06/ce/49/06ce492e2dae6ecbb1c7abd4672e4aba.jpg', label: 'Wong — reference 4' },
+      { src: 'https://i.pinimg.com/736x/4f/ba/82/4fba8230aa5af963bd8e65729218a4ea.jpg', label: 'Wong — reference 5' },
+      { src: 'https://i.pinimg.com/736x/de/ee/6f/deee6fd0262227ff7b9118118a8cb571.jpg', label: 'Wong — reference 6' },
+      { src: 'https://i.pinimg.com/736x/cb/70/32/cb70325fa80e4e21e9e6fb4396e0d113.jpg', label: 'Wong — reference 7' },
+      { src: 'https://i.pinimg.com/736x/b1/98/f5/b198f5c777bc9bc9cc06f3250d5182ab.jpg', label: 'Wong — reference 8' },
+      { src: 'https://i.pinimg.com/736x/eb/28/5f/eb285f90f9861fa62c59149075a78506.jpg', label: 'Wong — reference 9' },
+      { src: 'https://i.pinimg.com/736x/43/d8/30/43d830be798ff085ebd2ad60f37d4cd5.jpg', label: 'Wong — reference 10' },
+      { src: 'https://i.pinimg.com/736x/63/8f/25/638f259d714a930245ca02da1436c08e.jpg', label: 'Wong — reference 11' },
+      { src: 'https://i.pinimg.com/736x/88/8c/f5/888cf5fafc02f9b5a787875aea0c4375.jpg', label: 'Wong — reference 12' },
+    ],
+  },
+  {
+    id: 'maurice_noble', rank: '06', name: 'Maurice Noble',
+    subtitle: 'Layout & Background Designer · 미국 · 1911-2001',
+    styleType: 'gouache', styleLabel: 'Gouache / Mixed Media',
+    desc: '척 존스의 오른팔로 60년 이상 워너 브라더스 애니메이션의 배경을 디자인. What\'s Opera, Doc?, Duck Dodgers, Road Runner 시리즈의 배경을 창조했다.',
+    styleDesc: '대담하고 그래픽적인 추상 배경. 사실주의가 아닌 형태와 색상으로 공간을 정의. 영화마다 극적으로 다른 스타일을 적용.',
+    technique: 'Expressive Abstraction: 배경이 캐릭터만큼의 개성을 가짐.\nMood-Driven Style: 무드에 따라 완전히 다른 시각 언어 사용.\nGraphic Geometry: 기하학적 형태로 공간을 구축.',
+    aiPrompt: 'Maurice Noble background art style, bold graphic abstract animation background, Chuck Jones Warner Bros aesthetic, expressionist landscape, geometric desert, What\'s Opera Doc operatic backdrop',
+    films: ['What\'s Opera, Doc? (1957)', 'Duck Dodgers (1953)', 'Road Runner 시리즈', 'How the Grinch Stole Christmas (1966)'],
+    characters: ['사막 풍경', '오페라 무대', '우주 배경'],
+    links: [
+      { text: '99% Invisible: Noble Effort', url: 'https://99percentinvisible.org/episode/episode-85-noble-effort/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/8a/aa/b2/8aaab218c14b40e322ff9b73e7f8d0b4.jpg', label: 'Noble — reference 1' },
+      { src: 'https://i.pinimg.com/736x/17/b4/b8/17b4b85a993adcdf82c9dbbfcbf34f44.jpg', label: 'Noble — reference 2' },
+      { src: 'https://i.pinimg.com/736x/55/ab/e9/55abe9802d62b0a6204fd6741666ce26.jpg', label: 'Noble — reference 3' },
+      { src: 'https://i.pinimg.com/736x/3f/b5/c9/3fb5c947fd28f586dae3954db771789a.jpg', label: 'Noble — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ae/e6/17/aee61782bccbc315ffbf188303cdb3e3.jpg', label: 'Noble — reference 5' },
+      { src: 'https://i.pinimg.com/736x/30/a2/2f/30a22f4bacb447c46b8cf84babaceb41.jpg', label: 'Noble — reference 6' },
+      { src: 'https://i.pinimg.com/736x/54/9b/7c/549b7c62b4dbc921cbef7329315fd592.jpg', label: 'Noble — reference 7' },
+      { src: 'https://i.pinimg.com/736x/a8/fc/f8/a8fcf89d78a04609c9424725755331fa.jpg', label: 'Noble — reference 8' },
+      { src: 'https://i.pinimg.com/736x/32/80/bb/3280bb23959f116d9a4f6d6edc5eb8fe.jpg', label: 'Noble — reference 9' },
+      { src: 'https://i.pinimg.com/736x/41/9b/7b/419b7b910742b22c7bb5250ff58ddc04.jpg', label: 'Noble — reference 10' },
+      { src: 'https://i.pinimg.com/736x/0c/58/b9/0c58b929a2ed39a0f82fb6fe595a4b0d.jpg', label: 'Noble — reference 11' },
+      { src: 'https://i.pinimg.com/736x/06/ee/16/06ee169263c3b64e0c6c11c796bb2084.jpg', label: 'Noble — reference 12' },
+    ],
+  },
+  {
+    id: 'dylan_cole', rank: '07', name: 'Dylan Cole',
+    subtitle: 'Co-Production Designer · 미국',
+    styleType: 'digital', styleLabel: 'Digital Matte Painting / Concept Art',
+    desc: '아바타 프랜차이즈 전체의 환경을 디자인한 공동 프로덕션 디자이너. 23세에 반지의 제왕에 참여한 이후 현대 블록버스터 환경 디자인의 정점에 선 인물.',
+    styleDesc: '디지털 매트 페인팅과 컨셉 아트. 포토리얼리스틱하면서도 환상적인 세계관 구축. 그의 "Riding Through the Reef" 그림이 아바타 수중 세계의 스타일 가이드가 되었다.',
+    technique: 'Ecosystem Design: 생태계 전체를 디자인하는 접근.\nPhotorealistic Fantasy: 실사와 환상의 경계를 허무는 기법.\nWorld-Scale Thinking: 행성 단위의 환경을 체계적으로 설계.',
+    aiPrompt: 'Dylan Cole environment concept art, Avatar Pandora bioluminescent landscape, digital matte painting, photorealistic alien ecosystem, floating mountains, lush alien jungle, epic scale fantasy world',
+    films: ['아바타 (2009)', '아바타: 물의 길 (2022)', '반지의 제왕: 왕의 귀환 (2003)', '트론: 레거시 (2010)'],
+    characters: ['판도라 정글', '판도라 해양 세계', '미나스 티리스'],
+    links: [
+      { text: 'School of Motion: Dylan Cole', url: 'https://www.schoolofmotion.com/blog/dylan-cole-world-creator' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'Cole — reference 1' },
+      { src: 'https://i.pinimg.com/736x/4a/40/65/4a40652a8192adbc943e63be95aeeb31.jpg', label: 'Cole — reference 2' },
+      { src: 'https://i.pinimg.com/736x/eb/0c/3a/eb0c3a24499cf1047cb15596991def14.jpg', label: 'Cole — reference 3' },
+      { src: 'https://i.pinimg.com/736x/fc/3b/90/fc3b908491a22e64b2e76145d8a908b0.jpg', label: 'Cole — reference 4' },
+      { src: 'https://i.pinimg.com/736x/ca/5f/6b/ca5f6b6d70f2898e914a2972d75acaca.jpg', label: 'Cole — reference 5' },
+      { src: 'https://i.pinimg.com/736x/7c/35/2b/7c352b5a809a3a073cca0d132bc9f704.jpg', label: 'Cole — reference 6' },
+      { src: 'https://i.pinimg.com/736x/1b/6e/01/1b6e018422e7e5a83eec077594493e6c.jpg', label: 'Cole — reference 7' },
+      { src: 'https://i.pinimg.com/736x/6d/52/d1/6d52d1ce30ce7b3497e3e3a0d7670518.jpg', label: 'Cole — reference 8' },
+      { src: 'https://i.pinimg.com/736x/a5/3e/ec/a53eeca11b93c4e1a8dc06b4eb983bfb.jpg', label: 'Cole — reference 9' },
+      { src: 'https://i.pinimg.com/736x/5a/87/ce/5a87ce430de34f415098001615f433bd.jpg', label: 'Cole — reference 10' },
+      { src: 'https://i.pinimg.com/736x/49/84/85/4984853c01df343703fe183982a4f22b.jpg', label: 'Cole — reference 11' },
+      { src: 'https://i.pinimg.com/736x/96/72/01/96720126f26c89993d1487003f223504.jpg', label: 'Cole — reference 12' },
+    ],
+  },
+  {
+    id: 'craig_mullins', rank: '08', name: 'Craig Mullins',
+    subtitle: 'Digital Matte Painter · 미국',
+    styleType: 'digital', styleLabel: 'Digital Painting',
+    desc: '"디지털 페인팅의 대부." 1994년 포토샵을 도입해 디지털 매트 페인팅 워크플로우를 사실상 발명한 인물. 쥬라기 공원, 포레스트 검프, 아폴로 13의 환경을 창조했다.',
+    styleDesc: '전통 유화의 풍부함을 디지털로 구현한 선구자. 태블릿 이전 10년간 마우스만으로 디지털 페인팅을 제작. 회화적이면서도 대기감 넘치는 작업.',
+    technique: 'Digital Plein Air: 디지털 도구로 전통 회화의 감성을 재현.\nAtmospheric Mastery: 빛과 대기의 표현에서 타의 추종을 불허.\nEfficiency Through Abstraction: 최소한의 붓질로 최대의 정보 전달.',
+    aiPrompt: 'Craig Mullins digital painting style, atmospheric environment concept art, painterly digital landscape, cinematic lighting, matte painting for film, traditional art quality in digital medium',
+    films: ['쥬라기 공원 (1993)', '포레스트 검프 (1994)', '아폴로 13 (1995)', '매트릭스 레볼루션 (2003)'],
+    characters: ['공룡 시대 풍경', '역사적 미국 환경', '우주 환경'],
+    links: [
+      { text: 'Sessions College: Craig Mullins', url: 'https://www.sessions.edu/notes-on-design/why-they-work-craig-mullins/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/8c/11/5f/8c115ffd8714260b88001a84cb86ecfa.jpg', label: 'Mullins — reference 1' },
+      { src: 'https://i.pinimg.com/736x/89/12/41/891241e8ce8878590d1b6ba62edd8f0d.jpg', label: 'Mullins — reference 2' },
+      { src: 'https://i.pinimg.com/736x/e4/fe/60/e4fe606c3c228d984c3ae319c1eb38e1.jpg', label: 'Mullins — reference 3' },
+      { src: 'https://i.pinimg.com/736x/a1/d2/60/a1d260423a4d65dcd441f8d45ebf888e.jpg', label: 'Mullins — reference 4' },
+      { src: 'https://i.pinimg.com/736x/0f/66/f8/0f66f85f2fa2f9785c792cf790190662.jpg', label: 'Mullins — reference 5' },
+      { src: 'https://i.pinimg.com/736x/d3/a5/b0/d3a5b01766607af3771493b49b559d96.jpg', label: 'Mullins — reference 6' },
+      { src: 'https://i.pinimg.com/736x/36/77/51/367751e539f68745f6053cb308093e28.jpg', label: 'Mullins — reference 7' },
+      { src: 'https://i.pinimg.com/736x/10/bd/e8/10bde88aaf01ae15f16df222aa572385.jpg', label: 'Mullins — reference 8' },
+      { src: 'https://i.pinimg.com/736x/bf/dd/c6/bfddc62db0a48014a23ad0aa32968be0.jpg', label: 'Mullins — reference 9' },
+      { src: 'https://i.pinimg.com/736x/e7/23/08/e72308b1899199cff55a07c2aadebaf2.jpg', label: 'Mullins — reference 10' },
+      { src: 'https://i.pinimg.com/736x/f9/44/13/f944133edfb8783af70dd8e9013fbe0f.jpg', label: 'Mullins — reference 11' },
+      { src: 'https://i.pinimg.com/736x/41/cb/28/41cb28f9a2ac7afb50b4e25f308e1a3e.jpg', label: 'Mullins — reference 12' },
+    ],
+  },
+  {
+    id: 'yanick_dusseault', rank: '09', name: 'Yanick Dusseault',
+    subtitle: 'Senior Art Director · 캐나다',
+    styleType: 'digital', styleLabel: 'Digital Matte Painting',
+    desc: 'ILM에서 10년 이상 시니어 아트 디렉터로 활동. 반지의 제왕 트릴로지의 시니어 매트 페인터, 스타워즈: 깨어난 포스에서 자쿠 행성을 디자인했다.',
+    styleDesc: '포토리얼리스틱 디지털 매트 페인팅과 환경 아트 디렉션. VFX 블록버스터에서 믿을 수 있으면서도 환상적인 세계를 대규모로 구축.',
+    technique: 'VFX Integration: CG, 실사, 페인팅 요소의 완벽한 통합.\nPlanetary Scale: 행성 단위 환경을 체계적으로 설계.\nNarrative Environment: 스토리를 지원하는 환경 디자인.',
+    aiPrompt: 'Yanick Dusseault matte painting style, epic photorealistic environment, Lord of the Rings landscape, Star Wars desert planet, ILM quality digital matte painting, massive scale fantasy world',
+    films: ['반지의 제왕 트릴로지 (2001-03)', '스타워즈: 깨어난 포스 (2015)', '캐리비안의 해적', '듄: 파트 2 (2024)'],
+    characters: ['미나스 티리스', '자쿠 행성', '중간계 풍경'],
+    links: [
+      { text: 'Dusso.com', url: 'https://www.dusso.com/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/55/fc/1e/55fc1e0c1c98a62f111b7b38b2470d5a.jpg', label: 'Dusseault — reference 1' },
+      { src: 'https://i.pinimg.com/736x/86/dd/e3/86dde31b154697d301f9edd4d59889df.jpg', label: 'Dusseault — reference 2' },
+      { src: 'https://i.pinimg.com/736x/a8/99/14/a89914a853933d833a658a025ad3b30c.jpg', label: 'Dusseault — reference 3' },
+      { src: 'https://i.pinimg.com/736x/0c/a4/40/0ca44025f05400f7a57ffe7fdfa4040b.jpg', label: 'Dusseault — reference 4' },
+      { src: 'https://i.pinimg.com/736x/00/3b/a1/003ba1084d3890b51936c6743d4be382.jpg', label: 'Dusseault — reference 5' },
+      { src: 'https://i.pinimg.com/736x/8d/14/23/8d1423f6b74b5428f8bd708af57ca5e0.jpg', label: 'Dusseault — reference 6' },
+      { src: 'https://i.pinimg.com/736x/a1/ec/f1/a1ecf13f3b583ef8ab3d43e56230a71a.jpg', label: 'Dusseault — reference 7' },
+      { src: 'https://i.pinimg.com/736x/30/00/85/300085a7ce2b8aa053aade2b4be2de1f.jpg', label: 'Dusseault — reference 8' },
+      { src: 'https://i.pinimg.com/736x/87/e7/9e/87e79ed19a288cc9b004234db8853204.jpg', label: 'Dusseault — reference 9' },
+      { src: 'https://i.pinimg.com/736x/46/54/8a/46548a2b2ff9478562b88931171a1cc9.jpg', label: 'Dusseault — reference 10' },
+      { src: 'https://i.pinimg.com/736x/00/1c/6c/001c6cc611fcdae918b637baadee9e20.jpg', label: 'Dusseault — reference 11' },
+      { src: 'https://i.pinimg.com/736x/dd/44/33/dd44336792fe9f7d15309b3789ad4e21.jpg', label: 'Dusseault — reference 12' },
+    ],
+  },
+  {
+    id: 'ralph_eggleston', rank: '10', name: 'Ralph Eggleston',
+    subtitle: 'Production Designer · 미국 · 1965-2022',
+    styleType: 'digital', styleLabel: 'Digital & Traditional Concept Art',
+    desc: '픽사의 프리미어 프로덕션 디자이너. 토이 스토리(최초의 CG 장편), 니모를 찾아서, 인사이드 아웃의 아트 디렉터를 맡았다. 컬러 스크립트를 업계 표준으로 확립시킨 인물.',
+    styleDesc: 'CG 애니메이션을 위한 디지털 및 전통 컨셉 아트. 색상, 빛, 대기를 통해 감정적으로 공명하는 공간을 창조. 영화 전체의 감정 흐름을 환경 팔레트로 설계하는 컬러 스크립트의 개척자.',
+    technique: 'Color Script: 영화 전체의 감정 아크를 환경 색상으로 매핑.\nEmotional Space: 따뜻하고 살아있는 느낌의 CG 환경.\nLight as Storytelling: 빛을 서사 도구로 활용.',
+    aiPrompt: 'Ralph Eggleston Pixar production design style, warm emotionally resonant CG environment, color script concept art, Finding Nemo underwater world, Inside Out mind landscape, masterful use of light and atmosphere',
+    films: ['토이 스토리 (1995)', '니모를 찾아서 (2003)', '인사이드 아웃 (2015)', '월-E (2008)'],
+    characters: ['앤디의 방', '산호초 바다', '감정의 세계', '버려진 지구'],
+    links: [
+      { text: 'Wikipedia: Ralph Eggleston', url: 'https://en.wikipedia.org/wiki/Ralph_Eggleston' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/fc/df/03/fcdf0341a8526abcbf2b6eccedfb7e4e.jpg', label: 'Eggleston — reference 1' },
+      { src: 'https://i.pinimg.com/736x/6c/c9/af/6cc9afeeb33287b866e85d142acb4557.jpg', label: 'Eggleston — reference 2' },
+      { src: 'https://i.pinimg.com/736x/28/50/18/285018a35983c0b9931e9afb121c6eb1.jpg', label: 'Eggleston — reference 3' },
+      { src: 'https://i.pinimg.com/736x/0f/f2/7f/0ff27f619b6e8630aa889d568eaf6a67.jpg', label: 'Eggleston — reference 4' },
+      { src: 'https://i.pinimg.com/736x/4c/ea/f8/4ceaf8661266c677f6a93b3e76771e30.jpg', label: 'Eggleston — reference 5' },
+      { src: 'https://i.pinimg.com/736x/33/14/20/331420d1dce0b6fbc35a46c2533c042a.jpg', label: 'Eggleston — reference 6' },
+      { src: 'https://i.pinimg.com/736x/17/c2/09/17c209891e709777e81c49c01278ff48.jpg', label: 'Eggleston — reference 7' },
+      { src: 'https://i.pinimg.com/736x/28/dd/92/28dd9280ab4bc4caa1edb0d9c48d3271.jpg', label: 'Eggleston — reference 8' },
+      { src: 'https://i.pinimg.com/736x/76/e7/42/76e742855cd3602d1b5715a69c49d761.jpg', label: 'Eggleston — reference 9' },
+      { src: 'https://i.pinimg.com/736x/d2/90/ce/d290ce2d2e87103cfffa057357fd8f79.jpg', label: 'Eggleston — reference 10' },
+      { src: 'https://i.pinimg.com/736x/65/e5/c7/65e5c728fe1a4bce86f448ec4b192e9c.jpg', label: 'Eggleston — reference 11' },
+      { src: 'https://i.pinimg.com/736x/05/d9/60/05d960b696dafcaa5a97a3cb24ed7743.jpg', label: 'Eggleston — reference 12' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+// Build left panel
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = DESIGNERS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+
+  // Update active state
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+  if (typeof isMobile === "function" && isMobile()) switchMobileTab("viewer");
+}
+
+function updateInfoPanel(a) {
+  let techniqueSec = '';
+  if (a.technique) {
+    techniqueSec = `
+      <div class="info-section">
+        <h4>Technique</h4>
+        <p>${a.technique.replace(/\n/g, '<br>')}</p>
+      </div>
+    `;
+  }
+
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="char-tags">${a.characters.map(c => `<span class="char-tag">${c}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    ${techniqueSec}
+    <div class="info-section">
+      <h4>AI Prompt</h4>
+      <div class="prompt-box" onclick="copyPrompt(this, '${a.id}')">
+        <span class="copy-hint">click to copy</span>
+        ${a.aiPrompt}
+      </div>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function copyPrompt(el, id) {
+  const artist = DESIGNERS.find(a => a.id === id);
+  if (!artist) return;
+  navigator.clipboard.writeText(artist.aiPrompt).then(() => {
+    el.classList.add('copied');
+    el.querySelector('.copy-hint').textContent = 'copied!';
+    setTimeout(() => {
+      el.classList.remove('copied');
+      el.querySelector('.copy-hint').textContent = 'click to copy';
+    }, 1500);
+  });
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 4}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image available</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" onerror="this.style.display='none';this.parentElement.querySelector('.no-image')||this.insertAdjacentHTML('afterend','<div class=no-image>Load error</div>')" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.style.opacity = '0';
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.onerror = function() {
+      img.style.display = 'none';
+      ph.style.display = 'flex';
+      ph.style.flexDirection = 'column';
+      ph.style.alignItems = 'center';
+      ph.style.justifyContent = 'center';
+      ph.innerHTML = `<div style="text-align:center;color:var(--text-dim)">`
+        + `<div style="font-size:2em;margin-bottom:8px">&#9888;</div>`
+        + `<div style="font-size:0.85em;color:#888">${a.images[currentImageIdx].label}</div>`
+        + `<div style="font-size:0.75em;margin-top:4px;color:#555">이미지를 불러올 수 없습니다</div>`
+        + `<button onclick="selectImage(${currentImageIdx})" style="margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em">재시도</button>`
+        + `</div>`;
+    };
+    img.src = a.images[currentImageIdx].src;
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#127912;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No reference images available for this designer.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+// Modal
+function openModal() {
+  const sel = document.getElementById('modalStyle');
+  if (sel.options.length <= 1) {
+    DESIGNERS.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.id;
+      opt.textContent = `${d.rank}. ${d.name} (${d.styleLabel})`;
+      sel.appendChild(opt);
+    });
+  }
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id;
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const camera = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+
+  if (!scene.trim()) { alert('Environment description is required.'); return; }
+
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+
+  generateConcept('environment', { description: scene, style, pose, mood })
+    .then(data => {
+      if (data.success && data.url) {
+        showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`);
+        setStatus('ready', 'Generation complete ✓');
+      } else {
+        setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`);
+      }
+    })
+    .catch(err => {
+      setStatus('ready', `API error: ${err.message}`);
+    });
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  // Number keys 1-9, 0 to select artist
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id);
+  }
+});
+
+// Click outside modal to close
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyboard Gallery — 10 Masters</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #e8c872; }</style>
+</head>
+<body>
+
+<!-- GALLERY NAV -->
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab active">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab">VFX</a>
+</nav>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div>
+    <h1>STORYBOARD GALLERY</h1>
+    <div class="subtitle">10 Masters Reference &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate Storyboard</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- LEFT: ARTIST LIST -->
+  <div class="artist-panel" id="artistPanel"></div>
+
+  <!-- CENTER: VIEWER + FILMSTRIP -->
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle"></div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://cdn8.openculture.com/wp-content/uploads/2015/10/Kurasawa-1.jpg" alt="">
+        <div class="hero-overlay">
+          <h2>Storyboard Gallery</h2>
+          <p>10명의 마스터 아티스트 — 구로사와, 리들리 스콧, 봉준호, 미야자키 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 아티스트를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+
+    <div class="filmstrip-wrapper">
+      <div class="filmstrip" id="filmstrip"></div>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 artists loaded</span>
+    </div>
+  </div>
+
+  <!-- RIGHT: INFO PANEL -->
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#128396;</p>
+      <p style="font-size:0.85em;">Select an artist from the left panel</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- GENERATION MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate Storyboard</h3>
+    <label>Scene Description</label>
+    <textarea id="modalScene" placeholder="e.g. 주인공이 어두운 골목에서 그림자를 발견한다"></textarea>
+    <label>Artist Style</label>
+    <select id="modalStyle">
+      <option value="all">All Styles (Compare)</option>
+      <option value="kurosawa">01. Kurosawa (Watercolor)</option>
+      <option value="ridley_scott">02. Ridley Scott (Ridleygrams)</option>
+      <option value="bong">03. Bong Joon-ho (Pen Line)</option>
+      <option value="saul_bass">04. Saul Bass (Graphic B&W)</option>
+      <option value="miyazaki">05. Miyazaki (Ekonte)</option>
+      <option value="scorsese">06. Scorsese (Rough Sketch)</option>
+      <option value="mad_max">07. Sexton/McCarthy (Action Comic)</option>
+      <option value="anderson_jt">08. J. Todd Anderson (Ink Shadow)</option>
+      <option value="lowery">09. David Lowery (Cinematic)</option>
+      <option value="anderson_wes">10. Wes Anderson (Symmetry)</option>
+    </select>
+    <label>Camera Angle</label>
+    <input id="modalCamera" type="text" placeholder="e.g. low angle, wide shot, close-up" />
+    <label>Mood</label>
+    <input id="modalMood" type="text" placeholder="e.g. suspense, melancholy, joy" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+
+<script src="gallery-api.js"></script>
+<script>
+// Embed mode detection + project name from URL
+const _urlParams = new URLSearchParams(window.location.search);
+if (_urlParams.get('embed') === 'true') document.body.classList.add('embed-mode');
+const projectName = _urlParams.get('project') || 'Untitled';
+
+const ARTISTS = [
+  {
+    id: 'kurosawa', rank: '01', name: '黒澤 明 (Akira Kurosawa)',
+    subtitle: '감독 겸 스토리보드 아티스트 · 일본 · 1910-1998',
+    styleType: 'watercolor', styleLabel: 'Watercolor / Gouache',
+    desc: '화가 출신 감독. 전체 장면을 수채화/구아슈/크레용으로 직접 그렸다. 반 고흐와 인상파의 영향을 받아 색채와 감정을 동시에 전달하는 독보적 스타일.',
+    styleDesc: '수채화/구아슈/크레용 기법. 풀컬러 회화 수준. 반 고흐 + 일본 전통화 융합. 색채로 장면의 감정 온도를 전달.',
+    lesson: '시대별 색온도 시스템은 구로사와의 "색채로 감정 전달" 철학과 정확히 일치. AI 이미지 프롬프트에 color palette를 명시적으로 포함해야 함.',
+    films: ['乱 Ran (1985)', '影武者 Kagemusha (1980)', '夢 Dreams (1990)', 'まあだだよ Madadayo (1993)'],
+    links: [
+      { text: 'Open Culture: 구로사와 스토리보드', url: 'https://www.openculture.com/2015/10/akira-kurosawa-painted-the-storyboards-for-scenes-in-his-epic-films.html' },
+      { text: 'Far Out: 핸드페인트 스토리보드', url: 'https://faroutmagazine.co.uk/akira-kurosawa-hand-painted-storyboards/' },
+      { text: 'No Film School: 컬러 보드', url: 'https://nofilmschool.com/Akira-Kurosawa-Storyboards' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/74/73/d8/7473d8d69e35e5de4228253e5bd6ab1e.jpg', label: 'Kurosawa — reference 1' },
+      { src: 'https://i.pinimg.com/736x/c2/fa/a4/c2faa481d1a3ec45818625b245c92836.jpg', label: 'Kurosawa — reference 2' },
+      { src: 'https://i.pinimg.com/736x/51/2c/09/512c09b6171e6f1660bf1b65e3a74757.jpg', label: 'Kurosawa — reference 3' },
+      { src: 'https://i.pinimg.com/736x/4c/53/d9/4c53d902437b6924bc28a4bc63854e3f.jpg', label: 'Kurosawa — reference 4' },
+      { src: 'https://i.pinimg.com/736x/22/de/82/22de822394cf8c167d39d33adddee030.jpg', label: 'Kurosawa — reference 5' },
+      { src: 'https://i.pinimg.com/736x/9d/ee/6c/9dee6c52e141c0d772f148f0830e2336.jpg', label: 'Kurosawa — reference 6' },
+      { src: 'https://i.pinimg.com/736x/26/07/12/26071249cbaace9cedd74d6bb0033b6d.jpg', label: 'Kurosawa — reference 7' },
+      { src: 'https://i.pinimg.com/736x/a0/da/a1/a0daa147ccda537c0fddc1b05338ecba.jpg', label: 'Kurosawa — reference 8' },
+      { src: 'https://i.pinimg.com/736x/89/f6/01/89f6018e2e4b6ce4d7b3e7e966545c73.jpg', label: 'Kurosawa — reference 9' },
+      { src: 'https://i.pinimg.com/736x/2e/8a/ab/2e8aabe69cd7aa8384485f5fa5b8cc0e.jpg', label: 'Kurosawa — reference 10' },
+      { src: 'https://i.pinimg.com/736x/2d/b4/09/2db409f54826c47d4441e0da2741aa48.jpg', label: 'Kurosawa — reference 11' },
+      { src: 'https://i.pinimg.com/736x/7b/a8/01/7ba801a581b97394f4b0f26cdc61c6c8.jpg', label: 'Kurosawa — reference 12' },
+    ],
+  },
+  {
+    id: 'ridley_scott', rank: '02', name: 'Ridley Scott',
+    subtitle: '"Ridleygrams" · 영국 · 1937-',
+    styleType: 'ink', styleLabel: 'Ink + Pencil / Contour',
+    desc: '자신의 영화를 직접 스토리보드하는 감독. "Ridleygrams"라 불리는 스토리보드는 잉크+연필로 그린 코믹북 스타일이며, 등고선 렌더링으로 깊이와 볼륨을 정확하게 전달한다.',
+    styleDesc: '잉크+연필 드로잉. 미국 코믹북/Heavy Metal 매거진 스타일. 등고선 기반 렌더링으로 깊이감. Jean Giraud(뫼비우스) 영향.',
+    lesson: '리들리그램의 핵심은 "분위기 전달력". AI 프롬프트에서 조명 방향, 대기 연무, 렌즈 선택까지 명시해야 함.',
+    films: ['Alien (1979)', 'Blade Runner (1982)', 'Gladiator (2000)', 'Napoleon (2023)'],
+    links: [
+      { text: 'Boords: 리들리그램 베스트 10', url: 'https://boords.com/blog/10-best-ridley-scott-storyboards-to-give-you-inspiration' },
+      { text: 'Alien 리들리그램 컬렉션', url: 'https://alien-covenant.com/news/alien-unseen-part-one-ridleygrams' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/e2/3d/1e/e23d1e83fd56998ad5c4fb3ab261e485.jpg', label: 'R.Scott — reference 1' },
+      { src: 'https://i.pinimg.com/736x/e8/82/87/e88287d2b0d3f0e348f3075f70e97317.jpg', label: 'R.Scott — reference 2' },
+      { src: 'https://i.pinimg.com/736x/54/75/d6/5475d61a57adb0d6415702418d5bf18b.jpg', label: 'R.Scott — reference 3' },
+      { src: 'https://i.pinimg.com/736x/78/64/fe/7864fe7f7f4b2409eb640e0deb1ff329.jpg', label: 'R.Scott — reference 4' },
+      { src: 'https://i.pinimg.com/736x/e8/a8/e6/e8a8e665dc61d04ed09ab6ea68c54b57.jpg', label: 'R.Scott — reference 5' },
+      { src: 'https://i.pinimg.com/736x/f2/ef/75/f2ef75dbe22372002bafc875045eec61.jpg', label: 'R.Scott — reference 6' },
+      { src: 'https://i.pinimg.com/736x/96/f8/e2/96f8e2605485c7d1c83700b451135c5c.jpg', label: 'R.Scott — reference 7' },
+      { src: 'https://i.pinimg.com/736x/5d/e0/16/5de01602bcc68b089983efc6566d3190.jpg', label: 'R.Scott — reference 8' },
+      { src: 'https://i.pinimg.com/736x/5c/85/5b/5c855b42782c1dcfdf202ba73735654f.jpg', label: 'R.Scott — reference 9' },
+      { src: 'https://i.pinimg.com/736x/8d/fa/81/8dfa813986b90200c7bd5d6ae1e0a789.jpg', label: 'R.Scott — reference 10' },
+      { src: 'https://i.pinimg.com/736x/c8/39/97/c8399701fc8d7af87399b5336fbb1050.jpg', label: 'R.Scott — reference 11' },
+      { src: 'https://i.pinimg.com/736x/ef/53/c6/ef53c67d6796d397d087d774b7c4c2fa.jpg', label: 'R.Scott — reference 12' },
+    ],
+  },
+  {
+    id: 'bong', rank: '03', name: '봉준호 (Bong Joon-ho)',
+    subtitle: '감독 겸 스토리보드 아티스트 · 한국 · 1969-',
+    styleType: 'ink', styleLabel: 'Pen Line / Graphic Novel',
+    desc: '모든 영화의 모든 씬, 모든 샷을 직접 스토리보드한다. 기생충에서 960개 샷 전체를 304페이지에 걸쳐 사전 드로잉. 그래픽 노블로 출판되었다.',
+    styleDesc: '깔끔한 펜 라인 드로잉. 만화적이면서도 시네마틱한 구도. 카메라 앵글/이동 방향 화살표 상세. 대사와 사운드 효과까지 기입.',
+    lesson: '봉준호 방식의 "전 샷 사전 계획"은 AI 파이프라인에서 더욱 중요. 전체를 통합 관리해야 함.',
+    films: ['기생충 Parasite (2019)', '설국열차 Snowpiercer (2013)', '마더 Mother (2009)', '살인의 추억 (2003)'],
+    links: [
+      { text: 'Open Culture: 기생충 스토리보드 분석', url: 'https://www.openculture.com/2020/09/how-bong-joon-hos-storyboards-for-parasite-meticulously-shaped-the-acclaimed-film.html' },
+      { text: 'Amazon: 기생충 그래픽노블', url: 'https://www.amazon.com/Parasite-Storyboards-Bong-Joon-Ho/dp/1538753251' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/2f/73/36/2f73363aa0402870c1d650432963a606.jpg', label: 'Bong — reference 1' },
+      { src: 'https://i.pinimg.com/736x/a5/e5/f1/a5e5f14fdf9f9eefe8cbed60ad04a7f0.jpg', label: 'Bong — reference 2' },
+      { src: 'https://i.pinimg.com/736x/b4/a9/47/b4a9479f2408e4dce0ba2a604959a5e9.jpg', label: 'Bong — reference 3' },
+      { src: 'https://i.pinimg.com/736x/d0/16/69/d01669da7166420b67d46da4fccfd31a.jpg', label: 'Bong — reference 4' },
+      { src: 'https://i.pinimg.com/736x/43/f3/f2/43f3f2459f32b409ee2fbae30c4412ef.jpg', label: 'Bong — reference 5' },
+      { src: 'https://i.pinimg.com/736x/dc/01/a0/dc01a0a8ec5e7c57dd4b9c54d03bc7f7.jpg', label: 'Bong — reference 6' },
+      { src: 'https://i.pinimg.com/736x/ec/6b/84/ec6b84cbf27af8f2b9aa20eb0863fd9e.jpg', label: 'Bong — reference 7' },
+      { src: 'https://i.pinimg.com/736x/5e/10/88/5e10884cd2da76baf9199c1d3dee4b2a.jpg', label: 'Bong — reference 8' },
+      { src: 'https://i.pinimg.com/736x/08/e2/2b/08e22b64d9c61beece6bad0978406738.jpg', label: 'Bong — reference 9' },
+      { src: 'https://i.pinimg.com/736x/25/6c/fe/256cfe4df3f58f8dc2a1f454aa165c0d.jpg', label: 'Bong — reference 10' },
+      { src: 'https://i.pinimg.com/736x/f9/05/c2/f905c263ebafd1014cac9d28cf7bbf8d.jpg', label: 'Bong — reference 11' },
+      { src: 'https://i.pinimg.com/736x/08/a4/cf/08a4cffaf91689732d51bfa256373293.jpg', label: 'Bong — reference 12' },
+    ],
+  },
+  {
+    id: 'saul_bass', rank: '04', name: 'Saul Bass',
+    subtitle: '그래픽 디자이너 겸 스토리보드 아티스트 · 미국 · 1920-1996',
+    styleType: 'minimal', styleLabel: 'Graphic / High Contrast B&W',
+    desc: '영화 타이틀 디자인의 전설. 히치콕의 사이코 샤워 씬을 위해 48장의 양식화된 스토리보드를 제작. 스콜세지와도 Goodfellas, Casino에서 협업.',
+    styleDesc: '그래픽 디자인 기반의 양식화. 강렬한 대비, 실루엣 활용. 미니멀하면서도 충격적인 구성. 타이틀 시퀀스 디자인의 선구자.',
+    lesson: 'Scene 1 타이틀 시퀀스와 엔딩 크레딧에 솔 바스 스타일 직접 참조. B&W, high contrast 비주얼 키와 일치.',
+    films: ['Psycho (1960)', 'The Birds (1963)', 'Goodfellas (1990)', 'Casino (1995)'],
+    links: [
+      { text: 'Open Culture: 사이코 스토리보드 vs 실제', url: 'https://www.openculture.com/2014/02/who-directed-the-psycho-shower-scene.html' },
+      { text: 'GeekTyrant: 솔 바스 사이코 아트', url: 'https://geektyrant.com/news/2012/12/3/saul-bass-storyboard-art-for-alfred-hitchcocks-psycho.html' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/e9/78/ca/e978ca61cbfb510b04821ac4a061bd03.jpg', label: 'Bass — reference 1' },
+      { src: 'https://i.pinimg.com/736x/ff/3a/a3/ff3aa3325eda6b3906ac758d6d00dd82.jpg', label: 'Bass — reference 2' },
+      { src: 'https://i.pinimg.com/736x/d7/00/b5/d700b54922d233cea1bdcac703940e06.jpg', label: 'Bass — reference 3' },
+      { src: 'https://i.pinimg.com/736x/b7/b9/69/b7b969148f3a558f0eeccabb62492744.jpg', label: 'Bass — reference 4' },
+      { src: 'https://i.pinimg.com/736x/01/25/de/0125de495d5acb010a1f0a2e66095367.jpg', label: 'Bass — reference 5' },
+      { src: 'https://i.pinimg.com/736x/75/95/b2/7595b21f05b7c9b9412d92230c184766.jpg', label: 'Bass — reference 6' },
+      { src: 'https://i.pinimg.com/736x/00/a0/49/00a04984e6359360330c6a7346663533.jpg', label: 'Bass — reference 7' },
+      { src: 'https://i.pinimg.com/736x/01/5d/d2/015dd240f9c93637fd0faf6d44746b4e.jpg', label: 'Bass — reference 8' },
+      { src: 'https://i.pinimg.com/736x/00/f1/d6/00f1d6cd5d6c14134edd9bd13d8260f5.jpg', label: 'Bass — reference 9' },
+      { src: 'https://i.pinimg.com/736x/03/04/d2/0304d2fbd3c872bed571c19d3d77bca4.jpg', label: 'Bass — reference 10' },
+      { src: 'https://i.pinimg.com/736x/02/2f/11/022f113a1df13dc6360af4093feb9ccb.jpg', label: 'Bass — reference 11' },
+    ],
+  },
+  {
+    id: 'miyazaki', rank: '05', name: '宮崎 駿 (Hayao Miyazaki)',
+    subtitle: '감독 겸 에콘테 작가 · 일본 · 1941-',
+    styleType: 'pencil', styleLabel: 'Monochrome Pencil / Ekonte',
+    desc: '스크립트 대신 에콘테(絵コンテ)를 직접 그려 영화를 "쓴다". 스토리보드가 곧 시나리오. 스튜디오 지브리 전 작품의 에콘테 전집이 출판.',
+    styleDesc: '모노크롬 연필 드로잉 + 타이밍 코드. 정보 밀도 극한 — 카메라 무브, 대사, 효과음, 프레임 수까지 한 칸에 기입.',
+    lesson: '미야자키의 "한 장에 모든 정보" 원칙을 AI 프롬프트에 적용: 카메라/조명/감정/사운드를 하나의 프롬프트에 통합.',
+    films: ['센과 치히로 (2001)', '하울의 움직이는 성 (2004)', '바람이 분다 (2013)', '모노노케 히메 (1997)'],
+    links: [
+      { text: 'Discover Ghibli: 에콘테란?', url: 'https://discoverghibli.com/what-are-storyboards-or-ekonte/' },
+      { text: 'Internet Archive: 지브리 에콘테', url: 'https://archive.org/details/studio-ghibli-storyboard-films' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/98/02/ca/9802ca61e43439a67bfc65a227504417.jpg', label: 'Miyazaki — reference 1' },
+      { src: 'https://i.pinimg.com/736x/3b/a7/06/3ba706063069d49a323a4a94646341d0.jpg', label: 'Miyazaki — reference 2' },
+      { src: 'https://i.pinimg.com/736x/6c/c9/af/6cc9afeeb33287b866e85d142acb4557.jpg', label: 'Miyazaki — reference 3' },
+      { src: 'https://i.pinimg.com/736x/eb/a4/5f/eba45f8f140899d3769e92095a16473c.jpg', label: 'Miyazaki — reference 4' },
+      { src: 'https://i.pinimg.com/736x/2a/7f/71/2a7f713831f73b9802def54a583c6390.jpg', label: 'Miyazaki — reference 5' },
+      { src: 'https://i.pinimg.com/736x/4b/dc/b8/4bdcb8211340b155a5e941fd67434279.jpg', label: 'Miyazaki — reference 6' },
+      { src: 'https://i.pinimg.com/736x/9d/ee/6c/9dee6c52e141c0d772f148f0830e2336.jpg', label: 'Miyazaki — reference 7' },
+      { src: 'https://i.pinimg.com/736x/a3/35/da/a335da22f1cc5afec37b999cb3257a13.jpg', label: 'Miyazaki — reference 8' },
+      { src: 'https://i.pinimg.com/736x/39/c5/f0/39c5f0f053aa63f8ac4590785e82eec4.jpg', label: 'Miyazaki — reference 9' },
+      { src: 'https://i.pinimg.com/736x/4f/9f/5f/4f9f5fcb1bdd6c3e828e8510a5da4369.jpg', label: 'Miyazaki — reference 10' },
+      { src: 'https://i.pinimg.com/736x/75/db/ee/75dbee45f3416ab8c79427a191f77dff.jpg', label: 'Miyazaki — reference 11' },
+      { src: 'https://i.pinimg.com/736x/f5/86/6b/f5866b4f25c0625a6ac555a3ea6ad350.jpg', label: 'Miyazaki — reference 12' },
+    ],
+  },
+  {
+    id: 'scorsese', rank: '06', name: 'Martin Scorsese',
+    subtitle: '감독 겸 스토리보드 아티스트 · 미국 · 1942-',
+    styleType: 'pencil', styleLabel: 'Rough Sketch + Notes',
+    desc: '11세에 로마 시대 에픽 영화의 스토리보드를 그린 천재. 택시 드라이버 클라이맥스를 연필+빨간 펜으로 직접 스토리보드. 피는 빨간 잉크로 표현.',
+    styleDesc: '러프 스케치 + 메모. 스틱 피겨 수준의 간결함이지만 구도와 카메라 무빙이 정확. 협업자에게 여지를 남기는 열린 스토리보드.',
+    lesson: '스콜세지의 "최소한의 선으로 최대 정보"는 AI 프롬프트의 효율성과 연결. 핵심 감정/구도/조명 3가지에 집중.',
+    films: ['Taxi Driver (1976)', 'Goodfellas (1990)', 'Casino (1995)', 'Cape Fear (1991)'],
+    links: [
+      { text: 'Boords: 택시 드라이버 스토리보드', url: 'https://boords.com/blog/martin-scorseses-hand-drawn-taxi-driver-storyboards-and-the-stories-behind' },
+      { text: 'Open Culture: 11세 스콜세지 보드', url: 'https://www.openculture.com/2014/07/11-year-old-martin-scorseses-storyboards.html' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/c1/56/db/c156db6d1f4beb9a8dafa96df3500e4a.jpg', label: 'Scorsese — reference 1' },
+      { src: 'https://i.pinimg.com/736x/0a/bb/d1/0abbd1c2ac873912a3f1e31ec7c12d7f.jpg', label: 'Scorsese — reference 2' },
+      { src: 'https://i.pinimg.com/736x/3d/71/e8/3d71e8af94df5074cce8882fb70a57b4.jpg', label: 'Scorsese — reference 3' },
+      { src: 'https://i.pinimg.com/736x/d7/99/8d/d7998d9caf4a6c622caa94b2f57408ff.jpg', label: 'Scorsese — reference 4' },
+      { src: 'https://i.pinimg.com/736x/88/5e/dc/885edc25c1e00c2059fcefc9adaa9129.jpg', label: 'Scorsese — reference 5' },
+      { src: 'https://i.pinimg.com/736x/a8/ca/c5/a8cac5fa5cc09d1e3b9ebbe318a25423.jpg', label: 'Scorsese — reference 6' },
+      { src: 'https://i.pinimg.com/736x/52/02/50/52025054bebf03a3a742c17134da6b45.jpg', label: 'Scorsese — reference 7' },
+      { src: 'https://i.pinimg.com/736x/1b/30/97/1b3097eefbdd2a791a5fcf31d2527e26.jpg', label: 'Scorsese — reference 8' },
+      { src: 'https://i.pinimg.com/736x/8b/5d/18/8b5d1878208266e71364fbf512bd27a1.jpg', label: 'Scorsese — reference 9' },
+      { src: 'https://i.pinimg.com/736x/e6/1e/df/e61edf6dca2583778ebb3c92ccf448ed.jpg', label: 'Scorsese — reference 10' },
+      { src: 'https://i.pinimg.com/736x/f9/05/c2/f905c263ebafd1014cac9d28cf7bbf8d.jpg', label: 'Scorsese — reference 11' },
+      { src: 'https://i.pinimg.com/736x/04/9d/04/049d04ec330ba701cd943596fff17db8.jpg', label: 'Scorsese — reference 12' },
+    ],
+  },
+  {
+    id: 'mad_max', rank: '07', name: 'Mark Sexton + Brendan McCarthy',
+    subtitle: 'George Miller의 스토리보드 팀 · 호주',
+    styleType: 'comic', styleLabel: 'Action Comic / Full Coverage',
+    desc: 'Mad Max: Fury Road는 전통적 시나리오 없이 3,500장의 스토리보드로 "쓰였다". 최종 영화는 스토리보드와 거의 샷바이샷으로 일치.',
+    styleDesc: '코믹북 아티스트 기반의 정밀 드로잉. 3,500+ 패널. 컬러 & B/W 모두 사용. 액션 동선/카메라 무브/VFX 레이어까지 표현.',
+    lesson: '"대본 대신 스토리보드로 영화 만들기"는 AI 비주얼 파이프라인의 미래. 드라마에서도 같은 정밀도를 유지하는 것이 관건.',
+    films: ['Mad Max: Fury Road (2015)', 'Furiosa (2024)'],
+    links: [
+      { text: 'Zerply: Mark Sexton 인터뷰', url: 'https://industry.zerply.com/mark-sexton-interview' },
+      { text: 'Screen Rant: 스토리보드로 쓴 영화', url: 'https://screenrant.com/mad-max-fury-road-movie-written-by-storyboards/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/0e/e9/a8/0ee9a8fba6ff79c23f87b7ea8b157ba2.jpg', label: 'Sexton/McCarthy — reference 1' },
+      { src: 'https://i.pinimg.com/736x/ca/e6/82/cae682de2ebd38f62713c2ada6a7ed05.jpg', label: 'Sexton/McCarthy — reference 2' },
+      { src: 'https://i.pinimg.com/736x/a8/09/00/a8090075a7a01894290d3abc67105909.jpg', label: 'Sexton/McCarthy — reference 3' },
+      { src: 'https://i.pinimg.com/736x/8c/4d/12/8c4d121bdf588995f627397364e2bf3e.jpg', label: 'Sexton/McCarthy — reference 4' },
+      { src: 'https://i.pinimg.com/736x/84/80/e4/8480e4f73723effd6c97f1e443dde01a.jpg', label: 'Sexton/McCarthy — reference 5' },
+      { src: 'https://i.pinimg.com/736x/40/f3/22/40f32233bb50875c2b141e49750e58ff.jpg', label: 'Sexton/McCarthy — reference 6' },
+      { src: 'https://i.pinimg.com/736x/1a/7e/0d/1a7e0d6d2c3c90622a0e61ca233fa962.jpg', label: 'Sexton/McCarthy — reference 7' },
+      { src: 'https://i.pinimg.com/736x/16/34/3f/16343f4784ab6f0714097321dec0b076.jpg', label: 'Sexton/McCarthy — reference 8' },
+      { src: 'https://i.pinimg.com/736x/b6/16/bc/b616bcf27202dd8db95d24b56bfecc45.jpg', label: 'Sexton/McCarthy — reference 9' },
+      { src: 'https://i.pinimg.com/736x/87/86/83/878683e9ee7414f8358f74590ebefd24.jpg', label: 'Sexton/McCarthy — reference 10' },
+      { src: 'https://i.pinimg.com/736x/ae/56/81/ae568131400f97941a9c6faeed4f7e81.jpg', label: 'Sexton/McCarthy — reference 11' },
+      { src: 'https://i.pinimg.com/736x/02/50/f3/0250f3f9d7404320062362c11fef75a5.jpg', label: 'Sexton/McCarthy — reference 12' },
+    ],
+  },
+  {
+    id: 'anderson_jt', rank: '08', name: 'J. Todd Anderson',
+    subtitle: '코엔 형제 전담 스토리보드 아티스트 · 미국',
+    styleType: 'ink', styleLabel: 'Ink + Shadow Drawing',
+    desc: '1985년 Raising Arizona부터 코엔 형제의 모든 영화를 스토리보드. 영화 한 편당 약 1,000장의 드로잉. 구술→스케치→잉크+그림자 6주 반복 프로세스.',
+    styleDesc: '잉크+그림자 드로잉. 감독의 비전을 "해석"하는 통역사 역할. 전 장면 보딩으로 영화의 리듬과 페이싱까지 설계.',
+    lesson: 'Anderson의 "전 장면 보딩" 원칙은 AI 제작에서 더욱 필수. 리듬/페이싱/톤의 일관성을 위해 전체를 통합 관리.',
+    films: ['No Country for Old Men (2007)', 'Fargo (1996)', 'The Big Lebowski (1998)', 'Hail, Caesar! (2016)'],
+    links: [
+      { text: 'Boords: 코엔 형제 베스트 10 보드', url: 'https://boords.com/blog/the-coen-brothers-10-best-storyboards-and-the-stories-behind-them' },
+      { text: 'Artists Network: Anderson 인터뷰', url: 'https://www.artistsnetwork.com/art-mediums/drawing/beyond-drawing-basics-drawing-storyboards-for-the-coen-brothers-movies/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/c8/39/97/c8399701fc8d7af87399b5336fbb1050.jpg', label: 'Anderson — reference 1' },
+      { src: 'https://i.pinimg.com/736x/78/33/6a/78336a3469c024ab468bcd2f2cb169b5.jpg', label: 'Anderson — reference 2' },
+      { src: 'https://i.pinimg.com/736x/a8/ca/c5/a8cac5fa5cc09d1e3b9ebbe318a25423.jpg', label: 'Anderson — reference 3' },
+      { src: 'https://i.pinimg.com/736x/8d/9a/03/8d9a034e750d06dc6041d4aa1a6e8502.jpg', label: 'Anderson — reference 4' },
+      { src: 'https://i.pinimg.com/736x/c4/2d/bd/c42dbd896f4940cc3aa45de8919b0458.jpg', label: 'Anderson — reference 5' },
+      { src: 'https://i.pinimg.com/736x/d9/70/27/d9702731a9039fbf6e5738f3e42cc11a.jpg', label: 'Anderson — reference 6' },
+      { src: 'https://i.pinimg.com/736x/b8/28/05/b828050e6b555a1ac1fe5ecabdcfee2f.jpg', label: 'Anderson — reference 7' },
+      { src: 'https://i.pinimg.com/736x/7e/49/8f/7e498fd30784b250d7425d167f801a58.jpg', label: 'Anderson — reference 8' },
+      { src: 'https://i.pinimg.com/736x/97/f0/4a/97f04a9697efd11443e668776049692b.jpg', label: 'Anderson — reference 9' },
+      { src: 'https://i.pinimg.com/736x/08/a4/cf/08a4cffaf91689732d51bfa256373293.jpg', label: 'Anderson — reference 10' },
+      { src: 'https://i.pinimg.com/736x/ae/a9/7f/aea97f59293a537df64d708696bfd727.jpg', label: 'Anderson — reference 11' },
+      { src: 'https://i.pinimg.com/736x/c2/56/1e/c2561e4170d3d29795253fc93777ebbf.jpg', label: 'Anderson — reference 12' },
+    ],
+  },
+  {
+    id: 'lowery', rank: '09', name: 'David Lowery',
+    subtitle: 'Spielberg 전담 스토리보드 아티스트 · 미국',
+    styleType: 'ink', styleLabel: 'Cinematic Realism',
+    desc: '70편 이상의 장편영화 스토리보드를 담당. 쥬라기 공원의 전설적인 랩터 주방 시퀀스를 그렸으며, 스필버그의 레귤러 콜라보레이터.',
+    styleDesc: '시네마틱 리얼리즘. 조명/그림자의 정밀한 표현. 서스펜스 구축을 위한 프레이밍 설계.',
+    lesson: 'Lowery의 "서스펜스를 위한 프레이밍"은 이력서 발견 씬에 직접 적용. 프레임 단위로 서스펜스를 설계.',
+    films: ['Jurassic Park (1993)', 'Jurassic World (2015)', 'Spielberg 다수 작품'],
+    links: [
+      { text: 'FilmSketchr: 쥬라기 공원 보드', url: 'http://filmsketchr.blogspot.com/2013/09/wecome-to-classic-jurassic-park.html' },
+      { text: 'Jurassic Outpost: Lowery 인터뷰', url: 'https://jurassicoutpost.com/4-part-interview-with-storyboard-artist-david-lowery-unveils-new-art-details-from-the-making-of-the-jurassic-films/' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/bb/fe/e1/bbfee177e44e45b6f0495f9eb3477c49.jpg', label: 'Lowery — reference 1' },
+      { src: 'https://i.pinimg.com/736x/a8/ca/c5/a8cac5fa5cc09d1e3b9ebbe318a25423.jpg', label: 'Lowery — reference 2' },
+      { src: 'https://i.pinimg.com/736x/71/19/2d/71192dac301886f8f958fba529bbb6c7.jpg', label: 'Lowery — reference 3' },
+      { src: 'https://i.pinimg.com/736x/7e/2c/3e/7e2c3e25802fc5ee6e33e5895060bce3.jpg', label: 'Lowery — reference 4' },
+      { src: 'https://i.pinimg.com/736x/6d/d7/35/6dd7353bd5e4eb39e08f3889ea4384c2.jpg', label: 'Lowery — reference 5' },
+      { src: 'https://i.pinimg.com/736x/00/df/39/00df39e2b02554cae77dd23fe46eb4fd.jpg', label: 'Lowery — reference 6' },
+      { src: 'https://i.pinimg.com/736x/c5/61/3c/c5613cf319ca63ff5cdf76527b96777e.jpg', label: 'Lowery — reference 7' },
+      { src: 'https://i.pinimg.com/736x/35/0a/37/350a37a880432559761a64208de68ac8.jpg', label: 'Lowery — reference 8' },
+      { src: 'https://i.pinimg.com/736x/72/3b/50/723b5028471849332d63f567fecdd872.jpg', label: 'Lowery — reference 9' },
+      { src: 'https://i.pinimg.com/736x/cb/15/cc/cb15cc7948a9a041839a59375b82a5da.jpg', label: 'Lowery — reference 10' },
+      { src: 'https://i.pinimg.com/736x/bd/ef/5c/bdef5c55e3024d42230c59c1e1657d40.jpg', label: 'Lowery — reference 11' },
+      { src: 'https://i.pinimg.com/736x/b8/ce/aa/b8ceaa85590bfb9e30685071963eba47.jpg', label: 'Lowery — reference 12' },
+    ],
+  },
+  {
+    id: 'anderson_wes', rank: '10', name: 'Wes Anderson',
+    subtitle: '감독 겸 스토리보드/애니매틱 제작 · 미국 · 1969-',
+    styleType: 'minimal', styleLabel: 'Simple Line / Symmetry',
+    desc: '모든 애니매틱을 직접 손으로 그린다. 그랜드 부다페스트 호텔에서는 25분짜리 애니매틱 영상을 제작. 대칭 구도가 스토리보드 단계에서 이미 완성.',
+    styleDesc: '심플 라인 드로잉 + 애니매틱 전환. 대칭/중앙 구도의 교과서. 스토리북 스타일. B&W 기본.',
+    lesson: 'Anderson의 "대칭 구도"는 이력서의 좌우 대비에 완벽히 적용. 과거와 현재의 시각적 대칭 구도 활용.',
+    films: ['The Grand Budapest Hotel (2014)', 'Isle of Dogs (2018)', 'The French Dispatch (2021)', 'Asteroid City (2023)'],
+    links: [
+      { text: 'i-D: 그랜드 부다페스트 보드', url: 'https://i-d.co/article/wes-anderson-grand-budapest-hotel-storyboard/' },
+      { text: 'Boords: Anderson 베스트 5 보드', url: 'https://boords.com/blog/wes-andersons-5-best-storyboards-and-the-stories-behind-them' },
+    ],
+    images: [
+      { src: 'https://i.pinimg.com/736x/a0/04/9f/a0049faa111554559065aa9eb5e45caa.jpg', label: 'W.Anderson — reference 1' },
+      { src: 'https://i.pinimg.com/736x/71/bb/1a/71bb1acd0c23033baafe9a8a7e25e643.jpg', label: 'W.Anderson — reference 2' },
+      { src: 'https://i.pinimg.com/736x/d7/99/8d/d7998d9caf4a6c622caa94b2f57408ff.jpg', label: 'W.Anderson — reference 3' },
+      { src: 'https://i.pinimg.com/736x/b8/eb/ef/b8ebefbce65615ec1fdf77febc8a3d6a.jpg', label: 'W.Anderson — reference 4' },
+      { src: 'https://i.pinimg.com/736x/c5/4f/df/c54fdf70f66329a20234e3a752c587ad.jpg', label: 'W.Anderson — reference 5' },
+      { src: 'https://i.pinimg.com/736x/2b/4b/ac/2b4bac2f00160c379994b06942f0912b.jpg', label: 'W.Anderson — reference 6' },
+      { src: 'https://i.pinimg.com/736x/0d/6c/25/0d6c25547197e49f6e0380a3986d3618.jpg', label: 'W.Anderson — reference 7' },
+      { src: 'https://i.pinimg.com/736x/1a/99/20/1a99205923c6c7fd9485882c82ef4718.jpg', label: 'W.Anderson — reference 8' },
+      { src: 'https://i.pinimg.com/736x/28/76/45/28764522cb49b66ffdedd7a8f97ce30b.jpg', label: 'W.Anderson — reference 9' },
+      { src: 'https://i.pinimg.com/736x/12/b6/79/12b679a597fc04ee8d4c289061044497.jpg', label: 'W.Anderson — reference 10' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+
+// Build left panel
+function buildArtistPanel() {
+  const panel = document.getElementById('artistPanel');
+  panel.innerHTML = ARTISTS.map(a => `
+    <div class="artist-item" data-id="${a.id}" onclick="selectArtist('${a.id}')">
+      <span class="artist-rank">${a.rank}</span>
+      <div>
+        <div class="name">${a.name}</div>
+        <div class="role">${a.styleLabel}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectArtist(id) {
+  const artist = ARTISTS.find(a => a.id === id);
+  if (!artist) return;
+  currentArtist = artist;
+  currentImageIdx = 0;
+
+  // Update active state
+  document.querySelectorAll('.artist-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.artist-item[data-id="${id}"]`).classList.add('active');
+
+  updateInfoPanel(artist);
+  updateFilmstrip(artist);
+  updateViewer(artist);
+  if (typeof isMobile === "function" && isMobile()) switchMobileTab("viewer");
+}
+
+function updateInfoPanel(a) {
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${a.name}</h3>
+    <div class="meta">${a.subtitle}</div>
+    <span class="style-indicator ${a.styleType}">${a.styleLabel}</span>
+    <div class="desc">${a.desc}</div>
+    <div class="film-tags">${a.films.map(f => `<span class="film-tag">${f}</span>`).join('')}</div>
+    <div class="info-section">
+      <h4>Style</h4>
+      <p>${a.styleDesc}</p>
+    </div>
+    <div class="info-section">
+      <h4>AI Lesson</h4>
+      <p>${a.lesson}</p>
+    </div>
+    <div class="info-section">
+      <h4>References</h4>
+      <div class="link-list">
+        ${a.links.map(l => `<a href="${l.url}" target="_blank">${l.text} &#8599;</a>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function updateFilmstrip(a) {
+  const strip = document.getElementById('filmstrip');
+  if (a.images.length === 0) {
+    strip.innerHTML = Array.from({length: 6}, (_, i) => `
+      <div class="thumb ${i === 0 ? 'active' : ''}" data-idx="${i}">
+        <div class="no-image">No image<br>Press G to generate</div>
+        <div class="thumb-label">${a.rank}. ${a.name.split('(')[0].trim()} #${i + 1}</div>
+      </div>
+    `).join('');
+  } else {
+    strip.innerHTML = a.images.map((img, i) => `
+      <div class="thumb ${i === currentImageIdx ? 'active' : ''}" data-idx="${i}" onclick="selectImage(${i})">
+        <img src="${img.src}" alt="${img.label}" />
+        <div class="thumb-label">${img.label}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function updateViewer(a) {
+  const img = document.getElementById('mainImage');
+  const ph = document.getElementById('viewerPlaceholder');
+  const counter = document.getElementById('imageCounter');
+  const badge = document.getElementById('artistBadge');
+
+  badge.style.display = 'block';
+  document.getElementById('badgeName').textContent = a.name;
+  document.getElementById('badgeStyle').textContent = a.styleLabel;
+
+  if (a.images.length > 0 && a.images[currentImageIdx]) {
+    img.style.opacity = '0';
+    img.style.display = 'block';
+    ph.style.display = 'none';
+    img.onload = () => { img.style.opacity = '1'; };
+    img.onerror = function() {
+      img.style.display = 'none';
+      ph.style.display = 'flex';
+      ph.style.flexDirection = 'column';
+      ph.style.alignItems = 'center';
+      ph.style.justifyContent = 'center';
+      ph.innerHTML = `<div style="text-align:center;color:var(--text-dim)">`
+        + `<div style="font-size:2em;margin-bottom:8px">&#9888;</div>`
+        + `<div style="font-size:0.85em;color:#888">${a.images[currentImageIdx].label}</div>`
+        + `<div style="font-size:0.75em;margin-top:4px;color:#555">이미지를 불러올 수 없습니다</div>`
+        + `<button onclick="selectImage(${currentImageIdx})" style="margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em">재시도</button>`
+        + `</div>`;
+    };
+    img.src = a.images[currentImageIdx].src;
+    counter.style.display = 'block';
+    counter.textContent = `${currentImageIdx + 1} / ${a.images.length}`;
+  } else {
+    img.style.display = 'none';
+    ph.style.display = 'block';
+    ph.innerHTML = `
+      <div class="icon">&#127912;</div>
+      <p>${a.name}</p>
+      <p style="margin-top:8px;font-size:0.8em;color:#666;">No generated images yet. Press <kbd>G</kbd> or click Generate.</p>
+    `;
+    counter.style.display = 'none';
+  }
+}
+
+function selectImage(idx) {
+  if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return;
+  currentImageIdx = idx;
+  updateViewer(currentArtist);
+  document.querySelectorAll('.thumb').forEach((t, i) => t.classList.toggle('active', i === idx));
+}
+
+function prevImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+function nextImage() {
+  if (!currentArtist || currentArtist.images.length === 0) return;
+  currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length;
+  selectImage(currentImageIdx);
+}
+
+// Modal
+function openModal() {
+  document.getElementById('modalOverlay').classList.add('show');
+  document.getElementById('modalScene').focus();
+  if (currentArtist) {
+    document.getElementById('modalStyle').value = currentArtist.id;
+  }
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+function handleGenerate() {
+  const scene = document.getElementById('modalScene').value;
+  const style = document.getElementById('modalStyle').value;
+  const camera = document.getElementById('modalCamera').value;
+  const mood = document.getElementById('modalMood').value;
+
+  if (!scene.trim()) { alert('Scene description is required.'); return; }
+
+  closeModal();
+  setStatus('generating', `Generating ${style === 'all' ? 'all styles' : style}...`);
+
+  generateConcept('storyboard', { description: scene, style, camera, mood, project: projectName })
+    .then(data => {
+      if (data.success && data.url) {
+        showGeneratedImage(data.url, `Generated: ${scene.slice(0, 50)}`);
+        setStatus('ready', 'Generation complete ✓');
+      } else {
+        setStatus('ready', `Generation failed: ${data.error || 'Unknown error'}`);
+      }
+    })
+    .catch(err => {
+      setStatus('ready', `API error: ${err.message}`);
+    });
+}
+
+function setStatus(state, text) {
+  const dot = document.getElementById('statusDot');
+  const txt = document.getElementById('statusText');
+  dot.className = 'status-dot ' + state;
+  txt.textContent = text;
+}
+
+// Keyboard shortcuts
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') prevImage();
+  if (e.key === 'ArrowRight') nextImage();
+  if (e.key === 'g' || e.key === 'G') openModal();
+  if (e.key === 'Escape') closeModal();
+  // Number keys 1-9, 0 to select artist
+  const num = parseInt(e.key);
+  if (!isNaN(num)) {
+    const idx = num === 0 ? 9 : num - 1;
+    if (idx < ARTISTS.length) selectArtist(ARTISTS[idx].id);
+  }
+});
+
+// Click outside modal to close
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  const artistPanel = document.querySelector('.artist-panel');
+  const mainArea = document.querySelector('.main-area');
+  const infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.panel === panel));
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', () => {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

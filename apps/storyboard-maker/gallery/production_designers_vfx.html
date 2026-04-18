@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VFX Studios — World's Top Visual Effects Companies</title>
+<link rel="stylesheet" href="gallery-common.css?v=2">
+<style>:root { --accent: #3ab8c0; }</style>
+</head>
+<body>
+<nav class="gallery-nav">
+  <a href="index.html" class="logo">Marionette Studios</a>
+  <span class="sep">/</span>
+  <a href="Famous_Storyboard_Artists_Reference.html" class="tab">Storyboard</a>
+  <a href="concept_designers_character.html" class="tab">Character</a>
+  <a href="concept_designers_environment.html" class="tab">Environment</a>
+  <a href="concept_designers_props.html" class="tab">Prop</a>
+  <a href="production_designers_set.html" class="tab">Set Design</a>
+  <a href="production_designers_costume.html" class="tab">Costume</a>
+  <a href="production_designers_sfx_makeup.html" class="tab">SFX Makeup</a>
+  <a href="production_designers_vfx.html" class="tab active">VFX</a>
+</nav>
+<div class="topbar">
+  <div>
+    <h1>VFX STUDIOS</h1>
+    <div class="subtitle">10 World-Class Visual Effects Studios &mdash; Marionette Studios</div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center;">
+    <span style="color:#555;font-size:0.75em;"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> navigate &nbsp; <kbd>G</kbd> generate</span>
+    <button class="gen-btn" onclick="openModal()">Generate VFX Concept</button>
+  </div>
+</div>
+<div class="layout">
+  <div class="artist-panel" id="artistPanel"></div>
+  <div class="main-area">
+    <div class="viewer" id="viewer">
+      <div class="artist-badge" id="artistBadge" style="display:none;">
+        <div class="badge-name" id="badgeName"></div>
+        <div class="badge-style" id="badgeStyle">VFX STUDIO</div>
+      </div>
+      <div class="nav-arrow left" onclick="prevImage()">&#9664;</div>
+      <div class="nav-arrow right" onclick="nextImage()">&#9654;</div>
+      <div class="placeholder" id="viewerPlaceholder">
+        <img class="hero-img" src="https://www.ilm.com/wp-content/uploads/2021/03/JurassicPark-1920w-aspect-ratio-2.7-1.jpg" alt="ILM Jurassic Park VFX">
+        <div class="hero-overlay">
+          <h2>VFX Studios Gallery</h2>
+          <p>10개의 세계 정상 VFX 스튜디오 &mdash; ILM, Digital Domain, Weta FX 등</p>
+          <p style="margin-top:12px;">&#8592; 왼쪽에서 스튜디오를 선택하거나 <kbd>G</kbd>를 눌러 생성</p>
+        </div>
+      </div>
+      <img id="mainImage" style="display:none;" />
+      <div class="image-counter" id="imageCounter" style="display:none;"></div>
+    </div>
+    <div class="filmstrip-wrapper"><div class="filmstrip" id="filmstrip"></div></div>
+    <div class="status-bar">
+      <div class="status-dot ready" id="statusDot"></div>
+      <span id="statusText">Ready &mdash; 10 VFX studios loaded</span>
+    </div>
+  </div>
+  <div class="info-panel" id="infoPanel">
+    <div style="color:#555;text-align:center;margin-top:40px;">
+      <p style="font-size:2em;margin-bottom:8px;">&#127916;</p>
+      <p style="font-size:0.85em;">Select a studio from the left panel</p>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Generate VFX Concept</h3>
+    <label>Scene / Shot Description</label>
+    <textarea id="modalScene" placeholder="e.g. 우주 폭발 장면, 외계 행성 착륙, 디지털 더블 액션 씬"></textarea>
+    <label>Studio Style</label>
+    <select id="modalStyle"><option value="all">All Styles (Compare)</option></select>
+    <label>VFX Technique</label>
+    <input id="modalCamera" type="text" placeholder="e.g. photoreal CGI, fluid simulation, crowd sim, digital double" />
+    <label>Visual Tone</label>
+    <input id="modalMood" type="text" placeholder="e.g. cinematic, hyperreal, stylized, blockbuster action" />
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-generate" onclick="handleGenerate()">Generate</button>
+    </div>
+  </div>
+</div>
+<script src="gallery-api.js"></script>
+<script>
+// Embed mode detection
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('embed') === 'true') document.body.classList.add('embed-mode');
+})();
+
+const DESIGNERS = [
+  {
+    id: 'ilm', rank: '01', name: 'Industrial Light & Magic (ILM)',
+    subtitle: 'VFX Studio · USA · 1975- · Lucasfilm / Disney',
+    styleType: 'pioneer', styleLabel: 'VFX Pioneer',
+    desc: '조지 루카스가 스타워즈(1977)를 위해 설립. 아카데미 VFX 부문 최다 수상 스튜디오. 모션 캡처, 디지털 더블, 파티클 시뮬레이션 등 현대 VFX 기술의 대부분을 개척. 쥬라기 공원, 터미네이터 2, 아이언맨, 어벤져스 시리즈까지 블록버스터 VFX의 표준.',
+    styleDesc: '실용 이펙트와 디지털 기술의 완벽한 결합. 캐릭터 중심 VFX — 배우를 살리는 디지털 환경 창조. 사실적 물리 시뮬레이션과 포토리얼 렌더링의 균형.',
+    technique: 'Digital Double: 완벽한 포토리얼 디지털 배우 구현.\nEnvironment Extension: 세트와 디지털 세계의 매끄러운 합성.\nCreature FX: 생명감 있는 디지털 크리처 애니메이션.',
+    aiPrompt: 'ILM visual effects, photorealistic CGI, Star Wars galaxy, Jurassic Park dinosaur, blockbuster VFX, digital double, seamless compositing, cinematic lighting',
+    films: ['스타워즈 시리즈 (1977-)', '쥬라기 공원 (1993)', '터미네이터 2 (1991)', '어벤져스: 엔드게임 (2019)'],
+    characters: ['인도미너스 렉스', '타노스 디지털 더블', 'AT-AT 워커', '헐크 CG 캐릭터'],
+    links: [{ text: 'ILM Official', url: 'https://www.ilm.com/' }],
+    images: [
+      { src: 'https://www.ilm.com/wp-content/uploads/2021/03/JurassicPark-1920w-aspect-ratio-2.7-1.jpg', label: 'ILM — Jurassic Park (1993)' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2021/03/EP8-FF-006360-aspect-ratio-2.7-1-1.jpg', label: 'ILM — Star Wars: The Last Jedi' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2021/03/crs1140.comp_.077355.abain_v27.1268-aspect-ratio-2.7-1.jpg', label: 'ILM — Avengers: Endgame' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2023/02/avatar-header-aspect-ratio-2.7-1.jpg', label: 'ILM — Avatar' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/09/MandoAndGrogu-prev-654x334-1.jpg', label: 'ILM — The Mandalorian & Grogu' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/07/AvatarFireAndAsh-AA-prev.jpg', label: 'ILM — Avatar: Fire and Ash' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/02/tronAres.prev.jpg', label: 'ILM — Tron: Ares' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/09/StrangerThings-5_KeyArt-aspect-ratio-654-334-1-654x334.jpg', label: 'ILM — Stranger Things Season 5' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2023/05/jurassic_park_thumb.jpg', label: 'ILM — Jurassic Park Thumb' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2023/06/crs1140.comp_.077355.abain_v27.1268-aspect-ratio-654-334.jpg', label: 'ILM — Endgame Battle' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2023/06/EP8-FF-006360-1-aspect-ratio-654-334.jpg', label: 'ILM — Star Wars VFX' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/11/moana-prev.jpg', label: 'ILM — Moana' },
+    ],
+  },
+  {
+    id: 'digital_domain', rank: '02', name: 'Digital Domain',
+    subtitle: 'VFX Studio · USA · 1993- · 제임스 카메론 공동 창립',
+    styleType: 'digital', styleLabel: 'Digital Human',
+    desc: '제임스 카메론, 스탠 윈스턴이 공동 창립. 타이타닉의 디지털 승객들, 트루 라이즈의 폭발 등 대규모 VFX로 시작. 벤자민 버튼의 이상한 사건에서 디지털 휴먼 기술 선도. 아카데미 VFX 수상 3회 (타이타닉, 벤자민 버튼, 왓 드림스 메이 컴).',
+    styleDesc: '디지털 휴먼 렌더링의 선두주자. 수천 명의 디지털 엑스트라, 군중 시뮬레이션. 물/유체 시뮬레이션과 대규모 파괴 이펙트.',
+    technique: 'Digital Human: 포토리얼 디지털 배우 얼굴 및 신체 구현.\nCrowd Simulation: AI 기반 수만 명 군중 시뮬레이션.\nDestruction FX: 물리 기반 대규모 파괴 및 폭발.',
+    aiPrompt: 'Digital Domain VFX, Titanic sinking digital crowds, Benjamin Button young face, photorealistic digital human, massive crowd simulation, water destruction effects',
+    films: ['타이타닉 (1997)', '벤자민 버튼의 이상한 사건 (2008)', '아이언맨 3 (2013)', '어벤져스: 인피니티 워 (2018)'],
+    characters: ['젊은 벤자민 버튼 얼굴', '타이타닉 디지털 승객', '아이언 레지온 수트', '타노스 페이셜 캡처'],
+    links: [{ text: 'Digital Domain Official', url: 'https://digitaldomain.com/' }],
+    images: [
+      { src: 'https://digitaldomain.com/wp-content/uploads/2019/09/Titanic_1.jpg', label: 'Digital Domain — Titanic VFX' },
+      { src: 'https://digitaldomain.com/wp-content/uploads/2019/09/CCBB_G_02.jpg', label: 'Digital Domain — Benjamin Button' },
+      { src: 'https://digitaldomain.com/wp-content/uploads/2019/12/Digital-Domain_Avengers-Infinity-War_9.jpg', label: 'Digital Domain — Avengers: Infinity War' },
+    ],
+  },
+  {
+    id: 'weta_fx', rank: '03', name: 'Weta FX',
+    subtitle: 'VFX Studio · New Zealand · 1993- · 피터 잭슨 창립',
+    styleType: 'creature', styleLabel: 'Creature & World',
+    desc: '피터 잭슨이 반지의 제왕을 위해 설립. MASSIVE 소프트웨어(군중 AI)로 영화 역사상 최대 규모 전투 씬 구현. 골룸은 현재까지도 최고의 모션캡처+CG 캐릭터로 평가. 아바타, 혹성탈출 시리즈의 크리처 VFX.',
+    styleDesc: '세계 창조의 대가. 수천 개의 개별 AI를 가진 대규모 군중 배틀. 모션캡처를 통한 감정적으로 풍부한 크리처 연기. 자연과 디지털의 경계를 지우는 환경 VFX.',
+    technique: 'MASSIVE AI: 각자의 AI로 행동하는 수만 군중 병사 시뮬레이션.\nMotion Capture: 배우의 미세 표정까지 포착하는 퍼포먼스 캡처.\nEnvironment Build: 중간계, 판도라 등 완전한 디지털 세계 구축.',
+    aiPrompt: 'Weta FX, Lord of the Rings Helms Deep battle, Gollum motion capture, massive army simulation, Avatar Pandora environment, photorealistic creature, Middle-earth world',
+    films: ['반지의 제왕 3부작 (2001-2003)', '아바타 (2009)', '혹성탈출: 진화의 시작 (2011)', '아바타: 물의 길 (2022)'],
+    characters: ['골룸 디지털 캐릭터', '시저 (혹성탈출)', '나비족 (아바타)', '헬름 협곡 전투 군중'],
+    links: [{ text: 'Weta FX Official', url: 'https://www.wetafx.co.nz/' }],
+    images: [
+      { src: 'https://www.ilm.com/wp-content/uploads/2023/02/avatar-header-aspect-ratio-2.7-1.jpg', label: 'Avatar — Pandora Environment' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/07/AvatarFireAndAsh-AA-prev.jpg', label: 'Avatar: Fire and Ash' },
+    ],
+  },
+  {
+    id: 'dneg', rank: '04', name: 'DNEG (Double Negative)',
+    subtitle: 'VFX Studio · UK · 1998- · London/Mumbai/Vancouver',
+    styleType: 'photoreal', styleLabel: 'Photoreal Science',
+    desc: '인터스텔라의 블랙홀 가르강튀아를 이론물리학자와 협업해 과학적으로 정확하게 구현 — 논문 발표로 이어짐. 블레이드 러너 2049의 네온 도시경관, 듄 파트 2의 사막 전투. 아카데미 수상 7회.',
+    styleDesc: '과학적 정확성을 예술로 승화하는 스튜디오. 인터스텔라 블랙홀은 일반상대성이론 기반 렌더링. 건축적 정밀함과 사실적 물리를 결합한 환경 VFX.',
+    technique: 'Scientific Rendering: 물리 법칙 기반 정확한 현상 구현 (블랙홀, 웜홀).\nEnvironment Design: 포스트아포칼립스 및 미래 도시 환경.\nAtmospheric FX: 빛, 먼지, 안개 등 대기 현상 시뮬레이션.',
+    aiPrompt: 'DNEG visual effects, Interstellar black hole Gargantua, scientifically accurate wormhole, Blade Runner 2049 neon cityscape, Dune sandworm, atmospheric light scattering',
+    films: ['인터스텔라 (2014)', '블레이드 러너 2049 (2017)', '듄 파트 2 (2024)', '오펜하이머 (2023)'],
+    characters: ['가르강튀아 블랙홀', '블레이드 러너 2049 도시', '사이 훌루드 샌드웜', '트리니티 핵실험'],
+    links: [{ text: 'DNEG Official', url: 'https://www.dneg.com/' }],
+    images: [
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/2umXEBNgFkvvOJy5rHHjB3/ca52aecc1b3c0a66b3395b196a95b73c/Dune_Part_Two_-_VFX_still__Paul_and_crowd_.jpg', label: 'DNEG — Dune Part Two VFX' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/5LsbgImJTeBcF3skZSu3PV/31461de877525ba072ecc48f93db42d1/e_131_fdp_0160_still_1102_v001_PR-DU-FP-513-1.jpg', label: 'DNEG — VFX Still' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/4InRmx6bKYb29K1Ypsenl/702109c8cb2c69290bab5561aadb29c3/Christopher-Nolan-The-Odyssey-Matt-Damon.webp', label: 'DNEG — The Odyssey' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/45it8VU3FXsbm52zaiMJYo/b546d57333712d7a8cb73229ec5fd612/Hogwarts_Express_-_3.jpg', label: 'DNEG — Hogwarts Express' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/3cMyjSZxGRI9B0Ms2Yq45a/180e4e867eb9e1cfe7d384dc7491d228/GC1550_comp_DNE_v017.1078.jpg', label: 'DNEG — Compositing' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/GKK2thMIFNJx7jcKYjiTV/8a1c85ba0d844699b3da1998f107569e/RAMA_02.png', label: 'DNEG — Rama Concept' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/6NBXJfBrsqA3H1EWeXebh0/2a7f8d2495a7ac85a16673922e83156f/AB3_Hero_Poster_landscape_december.jpg', label: 'DNEG — Avatar 3' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/7meWHmKINgCTBNiIDEfTSO/9088c21cc7883377800b346ace664284/EN-US_Nimona_Teaser_Vertical_27x40_RGB.jpg', label: 'DNEG — Nimona' },
+    ],
+  },
+  {
+    id: 'framestore', rank: '05', name: 'Framestore',
+    subtitle: 'VFX Studio · UK · 1986- · London/New York/Montreal',
+    styleType: 'organic', styleLabel: 'Organic Realism',
+    desc: '해리 포터 시리즈의 마법 세계, 그래비티의 우주 공간, 가디언즈 오브 갤럭시의 외계 생명체. 판타스틱 비스트의 살아있는 마법 동물들로 유기적 크리처 표현의 정점. 광고 VFX 분야에서도 독보적 위치.',
+    styleDesc: '유기적 생명체와 마법적 환경 표현의 전문가. 살아 숨쉬는 것 같은 생물학적 크리처 구현. 중력, 진공, 우주 물리의 사실적 표현.',
+    technique: 'Organic Creature: 피부, 털, 근육 시뮬레이션으로 살아있는 동물 구현.\nZero-G Simulation: 우주 무중력 환경의 물리적 정확한 표현.\nMagical FX: 마법 이펙트의 유기적이고 자연스러운 시각화.',
+    aiPrompt: 'Framestore VFX, Harry Potter magic creatures, Gravity space debris, Fantastic Beasts Niffler, organic creature fur simulation, zero gravity environment, magical visual effects',
+    films: ['해리포터 시리즈 (2001-2011)', '그래비티 (2013)', '판타스틱 비스트 시리즈 (2016-)', '가디언즈 오브 갤럭시 (2014)'],
+    characters: ['벅빅 히포그리프', '니플러 (판타스틱 비스트)', '그래비티 우주 잔해', '로켓 라쿤'],
+    links: [{ text: 'Framestore Official', url: 'https://www.framestore.com/' }],
+    images: [
+      { src: 'https://www.framestore.com/sites/default/files/2026-02/Prehistoric-Planet-Home-Page-Pillar.jpg', label: 'Framestore — Prehistoric Planet' },
+      { src: 'https://www.framestore.com/sites/default/files/2026-02/PHM-Home-Page-Pillar_0.jpg', label: 'Framestore — Project Hail Mary' },
+      { src: 'https://www.framestore.com/sites/default/files/styles/image_gallery_mob_688x_387_/public/2026-04/ATLA-Season2-Promo-Image_0.jpg', label: 'Framestore — Avatar: The Last Airbender S2' },
+      { src: 'https://www.framestore.com/sites/default/files/styles/image_gallery_mob_688x_387_/public/2026-03/ap060_0070.jpg', label: 'Framestore — VFX Work' },
+      { src: 'https://www.framestore.com/sites/default/files/styles/image_gallery_mob_688x_387_/public/2026-04/StarCity-case-study-header-1980x820.jpg', label: 'Framestore — Star City' },
+      { src: 'https://www.framestore.com/sites/default/files/2026-02/Pepsi-Super%20Bowl-Pillar-Image.jpg', label: 'Framestore — Pepsi Super Bowl' },
+    ],
+  },
+  {
+    id: 'mpc', rank: '06', name: 'MPC (Moving Picture Company)',
+    subtitle: 'VFX Studio · UK · 1970- · London/Vancouver/Mumbai',
+    styleType: 'naturalist', styleLabel: 'Naturalist Photoreal',
+    desc: '라이온 킹(2019)의 포토리얼 사바나와 동물들 — 완전한 CG임에도 실사로 오인될 정도. 정글북(2016)의 단 한 장면만 실사 촬영. 자연 다큐멘터리 수준의 동물 VFX 전문.',
+    styleDesc: '자연계의 완벽한 디지털 재현. 동물 털, 피부, 눈의 포토리얼 표현. 자연광과 환경의 물리적 정확성. 관객이 CG임을 인지하지 못하는 수준의 사실주의.',
+    technique: 'Photo-Real Animals: 동물 털, 피부, 눈의 분자 수준 렌더링.\nNature Environment: 식물, 흙, 물의 자연광 시뮬레이션.\nAnimal Behavior: AI 기반 실제와 같은 동물 행동 구현.',
+    aiPrompt: 'MPC visual effects, Lion King 2019 photorealistic savanna, Jungle Book natural environment, photoreal CG animals, fur simulation, natural lighting, wildlife documentary quality',
+    films: ['라이온 킹 (2019)', '정글북 (2016)', '맥베스 (2015)', '다크나이트 라이즈 (2012)'],
+    characters: ['심바 (라이온 킹 2019)', '발루 곰 (정글북)', '킹 루이 오랑우탄'],
+    links: [{ text: 'MPC Film Official', url: 'https://www.mpcfilm.com/' }],
+    images: [
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/11/moana-prev.jpg', label: 'MPC — Moana VFX' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2026/04/the_dinosaurs-prev.jpg', label: 'MPC — The Dinosaurs' },
+    ],
+  },
+  {
+    id: 'scanline_vfx', rank: '07', name: 'Scanline VFX',
+    subtitle: 'VFX Studio · Germany/Canada · 2001- · Munich/Vancouver',
+    styleType: 'fluid', styleLabel: 'Fluid & Destruction',
+    desc: '유체 시뮬레이션 소프트웨어 Flowline의 개발사. 어벤져스의 뉴욕 침공 씬, 게임 오브 스론의 드래곤 화염, 문나이트의 이집트 씬. 물, 불, 파괴 이펙트에서 세계 최고 수준.',
+    styleDesc: '대규모 파괴와 유체 이펙트의 세계 최강자. Flowline 독점 기술로 사실적 물/화염/폭발 구현. IMAX 해상도를 위한 초고품질 렌더링.',
+    technique: 'Fluid Simulation: Flowline 기술로 사실적 물/유체 시뮬레이션.\nDestruction Physics: 건물 붕괴, 대규모 파괴의 물리 시뮬레이션.\nFire & Explosion: 연소, 화염, 폭발의 볼류메트릭 렌더링.',
+    aiPrompt: 'Scanline VFX, Avengers New York invasion, Game of Thrones dragon fire, fluid simulation destruction, massive explosion physics, water simulation IMAX quality, city destruction',
+    films: ['어벤져스 (2012)', '게임 오브 스론 (HBO)', '플래쉬 (2023)', '문나이트 (2022)'],
+    characters: ['뉴욕 침공 폭발 씬', '드래곤 화염 이펙트', '문나이트 이집트 붕괴'],
+    links: [{ text: 'Eyeline Studios (Scanline VFX)', url: 'https://eyelinestudios.com/' }],
+    images: [
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/12/AvengerDoomsday-prev.jpg', label: 'Avengers VFX — Destruction' },
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/06/Frankenstein-prev.png', label: 'Scanline — Frankenstein VFX' },
+    ],
+  },
+  {
+    id: 'rising_sun', rank: '08', name: 'Rising Sun Pictures',
+    subtitle: 'VFX Studio · Australia · 1995- · Adelaide',
+    styleType: 'environment', styleLabel: 'Environment & Comp',
+    desc: '호주 최대 VFX 스튜디오. 가디언즈 오브 갤럭시 2의 이고 행성, 엑스맨 시리즈의 파워 이펙트, 토르: 러브 앤 썬더의 에테르나이트 세계. 아카데미 노미네이트 4회. 환경 VFX와 컴포지팅의 강자.',
+    styleDesc: '광활한 환경 VFX와 정밀 컴포지팅의 전문가. 실사 배우와 CG 환경의 완벽한 통합. 대기 효과와 빛의 사실적 표현.',
+    technique: 'Environment VFX: 외계 행성, 신화적 세계 환경 구축.\nCompositing: 실사와 CG의 완벽한 합성 기술.\nPower FX: 슈퍼히어로 능력의 시각적 표현.',
+    aiPrompt: 'Rising Sun Pictures VFX, Guardians of the Galaxy Ego planet, X-Men power effects, atmospheric environment, seamless compositing, alien world cinematography',
+    films: ['가디언즈 오브 갤럭시 2 (2017)', '엑스맨: 데이즈 오브 퓨처 패스트 (2014)', '토르: 러브 앤 썬더 (2022)', '닥터 스트레인지 (2016)'],
+    characters: ['이고 행성 (가디언즈 2)', '엑스맨 파워 이펙트', '닥터 스트레인지 매직'],
+    links: [{ text: 'Rising Sun Pictures Official', url: 'https://rsp.com.au/' }],
+    images: [
+      { src: 'https://www.rsp.com.au/wp-content/uploads/resized/2024/09/Deadpool-and-Wolverine-2024-movie-poster-220x320-c-default.jpg', label: 'RSP — Deadpool & Wolverine' },
+      { src: 'https://www.rsp.com.au/wp-content/uploads/resized/2025/05/thunderbolts_movie_poster-220x320-c-default.jpeg', label: 'RSP — Thunderbolts' },
+      { src: 'https://www.rsp.com.au/wp-content/uploads/resized/2024/11/furiosa-220x320-c-default.jpg', label: 'RSP — Furiosa' },
+      { src: 'https://www.rsp.com.au/wp-content/uploads/resized/2025/06/mickey-17-0a993206-220x320-c-default.jpg', label: 'RSP — Mickey 17' },
+      { src: 'https://www.rsp.com.au/wp-content/uploads/resized/2025/06/screenshot-2025-04-16-at-12-21-30-pm-67ffd91d0d7af-1-220x320-c-default.jpg', label: 'RSP — VFX Project' },
+    ],
+  },
+  {
+    id: 'pixomondo', rank: '09', name: 'Pixomondo',
+    subtitle: 'VFX Studio · Germany · 2001- · Frankfurt/Toronto/Beijing',
+    styleType: 'period', styleLabel: 'Period & Scale',
+    desc: '게임 오브 스론 시즌 2 블랙워터 전투, 휴고의 1930년대 파리 기차역 재현, 스타트렉 인투 다크니스. 역사적 환경 재현과 드래곤 VFX로 에미상 수상. 드래곤 하우스(2022)에서도 드래곤 비행 VFX 담당.',
+    styleDesc: '역사적 시대 재현과 대규모 전투 씬의 전문가. 중세 성채, 빅토리아 시대 도시의 디지털 재건. 드래곤 비행 역학의 생체역학적 정확성.',
+    technique: 'Historical Reconstruction: 과거 시대 건축, 도시의 포토리얼 디지털 재건.\nDragon Animation: 생체역학 기반 드래곤 비행 및 행동 구현.\nBattle Simulation: 대규모 해전, 육전 시뮬레이션.',
+    aiPrompt: 'Pixomondo VFX, Game of Thrones Blackwater battle, Hugo 1930s Paris station, dragon flight biomechanics, historical environment reconstruction, medieval city digital set',
+    films: ['게임 오브 스론 (HBO)', '휴고 (2011)', '스타트렉 인투 다크니스 (2013)', '하우스 오브 더 드래곤 (2022)'],
+    characters: ['블랙워터 전투 화염', '휴고 파리 기차역', '드래곤 하우스 드래곤 비행'],
+    links: [{ text: 'Pixomondo Official', url: 'https://pixomondo.com/' }],
+    images: [
+      { src: 'https://images.squarespace-cdn.com/content/v1/622f14a19cd6a9323a25a55a/bf970ab8-4502-422b-8779-102723c68414/Game+of+Thrones.png', label: 'Pixomondo — Game of Thrones' },
+      { src: 'https://images.squarespace-cdn.com/content/v1/622f14a19cd6a9323a25a55a/f199667f-a4d5-48a9-b4b6-6fe137850b93/HOTG-Youtube-Thumbnail-byE-191125.png', label: 'Pixomondo — House of the Dragon' },
+      { src: 'https://images.squarespace-cdn.com/content/v1/622f14a19cd6a9323a25a55a/a950b451-34de-4374-8415-57ec095461a5/The+Penguin-Youtube-Thumbnail-ByE-191125.png', label: 'Pixomondo — The Penguin' },
+      { src: 'https://images.squarespace-cdn.com/content/v1/622f14a19cd6a9323a25a55a/1a3ca60d-3f39-45e4-9c66-216bd34bc3bb/Avatar-Youtube-Thumbnail-ByE-191125.png', label: 'Pixomondo — Avatar VFX' },
+      { src: 'https://images.squarespace-cdn.com/content/v1/622f14a19cd6a9323a25a55a/dab185f7-0ecb-4824-8161-72a660175eb4/AKIRA-Thumbnail-02.png', label: 'Pixomondo — Akira VFX' },
+    ],
+  },
+  {
+    id: 'rodeo_fx', rank: '10', name: 'Rodeo FX',
+    subtitle: 'VFX Studio · Canada · 2006- · Montreal/Quebec',
+    styleType: 'horror', styleLabel: 'Horror & Dark Fantasy',
+    desc: '스트레인저 씽스의 업사이드 다운 세계, 페니 드레드풀의 빅토리안 고딕, 블레이드 러너 2049의 라스베이거스 시퀀스. 공포와 다크 판타지 장르 VFX의 특화 스튜디오. 캐나다 국내 최대 VFX 스튜디오.',
+    styleDesc: '다크 판타지와 공포 장르의 시각적 언어 전문가. 기괴하고 위협적인 존재의 생생한 구현. 어두운 대기와 불안한 환경 연출.',
+    technique: 'Dark Environment: 불안하고 위협적인 분위기의 환경 VFX.\nHorror Creature: 공포 장르 특화 크리처 디자인 및 구현.\nParallel World: 현실과 비틀린 거울 세계의 시각적 대비.',
+    aiPrompt: 'Rodeo FX, Stranger Things Upside Down dark world, gothic Victorian horror atmosphere, dark fantasy creature, threatening environment, eerie atmosphere, parallel dimension',
+    films: ['스트레인저 씽스 시리즈 (Netflix)', '블레이드 러너 2049 (2017)', '페니 드레드풀 (Showtime)', '더 피스트 (Netflix)'],
+    characters: ['업사이드 다운 세계', '블레이드 러너 라스베이거스', '빅토리안 고딕 환경'],
+    links: [{ text: 'Rodeo FX Official', url: 'https://www.rodeofx.com/' }],
+    images: [
+      { src: 'https://www.ilm.com/wp-content/uploads/2025/09/StrangerThings-5_KeyArt-aspect-ratio-654-334-1-654x334.jpg', label: 'Stranger Things Season 5' },
+      { src: 'https://images.ctfassets.net/3sjsytt3tkv5/7ncUrGns8jVSVRmEEmjZuR/6964a4e56a611d0a9faf71222cc74ec6/for_all_mankind_s5.png', label: 'For All Mankind S5' },
+    ],
+  },
+];
+
+let currentArtist = null;
+let currentImageIdx = 0;
+function buildArtistPanel() { document.getElementById('artistPanel').textContent = ''; DESIGNERS.forEach(function(a) { var div = document.createElement('div'); div.className = 'artist-item'; div.dataset.id = a.id; div.onclick = function() { selectArtist(a.id); }; var rankSpan = document.createElement('span'); rankSpan.className = 'artist-rank'; rankSpan.textContent = a.rank; var infoDiv = document.createElement('div'); var nameDiv = document.createElement('div'); nameDiv.className = 'name'; nameDiv.textContent = a.name; var roleDiv = document.createElement('div'); roleDiv.className = 'role'; roleDiv.textContent = a.styleLabel; infoDiv.appendChild(nameDiv); infoDiv.appendChild(roleDiv); div.appendChild(rankSpan); div.appendChild(infoDiv); document.getElementById('artistPanel').appendChild(div); }); }
+function selectArtist(id) { var artist = DESIGNERS.find(function(a) { return a.id === id; }); if (!artist) return; currentArtist = artist; currentImageIdx = 0; document.querySelectorAll('.artist-item').forEach(function(el) { el.classList.remove('active'); }); var activeEl = document.querySelector('.artist-item[data-id="' + id + '"]'); if (activeEl) activeEl.classList.add('active'); updateInfoPanel(artist); updateFilmstrip(artist); updateViewer(artist); }
+function updateInfoPanel(a) { var panel = document.getElementById('infoPanel'); panel.textContent = ''; var h3 = document.createElement('h3'); h3.textContent = a.name; panel.appendChild(h3); var meta = document.createElement('div'); meta.className = 'meta'; meta.textContent = a.subtitle; panel.appendChild(meta); var style = document.createElement('span'); style.className = 'style-indicator ' + a.styleType; style.textContent = a.styleLabel; panel.appendChild(style); var desc = document.createElement('div'); desc.className = 'desc'; desc.textContent = a.desc; panel.appendChild(desc); var filmTags = document.createElement('div'); filmTags.className = 'film-tags'; a.films.forEach(function(f) { var tag = document.createElement('span'); tag.className = 'film-tag'; tag.textContent = f; filmTags.appendChild(tag); }); panel.appendChild(filmTags); var charTags = document.createElement('div'); charTags.className = 'char-tags'; a.characters.forEach(function(c) { var tag = document.createElement('span'); tag.className = 'char-tag'; tag.textContent = c; charTags.appendChild(tag); }); panel.appendChild(charTags); var styleSec = document.createElement('div'); styleSec.className = 'info-section'; var sh = document.createElement('h4'); sh.textContent = 'Style'; styleSec.appendChild(sh); var sp = document.createElement('p'); sp.textContent = a.styleDesc; styleSec.appendChild(sp); panel.appendChild(styleSec); if (a.technique) { var techSec = document.createElement('div'); techSec.className = 'info-section'; var th = document.createElement('h4'); th.textContent = 'Technique'; techSec.appendChild(th); var tp = document.createElement('p'); a.technique.split('\n').forEach(function(line, i) { if (i > 0) tp.appendChild(document.createElement('br')); tp.appendChild(document.createTextNode(line)); }); techSec.appendChild(tp); panel.appendChild(techSec); } var promptSec = document.createElement('div'); promptSec.className = 'info-section'; var ph = document.createElement('h4'); ph.textContent = 'AI Prompt'; promptSec.appendChild(ph); var promptBox = document.createElement('div'); promptBox.className = 'prompt-box'; promptBox.onclick = function() { copyPrompt(promptBox, a.id); }; var hint = document.createElement('span'); hint.className = 'copy-hint'; hint.textContent = 'click to copy'; promptBox.appendChild(hint); promptBox.appendChild(document.createTextNode(a.aiPrompt)); promptSec.appendChild(promptBox); panel.appendChild(promptSec); var refSec = document.createElement('div'); refSec.className = 'info-section'; var rh = document.createElement('h4'); rh.textContent = 'References'; refSec.appendChild(rh); var linkList = document.createElement('div'); linkList.className = 'link-list'; a.links.forEach(function(l) { var link = document.createElement('a'); link.href = l.url; link.target = '_blank'; link.textContent = l.text + ' \u2197'; linkList.appendChild(link); }); refSec.appendChild(linkList); panel.appendChild(refSec); }
+function copyPrompt(el, id) { var artist = DESIGNERS.find(function(a) { return a.id === id; }); if (!artist) return; navigator.clipboard.writeText(artist.aiPrompt).then(function() { el.classList.add('copied'); el.querySelector('.copy-hint').textContent = 'copied!'; setTimeout(function() { el.classList.remove('copied'); el.querySelector('.copy-hint').textContent = 'click to copy'; }, 1500); }); }
+function updateFilmstrip(a) { var strip = document.getElementById('filmstrip'); strip.textContent = ''; if (a.images.length === 0) { for (var i = 0; i < 4; i++) { var d = document.createElement('div'); d.className = 'thumb' + (i === 0 ? ' active' : ''); d.dataset.idx = i; var noImg = document.createElement('div'); noImg.className = 'no-image'; noImg.textContent = 'No image'; d.appendChild(noImg); strip.appendChild(d); } } else { a.images.forEach(function(img, i) { var d = document.createElement('div'); d.className = 'thumb' + (i === currentImageIdx ? ' active' : ''); d.dataset.idx = i; d.onclick = function() { selectImage(i); }; var imgEl = document.createElement('img'); imgEl.src = img.src; imgEl.alt = img.label; imgEl.onerror = function() { imgEl.style.display = 'none'; var errDiv = document.createElement('div'); errDiv.className = 'no-image'; errDiv.textContent = 'Load error'; imgEl.parentNode.appendChild(errDiv); }; d.appendChild(imgEl); var lbl = document.createElement('div'); lbl.className = 'thumb-label'; lbl.textContent = img.label; d.appendChild(lbl); strip.appendChild(d); }); } }
+function updateViewer(a) { var img = document.getElementById('mainImage'); var ph = document.getElementById('viewerPlaceholder'); var counter = document.getElementById('imageCounter'); var badge = document.getElementById('artistBadge'); badge.style.display = 'block'; document.getElementById('badgeName').textContent = a.name; document.getElementById('badgeStyle').textContent = a.styleLabel; if (a.images.length > 0 && a.images[currentImageIdx]) { img.style.opacity = '0'; img.style.display = 'block'; ph.style.display = 'none'; img.onload = function() { img.style.opacity = '1'; }; img.onerror = function() { img.style.display = 'none'; ph.style.display = 'flex'; ph.style.flexDirection = 'column'; ph.style.alignItems = 'center'; ph.style.justifyContent = 'center'; ph.textContent = ''; var errWrap = document.createElement('div'); errWrap.style.textAlign = 'center'; errWrap.style.color = 'var(--text-dim)'; var icon = document.createElement('div'); icon.style.fontSize = '2em'; icon.style.marginBottom = '8px'; icon.textContent = '\u26A0'; errWrap.appendChild(icon); var lbl = document.createElement('div'); lbl.style.fontSize = '0.85em'; lbl.style.color = '#888'; lbl.textContent = a.images[currentImageIdx].label; errWrap.appendChild(lbl); var msg = document.createElement('div'); msg.style.fontSize = '0.75em'; msg.style.marginTop = '4px'; msg.style.color = '#555'; msg.textContent = '\uC774\uBBF8\uC9C0\uB97C \uBD88\uB7EC\uC62C \uC218 \uC5C6\uC2B5\uB2C8\uB2E4'; errWrap.appendChild(msg); var retryBtn = document.createElement('button'); retryBtn.style.cssText = 'margin-top:12px;padding:6px 16px;border-radius:6px;background:#16161f;border:1px solid var(--border);color:var(--text-muted);cursor:pointer;font-size:0.8em'; retryBtn.textContent = '\uC7AC\uC2DC\uB3C4'; retryBtn.onclick = function() { selectImage(currentImageIdx); }; errWrap.appendChild(retryBtn); ph.appendChild(errWrap); }; img.src = a.images[currentImageIdx].src; counter.style.display = 'block'; counter.textContent = (currentImageIdx + 1) + ' / ' + a.images.length; } else { img.style.display = 'none'; ph.style.display = 'block'; counter.style.display = 'none'; } }
+function selectImage(idx) { if (!currentArtist || idx < 0 || idx >= currentArtist.images.length) return; currentImageIdx = idx; updateViewer(currentArtist); document.querySelectorAll('.thumb').forEach(function(t, i) { t.classList.toggle('active', i === idx); }); }
+function prevImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx - 1 + currentArtist.images.length) % currentArtist.images.length; selectImage(currentImageIdx); }
+function nextImage() { if (!currentArtist || currentArtist.images.length === 0) return; currentImageIdx = (currentImageIdx + 1) % currentArtist.images.length; selectImage(currentImageIdx); }
+function openModal() { var sel = document.getElementById('modalStyle'); if (sel.options.length <= 1) { DESIGNERS.forEach(function(d) { var opt = document.createElement('option'); opt.value = d.id; opt.textContent = d.rank + '. ' + d.name + ' (' + d.styleLabel + ')'; sel.appendChild(opt); }); } document.getElementById('modalOverlay').classList.add('show'); document.getElementById('modalScene').focus(); if (currentArtist) document.getElementById('modalStyle').value = currentArtist.id; }
+function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function handleGenerate() { var scene = document.getElementById('modalScene').value; var style = document.getElementById('modalStyle').value; if (!scene.trim()) { alert('Description is required.'); return; } closeModal(); setStatus('generating', 'Generating ' + (style === 'all' ? 'all styles' : style) + '...'); generateConcept('sfx_makeup', { description: scene, style: style }).then(function(data) { if (data.success && data.url) { showGeneratedImage(data.url, 'Generated: ' + scene.slice(0, 50)); setStatus('ready', 'Generation complete \u2713'); } else { setStatus('ready', 'Generation failed: ' + (data.error || 'Unknown error')); } }).catch(function(err) { setStatus('ready', 'API error: ' + err.message); }); }
+function setStatus(state, text) { document.getElementById('statusDot').className = 'status-dot ' + state; document.getElementById('statusText').textContent = text; }
+document.addEventListener('keydown', function(e) { if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return; if (e.key === 'ArrowLeft') prevImage(); if (e.key === 'ArrowRight') nextImage(); if (e.key === 'g' || e.key === 'G') openModal(); if (e.key === 'Escape') closeModal(); var num = parseInt(e.key); if (!isNaN(num)) { var idx = num === 0 ? 9 : num - 1; if (idx < DESIGNERS.length) selectArtist(DESIGNERS[idx].id); } });
+document.getElementById('modalOverlay').addEventListener('click', function(e) { if (e.target === e.currentTarget) closeModal(); });
+
+// --- Mobile tab navigation ---
+function resetDesktopLayout() {
+  document.querySelector('.artist-panel').style.display = '';
+  document.querySelector('.main-area').style.display = '';
+  document.querySelector('.info-panel').style.display = '';
+}
+function switchMobileTab(panel) {
+  var artistPanel = document.querySelector('.artist-panel');
+  var mainArea = document.querySelector('.main-area');
+  var infoPanel = document.querySelector('.info-panel');
+  document.querySelectorAll('.mtab').forEach(function(t) { t.classList.toggle('active', t.dataset.panel === panel); });
+  if (panel === 'list') {
+    artistPanel.style.display = 'block';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'none';
+  } else if (panel === 'viewer') {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'flex';
+    infoPanel.style.display = 'none';
+  } else {
+    artistPanel.style.display = 'none';
+    mainArea.style.display = 'none';
+    infoPanel.style.display = 'block';
+  }
+}
+function isMobile() { return window.innerWidth <= 768; }
+
+// Reset layout on resize to desktop
+window.addEventListener('resize', function() {
+  if (!isMobile()) resetDesktopLayout();
+});
+
+// Init
+buildArtistPanel();
+</script>
+
+<!-- MOBILE TABS -->
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mtab active" data-panel="list" onclick="switchMobileTab('list')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></svg>
+    목록
+  </button>
+  <button class="mtab" data-panel="viewer" onclick="switchMobileTab('viewer')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+    이미지
+  </button>
+  <button class="mtab" data-panel="info" onclick="switchMobileTab('info')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    정보
+  </button>
+</div>
+
+</body>
+</html>

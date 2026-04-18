@@ -1,0 +1,363 @@
+# ============================================================
+# Concept Designer Profiles — Hollywood 10 Masters
+# Character / Environment / Prop Design
+# ============================================================
+
+designers:
+
+  # === 01. Syd Mead — Visual Futurist ===
+  syd_mead:
+    name: "Syd Mead"
+    title: "Visual Futurist"
+    nationality: "American"
+    years: "1933-2019"
+    specialties:
+      - environment
+      - vehicle
+      - prop
+    medium: "gouache, prismacolor pencil, crow-quill ink"
+    notable_films:
+      - "Blade Runner (1982)"
+      - "Aliens (1986)"
+      - "Tron (1982)"
+      - "Blade Runner 2049 (2017)"
+      - "Elysium (2013)"
+    notable_designs:
+      - "Spinner (flying police car)"
+      - "Voight-Kampff Machine"
+      - "Power Loader"
+      - "Light Cycle"
+      - "Dystopian LA 2019 cityscape"
+    design_philosophy: "Science fiction is reality ahead of schedule. The idea supersedes technique."
+    character_keywords: "industrial design character concept, human-machine interface, functional futuristic costume, chrome and neon aesthetic, gouache painting"
+    environment_keywords: "dystopian cyberpunk cityscape, gouache painting, neon-lit rain-slicked streets, layered vertical urbanism, wet reflective surfaces, atmospheric fog, Blade Runner aesthetic"
+    prop_keywords: "industrial design rendering, gouache hand-painted, functional futuristic vehicle, chrome and glass material, retro-futuristic gadget, product design quality, multiple angle turnaround"
+    post_processing:
+      - saturation_adjust
+      - watercolor_filter
+    aspect_ratio: "2.35:1"
+
+  # === 02. Ralph McQuarrie — Star Wars Visual Father ===
+  ralph_mcquarrie:
+    name: "Ralph McQuarrie"
+    title: "Conceptual Illustrator"
+    nationality: "American"
+    years: "1929-2012"
+    specialties:
+      - character
+      - environment
+      - vehicle
+    medium: "gouache, acrylic, oil paint"
+    notable_films:
+      - "Star Wars Original Trilogy (1977-1983)"
+      - "E.T. (1982)"
+      - "Battlestar Galactica (1978)"
+      - "Cocoon (1985)"
+    notable_designs:
+      - "Darth Vader"
+      - "C-3PO / R2-D2"
+      - "Millennium Falcon"
+      - "X-Wing / TIE Fighter"
+      - "Tatooine Twin Suns"
+      - "Cloud City"
+    design_philosophy: "Characters and environments exist together. The design must be recognizable from its silhouette alone."
+    character_keywords: "iconic character silhouette, gouache painting, character in cinematic environment, atmospheric lighting, sci-fi retro-futurism, warm and cool light contrast, heroic composition, painterly brushstrokes"
+    environment_keywords: "epic sci-fi landscape, gouache painting, atmospheric perspective, small figure for scale, emotional narrative landscape, Star Wars planet aesthetic, dramatic sky, multiple light sources"
+    prop_keywords: "iconic silhouette vehicle, gouache painting, Star Wars spacecraft, kitbash detail, faction-coded design, asymmetric junker spaceship, recognizable shape language"
+    post_processing:
+      - watercolor_filter
+      - saturation_adjust
+    aspect_ratio: "2.35:1"
+
+  # === 03. H.R. Giger — Biomechanical Master ===
+  hr_giger:
+    name: "H.R. Giger"
+    title: "Biomechanical Artist"
+    nationality: "Swiss"
+    years: "1940-2014"
+    specialties:
+      - creature
+      - character
+      - environment
+    medium: "airbrush, ink, sculpture"
+    notable_films:
+      - "Alien (1979)"
+      - "Species (1995)"
+      - "Poltergeist II (1986)"
+    notable_designs:
+      - "Xenomorph"
+      - "Facehugger / Chestburster"
+      - "Space Jockey"
+      - "Derelict Ship Interior"
+      - "Egg Chamber"
+    design_philosophy: "Fusion of organic and mechanical. Remove the eyes to make a creature unknowable."
+    character_keywords: "biomechanical creature, dark surreal, airbrush technique, organic-mechanical fusion, elongated skull, eyeless alien, ribbed exoskeleton, industrial bone texture, monochrome nightmare, Necronom IV inspired"
+    environment_keywords: "biomechanical architecture, organic-mechanical interior, bone and pipe fusion, dark alien chamber, ribbed cathedral space, airbrush monochrome, living architecture, visceral horror, breathing walls"
+    prop_keywords: "biomechanical prop, organic-mechanical fusion object, bone and pipe texture, ambiguous living prop, dark surreal equipment, airbrush rendered, alien technology, ribbed exoskeletal tool"
+    post_processing:
+      - grayscale_convert
+      - high_contrast
+      - ink_line_enhance
+    aspect_ratio: "1.85:1"
+
+  # === 04. Moebius (Jean Giraud) — Lived-In Future ===
+  moebius:
+    name: "Moebius (Jean Giraud)"
+    title: "World Builder"
+    nationality: "French"
+    years: "1938-2012"
+    specialties:
+      - character
+      - environment
+      - costume
+    medium: "pen and ink, watercolor"
+    notable_films:
+      - "Alien (1979)"
+      - "The Fifth Element (1997)"
+      - "Tron (1982)"
+      - "The Abyss (1989)"
+    notable_designs:
+      - "Nostromo Crew Attire"
+      - "Fifth Element Characters & City"
+      - "Tron Digital World"
+    design_philosophy: "The future should feel lived-in, not pristine. Culture is expressed through costume and wear."
+    character_keywords: "intricate pen and ink, surreal sci-fi, lived-in futuristic costume, detailed cross-hatching, retro-futuristic fashion, worn weathered attire, French bande dessinee, clean precise lineart with surreal elements"
+    environment_keywords: "lived-in futuristic city, intricate pen and ink detail, dense visual information, used future aesthetic, multicultural urbanism, weathered surfaces, French comic world-building, cross-hatching architecture"
+    prop_keywords: "detailed pen and ink equipment, worn futuristic spacesuit, intricate line work, lived-in tool design, functional pocket and belt detail, practical sci-fi equipment, costume-integrated prop system"
+    post_processing:
+      - ink_line_enhance
+      - denoise
+    aspect_ratio: "1.85:1"
+
+  # === 05. Ron Cobb — Functional Futurist ===
+  ron_cobb:
+    name: "Ron Cobb"
+    title: "Industrial Environment Designer"
+    nationality: "American-Australian"
+    years: "1937-2020"
+    specialties:
+      - environment
+      - vehicle
+      - prop
+    medium: "technical pen and ink"
+    notable_films:
+      - "Alien (1979)"
+      - "Star Wars (1977)"
+      - "Back to the Future (1985)"
+      - "Conan the Barbarian (1982)"
+      - "Aliens (1986)"
+      - "Close Encounters (1977)"
+    notable_designs:
+      - "DeLorean Time Machine"
+      - "Nostromo Interior/Exterior"
+      - "Cantina Aliens"
+      - "Hadley's Hope Colony"
+    design_philosophy: "Clean lines, bulky lived-in aesthetic. Everything must have a functional reason."
+    character_keywords: "clean technical line drawing, bulky lived-in aesthetic, functional alien creature, utilitarian sci-fi equipment, believable mechanical detail, pen and ink, retro-industrial sci-fi"
+    environment_keywords: "industrial sci-fi interior, functional utilitarian space, technical pen drawing, narrow corridors, exposed pipes, fluorescent lighting, blue-collar space station, practical engineering detail"
+    prop_keywords: "technical pen and ink, homemade sci-fi gadget, exposed wiring, lived-in industrial prop, functional blueprint quality, weathered mechanical device, practical prop design, believable handmade technology"
+    post_processing:
+      - ink_line_enhance
+      - high_contrast
+    aspect_ratio: "1.85:1"
+
+  # === 06. Doug Chiang — Systematic Design Master ===
+  doug_chiang:
+    name: "Doug Chiang"
+    title: "VP & Creative Director, Lucasfilm"
+    nationality: "Taiwanese-American"
+    years: "1962-"
+    specialties:
+      - environment
+      - vehicle
+      - character
+    medium: "digital painting, gouache"
+    notable_films:
+      - "Star Wars Ep I-II"
+      - "Rogue One (2016)"
+      - "Solo (2018)"
+      - "The Mandalorian"
+      - "Forrest Gump (VFX)"
+    notable_designs:
+      - "Naboo Palace & Starfighter"
+      - "Podracers"
+      - "Battle Droids"
+      - "Coruscant Cityscape"
+    design_philosophy: "Three-second rule: instantly recognizable. Faction color coding. Cultural fusion in sci-fi."
+    character_keywords: "systematic design language, strong silhouette, faction color coding, cultural reference fusion, three-second recognizable shape, Star Wars prequel aesthetic, clean digital painting, architectural character design"
+    environment_keywords: "cultural reference architecture, faction-based building language, Star Wars prequel aesthetic, planetary civilization, Art Nouveau sci-fi palace, vertical megacity, environmental storytelling, systematic design language"
+    prop_keywords: "systematic design language, cultural reference fusion, Art Deco sci-fi vehicle, faction color-coded equipment, three-second recognizable shape, chrome and organic contrast, personality-driven object design"
+    post_processing:
+      - saturation_adjust
+      - denoise
+    aspect_ratio: "2.35:1"
+
+  # === 07. Iain McCaig — Character Soul ===
+  iain_mccaig:
+    name: "Iain McCaig"
+    title: "Character & Creature Designer"
+    nationality: "American"
+    years: "1957-"
+    specialties:
+      - character
+      - creature
+      - weapon
+    medium: "pencil, ink, watercolor"
+    notable_films:
+      - "Star Wars Ep I-III, VII"
+      - "Terminator 2"
+      - "Guardians of the Galaxy"
+      - "The Avengers"
+      - "Harry Potter and the Goblet of Fire"
+    notable_designs:
+      - "Darth Maul"
+      - "Queen Amidala / Padme"
+      - "Double-bladed Lightsaber"
+    design_philosophy: "Fear as foundation, then add beauty. The soul of a character must be visible in their design."
+    character_keywords: "narrative-driven character design, pencil and ink illustration, psychological depth, fear and beauty balance, detailed facial tattoo patterns, dramatic lighting, film-quality character sheet, soul sketchbook approach"
+    environment_keywords: "character-centric environment, dramatic atmospheric setting for character portrait, moody lighting backdrop"
+    prop_keywords: "character-integrated weapon design, narrative weapon concept, ornate ceremonial prop, cultural symbolism, Star Wars lightsaber variation, elegant yet deadly aesthetic"
+    post_processing:
+      - ink_line_enhance
+      - grayscale_convert
+    aspect_ratio: "16:9"
+
+  # === 08. Crash McCreery — Creature Realist ===
+  crash_mccreery:
+    name: 'Mark "Crash" McCreery'
+    title: "Creature & Character Designer"
+    nationality: "American"
+    years: "active since ~1990"
+    specialties:
+      - creature
+      - character
+    medium: "pencil, graphite, sculpture, maquette"
+    notable_films:
+      - "Jurassic Park (1993)"
+      - "The Lost World (1997)"
+      - "Pirates of the Caribbean"
+      - "Terminator 2"
+      - "Edward Scissorhands"
+    notable_designs:
+      - "T-Rex (warm-blooded reinterpretation)"
+      - "Velociraptors"
+      - "Davy Jones"
+    design_philosophy: "The purest sense of light, shadow, and form. Motion study before static design."
+    character_keywords: "detailed pencil rendering, anatomical accuracy, luminous graphite work, dynamic motion study, bird-of-prey stance, warm-blooded creature, cinematic lighting, realistic texture, Stan Winston Studio quality"
+    environment_keywords: "creature habitat environment, natural setting for creature showcase, dramatic lighting on landscape"
+    prop_keywords: "creature prop design, buildable animatronic concept, production-ready maquette, anatomical detail for rigging, practical effects creature, multi-angle prop sheet"
+    post_processing:
+      - grayscale_convert
+      - denoise
+    aspect_ratio: "16:9"
+
+  # === 09. Neville Page — Bio-Evolutionary Designer ===
+  neville_page:
+    name: "Neville Page"
+    title: "Creature & Concept Designer"
+    nationality: "British-American"
+    years: "1964-"
+    specialties:
+      - creature
+      - character
+    medium: "ZBrush, digital, pencil"
+    notable_films:
+      - "Avatar (2009)"
+      - "Prometheus (2012)"
+      - "Cloverfield (2008)"
+      - "Star Trek (2009-2016)"
+      - "TRON: Legacy (2010)"
+      - "Super 8 (2011)"
+    notable_designs:
+      - "Banshee (Avatar)"
+      - "Engineer & Trilobite (Prometheus)"
+      - "Cloverfield Monster"
+    design_philosophy: "Biological, evolutionary basis for every aspect. Industrial design applied to biology."
+    character_keywords: "biologically plausible alien, evolutionary design basis, ZBrush digital sculpture, functional creature anatomy, bioluminescent skin, Pandora ecosystem, scientific illustration, industrial design aesthetic applied to biology"
+    environment_keywords: "creature-environment integration, ecological niche design, alien habitat, biological environment interaction, evolutionary environment design, scientifically plausible alien world"
+    prop_keywords: "creature prop asset, ZBrush sculpt turnaround, anatomical detail for rigging, practical effects creature, production-ready creature asset"
+    post_processing:
+      - denoise
+      - saturation_adjust
+    aspect_ratio: "16:9"
+
+  # === 10. Wayne Barlowe — Alien Ecosystem Creator ===
+  wayne_barlowe:
+    name: "Wayne Barlowe"
+    title: "Creature & Ecosystem Designer"
+    nationality: "American"
+    years: "active since ~1979"
+    specialties:
+      - creature
+      - environment
+    medium: "oil painting, digital"
+    notable_films:
+      - "Avatar (2009)"
+      - "Hellboy 1 & 2"
+      - "Pacific Rim"
+      - "Harry Potter 3 & 4"
+      - "Blade II"
+      - "Aquaman"
+    notable_designs:
+      - "Great Leonopteryx (Avatar)"
+      - "Direhorse / Stingbat"
+      - "Hellboy Creatures"
+    design_philosophy: "Design the ecosystem first, then the creature. The trippiest aliens should still feel plausible."
+    character_keywords: "oil painting alien wildlife, ecosystem-driven design, rich color palette, convergent evolution, exotic bioluminescent creature, Pandora-style fauna, fine art illustration, fantastical yet plausible"
+    environment_keywords: "alien ecosystem, bioluminescent forest, rich oil painting, exotic alien flora, Pandora natural environment, ecological world-building, vibrant alien color palette, fine art quality"
+    prop_keywords: "alien biological prop, organic alien artifact, bioluminescent object, ecosystem-integrated prop, natural alien technology"
+    post_processing:
+      - saturation_adjust
+      - watercolor_filter
+    aspect_ratio: "2.35:1"
+
+# ============================================================
+# Design Categories
+# ============================================================
+categories:
+  character:
+    name: "Character Design"
+    description: "캐릭터/크리처 컨셉 디자인"
+    prompt_prefix: "Character concept design sheet, front and side view, detailed character design,"
+    prompt_suffix: "character turnaround sheet, white background, professional concept art quality"
+    specialists:
+      - iain_mccaig
+      - hr_giger
+      - crash_mccreery
+      - neville_page
+      - wayne_barlowe
+      - ralph_mcquarrie
+
+  environment:
+    name: "Environment Design"
+    description: "배경/환경 컨셉 디자인"
+    prompt_prefix: "Environment concept art, wide establishing shot, detailed background design,"
+    prompt_suffix: "matte painting quality, cinematic composition, atmospheric depth"
+    specialists:
+      - syd_mead
+      - ralph_mcquarrie
+      - moebius
+      - doug_chiang
+      - ron_cobb
+      - chris_foss
+
+  prop:
+    name: "Prop Design"
+    description: "프랍/차량/무기/장비 컨셉 디자인"
+    prompt_prefix: "Prop concept design, multiple angle views, detailed technical illustration,"
+    prompt_suffix: "prop turnaround sheet, clean background, production-ready concept art quality"
+    specialists:
+      - syd_mead
+      - ron_cobb
+      - ralph_mcquarrie
+      - doug_chiang
+      - chris_foss
+      - iain_mccaig
+
+# ============================================================
+# Defaults
+# ============================================================
+defaults:
+  output_width: 1024
+  grid_columns: 3
+  grid_rows: 2
