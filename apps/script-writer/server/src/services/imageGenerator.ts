@@ -134,6 +134,7 @@ const SPECIALIST_SYSTEM_PROMPTS: Record<string, string> = {
   color_script: 'Nate Wragg / Pixar color script style. Emotional arc through color temperature, saturation as tension indicator, palette continuity across acts. Horizontal sequence of color blocks with narrative annotation.',
   graphic_design: 'Title sequence / in-world graphic design — Imaginary Forces / Elastic style. Typography as narrative, motion design hierarchy, brand integration into the film world. Title treatment options and in-world graphic assets.',
   visual_world: 'Syd Mead / Dylan Cole style — visionary Visual Development Artist for feature films (Blade Runner, Avatar, Tron Legacy). Atmospheric concept painting that establishes the emotional color grammar of the entire world. Rich material textures, environmental storytelling through light and shadow, signature color palette that defines the film\'s visual identity. Panoramic establishing view with atmospheric depth, color palette strip below image.',
+  makeup_hair: 'Rick Baker / Kazuhiro Tsuji style — legendary makeup and prosthetic design. Portrait-style beauty shot with clear makeup detail: skin texture, aging/scarring/tattoo specs, prosthetic edges, hair styling notes. Front and 3-quarter portrait references with annotation callouts for application areas.',
 };
 
 /**

@@ -606,71 +606,49 @@ const app = new Elysia()
           }
         }
 
-        // For other design nodes: call Python storyboard API (:3007)
-        const STORYBOARD_API = process.env.STORYBOARD_API_URL || 'http://localhost:3007';
-        const apiMap: Record<string, string> = {
-          character_design: '/api/character',
-          set_design: '/api/environment',
-          costume_design: '/api/costume',
-          props: '/api/props',
-        };
+        // ─── Track A image-producing design nodes ───
+        // Sprint 2 alignment: route image design nodes through script-writer's own
+        // provider chain (generateImage) instead of the deprecated storyboard-maker
+        // :3007 API. Same flow as scene-level image_prompt / storyboard Default path.
+        const IMAGE_DESIGN_NODES = new Set([
+          'character_design',
+          'set_design',
+          'costume_design',
+          'props',
+          'graphic_design',
+          'makeup_hair',
+        ]);
 
-        const apiEndpoint = apiMap[nodeId];
-        if (apiEndpoint) {
+        if (IMAGE_DESIGN_NODES.has(nodeId)) {
           try {
+            // Resolve category: from body or DB
+            let category: string = b.category || '';
+            if (!category) {
+              const [proj] = await db.select({ category: projects.category })
+                .from(projects).where(eq(projects.id, projectId));
+              category = proj?.category || 'Feature Film';
+            }
+
             const rawDescription = b.description || b.inputData?.description || '';
-            const specialistDescription = buildSpecializedPrompt(nodeId, rawDescription, {
-              category: b.category || 'Feature Film',
+            const prompt = buildSpecializedPrompt(nodeId, rawDescription, {
+              category,
               style: b.style,
             });
-            const res = await fetch(`${STORYBOARD_API}${apiEndpoint}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                description: specialistDescription,
-                style: b.style || 'bong',
-                project: b.project || 'Untitled',
-                scene: b.scene || rawDescription,
-                specialist: nodeId,
-              }),
-            });
-            const result = await res.json();
-            // Build image URL: prefer explicit url, then construct from path
-            let remoteImgUrl = result.url || result.image_url || null;
-            if (!remoteImgUrl && result.path) {
-              const filename = result.path.split('/').pop();
-              remoteImgUrl = `${STORYBOARD_API}/output/${filename}`;
-            }
-            // Download remote image to local public dir so it stays accessible.
-            // Start as null — only set if local download succeeds (no fallback to dead :3007 URLs).
-            let imgUrl: string | null = null;
-            if (remoteImgUrl) {
-              try {
-                const imgRes = await fetch(remoteImgUrl, { signal: AbortSignal.timeout(30000) });
-                if (imgRes.ok) {
-                  const { default: fs } = await import('node:fs');
-                  const { default: path } = await import('node:path');
-                  const storyboardDir = path.join(process.cwd(), 'public', 'storyboard', 'images');
-                  if (!fs.existsSync(storyboardDir)) fs.mkdirSync(storyboardDir, { recursive: true });
-                  const ext = remoteImgUrl.split('.').pop()?.split('?')[0] || 'png';
-                  const fileName = `storyboard_${Date.now()}_${Math.floor(Math.random() * 9999)}.${ext}`;
-                  const filePath = path.join(storyboardDir, fileName);
-                  const buf = Buffer.from(await imgRes.arrayBuffer());
-                  fs.writeFileSync(filePath, buf);
-                  const host = process.env.BACKEND_URL || 'http://localhost:3006';
-                  imgUrl = `${host}/public/storyboard/images/${fileName}`;
-                }
-              } catch (_) { /* imgUrl stays null — frame stays pending, can be retried */ }
-            }
-            const imageUrls = imgUrl ? [imgUrl] : (result.images || []);
+
+            const imgResult = await generateImage(prompt, { cutId: String(assetId) });
+            const imgUrl = imgResult.success ? imgResult.imageUrl ?? null : null;
             await db.update(productionAssets).set({
-              status: result.success !== false ? 'done' : 'error',
-              outputData: JSON.stringify(result),
-              imageUrls: JSON.stringify(imageUrls),
-              errorMessage: result.error || null,
+              status: imgResult.success ? 'done' : 'error',
+              outputData: JSON.stringify({ prompt, category, specialist: nodeId }),
+              imageUrls: imgUrl ? JSON.stringify([imgUrl]) : JSON.stringify([]),
+              errorMessage: imgResult.error || null,
               updatedAt: new Date().toISOString(),
             }).where(eq(productionAssets.id, assetId));
-            return { success: true, assetId, result: { ...result, imageUrl: imgUrl } };
+            return {
+              success: imgResult.success,
+              assetId,
+              result: { imageUrl: imgUrl, category, prompt, specialist: nodeId },
+            };
           } catch (e: any) {
             await db.update(productionAssets).set({
               status: 'error',
