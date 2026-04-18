@@ -8,6 +8,7 @@ import { GET as castingProgressGET } from "../../../casting/progress/route";
 import { GET as locationsProgressGET } from "../../../locations/progress/route";
 import { GET as rehearsalsProgressGET } from "../../../rehearsals/progress/route";
 import { GET as ingestProgressGET } from "../../../ingest/progress/route";
+import { GET as titlesProgressGET } from "../../../titles/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -123,7 +124,18 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig] = (await Promise.all([
+  const titlesInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/titles/progress?paperclipId=${enc}`);
+      const res = await titlesProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -134,7 +146,8 @@ export async function GET(
     locationsInProcess,
     rehearsalsInProcess,
     ingestInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any];
+    titlesInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -234,6 +247,15 @@ export async function GET(
       }
     : null;
 
+  const titles = tl?.found
+    ? {
+        paperclipId: tl.paperclipId,
+        steps: tl.steps,
+        summary: tl.summary,
+        mainTitle: tl.mainTitle,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -244,5 +266,6 @@ export async function GET(
     locations,
     rehearsals,
     ingest,
+    titles,
   });
 }

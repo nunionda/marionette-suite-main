@@ -169,6 +169,27 @@ export interface IngestStatus {
   } | null;
 }
 
+export interface TitlesStatus {
+  paperclipId: string;
+  steps: {
+    drafted: boolean;
+    inReview: boolean;
+    approved: boolean;
+  };
+  summary: {
+    total: number;
+    approved: number;
+    review: number;
+    draft: number;
+  };
+  mainTitle: {
+    text: string | null;
+    font: string | null;
+    durationSec: number | null;
+    status: "draft" | "review" | "approved" | "locked";
+  } | null;
+}
+
 interface AggregatorResponse {
   creativeSteps: StepProgress[];
   postProduction: PostProductionStatus | null;
@@ -179,6 +200,7 @@ interface AggregatorResponse {
   locations: LocationsStatus | null;
   rehearsals: RehearsalsStatus | null;
   ingest: IngestStatus | null;
+  titles: TitlesStatus | null;
 }
 
 /**
@@ -200,6 +222,7 @@ export function useProjectProgress(projectId: string) {
   const [locations, setLocations] = useState<LocationsStatus | null>(null);
   const [rehearsals, setRehearsals] = useState<RehearsalsStatus | null>(null);
   const [ingest, setIngest] = useState<IngestStatus | null>(null);
+  const [titles, setTitles] = useState<TitlesStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -219,6 +242,7 @@ export function useProjectProgress(projectId: string) {
           setLocations(data.locations);
           setRehearsals(data.rehearsals);
           setIngest(data.ingest);
+          setTitles(data.titles);
         }
       } catch {
         // Silent fail: keep defaults
@@ -235,5 +259,5 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest };
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles };
 }
