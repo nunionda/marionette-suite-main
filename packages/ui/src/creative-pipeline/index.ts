@@ -10,8 +10,10 @@ export type {
   DistributionStatus,
   ScheduleStatus,
   BudgetStatus,
+  CastingStatus,
 } from "./useProjectProgress";
 export { PostProductionPanel } from "./PostProductionPanel";
 export { DistributionPanel } from "./DistributionPanel";
 export { SchedulePanel } from "./SchedulePanel";
 export { BudgetPanel } from "./BudgetPanel";
+export { CastingPanel } from "./CastingPanel";

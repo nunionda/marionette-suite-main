@@ -4,6 +4,7 @@ import { GET as libraryProgressGET } from "../../../library/progress/route";
 import { GET as postProgressGET } from "../../../post/progress/route";
 import { GET as scheduleProgressGET } from "../../../schedule/progress/route";
 import { GET as budgetProgressGET } from "../../../budget/progress/route";
+import { GET as castingProgressGET } from "../../../casting/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -75,14 +76,26 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg] = (await Promise.all([
+  const castingInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/casting/progress?paperclipId=${enc}`);
+      const res = await castingProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
     libraryInProcess,
     scheduleInProcess,
     budgetInProcess,
-  ])) as [any, any, any, any, any, any];
+    castingInProcess,
+  ])) as [any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -136,11 +149,21 @@ export async function GET(
       }
     : null;
 
+  const casting = ct?.found
+    ? {
+        paperclipId: ct.paperclipId,
+        steps: ct.steps,
+        summary: ct.summary,
+        leads: ct.leads,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
     distribution,
     schedule,
     budget,
+    casting,
   });
 }
