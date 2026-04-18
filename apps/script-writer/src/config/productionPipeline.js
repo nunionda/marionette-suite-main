@@ -320,6 +320,52 @@ export const VIDEO_GENERATION_NODES = [
   },
 ];
 
+// ─── Track C: Post-production Audio (Charter #49, #51, #52) ───
+// Sprint 6 [AI-AUD]: structured spec-document nodes. Produces JSON plans
+// that an audio engineer or external AI tool (Coqui/Bark/Suno/MusicGen)
+// consumes. No server-side audio synthesis.
+export const AUDIO_POST_NODES = [
+  {
+    id: 'adr_dubbing',
+    label: 'ADR / Dubbing',
+    labelKo: '후시녹음·더빙',
+    agent: 'POST_SOUND',
+    sub: 'adr_supervisor',
+    description: '재녹음 필요 라인 파악 + lip-sync/우선순위/감정 태그 + 국제 더빙 타겟',
+    inputs: ['scene_list', 'script_text'],
+    outputs: ['adr_plan'],
+    phase: 'audio',
+    quality: 'spec',
+    charter: '#49',
+  },
+  {
+    id: 'foley',
+    label: 'Foley',
+    labelKo: '폴리',
+    agent: 'POST_SOUND',
+    sub: 'foley_supervisor',
+    description: '씬별 Foley 큐 시트 (발걸음/의상/소품/특수음)',
+    inputs: ['scene_list', 'storyboard_frames'],
+    outputs: ['foley_cue_sheet'],
+    phase: 'audio',
+    quality: 'spec',
+    charter: '#51',
+  },
+  {
+    id: 'music_composition',
+    label: 'Music Composition',
+    labelKo: '음악 작곡',
+    agent: 'POST_SOUND',
+    sub: 'composer',
+    description: '테마 정의 + 큐 시트 + 인스트루멘테이션 + 레퍼런스 스코어',
+    inputs: ['scene_list', 'character_arcs', 'emotional_color_map'],
+    outputs: ['score_brief', 'cue_sheet'],
+    phase: 'audio',
+    quality: 'spec',
+    charter: '#52',
+  },
+];
+
 // ─── 두 트랙의 연결점 (Handoff Points) ───
 // Production Design → Video Generation으로 데이터가 흐르는 지점
 
@@ -355,6 +401,11 @@ export const VIDEO_PHASES = [
   { id: 'video_gen',  label: 'Video Gen',   labelKo: '비디오 생성', icon: '🎬', color: 'var(--gold-dim)' },
   { id: 'audio',      label: 'Audio',       labelKo: '오디오',      icon: '🔊', color: 'var(--gold-dim)' },
   { id: 'assembly',   label: 'Assembly',    labelKo: '어셈블리',    icon: '✅', color: 'var(--gold-dim)' },
+];
+
+// Charter [AI-AUD] Post-production audio phases (Sprint 6 nodes slot here)
+export const AUDIO_POST_PHASES = [
+  { id: 'audio', label: 'Post Sound', labelKo: '포스트 사운드', icon: '🎙️', color: 'var(--gold-dim)' },
 ];
 
 // ─── 카테고리별 활성 노드 ───

@@ -290,6 +290,84 @@ export const TEXT_DESIGN_NODE_SPECS: Record<string, NodeSpec> = {
   ]
 }`,
   },
+  // ─── Sprint 6 AI Audio specs (Charter #49, #51, #52) ───
+  // These nodes produce structured audio-design specifications that external
+  // TTS / Foley / music-gen tools (Coqui, Bark, Suno, MusicGen) can consume.
+  // Per 무료 LLM API 정책: no audio is synthesized server-side; we only
+  // generate the spec. The spec is the valuable artifact — it's what an
+  // audio engineer would hand to a producer or a script for a generator.
+  adr_dubbing: {
+    role: 'Supervising sound editor producing an ADR (Automated Dialogue Replacement) and dubbing plan. Think Skip Lievsay / Ren Klyce workflow — reasoning about line-by-line lip-sync, noisy-location fixes, and international dub constraints.',
+    schema: `{
+  "lines": [
+    {
+      "sceneNumber": 1,
+      "character": "Korean or original character name from screenplay",
+      "originalLine": "dialogue text in source language",
+      "reason": "ambient_noise | off_mic | performance_revision | international_dub | pickup_shot",
+      "priority": "critical | normal | optional",
+      "lipSync": "strict | moderate | loose (how tight the lip match must be)",
+      "emotion": "one-word emotion tag the VO must convey",
+      "referenceActor": "name of original actor (for voice-matching in same language)",
+      "targetLanguages": ["KR", "EN", "JA", ...]
+    }
+  ],
+  "totalLines": 0,
+  "sessionPlanHours": 0,
+  "notes": "one-paragraph summary of ADR strategy (in original language)"
+}`,
+  },
+  foley: {
+    role: 'Foley supervisor producing a per-scene Foley cue sheet. Think Gary Rydstrom workflow — categorizing every on-screen sound into footsteps, cloth, props, and specific hero sounds that need to be performed or designed.',
+    schema: `{
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "cues": [
+        {
+          "cueId": "S1-F01",
+          "category": "footsteps | cloth | props | specific",
+          "description": "what the audience sees/should hear (e.g. 'keys dropping onto marble counter')",
+          "surface": "e.g. 'polished marble' or 'wet asphalt' (for footsteps)",
+          "pace": "slow | walking | running | frantic",
+          "character": "character name or 'ambient'",
+          "recordingHint": "practical suggestion for the Foley artist (e.g. 'record keys on ceramic tile for metallic ring')"
+        }
+      ]
+    }
+  ],
+  "assetLibraryTags": ["surface tags to pull from library, e.g. 'marble_pad', 'leather_jacket'"],
+  "summary": "one-paragraph Foley strategy (in original language)"
+}`,
+  },
+  music_composition: {
+    role: 'Film composer drafting a score brief and cue-sheet. Think Jóhann Jóhannsson / Mica Levi workflow — defining thematic material, instrumentation, and per-scene cue placement with emotional intent.',
+    schema: `{
+  "themes": [
+    {
+      "name": "theme name (e.g. 'Decoder Motif')",
+      "associatedCharacter": "character this theme belongs to (or 'world' / 'antagonist' / 'love')",
+      "instrumentation": ["primary instruments, e.g. 'solo cello', 'prepared piano', 'synth pad'"],
+      "mode": "major | minor | modal | atonal | microtonal",
+      "tempoBpm": 0,
+      "emotionalFunction": "one sentence on what this theme does dramatically"
+    }
+  ],
+  "cues": [
+    {
+      "cueId": "M1",
+      "sceneNumber": 1,
+      "startTiming": "scene-in / 0:00 / on dialogue start",
+      "durationSec": 0,
+      "themes": ["names of themes referenced"],
+      "intensity": 1,
+      "direction": "one-sentence instruction to the composer (e.g. 'slow pulse, sub-bass only, no melodic statement until hero enters')"
+    }
+  ],
+  "overallTone": "one-paragraph score brief (in original language)",
+  "referenceScores": ["film title — composer", "..."]
+}`,
+  },
 };
 
 export interface DesignDocumentResult {
