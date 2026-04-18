@@ -21,6 +21,8 @@ const navItems = [
   { href: "/titles", label: "Titles", icon: "🔤" },
   { href: "/festivals", label: "Festivals", icon: "🏆" },
   { href: "/marketing", label: "Marketing", icon: "📣" },
+  { href: "/boxoffice", label: "Box Office", icon: "🎟️" },
+  { href: "/reviews", label: "Reviews", icon: "⭐" },
   { href: "/library", label: "Content Library", icon: "📚" },
   { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },

@@ -244,6 +244,68 @@ export interface MarketingStatus {
   };
 }
 
+export interface BoxOfficeStatus {
+  paperclipId: string;
+  steps: {
+    released: boolean;
+    week1Done: boolean;
+    breakeven: boolean;
+  };
+  summary: {
+    krRevenue: number;
+    krAdmissions: number;
+    weeksInRelease: number;
+    peakScreens: number;
+    peakRank: number;
+    territoriesLive: number;
+    breakevenPct: number;
+    breakeven: boolean;
+  };
+  meta: {
+    releaseDate: string | null;
+    pattern: "wide" | "platform" | "limited" | "streaming" | "festival_only";
+    budgetKRW: number;
+  };
+  latestWeek: {
+    weekNumber: number;
+    weekStarting: string;
+    admissions: number;
+    revenue: number;
+    screens: number;
+    rank: number;
+    weekOverWeekPct: number | null;
+  } | null;
+}
+
+export interface ReviewsStatus {
+  paperclipId: string;
+  steps: {
+    published: boolean;
+    criticsAggregated: boolean;
+    audienceAggregated: boolean;
+  };
+  summary: {
+    total: number;
+    avgScore: number | null;
+    criticsAvg: number | null;
+    audienceAvg: number | null;
+    criticsCount: number;
+    audienceCount: number;
+    positive: number;
+    mixed: number;
+    negative: number;
+    positivePct: number;
+  };
+  topReview: {
+    outlet: string;
+    reviewer: string | null;
+    score: number | null;
+    headline: string | null;
+    sentiment: "positive" | "mixed" | "negative";
+    publishedAt: string;
+  } | null;
+}
+
 interface AggregatorResponse {
   creativeSteps: StepProgress[];
   postProduction: PostProductionStatus | null;
@@ -257,6 +319,8 @@ interface AggregatorResponse {
   titles: TitlesStatus | null;
   festivals: FestivalsStatus | null;
   marketing: MarketingStatus | null;
+  boxOffice: BoxOfficeStatus | null;
+  reviews: ReviewsStatus | null;
 }
 
 /**
@@ -281,6 +345,8 @@ export function useProjectProgress(projectId: string) {
   const [titles, setTitles] = useState<TitlesStatus | null>(null);
   const [festivals, setFestivals] = useState<FestivalsStatus | null>(null);
   const [marketing, setMarketing] = useState<MarketingStatus | null>(null);
+  const [boxOffice, setBoxOffice] = useState<BoxOfficeStatus | null>(null);
+  const [reviews, setReviews] = useState<ReviewsStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -303,6 +369,8 @@ export function useProjectProgress(projectId: string) {
           setTitles(data.titles);
           setFestivals(data.festivals);
           setMarketing(data.marketing);
+          setBoxOffice(data.boxOffice);
+          setReviews(data.reviews);
         }
       } catch {
         // Silent fail: keep defaults
@@ -319,5 +387,5 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing };
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing, boxOffice, reviews };
 }

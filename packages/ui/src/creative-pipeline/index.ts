@@ -17,6 +17,8 @@ export type {
   TitlesStatus,
   FestivalsStatus,
   MarketingStatus,
+  BoxOfficeStatus,
+  ReviewsStatus,
 } from "./useProjectProgress";
 export { PostProductionPanel } from "./PostProductionPanel";
 export { DistributionPanel } from "./DistributionPanel";
@@ -29,3 +31,5 @@ export { IngestPanel } from "./IngestPanel";
 export { TitlesPanel } from "./TitlesPanel";
 export { FestivalsPanel } from "./FestivalsPanel";
 export { MarketingPanel } from "./MarketingPanel";
+export { BoxOfficePanel } from "./BoxOfficePanel";
+export { ReviewsPanel } from "./ReviewsPanel";

@@ -11,6 +11,8 @@ import { GET as ingestProgressGET } from "../../../ingest/progress/route";
 import { GET as titlesProgressGET } from "../../../titles/progress/route";
 import { GET as festivalsProgressGET } from "../../../festivals/progress/route";
 import { GET as marketingProgressGET } from "../../../marketing/progress/route";
+import { GET as boxOfficeProgressGET } from "../../../boxoffice/progress/route";
+import { GET as reviewsProgressGET } from "../../../reviews/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -159,7 +161,29 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk] = (await Promise.all([
+  const boxOfficeInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/boxoffice/progress?paperclipId=${enc}`);
+      const res = await boxOfficeProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const reviewsInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/reviews/progress?paperclipId=${enc}`);
+      const res = await reviewsProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -173,7 +197,9 @@ export async function GET(
     titlesInProcess,
     festivalsInProcess,
     marketingInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any];
+    boxOfficeInProcess,
+    reviewsInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -300,6 +326,25 @@ export async function GET(
       }
     : null;
 
+  const boxOffice = bx?.found
+    ? {
+        paperclipId: bx.paperclipId,
+        steps: bx.steps,
+        summary: bx.summary,
+        meta: bx.meta,
+        latestWeek: bx.latestWeek,
+      }
+    : null;
+
+  const reviews = rv?.found
+    ? {
+        paperclipId: rv.paperclipId,
+        steps: rv.steps,
+        summary: rv.summary,
+        topReview: rv.topReview,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -313,5 +358,7 @@ export async function GET(
     titles,
     festivals,
     marketing,
+    boxOffice,
+    reviews,
   });
 }
