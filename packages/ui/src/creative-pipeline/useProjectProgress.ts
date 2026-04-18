@@ -58,11 +58,33 @@ export interface ScheduleStatus {
   activeDay: ScheduleStatus["nextDay"];
 }
 
+export interface BudgetStatus {
+  paperclipId: string;
+  steps: {
+    drafted: boolean;
+    approved: boolean;
+  };
+  status: "draft" | "submitted" | "approved" | "locked";
+  totalAllocated: number;
+  currency: "KRW";
+  summary: {
+    spent: number;
+    remaining: number;
+    burnRatePct: number;
+  };
+  departments: Array<{
+    department: string;
+    allocated: number;
+    spent: number;
+  }>;
+}
+
 interface AggregatorResponse {
   creativeSteps: StepProgress[];
   postProduction: PostProductionStatus | null;
   distribution: DistributionStatus | null;
   schedule: ScheduleStatus | null;
+  budget: BudgetStatus | null;
 }
 
 /**
@@ -79,6 +101,7 @@ export function useProjectProgress(projectId: string) {
     null,
   );
   const [schedule, setSchedule] = useState<ScheduleStatus | null>(null);
+  const [budget, setBudget] = useState<BudgetStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -93,6 +116,7 @@ export function useProjectProgress(projectId: string) {
           setPostProduction(data.postProduction);
           setDistribution(data.distribution);
           setSchedule(data.schedule);
+          setBudget(data.budget);
         }
       } catch {
         // Silent fail: keep defaults
@@ -109,5 +133,5 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule };
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget };
 }

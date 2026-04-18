@@ -3,6 +3,7 @@ import type { StepProgress, StepStatus } from "@marionette/ui";
 import { GET as libraryProgressGET } from "../../../library/progress/route";
 import { GET as postProgressGET } from "../../../post/progress/route";
 import { GET as scheduleProgressGET } from "../../../schedule/progress/route";
+import { GET as budgetProgressGET } from "../../../budget/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -63,13 +64,25 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc] = (await Promise.all([
+  const budgetInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/budget/progress?paperclipId=${enc}`);
+      const res = await budgetProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
     libraryInProcess,
     scheduleInProcess,
-  ])) as [any, any, any, any, any];
+    budgetInProcess,
+  ])) as [any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -111,10 +124,23 @@ export async function GET(
       }
     : null;
 
+  const budget = bg?.found
+    ? {
+        paperclipId: bg.paperclipId,
+        steps: bg.steps,
+        status: bg.status,
+        totalAllocated: bg.totalAllocated,
+        currency: bg.currency,
+        summary: bg.summary,
+        departments: bg.departments,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
     distribution,
     schedule,
+    budget,
   });
 }
