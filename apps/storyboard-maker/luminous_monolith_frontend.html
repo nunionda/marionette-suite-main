@@ -452,5 +452,73 @@
             heroImg.style.transform = `scale(1.05) translate(${xAxis * 1.5}px, ${yAxis * 1.5}px)`;
         });
     </script>
+
+<div id="hub-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="background:#111;border:1px solid #333;border-radius:12px;padding:2rem;min-width:340px;color:#eee;font-family:monospace;">
+    <h2 style="margin:0 0 1rem;font-size:1.1rem;letter-spacing:.1em;">STORYBOARD MAKER</h2>
+    <div id="hub-project-id" style="font-size:.8rem;color:#888;margin-bottom:1.5rem;"></div>
+    <div id="hub-steps" style="display:flex;gap:.75rem;margin-bottom:1.5rem;">
+      <span id="step-imagePrompt" style="padding:.3rem .7rem;border-radius:4px;font-size:.75rem;background:#222;color:#666;">imagePrompt ⏳</span>
+      <span id="step-videoPrompt" style="padding:.3rem .7rem;border-radius:4px;font-size:.75rem;background:#222;color:#666;">videoPrompt ⏳</span>
+    </div>
+    <form id="hub-form">
+      <input id="hub-scene" name="scene" placeholder="Scene description (optional)" style="width:100%;box-sizing:border-box;background:#1a1a1a;border:1px solid #444;color:#eee;padding:.5rem;border-radius:4px;margin-bottom:.75rem;font-family:monospace;font-size:.85rem;">
+      <button type="submit" style="width:100%;padding:.6rem;background:#e50914;border:none;color:#fff;border-radius:4px;cursor:pointer;font-size:.9rem;letter-spacing:.05em;">GENERATE</button>
+    </form>
+    <div id="hub-msg" style="margin-top:.75rem;font-size:.8rem;color:#aaa;"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const pid = params.get('paperclipId');
+  if (!pid) return;
+
+  const overlay = document.getElementById('hub-overlay');
+  overlay.style.display = 'flex';
+  document.getElementById('hub-project-id').textContent = 'Project: ' + pid;
+
+  function updateBadge(id, done) {
+    const el = document.getElementById('step-' + id);
+    if (!el) return;
+    el.style.background = done ? '#1a472a' : '#222';
+    el.style.color = done ? '#4ade80' : '#666';
+    el.textContent = id + (done ? ' ✅' : ' ⏳');
+  }
+
+  function poll() {
+    fetch('/api/progress?paperclipId=' + encodeURIComponent(pid))
+      .then(r => r.json())
+      .then(data => {
+        const steps = data.steps || {};
+        updateBadge('imagePrompt', steps.imagePrompt);
+        updateBadge('videoPrompt', steps.videoPrompt);
+      })
+      .catch(() => {});
+  }
+
+  poll();
+  setInterval(poll, 5000);
+
+  document.getElementById('hub-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const scene = document.getElementById('hub-scene').value.trim();
+    const body = { paperclipId: pid };
+    if (scene) body.scene = scene;
+    fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }).then(r => r.json()).then(data => {
+      document.getElementById('hub-msg').textContent = data.status === 'started'
+        ? 'Generation started! Polling for progress…'
+        : JSON.stringify(data);
+    }).catch(err => {
+      document.getElementById('hub-msg').textContent = 'Error: ' + err.message;
+    });
+  });
+})();
+</script>
 </body>
 </html>
