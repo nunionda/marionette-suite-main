@@ -18,6 +18,7 @@ const navItems = [
   { href: "/rehearsals", label: "Rehearsals", icon: "🎬" },
   { href: "/ingest", label: "Data Ingest", icon: "💾" },
   { href: "/post", label: "Post Studio", icon: "✂️" },
+  { href: "/assembly", label: "Assembly", icon: "🎞️" },
   { href: "/titles", label: "Titles", icon: "🔤" },
   { href: "/festivals", label: "Festivals", icon: "🏆" },
   { href: "/marketing", label: "Marketing", icon: "📣" },

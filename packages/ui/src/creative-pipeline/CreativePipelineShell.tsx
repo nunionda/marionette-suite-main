@@ -15,6 +15,7 @@ import { FestivalsPanel } from "./FestivalsPanel";
 import { MarketingPanel } from "./MarketingPanel";
 import { BoxOfficePanel } from "./BoxOfficePanel";
 import { ReviewsPanel } from "./ReviewsPanel";
+import { AssemblyPanel } from "./AssemblyPanel";
 import { useProjectProgress } from "./useProjectProgress";
 import type { ProjectMeta, DeepLink, StepKey } from "./types";
 import { STEPS } from "./types";
@@ -27,7 +28,7 @@ interface Props {
 }
 
 export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
-  const { progress, currentStep, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing, boxOffice, reviews } = useProjectProgress(meta.id);
+  const { progress, currentStep, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing, boxOffice, reviews, assembly } = useProjectProgress(meta.id);
 
   return (
     <div
@@ -143,7 +144,7 @@ export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
         </div>
 
         {/* Sprint 1+: pre-production + production + post-production + distribution panels */}
-        {(schedule || budget || casting || locations || rehearsals || ingest || postProduction || titles || festivals || marketing || distribution || boxOffice || reviews) && (
+        {(schedule || budget || casting || locations || rehearsals || ingest || postProduction || titles || festivals || marketing || distribution || boxOffice || reviews || assembly) && (
           <div className="mt-6 flex flex-col gap-4">
             {schedule && <SchedulePanel status={schedule} />}
             {budget && <BudgetPanel status={budget} />}
@@ -152,6 +153,7 @@ export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
             {rehearsals && <RehearsalsPanel status={rehearsals} />}
             {ingest && <IngestPanel status={ingest} />}
             {postProduction && <PostProductionPanel status={postProduction} />}
+            {assembly && <AssemblyPanel status={assembly} />}
             {titles && <TitlesPanel status={titles} />}
             {distribution && <DistributionPanel status={distribution} />}
             {festivals && <FestivalsPanel status={festivals} />}

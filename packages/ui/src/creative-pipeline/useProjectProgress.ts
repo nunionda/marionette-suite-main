@@ -298,6 +298,41 @@ export interface BoxOfficeStatus {
   } | null;
 }
 
+export interface AssemblyStatus {
+  paperclipId: string;
+  steps: {
+    queued: boolean;
+    rendering: boolean;
+    mastered: boolean;
+  };
+  summary: {
+    total: number;
+    done: number;
+    running: number;
+    failed: number;
+    queued: number;
+    mastered: number;
+    totalSizeGB: number;
+    pctOverall: number;
+    presetsDelivered: string[];
+  };
+  latestJob: {
+    id: string;
+    version: string;
+    status: "queued" | "running" | "done" | "failed";
+    preset: string;
+    resolution: "720p" | "1080p" | "2K" | "4K";
+    hdr: "sdr" | "hdr10" | "dolby_vision";
+    audioFormat: "stereo" | "5_1" | "atmos";
+    renderedSec: number;
+    durationSec: number;
+    pct: number;
+    outputSizeGB: number | null;
+    outputPath: string | null;
+    completedAt: string | null;
+  } | null;
+}
+
 export interface ReviewsStatus {
   paperclipId: string;
   steps: {
@@ -342,6 +377,7 @@ interface AggregatorResponse {
   marketing: MarketingStatus | null;
   boxOffice: BoxOfficeStatus | null;
   reviews: ReviewsStatus | null;
+  assembly: AssemblyStatus | null;
 }
 
 /**
@@ -368,6 +404,7 @@ export function useProjectProgress(projectId: string) {
   const [marketing, setMarketing] = useState<MarketingStatus | null>(null);
   const [boxOffice, setBoxOffice] = useState<BoxOfficeStatus | null>(null);
   const [reviews, setReviews] = useState<ReviewsStatus | null>(null);
+  const [assembly, setAssembly] = useState<AssemblyStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -392,6 +429,7 @@ export function useProjectProgress(projectId: string) {
           setMarketing(data.marketing);
           setBoxOffice(data.boxOffice);
           setReviews(data.reviews);
+          setAssembly(data.assembly);
         }
       } catch {
         // Silent fail: keep defaults
@@ -408,5 +446,5 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing, boxOffice, reviews };
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing, boxOffice, reviews, assembly };
 }

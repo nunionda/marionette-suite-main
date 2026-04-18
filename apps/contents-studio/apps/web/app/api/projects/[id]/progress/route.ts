@@ -13,6 +13,7 @@ import { GET as festivalsProgressGET } from "../../../festivals/progress/route";
 import { GET as marketingProgressGET } from "../../../marketing/progress/route";
 import { GET as boxOfficeProgressGET } from "../../../boxoffice/progress/route";
 import { GET as reviewsProgressGET } from "../../../reviews/progress/route";
+import { GET as assemblyProgressGET } from "../../../assembly/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -183,7 +184,18 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv] = (await Promise.all([
+  const assemblyInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/assembly/progress?paperclipId=${enc}`);
+      const res = await assemblyProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -199,7 +211,8 @@ export async function GET(
     marketingInProcess,
     boxOfficeInProcess,
     reviewsInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
+    assemblyInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -348,6 +361,15 @@ export async function GET(
       }
     : null;
 
+  const assembly = asm?.found
+    ? {
+        paperclipId: asm.paperclipId,
+        steps: asm.steps,
+        summary: asm.summary,
+        latestJob: asm.latestJob,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -363,5 +385,6 @@ export async function GET(
     marketing,
     boxOffice,
     reviews,
+    assembly,
   });
 }

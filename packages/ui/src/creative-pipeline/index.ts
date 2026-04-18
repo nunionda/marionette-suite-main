@@ -19,6 +19,7 @@ export type {
   MarketingStatus,
   BoxOfficeStatus,
   ReviewsStatus,
+  AssemblyStatus,
 } from "./useProjectProgress";
 export { PostProductionPanel } from "./PostProductionPanel";
 export { DistributionPanel } from "./DistributionPanel";
@@ -33,3 +34,4 @@ export { FestivalsPanel } from "./FestivalsPanel";
 export { MarketingPanel } from "./MarketingPanel";
 export { BoxOfficePanel } from "./BoxOfficePanel";
 export { ReviewsPanel } from "./ReviewsPanel";
+export { AssemblyPanel } from "./AssemblyPanel";
