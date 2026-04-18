@@ -6,6 +6,7 @@ import { GET as scheduleProgressGET } from "../../../schedule/progress/route";
 import { GET as budgetProgressGET } from "../../../budget/progress/route";
 import { GET as castingProgressGET } from "../../../casting/progress/route";
 import { GET as locationsProgressGET } from "../../../locations/progress/route";
+import { GET as rehearsalsProgressGET } from "../../../rehearsals/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -99,7 +100,18 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc] = (await Promise.all([
+  const rehearsalsInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/rehearsals/progress?paperclipId=${enc}`);
+      const res = await rehearsalsProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -108,7 +120,8 @@ export async function GET(
     budgetInProcess,
     castingInProcess,
     locationsInProcess,
-  ])) as [any, any, any, any, any, any, any, any];
+    rehearsalsInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -180,6 +193,16 @@ export async function GET(
       }
     : null;
 
+  const rehearsals = rh?.found
+    ? {
+        paperclipId: rh.paperclipId,
+        steps: rh.steps,
+        summary: rh.summary,
+        next: rh.next,
+        active: rh.active,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -188,5 +211,6 @@ export async function GET(
     budget,
     casting,
     locations,
+    rehearsals,
   });
 }

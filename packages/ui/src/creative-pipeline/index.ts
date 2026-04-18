@@ -12,6 +12,7 @@ export type {
   BudgetStatus,
   CastingStatus,
   LocationsStatus,
+  RehearsalsStatus,
 } from "./useProjectProgress";
 export { PostProductionPanel } from "./PostProductionPanel";
 export { DistributionPanel } from "./DistributionPanel";
@@ -19,3 +20,4 @@ export { SchedulePanel } from "./SchedulePanel";
 export { BudgetPanel } from "./BudgetPanel";
 export { CastingPanel } from "./CastingPanel";
 export { LocationsPanel } from "./LocationsPanel";
+export { RehearsalsPanel } from "./RehearsalsPanel";

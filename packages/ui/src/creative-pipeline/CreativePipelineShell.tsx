@@ -8,6 +8,7 @@ import { SchedulePanel } from "./SchedulePanel";
 import { BudgetPanel } from "./BudgetPanel";
 import { CastingPanel } from "./CastingPanel";
 import { LocationsPanel } from "./LocationsPanel";
+import { RehearsalsPanel } from "./RehearsalsPanel";
 import { useProjectProgress } from "./useProjectProgress";
 import type { ProjectMeta, DeepLink, StepKey } from "./types";
 import { STEPS } from "./types";
@@ -20,7 +21,7 @@ interface Props {
 }
 
 export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
-  const { progress, currentStep, postProduction, distribution, schedule, budget, casting, locations } = useProjectProgress(meta.id);
+  const { progress, currentStep, postProduction, distribution, schedule, budget, casting, locations, rehearsals } = useProjectProgress(meta.id);
 
   return (
     <div
@@ -135,13 +136,14 @@ export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
           })}
         </div>
 
-        {/* Sprint 1+: schedule / budget / casting / locations / post-production / distribution panels */}
-        {(schedule || budget || casting || locations || postProduction || distribution) && (
+        {/* Sprint 1+: pre-production + post-production + distribution panels */}
+        {(schedule || budget || casting || locations || rehearsals || postProduction || distribution) && (
           <div className="mt-6 flex flex-col gap-4">
             {schedule && <SchedulePanel status={schedule} />}
             {budget && <BudgetPanel status={budget} />}
             {casting && <CastingPanel status={casting} />}
             {locations && <LocationsPanel status={locations} />}
+            {rehearsals && <RehearsalsPanel status={rehearsals} />}
             {postProduction && <PostProductionPanel status={postProduction} />}
             {distribution && <DistributionPanel status={distribution} />}
           </div>

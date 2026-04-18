@@ -119,6 +119,31 @@ export interface LocationsStatus {
   }>;
 }
 
+export interface RehearsalsStatus {
+  paperclipId: string;
+  steps: {
+    scheduled: boolean;
+    started: boolean;
+    done: boolean;
+  };
+  summary: {
+    total: number;
+    completed: number;
+    inProgress: number;
+    scheduled: number;
+    totalHours: number;
+  };
+  next: {
+    id: string;
+    date: string;
+    type: string;
+    venue: string;
+    durationHours: number;
+    attendees: string[];
+  } | null;
+  active: RehearsalsStatus["next"];
+}
+
 interface AggregatorResponse {
   creativeSteps: StepProgress[];
   postProduction: PostProductionStatus | null;
@@ -127,6 +152,7 @@ interface AggregatorResponse {
   budget: BudgetStatus | null;
   casting: CastingStatus | null;
   locations: LocationsStatus | null;
+  rehearsals: RehearsalsStatus | null;
 }
 
 /**
@@ -146,6 +172,7 @@ export function useProjectProgress(projectId: string) {
   const [budget, setBudget] = useState<BudgetStatus | null>(null);
   const [casting, setCasting] = useState<CastingStatus | null>(null);
   const [locations, setLocations] = useState<LocationsStatus | null>(null);
+  const [rehearsals, setRehearsals] = useState<RehearsalsStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -163,6 +190,7 @@ export function useProjectProgress(projectId: string) {
           setBudget(data.budget);
           setCasting(data.casting);
           setLocations(data.locations);
+          setRehearsals(data.rehearsals);
         }
       } catch {
         // Silent fail: keep defaults
@@ -179,5 +207,5 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations };
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals };
 }
