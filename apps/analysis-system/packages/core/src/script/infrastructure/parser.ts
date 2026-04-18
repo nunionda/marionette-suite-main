@@ -50,7 +50,7 @@ function preprocessKoreanInlineDialogue(text: string): string {
     const m = trimmed.match(candidateRe);
     if (!m) continue;
     const name = m[1];
-    if (name.length < 2) continue;
+    if (name === undefined || name.length < 2) continue;
     if (excludedWords.has(name)) continue;
     if (verbEndingRe.test(name)) continue;
     // Reject words ending in object/possessive/locative particles
@@ -86,10 +86,12 @@ function preprocessKoreanInlineDialogue(text: string): string {
   for (const line of lines) {
     const trimmed = line.trim();
     const m = trimmed.match(candidateRe);
-    if (m && confirmedNames.has(m[1])) {
+    const name = m?.[1];
+    const rest = m?.[2];
+    if (name !== undefined && rest !== undefined && confirmedNames.has(name)) {
       // Split into character line + dialogue line
-      result.push(m[1]);
-      result.push(m[2]);
+      result.push(name);
+      result.push(rest);
     } else {
       result.push(line);
     }

@@ -17,8 +17,8 @@
 4. **모듈 anatomy 4 deliverable**: route namespace + progress API + deep-link + aggregator 등록
 
 ### Sprint 로드맵 요약
-- **0** CI 안정화 — 현재 진행 중
-- **1** Pre-prod Ops (#16, #17, #20)
+- **0** CI 안정화 — ✅ prompt-adapters 해결 (root cause: packages/tsconfig/{base,nextjs,node}.json 미커밋), 🟡 analysis-system은 별도 dev debt로 defer (Sprint 0.5-bis 후보: Prisma schema drift + scripts/export-reports.ts DOM lib)
+- **1** Pre-prod Ops (#16, #17, #20) ← **next**
 - **2** Design Track 갭 (#24.5~.8)
 - **3** Design Track 완성 (#24.9~.11, #28)
 - **4** Pre-prod 부대 (#18, #23)

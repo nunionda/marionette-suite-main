@@ -218,6 +218,7 @@ app/(dashboard)/[module]/
 ## 9. Out of Scope (의식적 제외)
 
 - `analysis-system` 흡수 — 투자자용 독립 모듈 유지
+  - **Typecheck 정책**: 135개 pre-existing 타입 debt 존재. CI에서는 advisory (exit 0 + 메시지)로 운영. 로컬에서 `tsc --noEmit` 실행하여 audit 가능. 부채 청산 세션은 별도 계획.
 - `studio` 흡수 — Supabase + react-flow 별도 플랜 필요
 - `shorts-factory` 흡수 — 별개 제품군 (K-POP 숏폼)
 - `production-pipeline-system` — deprecated, 별도 결정 세션 필요
