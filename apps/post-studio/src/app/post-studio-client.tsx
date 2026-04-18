@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type {
   PostProject,
   EditCut,
@@ -32,6 +32,14 @@ interface Props {
 export function PostStudioClient(props: Props) {
   const [activeProject, setActiveProject] = useState(props.projects[0]?.id ?? "");
   const [tab, setTab] = useState<TabKey>("edit");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pid = params.get("paperclipId");
+    if (pid && props.projects.some((p) => p.id === pid)) {
+      setActiveProject(pid);
+    }
+  }, [props.projects]);
 
   const project = props.projects.find((p) => p.id === activeProject);
   const filter = <T extends { projectId: string }>(arr: T[]) =>
