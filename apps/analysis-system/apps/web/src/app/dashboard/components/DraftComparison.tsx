@@ -82,7 +82,7 @@ export default function DraftComparison({
     setComparisonResult(null);
 
     try {
-      const res = await fetch('http://localhost:4006/compare', {
+      const res = await fetch(`${(process.env.INTERNAL_ANALYSIS_API_URL ?? "http://localhost:4006")}/compare`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

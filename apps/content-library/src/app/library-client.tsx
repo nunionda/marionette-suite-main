@@ -52,7 +52,7 @@ export function LibraryClient({ entries }: { entries: LibraryEntry[] }) {
               완성작 아카이브 · 영화 · 드라마 · 광고 · 유튜브
             </p>
           </div>
-          <a href="http://localhost:4001/projects" className="text-xs underline opacity-70 hover:opacity-100">
+          <a href={`${process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:4001"}/projects`} className="text-xs underline opacity-70 hover:opacity-100">
             ← Hub
           </a>
         </div>

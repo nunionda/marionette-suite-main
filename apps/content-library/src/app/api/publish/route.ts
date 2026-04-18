@@ -4,7 +4,7 @@ import type { LibraryEntry } from "@marionette/types-content";
 
 // Allow cross-origin calls from post-studio (:4002)
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "http://localhost:4002",
+  "Access-Control-Allow-Origin": (process.env.NEXT_PUBLIC_POST_STUDIO_URL ?? "http://localhost:4002"),
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };

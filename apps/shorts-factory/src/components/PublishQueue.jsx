@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API = 'http://localhost:3008';
+const API = (process.env.INTERNAL_SHORTS_FACTORY_BACKEND_URL ?? "http://localhost:3008");
 
 const STATUS_META = {
   pending:   { label: 'Draft',      color: 'var(--text-dim)',    icon: '○' },

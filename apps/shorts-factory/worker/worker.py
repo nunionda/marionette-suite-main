@@ -31,7 +31,7 @@ from logo_downloader import download_channel_logo
 
 APP_DIR = os.path.join(os.path.dirname(__file__), "..")
 DB_PATH = os.path.join(APP_DIR, "shorts_factory.db")
-API_BASE = os.environ.get("SHORTS_API_BASE", "http://localhost:3008")
+API_BASE = os.environ.get("SHORTS_API_BASE", os.environ.get("INTERNAL_SHORTS_FACTORY_BACKEND_URL", "http://localhost:3008"))
 WORKER_SECRET = os.environ.get("WORKER_SECRET", "")
 POLL_INTERVAL = 5  # seconds between polls when queue is empty
 

@@ -9,11 +9,11 @@
  *
  * // 서비스 URL 조합
  * const url = serviceUrl("pipelineApi", ENDPOINTS.pipelineApi.health);
- * // → "http://localhost:3005/api/health"
+ * // → `${(process.env.INTERNAL_CONTENTS_STUDIO_API_URL ?? "http://localhost:3005")}/api/health`
  *
  * // 동적 경로
  * const projectUrl = serviceUrl("pipelineApi", ENDPOINTS.pipelineApi.project("abc123"));
- * // → "http://localhost:3005/api/projects/abc123"
+ * // → `${(process.env.INTERNAL_CONTENTS_STUDIO_API_URL ?? "http://localhost:3005")}/api/projects/abc123`
  *
  * // WebSocket
  * const wsUrl = serviceWs("pipelineApi", ENDPOINTS.pipelineApi.wsPipeline);

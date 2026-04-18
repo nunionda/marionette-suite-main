@@ -10,7 +10,7 @@
  *   - Storyboard → /api/generate
  */
 
-const STORYBOARD_API = import.meta.env.VITE_STORYBOARD_API_URL || 'http://localhost:3007';
+const STORYBOARD_API = import.meta.env.VITE_STORYBOARD_API_URL || (process.env.NEXT_PUBLIC_STORYBOARD_URL ?? "http://localhost:3007");
 
 /**
  * Check if storyboard server is available.

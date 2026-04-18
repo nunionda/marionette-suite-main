@@ -18,7 +18,7 @@ import "./db";
 const PORT = Number(process.env.PORT) || 3008;
 
 const app = new Elysia()
-  .use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(",") ?? ["http://localhost:5178"] }))
+  .use(cors({ origin: process.env.ALLOWED_ORIGINS?.split(",") ?? [(process.env.NEXT_PUBLIC_SHORTS_FACTORY_URL ?? "http://localhost:5178")] }))
   .use(staticPlugin({ prefix: "/output", assets: "./output" }))
   .use(sourcesRoutes)
   .use(templatesRoutes)

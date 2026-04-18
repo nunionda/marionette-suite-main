@@ -58,7 +58,7 @@ export default function ShotReviewGallery({ shotId = "SC_001_020", runId, step =
 
   const fetchTakes = async () => {
     try {
-      const response = await fetch(`http://localhost:3005/api/pipeline/${runId}/takes?step=${step}&shot_id=${shotId}`);
+      const response = await fetch(`${(process.env.INTERNAL_CONTENTS_STUDIO_API_URL ?? "http://localhost:3005")}/api/pipeline/${runId}/takes?step=${step}&shot_id=${shotId}`);
       const data = await response.json();
       const mappedTakes: Take[] = data.map((t: any) => ({
         id: t.id,
@@ -83,7 +83,7 @@ export default function ShotReviewGallery({ shotId = "SC_001_020", runId, step =
   const handleShotgun = async () => {
     setIsShotgunning(true);
     try {
-      await fetch(`http://localhost:3005/api/pipeline/${runId}/shotgun?step=${step}&shot_id=${shotId}&num_takes=3`, { method: 'POST' });
+      await fetch(`${(process.env.INTERNAL_CONTENTS_STUDIO_API_URL ?? "http://localhost:3005")}/api/pipeline/${runId}/shotgun?step=${step}&shot_id=${shotId}&num_takes=3`, { method: 'POST' });
       await fetchTakes();
     } finally {
       setIsShotgunning(false);

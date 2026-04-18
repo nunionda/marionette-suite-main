@@ -17,7 +17,7 @@ import { join } from "path";
 const TOKEN_PATH = join(import.meta.dir, "../../../youtube-tokens.json");
 const REDIRECT_URI =
   process.env.YOUTUBE_REDIRECT_URI ??
-  "http://localhost:3008/api/auth/youtube/callback";
+  `${(process.env.INTERNAL_SHORTS_FACTORY_BACKEND_URL ?? "http://localhost:3008")}/api/auth/youtube/callback`;
 const SCOPES = ["https://www.googleapis.com/auth/youtube.upload"];
 
 function createClient() {

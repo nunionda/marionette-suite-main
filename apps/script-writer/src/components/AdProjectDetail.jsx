@@ -25,7 +25,7 @@ import { useAgentEngine } from '../hooks/useAgentEngine';
 import AnalyticsDashboard from './AnalyticsDashboard';
 import ScriptTableView from './ScriptTableView';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3006';
+const API_BASE = import.meta.env.VITE_API_URL || (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
 
 const AD_GENRE_HINTS = {
   'BrandFilm':    { icon: '✨', name: 'Brand Film',          cues: ['Cinematic', 'Emotional', 'Manifesto', 'Brand DNA'],       copyTone: '시적·철학적 VO',  visualRef: 'Apple / Nike / Patagonia' },

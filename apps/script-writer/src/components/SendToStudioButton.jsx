@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const STUDIO_API = import.meta.env.VITE_STUDIO_API_URL || 'http://localhost:3005';
+const STUDIO_API = import.meta.env.VITE_STUDIO_API_URL || (process.env.INTERNAL_CONTENTS_STUDIO_API_URL ?? "http://localhost:3005");
 
 /**
  * script-writer에서 완성된 스크립트를 마리오네트 스튜디오로 내보내는 버튼.

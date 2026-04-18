@@ -31,7 +31,7 @@ export default function DashboardPage() {
               📚 Library
             </Link>
             <a
-              href="http://localhost:4001/projects"
+              href={`${process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:4001"}/projects`}
               className="underline opacity-70 hover:opacity-100"
             >
               ← Hub

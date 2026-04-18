@@ -60,7 +60,7 @@ export function PostStudioClient(props: Props) {
             </p>
           </div>
           <a
-            href="http://localhost:4001/projects"
+            href={`${process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:4001"}/projects`}
             className="text-xs underline opacity-70 hover:opacity-100"
           >
             ← Hub
@@ -307,7 +307,7 @@ function DeliveryTab({ rows, project }: { rows: DeliveryItem[]; project: PostPro
   const handlePublish = useCallback(async () => {
     setPublishState("loading");
     try {
-      const res = await fetch("http://localhost:4003/api/publish", {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_CONTENT_LIBRARY_URL ?? "http://localhost:4003")}/api/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

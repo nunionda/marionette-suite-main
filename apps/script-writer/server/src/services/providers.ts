@@ -50,7 +50,7 @@ export const PROVIDERS: Record<string, ProviderConfig> = {
   },
   'storyboard-concept': {
     id: 'storyboard-concept', name: 'Storyboard Concept Maker', type: 'image',
-    free: true, enabled: true, baseUrl: 'http://localhost:3007',
+    free: true, enabled: true, baseUrl: (process.env.NEXT_PUBLIC_STORYBOARD_URL ?? "http://localhost:3007"),
   },
   'midjourney': {
     id: 'midjourney', name: 'Midjourney', type: 'image',

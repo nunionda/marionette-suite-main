@@ -122,7 +122,7 @@ const STORYBOARD_FALLBACK = [
   { id: 'anderson_wes', label: 'Wes Anderson', desc: '대칭, 파스텔, 미니어처' },
 ];
 
-const STORYBOARD_API = 'http://localhost:3007';
+const STORYBOARD_API = (process.env.NEXT_PUBLIC_STORYBOARD_URL ?? "http://localhost:3007");
 
 function getNodeStyles(nodeId) {
   return STYLE_BY_NODE[nodeId] || null; // null means use storyboard server styles

@@ -7,7 +7,7 @@
 import path from "path";
 
 const WORKER_DIR = path.resolve(import.meta.dir, "../../../worker");
-const API_BASE = "http://localhost:3008";
+const API_BASE = (process.env.INTERNAL_SHORTS_FACTORY_BACKEND_URL ?? "http://localhost:3008");
 
 // Use /usr/bin/env to resolve python3 via the shell's PATH — avoids Bun's
 // posix_spawn limitation with multi-level symlinks (e.g. Homebrew Python).

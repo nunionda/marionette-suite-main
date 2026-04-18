@@ -5,7 +5,7 @@
  * When embedded in ProductionDeck iframe, posts results back to parent React app.
  */
 
-const STORYBOARD_API = 'http://localhost:3007';
+const STORYBOARD_API = (process.env.NEXT_PUBLIC_STORYBOARD_URL ?? "http://localhost:3007");
 
 const CONCEPT_ENDPOINTS = {
   character:   '/api/character',

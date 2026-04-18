@@ -14,7 +14,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 
-const BASE = "http://localhost:3006/api";
+const BASE = `${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/api`;
 
 // ────────────────────────────────────────────────────────────────────────────
 // Shared project IDs — populated during creation, cleaned up in afterAll
@@ -326,9 +326,9 @@ describe("[Commercial] CRUD cycle", () => {
 
   it("stores storyboardImages JSON as an object", async () => {
     const images = {
-      "1": "http://localhost:3006/storyboard/frame1.jpg",
-      "2": "http://localhost:3006/storyboard/frame2.jpg",
-      "3": "http://localhost:3006/storyboard/frame3.jpg",
+      "1": `${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/storyboard/frame1.jpg`,
+      "2": `${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/storyboard/frame2.jpg`,
+      "3": `${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/storyboard/frame3.jpg`,
     };
     const res = await fetch(`${BASE}/projects/${ids.commercial}`, {
       method: "PATCH",

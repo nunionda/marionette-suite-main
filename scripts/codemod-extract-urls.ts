@@ -44,13 +44,33 @@ if (!target) {
 // or after whitespace so we don't match the `//` inside `http://` URLs.
 const SKIP_LINE = /(console\.(log|warn|error|info|debug)|print\s*\(|echo\s|Logger\.|logger\.|^\s*\/\/|^\s*#\s)/;
 const URL_RE = /(["'`])http:\/\/localhost:(\d+)([^"'`]*)\1/g;
+// Detects URLs already wrapped in `process.env.X ?? "..."` or `process.env.X || "..."`.
+// Used to skip those URLs so we don't add a redundant nested fallback.
+const ALREADY_ENV_RE = /process\.env\.[A-Z_][A-Z0-9_]*\s*(?:\?\?|\|\|)\s*(["'`])http:\/\/localhost:\d+[^"'`]*\1/g;
 
 async function processFile(path: string): Promise<{ changed: number; skipped: number }> {
   const original = await readFile(path, "utf8");
   let changed = 0, skipped = 0;
   const lines = original.split("\n").map((line) => {
     if (SKIP_LINE.test(line)) return line;
-    return line.replace(URL_RE, (full, quote, port, rest) => {
+
+    // Find ranges of URLs that are already env-fallbacks; skip those.
+    const skipRanges: Array<[number, number]> = [];
+    ALREADY_ENV_RE.lastIndex = 0;
+    let m: RegExpExecArray | null;
+    while ((m = ALREADY_ENV_RE.exec(line)) !== null) {
+      const quote = m[1];
+      const urlStart = line.indexOf(quote + "http://localhost:", m.index);
+      if (urlStart >= 0) {
+        const urlEnd = m.index + m[0].length;
+        skipRanges.push([urlStart, urlEnd]);
+      }
+    }
+
+    return line.replace(URL_RE, (full, quote, port, rest, offset) => {
+      if (typeof offset === "number" && skipRanges.some(([s, e]) => offset >= s && offset < e)) {
+        return full;
+      }
       const mapping = PORT_MAP[port];
       if (!mapping) { skipped++; return full; }
       changed++;

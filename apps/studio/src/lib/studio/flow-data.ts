@@ -85,7 +85,7 @@ export function buildInitialEdges(cutSlug: string): Edge[] {
 const BACKEND_URL =
   typeof window !== 'undefined'
     ? (process.env.NEXT_PUBLIC_PRODUCTION_API_URL ?? 'http://localhost:3006')
-    : 'http://localhost:3006';
+    : (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
 
 /**
  * Extract pipeline-relevant fields from ReactFlow nodes → flat DB fields.

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 
-const BASE = "http://localhost:3006/api";
+const BASE = `${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/api`;
 
 // Track created IDs for cleanup
 let createdProjectId: number;
@@ -86,7 +86,7 @@ describe("PATCH /api/projects/:id", () => {
   });
 
   it("serializes storyboardImages JSON correctly", async () => {
-    const images = { "1": "http://localhost:3006/public/storyboard/images/test.jpg" };
+    const images = { "1": `${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/public/storyboard/images/test.jpg` };
     const res = await fetch(`${BASE}/projects/${createdProjectId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -214,7 +214,7 @@ describe("POST /api/projects/:id/export + GET /api/export/:jobId", () => {
 
 describe("GET /", () => {
   it("server health check", async () => {
-    const res = await fetch("http://localhost:3006/");
+    const res = await fetch(`${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/`);
     expect(res.status).toBe(200);
     const text = await res.text();
     expect(text).toContain("Alive");

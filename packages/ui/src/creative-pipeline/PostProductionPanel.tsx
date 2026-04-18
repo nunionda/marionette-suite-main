@@ -20,7 +20,7 @@ function pct(done: number, total: number): number {
   return Math.round((done / total) * 100);
 }
 
-export function PostProductionPanel({ status, postStudioBaseUrl = "http://localhost:4002" }: Props) {
+export function PostProductionPanel({ status, postStudioBaseUrl = (process.env.NEXT_PUBLIC_POST_STUDIO_URL ?? "http://localhost:4002") }: Props) {
   const { progress, steps } = status;
   const url = `${postStudioBaseUrl}/?paperclipId=${encodeURIComponent(status.paperclipId)}`;
 

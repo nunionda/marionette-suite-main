@@ -8,7 +8,7 @@ import { mkdirSync } from 'fs';
 
 // ── Configuration ──
 const API_BASE = 'http://localhost:4005';
-const WEB_BASE = 'http://localhost:4000';
+const WEB_BASE = (process.env.NEXT_PUBLIC_SCENARIO_WEB_URL ?? "http://localhost:4000");
 const OUTPUT_DIR = '/Users/daniel/Desktop/scripts/scripts-analysis-result';
 const WAIT_TIMEOUT_MS = 120_000; // 120s for KO translation
 const CHART_SETTLE_MS = 3_000;   // wait for chart animations

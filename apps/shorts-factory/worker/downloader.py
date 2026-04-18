@@ -14,7 +14,7 @@ import json
 import urllib.request
 import urllib.error
 
-API_BASE = os.environ.get("SHORTS_API_BASE", "http://localhost:3008")
+API_BASE = os.environ.get("SHORTS_API_BASE", os.environ.get("INTERNAL_SHORTS_FACTORY_BACKEND_URL", "http://localhost:3008"))
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "..", "output", "downloads")
 
 

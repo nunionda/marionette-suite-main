@@ -89,7 +89,7 @@ function AppContent() {
     const params = new URLSearchParams(window.location.search);
     const paperclipId = params.get('paperclipId');
     if (!paperclipId) return;
-    fetch(`http://localhost:3006/api/progress?paperclipId=${encodeURIComponent(paperclipId)}`)
+    fetch(`${(process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006")}/api/progress?paperclipId=${encodeURIComponent(paperclipId)}`)
       .then(r => r.json())
       .then(data => {
         if (data.found && data.projectId) {
