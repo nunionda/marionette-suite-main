@@ -19,6 +19,7 @@ const navItems = [
   { href: "/ingest", label: "Data Ingest", icon: "💾" },
   { href: "/post", label: "Post Studio", icon: "✂️" },
   { href: "/titles", label: "Titles", icon: "🔤" },
+  { href: "/festivals", label: "Festivals", icon: "🏆" },
   { href: "/library", label: "Content Library", icon: "📚" },
   { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },

@@ -15,6 +15,7 @@ export type {
   RehearsalsStatus,
   IngestStatus,
   TitlesStatus,
+  FestivalsStatus,
 } from "./useProjectProgress";
 export { PostProductionPanel } from "./PostProductionPanel";
 export { DistributionPanel } from "./DistributionPanel";
@@ -25,3 +26,4 @@ export { LocationsPanel } from "./LocationsPanel";
 export { RehearsalsPanel } from "./RehearsalsPanel";
 export { IngestPanel } from "./IngestPanel";
 export { TitlesPanel } from "./TitlesPanel";
+export { FestivalsPanel } from "./FestivalsPanel";

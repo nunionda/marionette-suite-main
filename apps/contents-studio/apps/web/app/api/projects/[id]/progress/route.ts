@@ -9,6 +9,7 @@ import { GET as locationsProgressGET } from "../../../locations/progress/route";
 import { GET as rehearsalsProgressGET } from "../../../rehearsals/progress/route";
 import { GET as ingestProgressGET } from "../../../ingest/progress/route";
 import { GET as titlesProgressGET } from "../../../titles/progress/route";
+import { GET as festivalsProgressGET } from "../../../festivals/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -135,7 +136,18 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl] = (await Promise.all([
+  const festivalsInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/festivals/progress?paperclipId=${enc}`);
+      const res = await festivalsProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -147,7 +159,8 @@ export async function GET(
     rehearsalsInProcess,
     ingestInProcess,
     titlesInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any];
+    festivalsInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -256,6 +269,15 @@ export async function GET(
       }
     : null;
 
+  const festivals = fs?.found
+    ? {
+        paperclipId: fs.paperclipId,
+        steps: fs.steps,
+        summary: fs.summary,
+        nextDeadline: fs.nextDeadline,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -267,5 +289,6 @@ export async function GET(
     rehearsals,
     ingest,
     titles,
+    festivals,
   });
 }
