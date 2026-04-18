@@ -33,7 +33,6 @@
     "apps/script-writer",
     "apps/shorts-factory",
     "apps/studio",
-    "packages/*",
-    "apps/production-pipeline/packages/*"
+    "packages/*"
   ]
 }
