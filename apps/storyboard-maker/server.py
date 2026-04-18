@@ -5,7 +5,10 @@ import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
+from src.job_store import JobStore
+
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
+_store = JobStore(os.path.join(OUTPUT_DIR, "jobs.db"))
 
 
 def _detect_image_done(output_dir: str, paperclip_id: str) -> bool:
@@ -27,22 +30,45 @@ def _detect_video_done(output_dir: str, paperclip_id: str) -> bool:
 class Handler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
-        if parsed.path == "/api/progress":
+
+        if parsed.path == "/":
+            index_html = os.path.join(os.path.dirname(__file__), "index.html")
+            try:
+                with open(index_html, "rb") as f:
+                    body = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "text/html; charset=utf-8")
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+            except FileNotFoundError:
+                self._respond(404, {"error": "index.html not found"})
+
+        elif parsed.path == "/api/progress":
             qs = parse_qs(parsed.query)
             paperclip_id = qs.get("paperclipId", [None])[0]
             if not paperclip_id:
                 self._respond(400, {"error": "paperclipId required"})
                 return
+            image_done = _detect_image_done(OUTPUT_DIR, paperclip_id)
+            video_done = _detect_video_done(OUTPUT_DIR, paperclip_id)
+            _store.upsert(paperclip_id, image_done=image_done, video_done=video_done)
             self._respond(200, {
                 "paperclipId": paperclip_id,
                 "found": True,
                 "steps": {
-                    "imagePrompt": _detect_image_done(OUTPUT_DIR, paperclip_id),
-                    "videoPrompt": _detect_video_done(OUTPUT_DIR, paperclip_id),
+                    "imagePrompt": image_done,
+                    "videoPrompt": video_done,
                 },
             })
+
+        elif parsed.path == "/api/jobs":
+            jobs = _store.list_recent()
+            self._respond(200, {"jobs": jobs})
+
         elif parsed.path == "/health":
             self._respond(200, {"status": "ok"})
+
         else:
             self._respond(404, {"error": "not found"})
 
