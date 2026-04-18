@@ -5,9 +5,23 @@ const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? "http://localhost:3006";
 const STORYBOARD_API =
   process.env.STORYBOARD_API_URL ?? "http://localhost:3007";
+const POST_STUDIO_API =
+  process.env.POST_STUDIO_API_URL ?? "http://localhost:4002";
+const CONTENT_LIBRARY_API =
+  process.env.CONTENT_LIBRARY_API_URL ?? "http://localhost:4003";
 
 function boolToStatus(done: boolean): StepStatus {
   return done ? "in_progress" : "not_started";
+}
+
+async function safeJson(url: string): Promise<unknown> {
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
 }
 
 export async function GET(
@@ -15,23 +29,19 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const enc = encodeURIComponent(id);
 
-  const [swResult, sbResult] = await Promise.allSettled([
-    fetch(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${encodeURIComponent(id)}`).then(
-      (r) => r.json(),
-    ),
-    fetch(`${STORYBOARD_API}/api/progress?paperclipId=${encodeURIComponent(id)}`).then(
-      (r) => r.json(),
-    ),
-  ]);
-
-  const sw = swResult.status === "fulfilled" ? swResult.value : null;
-  const sb = sbResult.status === "fulfilled" ? sbResult.value : null;
+  const [sw, sb, ps, cl] = (await Promise.all([
+    safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
+    safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
+    safeJson(`${POST_STUDIO_API}/api/progress?paperclipId=${enc}`),
+    safeJson(`${CONTENT_LIBRARY_API}/api/progress?paperclipId=${enc}`),
+  ])) as [any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
 
-  const progress: StepProgress[] = [
+  const creativeSteps: StepProgress[] = [
     { key: "logline",       status: boolToStatus(!!swSteps?.logline) },
     { key: "synopsis",      status: boolToStatus(!!swSteps?.synopsis) },
     { key: "treatment",     status: boolToStatus(!!swSteps?.treatment) },
@@ -42,5 +52,25 @@ export async function GET(
     { key: "video-prompt",  status: boolToStatus(!!sbSteps?.videoPrompt) },
   ];
 
-  return NextResponse.json(progress);
+  const postProduction = ps?.found
+    ? {
+        paperclipId: ps.paperclipId,
+        steps: ps.steps,
+        progress: ps.progress,
+      }
+    : null;
+
+  const distribution = cl?.found
+    ? {
+        paperclipId: cl.paperclipId,
+        published: !!cl.steps?.publish,
+        entry: cl.entry ?? null,
+      }
+    : null;
+
+  return NextResponse.json({
+    creativeSteps,
+    postProduction,
+    distribution,
+  });
 }

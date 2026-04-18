@@ -5,3 +5,7 @@ export { PipelineStepCard } from "./PipelineStepCard";
 export { CreativePipelineShell } from "./CreativePipelineShell";
 export { useProjectMeta } from "./useProjectMeta";
 export { useProjectProgress } from "./useProjectProgress";
+export type {
+  PostProductionStatus,
+  DistributionStatus,
+} from "./useProjectProgress";
