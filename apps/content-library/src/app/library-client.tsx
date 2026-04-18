@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import type { LibraryEntry } from "@marionette/types-content";
 import type { ContentCategory } from "@marionette/pipeline-core";
 import { MetricsWidget } from "@/components/MetricsWidget";
@@ -23,6 +23,14 @@ const categoryColors: Record<ContentCategory, string> = {
 export function LibraryClient({ entries }: { entries: LibraryEntry[] }) {
   const [filter, setFilter] = useState<ContentCategory | "all">("all");
   const [selected, setSelected] = useState<string | null>(entries[0]?.id ?? null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pid = params.get("paperclipId");
+    if (!pid) return;
+    const match = entries.find((e) => e.projectId === pid);
+    if (match) setSelected(match.id);
+  }, [entries]);
 
   const filtered = useMemo(
     () => (filter === "all" ? entries : entries.filter((e) => e.category === filter)),
