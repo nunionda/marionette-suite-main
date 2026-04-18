@@ -9,3 +9,5 @@ export type {
   PostProductionStatus,
   DistributionStatus,
 } from "./useProjectProgress";
+export { PostProductionPanel } from "./PostProductionPanel";
+export { DistributionPanel } from "./DistributionPanel";
