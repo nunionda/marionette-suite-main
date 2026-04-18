@@ -11,7 +11,7 @@ const navItems = [
   { href: process.env.NEXT_PUBLIC_STORYBOARD_URL || "http://localhost:8080", label: "Storyboard Concept", icon: "🎨", external: true },
   { href: process.env.NEXT_PUBLIC_ANALYSIS_URL || (process.env.NEXT_PUBLIC_ANALYSIS_WEB_URL ?? "http://localhost:4007"), label: "Scenario Analysis", icon: "📊", external: true },
   { href: process.env.NEXT_PUBLIC_PIPELINE_URL || "http://localhost:3000/dashboard", label: "Production Pipeline", icon: "⚙️", external: true },
-  { href: (process.env.NEXT_PUBLIC_POST_STUDIO_URL ?? "http://localhost:4002"), label: "Post Studio", icon: "✂️", external: true },
+  { href: "/post", label: "Post Studio", icon: "✂️" },
   { href: "/library", label: "Content Library", icon: "📚" },
   { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },

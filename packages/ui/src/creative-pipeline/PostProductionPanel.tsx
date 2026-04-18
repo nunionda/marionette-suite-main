@@ -20,9 +20,12 @@ function pct(done: number, total: number): number {
   return Math.round((done / total) * 100);
 }
 
-export function PostProductionPanel({ status, postStudioBaseUrl = (process.env.NEXT_PUBLIC_POST_STUDIO_URL ?? "http://localhost:4002") }: Props) {
+export function PostProductionPanel({
+  status,
+  postStudioBaseUrl = `${process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:4001"}/post`,
+}: Props) {
   const { progress, steps } = status;
-  const url = `${postStudioBaseUrl}/?paperclipId=${encodeURIComponent(status.paperclipId)}`;
+  const url = `${postStudioBaseUrl}?paperclipId=${encodeURIComponent(status.paperclipId)}`;
 
   const rows: { key: string; label: string; icon: string; pctValue: number; done: boolean; detail: string }[] = [
     { key: "edit",     label: "Edit",     icon: "✂️", pctValue: progress.edit,                                done: steps.edit,     detail: `${progress.edit}%` },
