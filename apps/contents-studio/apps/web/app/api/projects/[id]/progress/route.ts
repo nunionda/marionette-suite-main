@@ -24,9 +24,21 @@ function boolToStatus(done: boolean): StepStatus {
   return done ? "in_progress" : "not_started";
 }
 
+/**
+ * Fetch external spoke progress with a hard timeout.
+ *
+ * Why the timeout: aggregator fans out to script-writer (:3006) and
+ * storyboard (:3007). If either spoke is unreachable-but-accepting-connections
+ * (stale process, network partition, k8s readiness blip), a bare `fetch` hangs
+ * forever and the hub's project dashboard never renders. 5s is long enough for
+ * dev-mode cold responses and short enough that a single unhealthy spoke can't
+ * take down the entire page.
+ */
+const EXTERNAL_FETCH_TIMEOUT_MS = 5000;
+
 async function safeJson(url: string): Promise<unknown> {
   try {
-    const r = await fetch(url);
+    const r = await fetch(url, { signal: AbortSignal.timeout(EXTERNAL_FETCH_TIMEOUT_MS) });
     if (!r.ok) return null;
     return await r.json();
   } catch {
