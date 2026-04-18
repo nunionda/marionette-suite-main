@@ -46,4 +46,8 @@ export type { AgentStatus, MasteringMode, PipelineState } from "./PipelineProvid
 export { default as NodeGraphViewer } from "./NodeGraphViewer";
 export type { PipelineNode, PipelineEdge } from "./NodeGraphViewer";
 export { default as ProjectCreator } from "./ProjectCreator";
-export * from "./creative-pipeline";
+// Note: creative-pipeline is exposed via the "./creative-pipeline" subpath
+// export in package.json. Importers should use:
+//   import { CreativePipelineShell, ... } from "@marionette/ui/creative-pipeline";
+// This keeps the legacy (strict-incompatible) UI components out of consumers'
+// type-check graph when they only need the pipeline module.

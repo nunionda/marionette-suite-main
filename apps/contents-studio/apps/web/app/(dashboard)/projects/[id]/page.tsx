@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { findProject } from "@marionette/paperclip-bridge/registry";
 import { PipelineClient } from "./pipeline-client";
-import type { ProjectMeta } from "@marionette/ui";
+import type { ProjectMeta } from "@marionette/ui/creative-pipeline";
 
 interface PageProps {
   params: Promise<{ id: string }>;

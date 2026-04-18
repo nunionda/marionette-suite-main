@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { CreativePipelineShell, type ProjectMeta, type StepKey, type DeepLink } from "@marionette/ui";
+import { CreativePipelineShell, type ProjectMeta, type StepKey, type DeepLink } from "@marionette/ui/creative-pipeline";
 
 interface Props {
   meta: ProjectMeta;

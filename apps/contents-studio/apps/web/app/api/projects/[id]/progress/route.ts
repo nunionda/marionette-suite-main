@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { StepProgress, StepStatus } from "@marionette/ui";
+import type { StepProgress, StepStatus } from "@marionette/ui/creative-pipeline";
 import { GET as libraryProgressGET } from "../../../library/progress/route";
 import { GET as postProgressGET } from "../../../post/progress/route";
 import { GET as scheduleProgressGET } from "../../../schedule/progress/route";
