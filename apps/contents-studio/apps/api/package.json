@@ -1,0 +1,21 @@
+{
+  "name": "@marionette/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts",
+    "typecheck": "echo '[api] advisory mode — analysis-core type debt deferred per Charter v2.0 §9 (docs/pipeline-constitution.md). Run \"tsc --noEmit\" locally to audit.'",
+    "test": "bun test",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@marionette/agents": "workspace:*",
+    "@marionette/ai-gateway": "workspace:*",
+    "@marionette/db": "workspace:*",
+    "@marionette/shared": "workspace:*",
+    "fflate": "^0.8.2",
+    "hono": "^4.7.0"
+  }
+}

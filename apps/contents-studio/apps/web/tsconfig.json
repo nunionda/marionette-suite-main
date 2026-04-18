@@ -8,7 +8,12 @@
         "name": "next"
       }
     ],
-    "incremental": true
+    "incremental": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "downlevelIteration": true,
+    "target": "ESNext"
   },
   "include": [
     "app/**/*.ts",
