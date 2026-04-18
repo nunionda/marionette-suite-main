@@ -1,19 +1,30 @@
 {
-  "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "target": "ESNext",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
     "jsx": "preserve",
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "incremental": true,
+    "allowJs": true,
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "downlevelIteration": true,
-    "target": "ESNext"
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "strict": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "app/**/*.ts",
