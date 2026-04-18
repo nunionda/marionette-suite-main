@@ -66,13 +66,6 @@
       "cwd": "apps/contents-studio/apps/scenario-web"
     },
     {
-      "name": "post-studio",
-      "runtimeExecutable": "bunx",
-      "runtimeArgs": ["next", "dev", "--turbopack", "--port", "4002"],
-      "port": 4002,
-      "cwd": "apps/post-studio"
-    },
-    {
       "name": "storyboard-maker-server",
       "runtimeExecutable": "python3",
       "runtimeArgs": ["server.py"],

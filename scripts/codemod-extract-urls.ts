@@ -21,7 +21,6 @@ const PORT_MAP: Record<string, { name: string; isPublic: boolean }> = {
   "3008": { name: "INTERNAL_SHORTS_FACTORY_BACKEND_URL", isPublic: false },
   "4000": { name: "NEXT_PUBLIC_SCENARIO_WEB_URL", isPublic: true },
   "4001": { name: "NEXT_PUBLIC_HUB_URL", isPublic: true },
-  "4002": { name: "NEXT_PUBLIC_POST_STUDIO_URL", isPublic: true },
   "4006": { name: "INTERNAL_ANALYSIS_API_URL", isPublic: false },
   "4007": { name: "NEXT_PUBLIC_ANALYSIS_WEB_URL", isPublic: true },
   "5174": { name: "NEXT_PUBLIC_SCRIPT_WRITER_URL", isPublic: true },
