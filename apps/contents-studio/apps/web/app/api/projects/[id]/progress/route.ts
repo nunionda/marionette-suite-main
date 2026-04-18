@@ -7,6 +7,7 @@ import { GET as budgetProgressGET } from "../../../budget/progress/route";
 import { GET as castingProgressGET } from "../../../casting/progress/route";
 import { GET as locationsProgressGET } from "../../../locations/progress/route";
 import { GET as rehearsalsProgressGET } from "../../../rehearsals/progress/route";
+import { GET as ingestProgressGET } from "../../../ingest/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -111,7 +112,18 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh] = (await Promise.all([
+  const ingestInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/ingest/progress?paperclipId=${enc}`);
+      const res = await ingestProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -121,7 +133,8 @@ export async function GET(
     castingInProcess,
     locationsInProcess,
     rehearsalsInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any];
+    ingestInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -203,6 +216,24 @@ export async function GET(
       }
     : null;
 
+  const ingest = ig?.found
+    ? {
+        paperclipId: ig.paperclipId,
+        steps: ig.steps,
+        summary: ig.summary,
+        latestBatch: ig.latestBatch
+          ? {
+              shootDate: ig.latestBatch.shootDate,
+              cameraRoll: ig.latestBatch.cameraRoll,
+              cameraModel: ig.latestBatch.cameraModel,
+              codec: ig.latestBatch.codec,
+              sizeGB: ig.latestBatch.sizeGB,
+              takes: ig.latestBatch.takes,
+            }
+          : null,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -212,5 +243,6 @@ export async function GET(
     casting,
     locations,
     rehearsals,
+    ingest,
   });
 }

@@ -16,6 +16,7 @@ const navItems = [
   { href: "/casting", label: "Casting", icon: "🎭" },
   { href: "/locations", label: "Locations", icon: "📍" },
   { href: "/rehearsals", label: "Rehearsals", icon: "🎬" },
+  { href: "/ingest", label: "Data Ingest", icon: "💾" },
   { href: "/post", label: "Post Studio", icon: "✂️" },
   { href: "/library", label: "Content Library", icon: "📚" },
   { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },

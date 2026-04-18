@@ -13,6 +13,7 @@ export type {
   CastingStatus,
   LocationsStatus,
   RehearsalsStatus,
+  IngestStatus,
 } from "./useProjectProgress";
 export { PostProductionPanel } from "./PostProductionPanel";
 export { DistributionPanel } from "./DistributionPanel";
@@ -21,3 +22,4 @@ export { BudgetPanel } from "./BudgetPanel";
 export { CastingPanel } from "./CastingPanel";
 export { LocationsPanel } from "./LocationsPanel";
 export { RehearsalsPanel } from "./RehearsalsPanel";
+export { IngestPanel } from "./IngestPanel";

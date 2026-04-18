@@ -144,6 +144,31 @@ export interface RehearsalsStatus {
   active: RehearsalsStatus["next"];
 }
 
+export interface IngestStatus {
+  paperclipId: string;
+  steps: {
+    ingesting: boolean;
+    verified: boolean;
+    archived: boolean;
+  };
+  summary: {
+    total: number;
+    verified: number;
+    ingesting: number;
+    totalSizeGB: number;
+    totalTakes: number;
+    archived: number;
+  };
+  latestBatch: {
+    shootDate: string;
+    cameraRoll: string;
+    cameraModel: string;
+    codec: string;
+    sizeGB: number;
+    takes: number;
+  } | null;
+}
+
 interface AggregatorResponse {
   creativeSteps: StepProgress[];
   postProduction: PostProductionStatus | null;
@@ -153,6 +178,7 @@ interface AggregatorResponse {
   casting: CastingStatus | null;
   locations: LocationsStatus | null;
   rehearsals: RehearsalsStatus | null;
+  ingest: IngestStatus | null;
 }
 
 /**
@@ -173,6 +199,7 @@ export function useProjectProgress(projectId: string) {
   const [casting, setCasting] = useState<CastingStatus | null>(null);
   const [locations, setLocations] = useState<LocationsStatus | null>(null);
   const [rehearsals, setRehearsals] = useState<RehearsalsStatus | null>(null);
+  const [ingest, setIngest] = useState<IngestStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -191,6 +218,7 @@ export function useProjectProgress(projectId: string) {
           setCasting(data.casting);
           setLocations(data.locations);
           setRehearsals(data.rehearsals);
+          setIngest(data.ingest);
         }
       } catch {
         // Silent fail: keep defaults
@@ -207,5 +235,5 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals };
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest };
 }
