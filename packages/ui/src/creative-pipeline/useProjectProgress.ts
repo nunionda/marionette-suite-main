@@ -213,6 +213,37 @@ export interface FestivalsStatus {
   } | null;
 }
 
+export interface MarketingStatus {
+  paperclipId: string;
+  steps: {
+    drafted: boolean;
+    inReview: boolean;
+    approved: boolean;
+  };
+  summary: {
+    total: number;
+    approved: number;
+    inReview: number;
+    aiGenerated: number;
+    videoAssets: number;
+    imageAssets: number;
+  };
+  flagship: {
+    trailer: {
+      label: string;
+      durationSec: number | null;
+      status: "draft" | "in_review" | "approved" | "delivered" | "live";
+      aiGenerated: boolean;
+    } | null;
+    poster: {
+      label: string;
+      kind: string;
+      status: "draft" | "in_review" | "approved" | "delivered" | "live";
+      aiGenerated: boolean;
+    } | null;
+  };
+}
+
 interface AggregatorResponse {
   creativeSteps: StepProgress[];
   postProduction: PostProductionStatus | null;
@@ -225,6 +256,7 @@ interface AggregatorResponse {
   ingest: IngestStatus | null;
   titles: TitlesStatus | null;
   festivals: FestivalsStatus | null;
+  marketing: MarketingStatus | null;
 }
 
 /**
@@ -248,6 +280,7 @@ export function useProjectProgress(projectId: string) {
   const [ingest, setIngest] = useState<IngestStatus | null>(null);
   const [titles, setTitles] = useState<TitlesStatus | null>(null);
   const [festivals, setFestivals] = useState<FestivalsStatus | null>(null);
+  const [marketing, setMarketing] = useState<MarketingStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -269,6 +302,7 @@ export function useProjectProgress(projectId: string) {
           setIngest(data.ingest);
           setTitles(data.titles);
           setFestivals(data.festivals);
+          setMarketing(data.marketing);
         }
       } catch {
         // Silent fail: keep defaults
@@ -285,5 +319,5 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals };
+  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing };
 }

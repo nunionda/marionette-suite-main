@@ -20,6 +20,7 @@ const navItems = [
   { href: "/post", label: "Post Studio", icon: "✂️" },
   { href: "/titles", label: "Titles", icon: "🔤" },
   { href: "/festivals", label: "Festivals", icon: "🏆" },
+  { href: "/marketing", label: "Marketing", icon: "📣" },
   { href: "/library", label: "Content Library", icon: "📚" },
   { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },
