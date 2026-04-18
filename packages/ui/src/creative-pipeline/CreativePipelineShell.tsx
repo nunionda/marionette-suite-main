@@ -4,6 +4,7 @@ import { PipelineStepper } from "./PipelineStepper";
 import { PipelineStepCard } from "./PipelineStepCard";
 import { PostProductionPanel } from "./PostProductionPanel";
 import { DistributionPanel } from "./DistributionPanel";
+import { SchedulePanel } from "./SchedulePanel";
 import { useProjectProgress } from "./useProjectProgress";
 import type { ProjectMeta, DeepLink, StepKey } from "./types";
 import { STEPS } from "./types";
@@ -16,7 +17,7 @@ interface Props {
 }
 
 export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
-  const { progress, currentStep, postProduction, distribution } = useProjectProgress(meta.id);
+  const { progress, currentStep, postProduction, distribution, schedule } = useProjectProgress(meta.id);
 
   return (
     <div
@@ -131,9 +132,10 @@ export function CreativePipelineShell({ meta, deepLinks, onExport }: Props) {
           })}
         </div>
 
-        {/* Phase 4: post-production + distribution panels */}
-        {(postProduction || distribution) && (
+        {/* Sprint 1+: schedule / post-production / distribution panels */}
+        {(schedule || postProduction || distribution) && (
           <div className="mt-6 flex flex-col gap-4">
+            {schedule && <SchedulePanel status={schedule} />}
             {postProduction && <PostProductionPanel status={postProduction} />}
             {distribution && <DistributionPanel status={distribution} />}
           </div>
