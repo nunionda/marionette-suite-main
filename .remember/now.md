@@ -1,8 +1,56 @@
-# 현재 세션 상태 (2026-04-18)
+# 현재 세션 상태 (2026-04-19)
 
-> **branch**: `feat/integrate-dev-projects` — 12+ commits ahead, PR #1 open
+> **branch**: `feat/integrate-dev-projects` — 27 commits ahead, PR #1 open, **push + PR CI 모두 green**
 > **Charter**: [`docs/pipeline-constitution.md`](../docs/pipeline-constitution.md) v2.0 (73공정 확정)
 > **이전 상태**는 아래 "레거시 세션 스냅샷" 참고
+
+---
+
+## 2026-04-19 세션 요약 — PR 범위 내 모든 미구현 태스크 완료
+
+### Design Track Sprint 2 (A+B+C)
+- `9ff0afc` **A+B**: apiMap → `generateImage` 정렬 + makeup_hair specialist → 6개 image 노드 복구
+- `4e12e52` **C**: `textDesigner.ts` + 7개 text-document 노드 + art_bible synthesis
+- 결과: 16 Design 노드 모두 실행 가능 (execute endpoint)
+
+### CI 안정화 (5 커밋 체인)
+- `ba47cc8` @marionette/ui 서브패스 export (barrel 40+ 컴포넌트 제외) + @marionette/pipeline-core workspace dep
+- `362f37a` web tsconfig self-contained (untracked extends-chain 제거)
+- `438ae2c` 누락 entry points 커밋 (design-tokens/content-profiles index.ts, paperclip-bridge 서브패스)
+- `95119a0` 0c2be0c revert (contents-studio 내부 package.json은 untracked 상태 유지가 정답)
+- `542a82b` analysis-system#test advisory (Charter §9)
+- **결과**: push CI ✅, PR CI ✅ (둘 다 처음으로 green)
+
+### 남은 미구현 태스크 4개 모두 완료
+- `729d084` **#69 Streaming/VOD**: LibraryEntry.streaming 확장 (platforms/DRM/bitrate/HDR/Atmos), DistributionPanel + library-client UI 확장
+- `5217958` **#49/#51/#52 AI Audio 3종**: textDesigner.ts에 adr_dubbing / foley / music_composition specs 추가 (무료 LLM 체인 재사용, 오디오 합성 대신 spec JSON 생성)
+- `aece097` **#58 Final Video Assembly**: hub `/assembly` route + AssemblyJob schema (preset ladder, ffmpegCommand 저장, HDR/Atmos/checksum), 10-file anatomy 11th 반복
+
+### Charter Sprint 커버리지 (2026-04-19 기준)
+| Sprint | 태스크 | 상태 | 커밋 |
+|---|---|---|---|
+| 0 | CI 안정화 | ✅ | `0dacca8` |
+| 0.5 | #58 Assembly | ✅ | `aece097` |
+| 0.5-bis | analysis-system debt | ✅ | `23fa067` |
+| 1 | #16/#17/#20 | ✅ | 3커밋 |
+| 2 | Design Track 정렬 + 확장 | ✅ | `9ff0afc`, `4e12e52` |
+| 3 | #24.10, #28 | ⏳ **deferred** (Charter §7 "별도 세션") |
+| 4 | #18, #23 | ✅ | 2커밋 |
+| 5 | #42, #56, #58 | ✅ | 3커밋 |
+| 6 | #49/#51/#52 | ✅ | `5217958` |
+| 7 | #62/#65/#69 | ✅ | 3커밋 |
+| 8 | #71/#72 | ✅ | `d769842` |
+
+### 현재 aggregator 상태: **16-leg**
+creativeSteps + postProduction + distribution(+streaming) + schedule + budget + casting + locations + rehearsals + ingest + titles + festivals + marketing + boxOffice + reviews + assembly
+
+### 남은 PR-외부 항목
+- `#3` (Charter): #24.10 Lighting Design, #28 VFX Previs — "별도 세션" 명시
+- `#9+` (Charter): 나머지 20개 공정 (Phase 1 Development #1/#6/#9/#11~13, #29 Stunt, #53 Music Licensing, etc.)
+- **Cloudflare Pages 빌드** (apps/studio Turbopack) — 별도 플랫폼 작업, Sprint 무관
+- analysis-core 135 errors — Charter §9 Out of Scope (advisory 모드로 운영 중)
+
+---
 
 ---
 
@@ -17,8 +65,14 @@
 4. **모듈 anatomy 4 deliverable**: route namespace + progress API + deep-link + aggregator 등록
 
 ### Sprint 로드맵 요약
-- **0** CI 안정화 — ✅ prompt-adapters 해결 (root cause: packages/tsconfig/{base,nextjs,node}.json 미커밋), 🟡 analysis-system은 별도 dev debt로 defer (Sprint 0.5-bis 후보: Prisma schema drift + scripts/export-reports.ts DOM lib)
-- **1** Pre-prod Ops (#16, #17, #20) ← **next**
+- **0** CI 안정화 — ✅ `0dacca8` packages/tsconfig 3 files 커밋 (prompt-adapters root cause)
+- **0.5-bis** analysis-system debt — ✅ `23fa067` advisory mode + 2 parser.ts surgical fixes. 135 errors는 Charter §9 Out of Scope로 defer
+- **1** Pre-prod Ops 3종 — ✅ 모두 완료
+  - `1bb31f8` #16 Schedule (hub `/schedule`, 7 shoot days mock, 6 files + 4 mods)
+  - `a27b53c` #17 Budget (hub `/budget`, ID-001 ₩8.5B 53% burn, 6+4 files)
+  - `0438a02` #20 Casting (hub `/casting`, 5+2 entries across ID-001/002, 6+4 files)
+  - Aggregator 이제 **7-leg**: script-writer, storyboard, post, library, schedule, budget, casting
+- **2** Design Track 갭 (#24.5~.8) ← **next**
 - **2** Design Track 갭 (#24.5~.8)
 - **3** Design Track 완성 (#24.9~.11, #28)
 - **4** Pre-prod 부대 (#18, #23)
