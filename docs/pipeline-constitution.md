@@ -60,16 +60,18 @@
 | 24.1 | Concept / Visual Direction | 컨셉·비주얼 디렉션 | Design Track 노드 | ✅ [AI-IMG] |
 | 24.2 | World Building | 세계관 설정 | Design Track 노드 | ✅ |
 | 24.3 | Physics / Reality Rules | 물리·리얼리티 룰 | Design Track 노드 | ✅ |
-| 24.4 | Character Design | 캐릭터 디자인 | Design Track 노드 | 🟡 [AI-IMG] |
-| 24.5 | Set / Location Design | 세트·로케이션 디자인 | Design Track 노드 | ❌ [AI-IMG] **Sprint 2** |
-| 24.6 | Costume Design / Fitting | 의상 디자인·피팅 | Design Track 노드 | ❌ [AI-IMG] **Sprint 2** |
-| 24.7 | Hair & Makeup Design | 헤어·메이크업 | Design Track 노드 | ❌ [AI-IMG] **Sprint 2** |
-| 24.8 | Props / Vehicles / Weapons | 소품·차량·무기 | Design Track 노드 | ❌ [AI-IMG] **Sprint 2** |
-| 24.9 | Color Script | 컬러 스크립트 | Design Track 노드 | ❌ [AI-IMG] **Sprint 3** |
-| 24.10 | Lighting Design | 라이팅 디자인 | Design Track 노드 | ❌ [AI-IMG] **Sprint 3** |
-| 24.11 | Camera / Lens / Framing | 카메라·렌즈·프레이밍 | Design Track 노드 | ❌ **Sprint 3** |
-| 24.12 | Previz / Animatic | 프리비즈·애니매틱 | Design Track 노드 | ✅ [AI-VID] |
+| 24.4 | Character Design | 캐릭터 디자인 | Design Track 노드 (`character_design`) | 🟡 [AI-IMG] frontend config 존재, backend apiMap stale |
+| 24.5 | Set / Location Design | 세트·로케이션 디자인 | Design Track 노드 (`set_design`) | 🟡 [AI-IMG] 동상 |
+| 24.6 | Costume Design / Fitting | 의상 디자인·피팅 | Design Track 노드 (`costume_design`) | 🟡 [AI-IMG] 동상 |
+| 24.7 | Hair & Makeup Design | 헤어·메이크업 | Design Track 노드 (`makeup_hair`) | 🟡 [AI-IMG] frontend only, backend apiMap 누락 |
+| 24.8 | Props / Vehicles / Weapons | 소품·차량·무기 | Design Track 노드 (`props`) | 🟡 [AI-IMG] frontend + apiMap stale |
+| 24.9 | Color Script | 컬러 스크립트 | Design Track 노드 (`color_script`) | 🟡 [AI-IMG] frontend config 존재, 실행 경로 없음 |
+| 24.10 | Lighting Design | 라이팅 디자인 | Design Track 노드 | ❌ **별도 세션** |
+| 24.11 | Camera / Lens / Framing | 카메라·렌즈·프레이밍 | Design Track 노드 (`shot_list`) | 🟡 frontend config 존재 |
+| 24.12 | Previz / Animatic | 프리비즈·애니매틱 | Design Track 노드 (`storyboard`) | ✅ [AI-VID] |
 | 24.13 | Art Bible Consolidation | 아트바이블 통합 | script-writer ArtBibleViewer | ✅ |
+
+**Design Track 현황 (2026-04-18 재평가)**: 프론트엔드 `apps/script-writer/src/config/productionPipeline.js`에 **16개 노드가 완전 정의**되어 있음 (초기 Charter v2.0 작성 시 12개로 과소평가). 그러나 `script-writer` backend의 apiMap이 `storyboard-maker :3007`의 dead endpoints(`/api/character` 등 모두 404)를 가리켜 **실행은 불가**. 진짜 debt는 "새 노드 추가"가 아니라 **script-writer ↔ storyboard-maker provider 정렬**. Sprint 2는 이 debt 전용 세션으로 재정의.
 | **25** | **Storyboard** | **스토리보드** | storyboard-maker (독립) | ✅ [AI-IMG] |
 | 26 | Shot List / Floor Plan | 샷 리스트·플로어 플랜 | script-writer | ✅ |
 | 27 | Equipment Prep | 장비 준비 | hub route | ❌ |
@@ -196,8 +198,8 @@ app/(dashboard)/[module]/
 | **0** | CI 안정화 (prompt-adapters typecheck) | — | 1일 |
 | **0.5 (옵션)** | Final Video Assembly (#58, Beat Savior 실데이터) | #58 | 2~3일 |
 | **1** | Pre-production Ops 3종 | #16, #17, #20 | 1~2주 |
-| **2** | Design Track 갭 보강 | #24.5~.8 | 2주 |
-| **3** | Design Track 완성 + VFX Previs | #24.9~.11, #28 | 2주 |
+| **2** *(재정의 2026-04-18)* | **Design Track provider 정렬** — script-writer apiMap ↔ storyboard-maker endpoints 복구. 새 노드 추가 아님 (이미 16개 정의 존재). | #24.5~.9 재활성화 | 별도 세션 |
+| **3** | Design Track 확장 + VFX Previs | #24.10, #28 | 2주 |
 | **4** | Pre-production 부대 | #18, #23 | 1주 |
 | **5** | Post-production 보강 | #42, #56, #58 | 2주 |
 | **6** | AI Audio 확장 [AI-AUD] | #49, #51, #52 | 2주 |

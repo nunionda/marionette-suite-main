@@ -14,6 +14,7 @@ const navItems = [
   { href: "/schedule", label: "Shoot Schedule", icon: "📅" },
   { href: "/budget", label: "Budget", icon: "💰" },
   { href: "/casting", label: "Casting", icon: "🎭" },
+  { href: "/locations", label: "Locations", icon: "📍" },
   { href: "/post", label: "Post Studio", icon: "✂️" },
   { href: "/library", label: "Content Library", icon: "📚" },
   { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },
