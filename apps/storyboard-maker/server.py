@@ -2,6 +2,7 @@
 """Minimal HTTP server for storyboard-maker hub integration."""
 import json
 import os
+import subprocess
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
@@ -25,6 +26,19 @@ def _detect_video_done(output_dir: str, paperclip_id: str) -> bool:
         return False
     files = [f for f in os.listdir(output_dir) if f.lower().startswith(prefix)]
     return any("_video." in f for f in files)
+
+
+def _build_generate_cmd(body: dict) -> list:
+    cmd = ["python", "main.py", "generate"]
+    if body.get("scene"):
+        cmd += ["--scene", body["scene"]]
+    if body.get("script"):
+        cmd += ["--script", body["script"]]
+    if body.get("paperclipId"):
+        cmd += ["--paperclip-id", body["paperclipId"]]
+    if body.get("format"):
+        cmd += ["--format", body["format"]]
+    return cmd
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -71,6 +85,26 @@ class Handler(BaseHTTPRequestHandler):
 
         else:
             self._respond(404, {"error": "not found"})
+
+    def do_POST(self):
+        parsed = urlparse(self.path)
+        if parsed.path != "/api/generate":
+            self._respond(404, {"error": "not found"})
+            return
+        length = int(self.headers.get("Content-Length", 0))
+        raw = self.rfile.read(length)
+        body = json.loads(raw)
+        if not body.get("scene") and not body.get("script"):
+            self._respond(400, {"error": "scene or script required"})
+            return
+        cmd = _build_generate_cmd(body)
+        subprocess.Popen(
+            cmd,
+            cwd=os.path.dirname(__file__),
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+        self._respond(202, {"status": "started", "paperclipId": body.get("paperclipId")})
 
     def _respond(self, status, body):
         payload = json.dumps(body).encode()
