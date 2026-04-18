@@ -1,6 +1,11 @@
 """Unit tests for server.py progress detection logic (no HTTP required)."""
 import os
 import pytest
+import sys
+
+# Add project root so we can import server module directly
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+from server import _detect_image_done, _detect_video_done
 
 
 def _make_files(directory: str, names: list[str]):
@@ -8,14 +13,7 @@ def _make_files(directory: str, names: list[str]):
         open(os.path.join(directory, name), "wb").close()
 
 
-def _detect_image_done(output_dir: str, paperclip_id: str) -> bool:
-    """Replicate server.py imagePrompt detection logic."""
-    prefix = paperclip_id.replace("-", "_").lower() + "_"
-    if not os.path.isdir(output_dir):
-        return False
-    files = [f for f in os.listdir(output_dir) if f.lower().startswith(prefix)]
-    return len([f for f in files if "_processed" in f]) > 0
-
+# ---- image detection tests (unchanged) ----
 
 def test_no_output_dir_returns_false():
     assert _detect_image_done("/tmp/nonexistent_99999", "ID-001") is False
@@ -47,7 +45,40 @@ def test_different_project_not_counted(tmp_path):
 
 
 def test_case_insensitive_prefix(tmp_path):
-    _make_files(str(tmp_path), [
-        "ID_001_SC001_bong_processed.png",  # uppercase in file
-    ])
+    _make_files(str(tmp_path), ["ID_001_SC001_bong_processed.png"])
     assert _detect_image_done(str(tmp_path), "ID-001") is True
+
+
+# ---- video detection tests ----
+
+def test_video_no_output_dir_returns_false():
+    assert _detect_video_done("/tmp/nonexistent_99999", "ID-001") is False
+
+
+def test_video_empty_dir_returns_false(tmp_path):
+    assert _detect_video_done(str(tmp_path), "ID-001") is False
+
+
+def test_video_processed_image_does_not_count(tmp_path):
+    _make_files(str(tmp_path), ["id_001_SC001_bong_processed.png"])
+    assert _detect_video_done(str(tmp_path), "ID-001") is False
+
+
+def test_video_file_returns_true(tmp_path):
+    _make_files(str(tmp_path), ["id_001_SC001_bong_video.mp4"])
+    assert _detect_video_done(str(tmp_path), "ID-001") is True
+
+
+def test_video_webm_returns_true(tmp_path):
+    _make_files(str(tmp_path), ["id_001_SC001_bong_video.webm"])
+    assert _detect_video_done(str(tmp_path), "ID-001") is True
+
+
+def test_video_different_project_not_counted(tmp_path):
+    _make_files(str(tmp_path), ["id_002_SC001_bong_video.mp4"])
+    assert _detect_video_done(str(tmp_path), "ID-001") is False
+
+
+def test_video_case_insensitive_prefix(tmp_path):
+    _make_files(str(tmp_path), ["ID_001_SC001_bong_video.MP4"])
+    assert _detect_video_done(str(tmp_path), "ID-001") is True

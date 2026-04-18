@@ -1,11 +1,27 @@
 #!/usr/bin/env python3
-"""Minimal HTTP server for storyboard-maker hub integration (Phase 1c)."""
+"""Minimal HTTP server for storyboard-maker hub integration."""
 import json
 import os
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), "output")
+
+
+def _detect_image_done(output_dir: str, paperclip_id: str) -> bool:
+    prefix = paperclip_id.replace("-", "_").lower() + "_"
+    if not os.path.isdir(output_dir):
+        return False
+    files = [f for f in os.listdir(output_dir) if f.lower().startswith(prefix)]
+    return any("_processed" in f for f in files)
+
+
+def _detect_video_done(output_dir: str, paperclip_id: str) -> bool:
+    prefix = paperclip_id.replace("-", "_").lower() + "_"
+    if not os.path.isdir(output_dir):
+        return False
+    files = [f for f in os.listdir(output_dir) if f.lower().startswith(prefix)]
+    return any("_video." in f for f in files)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -17,18 +33,12 @@ class Handler(BaseHTTPRequestHandler):
             if not paperclip_id:
                 self._respond(400, {"error": "paperclipId required"})
                 return
-            files = []
-            if os.path.isdir(OUTPUT_DIR):
-                prefix = paperclip_id.replace("-", "_").lower() + "_"
-                files = [f for f in os.listdir(OUTPUT_DIR) if f.lower().startswith(prefix)]
-            image_done = len([f for f in files if "_processed" in f]) > 0
-            video_done = False  # video generation not yet integrated
             self._respond(200, {
                 "paperclipId": paperclip_id,
                 "found": True,
                 "steps": {
-                    "imagePrompt": image_done,
-                    "videoPrompt": video_done,
+                    "imagePrompt": _detect_image_done(OUTPUT_DIR, paperclip_id),
+                    "videoPrompt": _detect_video_done(OUTPUT_DIR, paperclip_id),
                 },
             })
         elif parsed.path == "/health":
@@ -46,7 +56,7 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(payload)
 
     def log_message(self, fmt, *args):
-        pass  # suppress default access log
+        pass
 
 
 if __name__ == "__main__":
