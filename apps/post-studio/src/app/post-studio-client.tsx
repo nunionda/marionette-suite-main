@@ -307,7 +307,7 @@ function DeliveryTab({ rows, project }: { rows: DeliveryItem[]; project: PostPro
   const handlePublish = useCallback(async () => {
     setPublishState("loading");
     try {
-      const res = await fetch(`${(process.env.NEXT_PUBLIC_CONTENT_LIBRARY_URL ?? "http://localhost:4003")}/api/publish`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:4001")}/api/library/publish`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

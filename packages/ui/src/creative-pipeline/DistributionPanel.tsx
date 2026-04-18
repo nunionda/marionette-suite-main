@@ -7,8 +7,11 @@ interface Props {
   libraryBaseUrl?: string;
 }
 
-export function DistributionPanel({ status, libraryBaseUrl = (process.env.NEXT_PUBLIC_CONTENT_LIBRARY_URL ?? "http://localhost:4003") }: Props) {
-  const url = `${libraryBaseUrl}/?paperclipId=${encodeURIComponent(status.paperclipId)}`;
+export function DistributionPanel({
+  status,
+  libraryBaseUrl = `${process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:4001"}/library`,
+}: Props) {
+  const url = `${libraryBaseUrl}?paperclipId=${encodeURIComponent(status.paperclipId)}`;
   const { entry, published } = status;
 
   return (

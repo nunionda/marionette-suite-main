@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import type { StepProgress, StepStatus } from "@marionette/ui";
+import { GET as libraryProgressGET } from "../../../library/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -7,8 +8,6 @@ const STORYBOARD_API =
   process.env.STORYBOARD_API_URL ?? (process.env.NEXT_PUBLIC_STORYBOARD_URL ?? "http://localhost:3007");
 const POST_STUDIO_API =
   process.env.POST_STUDIO_API_URL ?? (process.env.NEXT_PUBLIC_POST_STUDIO_URL ?? "http://localhost:4002");
-const CONTENT_LIBRARY_API =
-  process.env.CONTENT_LIBRARY_API_URL ?? (process.env.NEXT_PUBLIC_CONTENT_LIBRARY_URL ?? "http://localhost:4003");
 
 function boolToStatus(done: boolean): StepStatus {
   return done ? "in_progress" : "not_started";
@@ -31,11 +30,22 @@ export async function GET(
   const { id } = await params;
   const enc = encodeURIComponent(id);
 
+  const libraryInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/library/progress?paperclipId=${enc}`);
+      const res = await libraryProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
   const [sw, sb, ps, cl] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${POST_STUDIO_API}/api/progress?paperclipId=${enc}`),
-    safeJson(`${CONTENT_LIBRARY_API}/api/progress?paperclipId=${enc}`),
+    libraryInProcess,
   ])) as [any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
