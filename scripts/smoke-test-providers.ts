@@ -21,8 +21,10 @@ import {
   getHealthMatrix,
   listImageProviders,
   listTextProviders,
+  listVideoProviders,
   resolveImageProvider,
   resolveTextProvider,
+  resolveVideoProvider,
   type ProviderHealth,
 } from "../packages/ai-providers/src/index";
 
@@ -53,20 +55,23 @@ function healthIcon(h: ProviderHealth): string {
 }
 
 function parseArgs(argv: string[]) {
-  const out: { capability: "text" | "image"; prefer?: string } = {
+  const out: { capability: "text" | "image" | "video"; prefer?: string; noGen?: boolean } = {
     capability: "text",
   };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--capability" && argv[i + 1]) {
       const v = argv[++i]!;
-      if (v !== "text" && v !== "image") {
+      if (v !== "text" && v !== "image" && v !== "video") {
         console.error(`Unsupported capability: ${v}`);
         process.exit(1);
       }
       out.capability = v;
     } else if (a === "--prefer" && argv[i + 1]) {
       out.prefer = argv[++i];
+    } else if (a === "--no-gen") {
+      // Skip the actual generate call; only probe + resolve (cheap for video).
+      out.noGen = true;
     }
   }
   return out;
@@ -207,12 +212,84 @@ function summary(ready: number, total: number, success: number) {
   console.log(`  Success: ${success}/${ready}`);
 }
 
+async function runVideo(prefer?: string, noGen?: boolean): Promise<number> {
+  const matrix = await getHealthMatrix("video");
+  printMatrix(matrix);
+  const ready = matrix.filter((e) => e.health.state === "ready");
+  if (ready.length === 0) {
+    printNoReadyHint([
+      "FAL_KEY (Seedance 2.0)",
+      "KLING_ACCESS_KEY + KLING_SECRET_KEY (Kling 3.0)",
+      "HF_TOKEN (Hunyuan/Wan/LTX)",
+    ]);
+    return 1;
+  }
+
+  if (noGen) {
+    console.log(
+      `${c.dim}(--no-gen: skipping submit/poll; video generation takes minutes)${c.reset}\n`,
+    );
+    try {
+      const picked = await resolveVideoProvider(prefer);
+      console.log(`  Resolve: ${c.green}${picked.meta.id}${c.reset} (${picked.meta.tier})`);
+    } catch (e) {
+      console.log(`  ${c.red}No healthy: ${e instanceof Error ? e.message : e}${c.reset}`);
+    }
+    summary(ready.length, matrix.length, ready.length);
+    return 0;
+  }
+
+  console.log(`${c.bold}── Generate smoke (video — submit + poll)${c.reset}\n`);
+  let success = 0;
+  for (const { meta } of ready) {
+    const provider = listVideoProviders().find((p) => p.meta.id === meta.id)!;
+    process.stdout.write(`  → ${meta.id.padEnd(42)} `);
+    try {
+      const start = Date.now();
+      const submission = await provider.submit({
+        prompt: "A paper marionette bows on an empty theater stage, warm spotlight, slow dolly in",
+        durationSec: 5,
+        camera: { aspectRatio: "16:9" },
+        quality: "draft",
+        timeoutMs: 60_000,
+      });
+      const submittedMs = Date.now() - start;
+      process.stdout.write(
+        `${c.green}submitted${c.reset} ${submittedMs}ms · jobId=${submission.jobId.slice(0, 20)}… `,
+      );
+      // Single poll to validate wire — full completion can take 2-10 minutes.
+      const status = await provider.poll(submission.jobId);
+      console.log(`${c.dim}[state=${status.state}]${c.reset}`);
+      success++;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(`${c.red}✗ ${msg.slice(0, 120)}${c.reset}`);
+    }
+  }
+  console.log();
+
+  console.log(`${c.bold}── resolveVideoProvider${prefer ? ` (prefer=${prefer})` : ""}${c.reset}\n`);
+  try {
+    const picked = await resolveVideoProvider(prefer);
+    console.log(`  Selected: ${c.green}${picked.meta.id}${c.reset} (${picked.meta.tier})`);
+  } catch (e) {
+    console.log(`  ${c.red}No healthy: ${e instanceof Error ? e.message : e}${c.reset}`);
+  }
+  console.log();
+
+  summary(ready.length, matrix.length, success);
+  return success > 0 ? 0 : 1;
+}
+
 async function main() {
-  const { capability, prefer } = parseArgs(process.argv.slice(2));
+  const { capability, prefer, noGen } = parseArgs(process.argv.slice(2));
   console.log(
     `${c.bold}── Marionette AI Providers · Smoke Test · capability=${capability}${c.reset}\n`,
   );
-  const code = capability === "text" ? await runText(prefer) : await runImage(prefer);
+  let code: number;
+  if (capability === "text") code = await runText(prefer);
+  else if (capability === "image") code = await runImage(prefer);
+  else code = await runVideo(prefer, noGen);
   process.exit(code);
 }
 

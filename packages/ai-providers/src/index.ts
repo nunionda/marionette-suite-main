@@ -16,3 +16,4 @@ export * from "./types";
 export * from "./registry";
 export * as text from "./text";
 export * as image from "./image";
+export * as video from "./video";

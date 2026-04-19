@@ -28,6 +28,14 @@ import {
 } from "./image";
 import type { ImageProvider } from "./image/provider";
 import {
+  hunyuanHfProvider,
+  klingProvider,
+  ltxHfProvider,
+  seedanceProvider,
+  wanHfProvider,
+} from "./video";
+import type { VideoProvider } from "./video/provider";
+import {
   NoHealthyProviderError,
   type Capability,
   type ProviderHealth,
@@ -52,6 +60,7 @@ interface AnyProvider {
 
 const _textProviders = new Map<string, TextProvider>();
 const _imageProviders = new Map<string, ImageProvider>();
+const _videoProviders = new Map<string, VideoProvider>();
 const _healthCache = new Map<string, CacheEntry>();
 
 function cacheKey(capability: Capability, id: string): string {
@@ -82,17 +91,31 @@ export function getImageProvider(id: string): ImageProvider | undefined {
   return _imageProviders.get(id);
 }
 
+// ─── VIDEO ─────────────────────────────────────────────────────────────────
+
+export function registerVideoProvider(provider: VideoProvider): void {
+  _videoProviders.set(provider.meta.id, provider);
+}
+export function listVideoProviders(): VideoProvider[] {
+  return [..._videoProviders.values()];
+}
+export function getVideoProvider(id: string): VideoProvider | undefined {
+  return _videoProviders.get(id);
+}
+
 // ─── Shared health + resolve ───────────────────────────────────────────────
 
 function getProvider(capability: Capability, id: string): AnyProvider | undefined {
   if (capability === "text") return _textProviders.get(id);
   if (capability === "image") return _imageProviders.get(id);
+  if (capability === "video") return _videoProviders.get(id);
   return undefined;
 }
 
 function listProviders(capability: Capability): AnyProvider[] {
   if (capability === "text") return [..._textProviders.values()];
   if (capability === "image") return [..._imageProviders.values()];
+  if (capability === "video") return [..._videoProviders.values()];
   return [];
 }
 
@@ -187,6 +210,15 @@ export async function resolveImageProvider(prefer?: string): Promise<ImageProvid
   );
 }
 
+export async function resolveVideoProvider(prefer?: string): Promise<VideoProvider> {
+  return resolveGeneric<VideoProvider>(
+    "video",
+    "DEFAULT_VIDEO_PROVIDER",
+    [..._videoProviders.values()],
+    prefer,
+  );
+}
+
 /**
  * Health matrix for the UI `/ai-ops` dashboard — parallel probes.
  * Default capability is `text` for backwards-compat with Sprint 11a callers.
@@ -213,3 +245,10 @@ registerImageProvider(nanoBananaProvider);
 registerImageProvider(fluxHfProvider);
 registerImageProvider(a1111Provider);
 registerImageProvider(comfyProvider);
+
+// VIDEO
+registerVideoProvider(seedanceProvider);
+registerVideoProvider(klingProvider);
+registerVideoProvider(hunyuanHfProvider);
+registerVideoProvider(wanHfProvider);
+registerVideoProvider(ltxHfProvider);

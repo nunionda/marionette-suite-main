@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./text": "./src/text/index.ts",
     "./image": "./src/image/index.ts",
+    "./video": "./src/video/index.ts",
     "./registry": "./src/registry.ts"
   },
   "scripts": {
