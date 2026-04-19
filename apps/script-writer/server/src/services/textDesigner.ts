@@ -368,6 +368,46 @@ export const TEXT_DESIGN_NODE_SPECS: Record<string, NodeSpec> = {
   "referenceScores": ["film title — composer", "..."]
 }`,
   },
+  // ─── Sprint 3 (#24.10 & #28) ─────────────────────────────────────────────
+  lighting_design: {
+    role: 'Gaffer / Director of Photography planning scene-by-scene lighting design. Think Roger Deakins / Hoyte van Hoytema — motivated practical sources, color temperature, intensity, and equipment lists.',
+    schema: `{
+  "scenes": [
+    {
+      "sceneNumber": 1,
+      "setting": "INT. or EXT. — LOCATION NAME",
+      "timeOfDay": "DAY | NIGHT | MAGIC HOUR | OVERCAST | DAWN | DUSK",
+      "keySource": "type of dominant light source (e.g. 'practical window', 'LED panel', 'HMI through diffusion')",
+      "colorTemp": "kelvin value or description (e.g. '3200K warm tungsten', '5600K daylight')",
+      "mood": "one-word emotional intent (e.g. 'oppressive', 'ethereal', 'clinical')",
+      "equipment": ["lighting fixtures and modifiers (e.g. 'ARRI SkyPanel S60-C', '12x12 silent grid'"],
+      "practicals": ["on-screen practical lights visible to camera"],
+      "notes": "brief direction for the gaffer and best boy"
+    }
+  ],
+  "overallStrategy": "one paragraph — the film's lighting language and visual philosophy"
+}`,
+  },
+  vfx_previs: {
+    role: 'VFX Supervisor creating a previs breakdown for CG/composite shots. Think ILM / Weta Digital workflow — shot-level VFX requirements, complexity tiers, and technical notes for the downstream pipeline.',
+    schema: `{
+  "shots": [
+    {
+      "sceneNumber": 1,
+      "shotId": "string identifier (e.g. 'SC01-VFX-01')",
+      "type": "composite | full_cg | environment_extension | creature | simulation | matte_painting | de_aging | crowd_simulation",
+      "complexity": "trivial | moderate | complex | hero",
+      "description": "what the audience sees on screen",
+      "elements": ["VFX elements required (e.g. 'CG dragon', 'city destruction sim', 'practical + CG hybrid fire')"],
+      "referenceStyle": "studio or film reference (e.g. 'ILM — The Mandalorian LED wall', 'Weta — LOTR Helm's Deep crowd sim')",
+      "notes": "technical notes for the VFX team and pipeline"
+    }
+  ],
+  "totalShotCount": 0,
+  "estimatedDays": 0,
+  "overallStrategy": "one paragraph — the VFX approach, technology choices, and pipeline philosophy for this production"
+}`,
+  },
 };
 
 export interface DesignDocumentResult {
