@@ -8,6 +8,11 @@ import { CommandPalette } from "../../components/ui/CommandPalette";
 
 const navItems = [
   { href: "/projects", label: "Projects", icon: "🎬" },
+  { href: "/idea", label: "Idea / Concept", icon: "💡" },
+  { href: "/research", label: "Research", icon: "🔬" },
+  { href: "/rights", label: "Rights / Clearances", icon: "⚖️" },
+  { href: "/pitch", label: "Pitch Deck", icon: "📊" },
+  { href: "/financing", label: "Financing", icon: "💳" },
   { href: process.env.NEXT_PUBLIC_SCRIPT_WRITER_URL || (process.env.NEXT_PUBLIC_SCRIPT_WRITER_URL ?? "http://localhost:5174"), label: "CineScript Writer", icon: "✍️", external: true },
   { href: process.env.NEXT_PUBLIC_STORYBOARD_URL || "http://localhost:8080", label: "Storyboard Concept", icon: "🎨", external: true },
   { href: process.env.NEXT_PUBLIC_ANALYSIS_URL || (process.env.NEXT_PUBLIC_ANALYSIS_WEB_URL ?? "http://localhost:4007"), label: "Scenario Analysis", icon: "📊", external: true },
