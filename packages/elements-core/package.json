@@ -14,7 +14,9 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@marionette/ai-providers": "workspace:*"
+    "@electric-sql/pglite": "^0.4.4",
+    "@marionette/ai-providers": "workspace:*",
+    "drizzle-orm": "^0.45.2"
   },
   "devDependencies": {
     "@marionette/tsconfig": "workspace:*",
