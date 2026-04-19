@@ -1,0 +1,26 @@
+{
+  "name": "@marionette/engine-co-director",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./context": "./src/project-context.ts",
+    "./suggestions": "./src/suggestion-engine.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@marionette/ai-providers": "workspace:*",
+    "@marionette/elements-core": "workspace:*"
+  },
+  "devDependencies": {
+    "@marionette/tsconfig": "workspace:*",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
