@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../../lib/auth-context";
 import { StudioSelector } from "../../components/ui/StudioSelector";
+import { CommandPalette } from "../../components/ui/CommandPalette";
 
 const navItems = [
   { href: "/projects", label: "Projects", icon: "🎬" },
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/boxoffice", label: "Box Office", icon: "🎟️" },
   { href: "/reviews", label: "Reviews", icon: "⭐" },
   { href: "/library", label: "Content Library", icon: "📚" },
+  { href: "/ai-ops", label: "AI Ops", icon: "🩺" },
   { href: "/paperclip", label: "Paperclip HQ", icon: "🏢" },
   { href: "/logline-guide", label: "Logline Guide", icon: "📝" },
   { href: "/prompt-guide", label: "Prompt Guide", icon: "🎨" },
@@ -198,6 +200,9 @@ export default function DashboardLayout({
       >
         {children}
       </main>
+
+      {/* Global ⌘K command palette */}
+      <CommandPalette />
     </div>
   );
 }
