@@ -47,6 +47,11 @@ import { GET as photographyProgressGET } from "../../../photography/progress/rou
 import { GET as onSetSoundProgressGET } from "../../../on-set-sound/progress/route";
 import { GET as continuityProgressGET } from "../../../continuity/progress/route";
 import { GET as conformProgressGET } from "../../../conform/progress/route";
+import { GET as dailiesProgressGET } from "../../../dailies/progress/route";
+import { GET as pictureLockProgressGET } from "../../../picture-lock/progress/route";
+import { GET as vfxReviewProgressGET } from "../../../vfx-review/progress/route";
+import { GET as finalMixProgressGET } from "../../../final-mix/progress/route";
+import { GET as deliverablesProgressGET } from "../../../deliverables/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -595,7 +600,57 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn, con, tc, cw, eq, ins, po, dr, wr, ml, qcRaw, dcpRaw, sl, th, pk, intl, aw, ar, sdoc, ld, vfxp, stn, ssp, phot, oss, cont, conf] = (await Promise.all([
+  const dailiesInProcess = (async () => {
+    try {
+      const res = await dailiesProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const pictureLockInProcess = (async () => {
+    try {
+      const res = await pictureLockProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const vfxReviewInProcess = (async () => {
+    try {
+      const res = await vfxReviewProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const finalMixInProcess = (async () => {
+    try {
+      const res = await finalMixProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const deliverablesInProcess = (async () => {
+    try {
+      const res = await deliverablesProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn, con, tc, cw, eq, ins, po, dr, wr, ml, qcRaw, dcpRaw, sl, th, pk, intl, aw, ar, sdoc, ld, vfxp, stn, ssp, phot, oss, cont, conf, dly, plk, vfxr, fmix, dlvr] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -645,7 +700,12 @@ export async function GET(
     onSetSoundInProcess,
     continuityInProcess,
     conformInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
+    dailiesInProcess,
+    pictureLockInProcess,
+    vfxReviewInProcess,
+    finalMixInProcess,
+    deliverablesInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -1114,6 +1174,51 @@ export async function GET(
         steps: conf.steps,
         summary: conf.summary,
         deliveredCount: conf.deliveredCount,
+      }
+    : null;
+
+  const dailies = dly?.found
+    ? {
+        paperclipId: dly.paperclipId,
+        steps: dly.steps,
+        summary: dly.summary,
+        topSessions: dly.topSessions,
+      }
+    : null;
+
+  const pictureLock = plk?.found
+    ? {
+        paperclipId: plk.paperclipId,
+        steps: plk.steps,
+        summary: plk.summary,
+        topVersions: plk.topVersions,
+      }
+    : null;
+
+  const vfxReview = vfxr?.found
+    ? {
+        paperclipId: vfxr.paperclipId,
+        steps: vfxr.steps,
+        summary: vfxr.summary,
+        topShots: vfxr.topShots,
+      }
+    : null;
+
+  const finalMix = fmix?.found
+    ? {
+        paperclipId: fmix.paperclipId,
+        steps: fmix.steps,
+        summary: fmix.summary,
+        topSessions: fmix.topSessions,
+      }
+    : null;
+
+  const deliverables = dlvr?.found
+    ? {
+        paperclipId: dlvr.paperclipId,
+        steps: dlvr.steps,
+        summary: dlvr.summary,
+        topDeliverables: dlvr.topDeliverables,
       }
     : null;
 
