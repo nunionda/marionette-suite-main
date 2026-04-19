@@ -57,7 +57,7 @@ export const PHASES: PhaseDef[] = [
   {
     id: "production",
     label: "Production",
-    legs: ["ingest"],
+    legs: ["ingest", "cinemaEngine", "marketingEngine"],
     representativeHref: (id) => `/projects/${id}/cinema`,
     pathPrefix: (id) => [
       `/projects/${id}/cinema`,
