@@ -9,6 +9,8 @@
     "./text": "./src/text/index.ts",
     "./image": "./src/image/index.ts",
     "./video": "./src/video/index.ts",
+    "./audio": "./src/audio/index.ts",
+    "./voice-clone": "./src/voice-clone/index.ts",
     "./registry": "./src/registry.ts"
   },
   "scripts": {

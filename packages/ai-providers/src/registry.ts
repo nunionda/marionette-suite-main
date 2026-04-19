@@ -36,6 +36,14 @@ import {
 } from "./video";
 import type { VideoProvider } from "./video/provider";
 import {
+  elevenLabsProvider,
+  piperProvider,
+  xttsProvider,
+} from "./audio";
+import type { AudioProvider } from "./audio/provider";
+import { elevenLabsPvcProvider } from "./voice-clone";
+import type { VoiceCloneProvider } from "./voice-clone/provider";
+import {
   NoHealthyProviderError,
   type Capability,
   type ProviderHealth,
@@ -61,6 +69,8 @@ interface AnyProvider {
 const _textProviders = new Map<string, TextProvider>();
 const _imageProviders = new Map<string, ImageProvider>();
 const _videoProviders = new Map<string, VideoProvider>();
+const _audioProviders = new Map<string, AudioProvider>();
+const _voiceCloneProviders = new Map<string, VoiceCloneProvider>();
 const _healthCache = new Map<string, CacheEntry>();
 
 function cacheKey(capability: Capability, id: string): string {
@@ -103,12 +113,38 @@ export function getVideoProvider(id: string): VideoProvider | undefined {
   return _videoProviders.get(id);
 }
 
+// ─── AUDIO ─────────────────────────────────────────────────────────────────
+
+export function registerAudioProvider(provider: AudioProvider): void {
+  _audioProviders.set(provider.meta.id, provider);
+}
+export function listAudioProviders(): AudioProvider[] {
+  return [..._audioProviders.values()];
+}
+export function getAudioProvider(id: string): AudioProvider | undefined {
+  return _audioProviders.get(id);
+}
+
+// ─── VOICE CLONE ───────────────────────────────────────────────────────────
+
+export function registerVoiceCloneProvider(provider: VoiceCloneProvider): void {
+  _voiceCloneProviders.set(provider.meta.id, provider);
+}
+export function listVoiceCloneProviders(): VoiceCloneProvider[] {
+  return [..._voiceCloneProviders.values()];
+}
+export function getVoiceCloneProvider(id: string): VoiceCloneProvider | undefined {
+  return _voiceCloneProviders.get(id);
+}
+
 // ─── Shared health + resolve ───────────────────────────────────────────────
 
 function getProvider(capability: Capability, id: string): AnyProvider | undefined {
   if (capability === "text") return _textProviders.get(id);
   if (capability === "image") return _imageProviders.get(id);
   if (capability === "video") return _videoProviders.get(id);
+  if (capability === "audio") return _audioProviders.get(id);
+  if (capability === "voice-clone") return _voiceCloneProviders.get(id);
   return undefined;
 }
 
@@ -116,6 +152,8 @@ function listProviders(capability: Capability): AnyProvider[] {
   if (capability === "text") return [..._textProviders.values()];
   if (capability === "image") return [..._imageProviders.values()];
   if (capability === "video") return [..._videoProviders.values()];
+  if (capability === "audio") return [..._audioProviders.values()];
+  if (capability === "voice-clone") return [..._voiceCloneProviders.values()];
   return [];
 }
 
@@ -219,6 +257,24 @@ export async function resolveVideoProvider(prefer?: string): Promise<VideoProvid
   );
 }
 
+export async function resolveAudioProvider(prefer?: string): Promise<AudioProvider> {
+  return resolveGeneric<AudioProvider>(
+    "audio",
+    "DEFAULT_AUDIO_PROVIDER",
+    [..._audioProviders.values()],
+    prefer,
+  );
+}
+
+export async function resolveVoiceCloneProvider(prefer?: string): Promise<VoiceCloneProvider> {
+  return resolveGeneric<VoiceCloneProvider>(
+    "voice-clone",
+    "DEFAULT_VOICE_CLONE_PROVIDER",
+    [..._voiceCloneProviders.values()],
+    prefer,
+  );
+}
+
 /**
  * Health matrix for the UI `/ai-ops` dashboard — parallel probes.
  * Default capability is `text` for backwards-compat with Sprint 11a callers.
@@ -252,3 +308,11 @@ registerVideoProvider(klingProvider);
 registerVideoProvider(hunyuanHfProvider);
 registerVideoProvider(wanHfProvider);
 registerVideoProvider(ltxHfProvider);
+
+// AUDIO
+registerAudioProvider(elevenLabsProvider);
+registerAudioProvider(xttsProvider);
+registerAudioProvider(piperProvider);
+
+// VOICE CLONE
+registerVoiceCloneProvider(elevenLabsPvcProvider);

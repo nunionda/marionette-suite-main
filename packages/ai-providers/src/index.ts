@@ -17,3 +17,5 @@ export * from "./registry";
 export * as text from "./text";
 export * as image from "./image";
 export * as video from "./video";
+export * as audio from "./audio";
+export * as voiceClone from "./voice-clone";

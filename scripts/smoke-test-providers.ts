@@ -19,12 +19,16 @@ import { mkdir, writeFile } from "node:fs/promises";
 import { resolve as resolvePath } from "node:path";
 import {
   getHealthMatrix,
+  listAudioProviders,
   listImageProviders,
   listTextProviders,
   listVideoProviders,
+  listVoiceCloneProviders,
+  resolveAudioProvider,
   resolveImageProvider,
   resolveTextProvider,
   resolveVideoProvider,
+  resolveVoiceCloneProvider,
   type ProviderHealth,
 } from "../packages/ai-providers/src/index";
 
@@ -54,23 +58,25 @@ function healthIcon(h: ProviderHealth): string {
   }
 }
 
+type SmokeCapability = "text" | "image" | "video" | "audio" | "voice-clone";
+
 function parseArgs(argv: string[]) {
-  const out: { capability: "text" | "image" | "video"; prefer?: string; noGen?: boolean } = {
+  const out: { capability: SmokeCapability; prefer?: string; noGen?: boolean } = {
     capability: "text",
   };
+  const valid: SmokeCapability[] = ["text", "image", "video", "audio", "voice-clone"];
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--capability" && argv[i + 1]) {
       const v = argv[++i]!;
-      if (v !== "text" && v !== "image" && v !== "video") {
-        console.error(`Unsupported capability: ${v}`);
+      if (!valid.includes(v as SmokeCapability)) {
+        console.error(`Unsupported capability: ${v}. Valid: ${valid.join(", ")}`);
         process.exit(1);
       }
-      out.capability = v;
+      out.capability = v as SmokeCapability;
     } else if (a === "--prefer" && argv[i + 1]) {
       out.prefer = argv[++i];
     } else if (a === "--no-gen") {
-      // Skip the actual generate call; only probe + resolve (cheap for video).
       out.noGen = true;
     }
   }
@@ -281,15 +287,128 @@ async function runVideo(prefer?: string, noGen?: boolean): Promise<number> {
   return success > 0 ? 0 : 1;
 }
 
+async function runAudio(prefer?: string): Promise<number> {
+  const matrix = await getHealthMatrix("audio");
+  printMatrix(matrix);
+  const ready = matrix.filter((e) => e.health.state === "ready");
+  if (ready.length === 0) {
+    printNoReadyHint([
+      "ELEVENLABS_API_KEY (v3 TTS)",
+      "XTTS_BASE_URL (Coqui local)",
+      "PIPER_BASE_URL (Piper local)",
+    ]);
+    return 1;
+  }
+
+  console.log(`${c.bold}── Generate smoke (audio — TTS)${c.reset}\n`);
+  const outDir = resolvePath(process.cwd(), "tmp");
+  await mkdir(outDir, { recursive: true });
+
+  let success = 0;
+  for (const { meta } of ready) {
+    const provider = listAudioProviders().find((p) => p.meta.id === meta.id)!;
+    process.stdout.write(`  → ${meta.id.padEnd(42)} `);
+    try {
+      const start = Date.now();
+      const result = await provider.generate({
+        text: "Marionette audio provider layer is ready.",
+        format: "mp3",
+        timeoutMs: 60_000,
+      });
+      const elapsed = Date.now() - start;
+      let outPath = "";
+      if (result.audio.kind === "bytes") {
+        const ext = result.audio.mime.split("/")[1]?.replace("mpeg", "mp3") ?? "mp3";
+        outPath = resolvePath(outDir, `smoke-${meta.id}.${ext}`);
+        await writeFile(outPath, result.audio.bytes);
+      } else {
+        outPath = `(url) ${result.audio.url}`;
+      }
+      console.log(`${c.green}✓${c.reset} ${elapsed}ms · ${c.dim}${outPath}${c.reset}`);
+      success++;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(`${c.red}✗ ${msg.slice(0, 120)}${c.reset}`);
+    }
+  }
+  console.log();
+
+  try {
+    const picked = await resolveAudioProvider(prefer);
+    console.log(`  Resolve: ${c.green}${picked.meta.id}${c.reset} (${picked.meta.tier})`);
+  } catch (e) {
+    console.log(`  ${c.red}No healthy: ${e instanceof Error ? e.message : e}${c.reset}`);
+  }
+  console.log();
+
+  summary(ready.length, matrix.length, success);
+  return success > 0 ? 0 : 1;
+}
+
+async function runVoiceClone(prefer?: string): Promise<number> {
+  const matrix = await getHealthMatrix("voice-clone");
+  printMatrix(matrix);
+  const ready = matrix.filter((e) => e.health.state === "ready");
+  if (ready.length === 0) {
+    printNoReadyHint(["ELEVENLABS_API_KEY (IVC/PVC)"]);
+    return 1;
+  }
+  console.log(
+    `${c.bold}── Voice clone smoke — listing trained voices only (training is an action, not idempotent)${c.reset}\n`,
+  );
+  let success = 0;
+  for (const { meta } of ready) {
+    const provider = listVoiceCloneProviders().find((p) => p.meta.id === meta.id)!;
+    process.stdout.write(`  → ${meta.id.padEnd(42)} `);
+    try {
+      const voices = await provider.list();
+      console.log(
+        `${c.green}✓${c.reset} ${voices.length} trained voice(s)${
+          voices.length ? " · " + c.dim + voices.slice(0, 3).map((v) => v.name).join(", ") + c.reset : ""
+        }`,
+      );
+      success++;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.log(`${c.red}✗ ${msg.slice(0, 120)}${c.reset}`);
+    }
+  }
+  console.log();
+
+  try {
+    const picked = await resolveVoiceCloneProvider(prefer);
+    console.log(`  Resolve: ${c.green}${picked.meta.id}${c.reset} (${picked.meta.tier})`);
+  } catch (e) {
+    console.log(`  ${c.red}No healthy: ${e instanceof Error ? e.message : e}${c.reset}`);
+  }
+  console.log();
+  summary(ready.length, matrix.length, success);
+  return success > 0 ? 0 : 1;
+}
+
 async function main() {
   const { capability, prefer, noGen } = parseArgs(process.argv.slice(2));
   console.log(
     `${c.bold}── Marionette AI Providers · Smoke Test · capability=${capability}${c.reset}\n`,
   );
   let code: number;
-  if (capability === "text") code = await runText(prefer);
-  else if (capability === "image") code = await runImage(prefer);
-  else code = await runVideo(prefer, noGen);
+  switch (capability) {
+    case "text":
+      code = await runText(prefer);
+      break;
+    case "image":
+      code = await runImage(prefer);
+      break;
+    case "video":
+      code = await runVideo(prefer, noGen);
+      break;
+    case "audio":
+      code = await runAudio(prefer);
+      break;
+    case "voice-clone":
+      code = await runVoiceClone(prefer);
+      break;
+  }
   process.exit(code);
 }
 
