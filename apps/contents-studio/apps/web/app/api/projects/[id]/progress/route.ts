@@ -14,6 +14,8 @@ import { GET as marketingProgressGET } from "../../../marketing/progress/route";
 import { GET as boxOfficeProgressGET } from "../../../boxoffice/progress/route";
 import { GET as reviewsProgressGET } from "../../../reviews/progress/route";
 import { GET as assemblyProgressGET } from "../../../assembly/progress/route";
+import { GET as cinemaEngineProgressGET } from "../../../cinema/progress/route";
+import { GET as marketingEngineProgressGET } from "../../../marketing/campaigns/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -207,7 +209,33 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm] = (await Promise.all([
+  const cinemaEngineInProcess = (async () => {
+    try {
+      const req = new Request(
+        `http://internal/api/cinema/progress?projectId=${enc}`,
+      );
+      const res = await cinemaEngineProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const marketingEngineInProcess = (async () => {
+    try {
+      const req = new Request(
+        `http://internal/api/marketing/campaigns/progress?projectId=${enc}`,
+      );
+      const res = await marketingEngineProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -224,7 +252,9 @@ export async function GET(
     boxOfficeInProcess,
     reviewsInProcess,
     assemblyInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
+    cinemaEngineInProcess,
+    marketingEngineInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -382,6 +412,26 @@ export async function GET(
       }
     : null;
 
+  const cinemaEngine = cin?.found
+    ? {
+        paperclipId: cin.paperclipId,
+        steps: cin.steps,
+        summary: cin.summary,
+        totalUsages: cin.totalUsages,
+        distinctNodeIds: cin.distinctNodeIds,
+      }
+    : null;
+
+  const marketingEngine = mkt?.found
+    ? {
+        paperclipId: mkt.paperclipId,
+        steps: mkt.steps,
+        summary: mkt.summary,
+        totalUsages: mkt.totalUsages,
+        distinctNodeIds: mkt.distinctNodeIds,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -397,6 +447,8 @@ export async function GET(
     marketing,
     boxOffice,
     reviews,
+    cinemaEngine,
+    marketingEngine,
     assembly,
   });
 }
