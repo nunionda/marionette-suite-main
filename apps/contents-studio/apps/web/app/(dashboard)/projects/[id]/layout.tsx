@@ -1,16 +1,21 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { findProject } from "@marionette/paperclip-bridge/registry";
+import { PhaseStepper } from "../../../../components/ui/PhaseStepper";
+import {
+  rollupPhases,
+  type PhaseRollup,
+} from "../../../../lib/phases/definition";
 
 /**
- * Project-scoped sub-nav. Appears above every /projects/[id]/* page,
- * giving the operator one-click access to every engine + panel attached
- * to the project.
+ * Project-scoped layout with two navigation layers:
  *
- * Implemented as a Server Component layout — Next.js applies it to all
- * nested routes under /projects/[id]/ automatically. The active link is
- * computed on the client via a small nested client component that reads
- * the pathname.
+ *   [Phase Stepper]  — 6-phase progress rolled up from the 15-leg aggregator,
+ *                      data-driven, shows where work lives
+ *   [Sub-nav pills]  — Overview · Screenplay · Cinema · Marketing · Elements,
+ *                      pathname-driven, shows where user is
+ *
+ * Applied by Next.js to every /projects/[id]/* page.
  */
 import { ProjectSubNavClient } from "./project-subnav-client";
 
@@ -19,10 +24,34 @@ interface LayoutProps {
   children: React.ReactNode;
 }
 
+/**
+ * Server-side seed for the Phase Stepper. We call the aggregator route
+ * directly (internal fetch) so the stepper renders with real progress
+ * before the client hydrates. Failure is non-fatal — the client will
+ * re-fetch on mount.
+ */
+async function fetchInitialRollups(projectId: string): Promise<PhaseRollup[]> {
+  try {
+    const base =
+      process.env.NEXT_PUBLIC_HUB_URL ?? "http://localhost:3000";
+    const res = await fetch(
+      `${base}/api/projects/${encodeURIComponent(projectId)}/progress`,
+      { signal: AbortSignal.timeout(4000), cache: "no-store" },
+    );
+    if (!res.ok) return [];
+    const data = (await res.json()) as Record<string, unknown>;
+    return rollupPhases(data);
+  } catch {
+    return [];
+  }
+}
+
 export default async function ProjectLayout({ params, children }: LayoutProps) {
   const { id } = await params;
   const entry = await findProject(id);
   if (!entry) notFound();
+
+  const initialRollups = await fetchInitialRollups(id);
 
   const links = [
     { href: `/projects/${id}`, label: "Overview" },
@@ -48,6 +77,7 @@ export default async function ProjectLayout({ params, children }: LayoutProps) {
           AI Ops ↗
         </Link>
       </header>
+      <PhaseStepper projectId={id} initialRollups={initialRollups} />
       <ProjectSubNavClient links={links} />
       <div>{children}</div>
     </div>
