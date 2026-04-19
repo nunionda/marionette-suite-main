@@ -13,6 +13,10 @@
     "./creative-pipeline": {
       "types": "./src/creative-pipeline/index.ts",
       "default": "./src/creative-pipeline/index.ts"
+    },
+    "./provider-switcher": {
+      "types": "./src/provider-switcher/index.ts",
+      "default": "./src/provider-switcher/index.ts"
     }
   },
   "files": [
@@ -20,6 +24,7 @@
     "src"
   ],
   "dependencies": {
+    "@marionette/ai-providers": "workspace:*",
     "@marionette/pipeline-core": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
