@@ -222,6 +222,9 @@ importers:
       '@marionette/engine-cinema':
         specifier: workspace:*
         version: link:../../../../packages/engine-cinema
+      '@marionette/engine-marketing':
+        specifier: workspace:*
+        version: link:../../../../packages/engine-marketing
       '@marionette/job-runner':
         specifier: workspace:*
         version: link:../../../../packages/job-runner

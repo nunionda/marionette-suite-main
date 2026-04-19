@@ -25,6 +25,7 @@
     "@marionette/ai-providers": "workspace:*",
     "@marionette/elements-core": "workspace:*",
     "@marionette/engine-cinema": "workspace:*",
+    "@marionette/engine-marketing": "workspace:*",
     "@marionette/job-runner": "workspace:*"
   },
   "devDependencies": {
