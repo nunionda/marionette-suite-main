@@ -38,6 +38,15 @@ import { GET as pressKitProgressGET } from "../../../press-kit/progress/route";
 import { GET as internationalProgressGET } from "../../../international/progress/route";
 import { GET as awardsProgressGET } from "../../../awards/progress/route";
 import { GET as archiveProgressGET } from "../../../archive/progress/route";
+import { GET as scriptDoctoringProgressGET } from "../../../script-doctoring/progress/route";
+import { GET as lightingDesignProgressGET } from "../../../lighting-design/progress/route";
+import { GET as vfxPrevisProgressGET } from "../../../vfx-previs/progress/route";
+import { GET as stuntProgressGET } from "../../../stunt/progress/route";
+import { GET as scriptSupervisorPrepProgressGET } from "../../../script-supervisor-prep/progress/route";
+import { GET as photographyProgressGET } from "../../../photography/progress/route";
+import { GET as onSetSoundProgressGET } from "../../../on-set-sound/progress/route";
+import { GET as continuityProgressGET } from "../../../continuity/progress/route";
+import { GET as conformProgressGET } from "../../../conform/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -496,7 +505,97 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn, con, tc, cw, eq, ins, po, dr, wr, ml, qcRaw, dcpRaw, sl, th, pk, intl, aw, ar] = (await Promise.all([
+  const scriptDoctoringInProcess = (async () => {
+    try {
+      const res = await scriptDoctoringProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const lightingDesignInProcess = (async () => {
+    try {
+      const res = await lightingDesignProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const vfxPrevisInProcess = (async () => {
+    try {
+      const res = await vfxPrevisProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const stuntInProcess = (async () => {
+    try {
+      const res = await stuntProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const scriptSupervisorPrepInProcess = (async () => {
+    try {
+      const res = await scriptSupervisorPrepProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const photographyInProcess = (async () => {
+    try {
+      const res = await photographyProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const onSetSoundInProcess = (async () => {
+    try {
+      const res = await onSetSoundProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const continuityInProcess = (async () => {
+    try {
+      const res = await continuityProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const conformInProcess = (async () => {
+    try {
+      const res = await conformProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn, con, tc, cw, eq, ins, po, dr, wr, ml, qcRaw, dcpRaw, sl, th, pk, intl, aw, ar, sdoc, ld, vfxp, stn, ssp, phot, oss, cont, conf] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -537,7 +636,16 @@ export async function GET(
     internationalInProcess,
     awardsInProcess,
     archiveInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
+    scriptDoctoringInProcess,
+    lightingDesignInProcess,
+    vfxPrevisInProcess,
+    stuntInProcess,
+    scriptSupervisorPrepInProcess,
+    photographyInProcess,
+    onSetSoundInProcess,
+    continuityInProcess,
+    conformInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -928,6 +1036,87 @@ export async function GET(
       }
     : null;
 
+  const scriptDoctoring = sdoc?.found
+    ? {
+        paperclipId: sdoc.paperclipId,
+        steps: sdoc.steps,
+        summary: sdoc.summary,
+        topDoctors: sdoc.topDoctors,
+      }
+    : null;
+
+  const lightingDesign = ld?.found
+    ? {
+        paperclipId: ld.paperclipId,
+        steps: ld.steps,
+        summary: ld.summary,
+        topSetups: ld.topSetups,
+      }
+    : null;
+
+  const vfxPrevis = vfxp?.found
+    ? {
+        paperclipId: vfxp.paperclipId,
+        steps: vfxp.steps,
+        summary: vfxp.summary,
+        topShots: vfxp.topShots,
+      }
+    : null;
+
+  const stunt = stn?.found
+    ? {
+        paperclipId: stn.paperclipId,
+        steps: stn.steps,
+        summary: stn.summary,
+        topSequences: stn.topSequences,
+      }
+    : null;
+
+  const scriptSupervisorPrep = ssp?.found
+    ? {
+        paperclipId: ssp.paperclipId,
+        steps: ssp.steps,
+        summary: ssp.summary,
+        topDocs: ssp.topDocs,
+      }
+    : null;
+
+  const photography = phot?.found
+    ? {
+        paperclipId: phot.paperclipId,
+        steps: phot.steps,
+        summary: phot.summary,
+        nextDay: phot.nextDay,
+      }
+    : null;
+
+  const onSetSound = oss?.found
+    ? {
+        paperclipId: oss.paperclipId,
+        steps: oss.steps,
+        summary: oss.summary,
+        topSessions: oss.topSessions,
+      }
+    : null;
+
+  const continuity = cont?.found
+    ? {
+        paperclipId: cont.paperclipId,
+        steps: cont.steps,
+        summary: cont.summary,
+        criticalCount: cont.criticalCount,
+      }
+    : null;
+
+  const conform = conf?.found
+    ? {
+        paperclipId: conf.paperclipId,
+        steps: conf.steps,
+        summary: conf.summary,
+        deliveredCount: conf.deliveredCount,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -968,5 +1157,14 @@ export async function GET(
     international,
     awards,
     archive,
+    scriptDoctoring,
+    lightingDesign,
+    vfxPrevis,
+    stunt,
+    scriptSupervisorPrep,
+    photography,
+    onSetSound,
+    continuity,
+    conform,
   });
 }
