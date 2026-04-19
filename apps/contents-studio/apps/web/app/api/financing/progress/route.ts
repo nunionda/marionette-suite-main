@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { findFinancingByProject } from "../../../../lib/financing/mock-entries";
+import { requireSession } from "../../../../lib/server-session";
 
 export async function GET(req: Request) {
+  const session = await requireSession(req);
+  if (session instanceof Response) return session;
+
   const { searchParams } = new URL(req.url);
   const pid = searchParams.get("paperclipId");
   if (!pid) {
@@ -10,9 +14,11 @@ export async function GET(req: Request) {
 
   const financing = findFinancingByProject(pid);
 
-  const pct = financing
-    ? Math.round((financing.totalRaised / financing.totalBudget) * 100)
-    : 0;
+  // Guard against totalBudget === 0 to avoid NaN / Infinity
+  const pct =
+    financing && financing.totalBudget > 0
+      ? Math.round((financing.totalRaised / financing.totalBudget) * 100)
+      : 0;
 
   return NextResponse.json({
     found: !!financing,

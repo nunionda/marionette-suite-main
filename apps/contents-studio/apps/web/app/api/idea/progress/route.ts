@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { findIdeaByProject } from "../../../../lib/idea/mock-entries";
+import { requireSession } from "../../../../lib/server-session";
 
 export async function GET(req: Request) {
+  const session = await requireSession(req);
+  if (session instanceof Response) return session;
+
   const { searchParams } = new URL(req.url);
   const pid = searchParams.get("paperclipId");
   if (!pid) {

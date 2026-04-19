@@ -54,11 +54,15 @@ async function safeJson(url: string): Promise<unknown> {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const enc = encodeURIComponent(id);
+
+  // Forward the session cookie so Sprint 19 auth-guarded routes accept the
+  // internal synthetic requests made below.
+  const cookieHeader = req.headers.get("cookie") ?? "";
 
   const libraryInProcess = (async () => {
     try {
@@ -240,10 +244,14 @@ export async function GET(
     }
   })();
 
+  // Sprint 19 routes require a valid session cookie — forward it from the
+  // outer request so these internal synthetic calls pass auth.
+  const authHeaders = cookieHeader ? { cookie: cookieHeader } : undefined;
+
   const ideaInProcess = (async () => {
     try {
-      const req = new Request(`http://internal/api/idea/progress?paperclipId=${enc}`);
-      const res = await ideaProgressGET(req);
+      const r = new Request(`http://internal/api/idea/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await ideaProgressGET(r);
       if (!res.ok) return null;
       return await res.json();
     } catch {
@@ -253,8 +261,8 @@ export async function GET(
 
   const researchInProcess = (async () => {
     try {
-      const req = new Request(`http://internal/api/research/progress?paperclipId=${enc}`);
-      const res = await researchProgressGET(req);
+      const r = new Request(`http://internal/api/research/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await researchProgressGET(r);
       if (!res.ok) return null;
       return await res.json();
     } catch {
@@ -264,8 +272,8 @@ export async function GET(
 
   const rightsInProcess = (async () => {
     try {
-      const req = new Request(`http://internal/api/rights/progress?paperclipId=${enc}`);
-      const res = await rightsProgressGET(req);
+      const r = new Request(`http://internal/api/rights/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await rightsProgressGET(r);
       if (!res.ok) return null;
       return await res.json();
     } catch {
@@ -275,8 +283,8 @@ export async function GET(
 
   const pitchInProcess = (async () => {
     try {
-      const req = new Request(`http://internal/api/pitch/progress?paperclipId=${enc}`);
-      const res = await pitchProgressGET(req);
+      const r = new Request(`http://internal/api/pitch/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await pitchProgressGET(r);
       if (!res.ok) return null;
       return await res.json();
     } catch {
@@ -286,8 +294,8 @@ export async function GET(
 
   const financingInProcess = (async () => {
     try {
-      const req = new Request(`http://internal/api/financing/progress?paperclipId=${enc}`);
-      const res = await financingProgressGET(req);
+      const r = new Request(`http://internal/api/financing/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await financingProgressGET(r);
       if (!res.ok) return null;
       return await res.json();
     } catch {
