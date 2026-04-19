@@ -27,6 +27,17 @@ import { GET as crewProgressGET } from "../../../crew/progress/route";
 import { GET as equipmentProgressGET } from "../../../equipment/progress/route";
 import { GET as insuranceProgressGET } from "../../../insurance/progress/route";
 import { GET as productionOfficeProgressGET } from "../../../production-office/progress/route";
+import { GET as dailyReportProgressGET } from "../../../daily-report/progress/route";
+import { GET as wrapReportProgressGET } from "../../../wrap-report/progress/route";
+import { GET as musicLicensingProgressGET } from "../../../music-licensing/progress/route";
+import { GET as qcProgressGET } from "../../../qc/progress/route";
+import { GET as dcpProgressGET } from "../../../dcp/progress/route";
+import { GET as salesProgressGET } from "../../../sales/progress/route";
+import { GET as theatricalProgressGET } from "../../../theatrical/progress/route";
+import { GET as pressKitProgressGET } from "../../../press-kit/progress/route";
+import { GET as internationalProgressGET } from "../../../international/progress/route";
+import { GET as awardsProgressGET } from "../../../awards/progress/route";
+import { GET as archiveProgressGET } from "../../../archive/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -375,7 +386,117 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn, con, tc, cw, eq, ins, po] = (await Promise.all([
+  const dailyReportInProcess = (async () => {
+    try {
+      const res = await dailyReportProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const wrapReportInProcess = (async () => {
+    try {
+      const res = await wrapReportProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const musicLicensingInProcess = (async () => {
+    try {
+      const res = await musicLicensingProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const qcInProcess = (async () => {
+    try {
+      const res = await qcProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const dcpInProcess = (async () => {
+    try {
+      const res = await dcpProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const salesInProcess = (async () => {
+    try {
+      const res = await salesProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const theatricalInProcess = (async () => {
+    try {
+      const res = await theatricalProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const pressKitInProcess = (async () => {
+    try {
+      const res = await pressKitProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const internationalInProcess = (async () => {
+    try {
+      const res = await internationalProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const awardsInProcess = (async () => {
+    try {
+      const res = await awardsProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const archiveInProcess = (async () => {
+    try {
+      const res = await archiveProgressGET();
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn, con, tc, cw, eq, ins, po, dr, wr, ml, qcRaw, dcpRaw, sl, th, pk, intl, aw, ar] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -405,7 +526,18 @@ export async function GET(
     equipmentInProcess,
     insuranceInProcess,
     productionOfficeInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
+    dailyReportInProcess,
+    wrapReportInProcess,
+    musicLicensingInProcess,
+    qcInProcess,
+    dcpInProcess,
+    salesInProcess,
+    theatricalInProcess,
+    pressKitInProcess,
+    internationalInProcess,
+    awardsInProcess,
+    archiveInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -694,6 +826,108 @@ export async function GET(
       }
     : null;
 
+  const dailyReport = dr?.found
+    ? {
+        paperclipId: dr.paperclipId,
+        steps: dr.steps,
+        summary: dr.summary,
+        latestReport: dr.latestReport,
+      }
+    : null;
+
+  const wrapReport = wr?.found
+    ? {
+        paperclipId: wr.paperclipId,
+        steps: wr.steps,
+        summary: wr.summary,
+        wrapDate: wr.wrapDate,
+      }
+    : null;
+
+  const musicLicensing = ml?.found
+    ? {
+        paperclipId: ml.paperclipId,
+        steps: ml.steps,
+        summary: ml.summary,
+        topTracks: ml.topTracks,
+      }
+    : null;
+
+  const qc = qcRaw?.found
+    ? {
+        paperclipId: qcRaw.paperclipId,
+        steps: qcRaw.steps,
+        summary: qcRaw.summary,
+        passRate: qcRaw.passRate,
+      }
+    : null;
+
+  const dcp = dcpRaw?.found
+    ? {
+        paperclipId: dcpRaw.paperclipId,
+        steps: dcpRaw.steps,
+        summary: dcpRaw.summary,
+        masterFile: dcpRaw.masterFile,
+      }
+    : null;
+
+  const sales = sl?.found
+    ? {
+        paperclipId: sl.paperclipId,
+        steps: sl.steps,
+        summary: sl.summary,
+        topDeals: sl.topDeals,
+      }
+    : null;
+
+  const theatrical = th?.found
+    ? {
+        paperclipId: th.paperclipId,
+        steps: th.steps,
+        summary: th.summary,
+        openingDate: th.openingDate,
+      }
+    : null;
+
+  const pressKit = pk?.found
+    ? {
+        paperclipId: pk.paperclipId,
+        steps: pk.steps,
+        summary: pk.summary,
+        readyCount: pk.readyCount,
+      }
+    : null;
+
+  const international = intl?.found
+    ? {
+        paperclipId: intl.paperclipId,
+        steps: intl.steps,
+        summary: intl.summary,
+        closedDeals: intl.closedDeals,
+        totalMG: intl.totalMG,
+      }
+    : null;
+
+  const awards = aw?.found
+    ? {
+        paperclipId: aw.paperclipId,
+        steps: aw.steps,
+        summary: aw.summary,
+        wonCount: aw.wonCount,
+        nominatedCount: aw.nominatedCount,
+      }
+    : null;
+
+  const archive = ar?.found
+    ? {
+        paperclipId: ar.paperclipId,
+        steps: ar.steps,
+        summary: ar.summary,
+        activeCount: ar.activeCount,
+        restrictedCount: ar.restrictedCount,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -723,5 +957,16 @@ export async function GET(
     equipment,
     insurance,
     productionOffice,
+    dailyReport,
+    wrapReport,
+    musicLicensing,
+    qc,
+    dcp,
+    sales,
+    theatrical,
+    pressKit,
+    international,
+    awards,
+    archive,
   });
 }
