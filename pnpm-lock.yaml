@@ -207,12 +207,24 @@ importers:
 
   apps/contents-studio/apps/web:
     dependencies:
+      '@marionette/ai-providers':
+        specifier: workspace:*
+        version: link:../../../../packages/ai-providers
       '@marionette/content-profiles':
         specifier: workspace:*
         version: link:../../../../packages/content-profiles
       '@marionette/design-tokens':
         specifier: workspace:*
         version: link:../../../../packages/design-tokens
+      '@marionette/elements-core':
+        specifier: workspace:*
+        version: link:../../../../packages/elements-core
+      '@marionette/engine-cinema':
+        specifier: workspace:*
+        version: link:../../../../packages/engine-cinema
+      '@marionette/job-runner':
+        specifier: workspace:*
+        version: link:../../../../packages/job-runner
       '@marionette/paperclip-bridge':
         specifier: workspace:*
         version: link:../../../../packages/paperclip-bridge

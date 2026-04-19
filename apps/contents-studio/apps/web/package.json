@@ -21,7 +21,11 @@
     "@marionette/types-content": "workspace:*",
     "@marionette/paperclip-bridge": "workspace:*",
     "@marionette/prompt-adapters": "workspace:*",
-    "@marionette/ui": "workspace:*"
+    "@marionette/ui": "workspace:*",
+    "@marionette/ai-providers": "workspace:*",
+    "@marionette/elements-core": "workspace:*",
+    "@marionette/engine-cinema": "workspace:*",
+    "@marionette/job-runner": "workspace:*"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
