@@ -26,13 +26,17 @@ const JWT_SECRET =
 // Internal helpers
 // ---------------------------------------------------------------------------
 
-function base64urlDecode(b64url: string): Uint8Array {
-  // Convert base64url → base64 → binary bytes
+function base64urlDecode(b64url: string): Uint8Array<ArrayBuffer> {
+  // Convert base64url → base64 → binary bytes.
+  // `new Uint8Array(n)` guarantees an ArrayBuffer backing (not SharedArrayBuffer),
+  // satisfying crypto.subtle.verify's BufferSource constraint in TS 5.7+.
   const b64 = b64url.replace(/-/g, "+").replace(/_/g, "/");
   const padLen = (4 - (b64.length % 4)) % 4;
   const padded = b64 + "=".repeat(padLen);
   const binary = atob(padded);
-  return Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
 }
 
 async function verifyHs256(

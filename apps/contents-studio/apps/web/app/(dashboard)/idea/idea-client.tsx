@@ -11,14 +11,14 @@ const STATUS_COLOR: Record<IdeaEntry["status"], string> = {
   draft: "#707070",
   developing: "#facc15",
   approved: "#00FF41",
-  archived: "#6b7280",
+  shelved: "#6b7280",
 };
 
 const STATUS_LABEL: Record<IdeaEntry["status"], string> = {
   draft: "초안",
   developing: "개발 중",
   approved: "승인",
-  archived: "보관",
+  shelved: "보류",
 };
 
 export function IdeaClient({ ideas }: Props) {

@@ -303,7 +303,7 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, id, rs, rt, pt, fn] = (await Promise.all([
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -505,14 +505,14 @@ export async function GET(
       }
     : null;
 
-  const idea = id?.found
+  const idea = ideaData?.found
     ? {
-        paperclipId: id.paperclipId,
-        steps: id.steps,
-        status: id.status,
-        format: id.format,
-        genre: id.genre,
-        logline: id.logline,
+        paperclipId: ideaData.paperclipId,
+        steps: ideaData.steps,
+        status: ideaData.status,
+        format: ideaData.format,
+        genre: ideaData.genre,
+        logline: ideaData.logline,
       }
     : null;
 
