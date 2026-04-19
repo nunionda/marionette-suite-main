@@ -16,6 +16,11 @@ import { GET as reviewsProgressGET } from "../../../reviews/progress/route";
 import { GET as assemblyProgressGET } from "../../../assembly/progress/route";
 import { GET as cinemaEngineProgressGET } from "../../../cinema/progress/route";
 import { GET as marketingEngineProgressGET } from "../../../marketing/campaigns/progress/route";
+import { GET as ideaProgressGET } from "../../../idea/progress/route";
+import { GET as researchProgressGET } from "../../../research/progress/route";
+import { GET as rightsProgressGET } from "../../../rights/progress/route";
+import { GET as pitchProgressGET } from "../../../pitch/progress/route";
+import { GET as financingProgressGET } from "../../../financing/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -49,11 +54,15 @@ async function safeJson(url: string): Promise<unknown> {
 }
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   const enc = encodeURIComponent(id);
+
+  // Forward the session cookie so Sprint 19 auth-guarded routes accept the
+  // internal synthetic requests made below.
+  const cookieHeader = req.headers.get("cookie") ?? "";
 
   const libraryInProcess = (async () => {
     try {
@@ -235,7 +244,66 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt] = (await Promise.all([
+  // Sprint 19 routes require a valid session cookie — forward it from the
+  // outer request so these internal synthetic calls pass auth.
+  const authHeaders = cookieHeader ? { cookie: cookieHeader } : undefined;
+
+  const ideaInProcess = (async () => {
+    try {
+      const r = new Request(`http://internal/api/idea/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await ideaProgressGET(r);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const researchInProcess = (async () => {
+    try {
+      const r = new Request(`http://internal/api/research/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await researchProgressGET(r);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const rightsInProcess = (async () => {
+    try {
+      const r = new Request(`http://internal/api/rights/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await rightsProgressGET(r);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const pitchInProcess = (async () => {
+    try {
+      const r = new Request(`http://internal/api/pitch/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await pitchProgressGET(r);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const financingInProcess = (async () => {
+    try {
+      const r = new Request(`http://internal/api/financing/progress?paperclipId=${enc}`, { headers: authHeaders });
+      const res = await financingProgressGET(r);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, id, rs, rt, pt, fn] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -254,7 +322,12 @@ export async function GET(
     assemblyInProcess,
     cinemaEngineInProcess,
     marketingEngineInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
+    ideaInProcess,
+    researchInProcess,
+    rightsInProcess,
+    pitchInProcess,
+    financingInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -432,6 +505,63 @@ export async function GET(
       }
     : null;
 
+  const idea = id?.found
+    ? {
+        paperclipId: id.paperclipId,
+        steps: id.steps,
+        status: id.status,
+        format: id.format,
+        genre: id.genre,
+        logline: id.logline,
+      }
+    : null;
+
+  const research = rs?.found
+    ? {
+        paperclipId: rs.paperclipId,
+        steps: rs.steps,
+        overallStatus: rs.overallStatus,
+        completedCategories: rs.completedCategories,
+        totalCategories: rs.totalCategories,
+        marketSize: rs.marketSize,
+      }
+    : null;
+
+  const rights = rt?.found
+    ? {
+        paperclipId: rt.paperclipId,
+        steps: rt.steps,
+        overallStatus: rt.overallStatus,
+        hasIssues: rt.hasIssues,
+        allClear: rt.allClear,
+        legalCounsel: rt.legalCounsel,
+      }
+    : null;
+
+  const pitch = pt?.found
+    ? {
+        paperclipId: pt.paperclipId,
+        steps: pt.steps,
+        status: pt.status,
+        deckVersion: pt.deckVersion,
+        meetingCount: pt.meetingCount,
+        interestedCount: pt.interestedCount,
+        askAmount: pt.askAmount,
+      }
+    : null;
+
+  const financing = fn?.found
+    ? {
+        paperclipId: fn.paperclipId,
+        steps: fn.steps,
+        status: fn.status,
+        totalBudget: fn.totalBudget,
+        totalRaised: fn.totalRaised,
+        raisedPercent: fn.raisedPercent,
+        greenlitDate: fn.greenlitDate,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -450,5 +580,10 @@ export async function GET(
     cinemaEngine,
     marketingEngine,
     assembly,
+    idea,
+    research,
+    rights,
+    pitch,
+    financing,
   });
 }
