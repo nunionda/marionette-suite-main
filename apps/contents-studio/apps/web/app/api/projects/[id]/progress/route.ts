@@ -21,6 +21,12 @@ import { GET as researchProgressGET } from "../../../research/progress/route";
 import { GET as rightsProgressGET } from "../../../rights/progress/route";
 import { GET as pitchProgressGET } from "../../../pitch/progress/route";
 import { GET as financingProgressGET } from "../../../financing/progress/route";
+import { GET as contractsProgressGET } from "../../../contracts/progress/route";
+import { GET as talentContractsProgressGET } from "../../../talent-contracts/progress/route";
+import { GET as crewProgressGET } from "../../../crew/progress/route";
+import { GET as equipmentProgressGET } from "../../../equipment/progress/route";
+import { GET as insuranceProgressGET } from "../../../insurance/progress/route";
+import { GET as productionOfficeProgressGET } from "../../../production-office/progress/route";
 
 const SCRIPT_WRITER_API =
   process.env.SCRIPT_WRITER_API_URL ?? (process.env.INTERNAL_SCRIPT_ENGINE_URL ?? "http://localhost:3006");
@@ -303,7 +309,73 @@ export async function GET(
     }
   })();
 
-  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn] = (await Promise.all([
+  const contractsInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/contracts/progress?paperclipId=${enc}`);
+      const res = await contractsProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const talentContractsInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/talent-contracts/progress?paperclipId=${enc}`);
+      const res = await talentContractsProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const crewInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/crew/progress?paperclipId=${enc}`);
+      const res = await crewProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const equipmentInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/equipment/progress?paperclipId=${enc}`);
+      const res = await equipmentProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const insuranceInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/insurance/progress?paperclipId=${enc}`);
+      const res = await insuranceProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const productionOfficeInProcess = (async () => {
+    try {
+      const req = new Request(`http://internal/api/production-office/progress?paperclipId=${enc}`);
+      const res = await productionOfficeProgressGET(req);
+      if (!res.ok) return null;
+      return await res.json();
+    } catch {
+      return null;
+    }
+  })();
+
+  const [sw, sb, ps, cl, sc, bg, ct, lc, rh, ig, tl, fs, mk, bx, rv, asm, cin, mkt, ideaData, rs, rt, pt, fn, con, tc, cw, eq, ins, po] = (await Promise.all([
     safeJson(`${SCRIPT_WRITER_API}/api/progress?paperclipId=${enc}`),
     safeJson(`${STORYBOARD_API}/api/progress?paperclipId=${enc}`),
     postInProcess,
@@ -327,7 +399,13 @@ export async function GET(
     rightsInProcess,
     pitchInProcess,
     financingInProcess,
-  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
+    contractsInProcess,
+    talentContractsInProcess,
+    crewInProcess,
+    equipmentInProcess,
+    insuranceInProcess,
+    productionOfficeInProcess,
+  ])) as [any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any, any];
 
   const swSteps = sw?.found ? sw.steps : null;
   const sbSteps = sb?.found ? sb.steps : null;
@@ -562,6 +640,60 @@ export async function GET(
       }
     : null;
 
+  const contracts = con?.found
+    ? {
+        paperclipId: con.paperclipId,
+        steps: con.steps,
+        summary: con.summary,
+        topContracts: con.topContracts,
+      }
+    : null;
+
+  const talentContracts = tc?.found
+    ? {
+        paperclipId: tc.paperclipId,
+        steps: tc.steps,
+        summary: tc.summary,
+        leads: tc.leads,
+      }
+    : null;
+
+  const crew = cw?.found
+    ? {
+        paperclipId: cw.paperclipId,
+        steps: cw.steps,
+        summary: cw.summary,
+        departments: cw.departments,
+      }
+    : null;
+
+  const equipment = eq?.found
+    ? {
+        paperclipId: eq.paperclipId,
+        steps: eq.steps,
+        summary: eq.summary,
+        categories: eq.categories,
+      }
+    : null;
+
+  const insurance = ins?.found
+    ? {
+        paperclipId: ins.paperclipId,
+        steps: ins.steps,
+        summary: ins.summary,
+        policyTypes: ins.policyTypes,
+      }
+    : null;
+
+  const productionOffice = po?.found
+    ? {
+        paperclipId: po.paperclipId,
+        steps: po.steps,
+        summary: po.summary,
+        categories: po.categories,
+      }
+    : null;
+
   return NextResponse.json({
     creativeSteps,
     postProduction,
@@ -585,5 +717,11 @@ export async function GET(
     rights,
     pitch,
     financing,
+    contracts,
+    talentContracts,
+    crew,
+    equipment,
+    insurance,
+    productionOffice,
   });
 }
