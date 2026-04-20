@@ -152,3 +152,43 @@ real-data 방식: **DB 테이블 + CRUD API + 폼 UI**.
 ---
 
 **다음 세션 진입**: D1~D5 결정 답변 → locked-in 섹션 추가 → 시범 작업 지침 확정 → 실행.
+
+---
+
+## 8. Locked-in 결정 (2026-04-20 저녁)
+
+| 코드 | 결정 | 근거 |
+|---|---|---|
+| **D1** | **D1-b** scene-level UI 재설계 | script-writer `textDesigner.ts` 의 `scenes[]`가 SSoT. 매핑 로스 제거. |
+| **D2** | **D2-c** elements-core PgLite (`kind: "lighting_plan" \| "vfx_shot" \| ...`) | PR #17로 즉시 활성화. 9 모듈 통합 스토어. Drizzle schema 1개 유지. |
+| **D3** | **D3-a 먼저** 프로젝트 일괄 generate | Beat Savior 122 scenes 기준 수동 per-scene 비현실적. D3-b는 follow-up. |
+| **D4** | **채택** — LLM 출력=draft / human: approved → locked / on-set-adjusted | Sprint 20 mock의 status 4단계 그대로 재사용. |
+| **D5** | **defer** — Group B 7 모듈은 Group A 완료 후 재평가 | 실제 제작 투입 단계에서만 가치, 현 우선순위 낮음. |
+
+### 시범 작업 세부 지침 (locked)
+
+1. `packages/elements-core/src/store/schema.ts` — 현재 `elements` 테이블에 `kind` 컬럼 추가/확장 확인 필요. `lighting_plan`/`vfx_shot` kind 허용.
+2. `apps/contents-studio/apps/api/src/routes/` 에 `lighting-design.ts` 신규 — `POST /api/hub/lighting-design/generate` (projectId 받음 → script-writer `/api/design/lighting_design/execute` 호출 → elements-core 저장).
+3. `apps/contents-studio/apps/web/app/(dashboard)/lighting-design/page.tsx` — server component에서 elements-core query (`kind="lighting_plan"`, `projectId` 필터). mock-entries.ts 제거.
+4. `lighting-design-client.tsx` — "Generate for project" 버튼 + 상태 드롭다운 + 감사로그 표시. scene-level 테이블로 재편.
+5. Beat Savior (project 28, 122 scenes) 테스트.
+6. `/vfx-previs` 동일 패턴 복제.
+
+### 작업 단위 (commit 경계)
+
+- **C1**: elements-core schema `kind` 확장 + 마이그레이션 (해당 필요 시)
+- **C2**: hub API `lighting-design/generate` route (프록시 only, 저장 제외)
+- **C3**: elements-core write path + generate route 저장 연동
+- **C4**: `/lighting-design` page → DB fetch 전환
+- **C5**: client generate 버튼 + status 드롭다운
+- **C6**: Beat Savior 실행 검증 + 회고
+- **C7**: `/vfx-previs` 복제 (C1~C5 동등 패턴)
+
+---
+
+## 9. 주의: 시범 시작 전 확인 필요
+
+- `packages/elements-core`의 현재 `kind` 컬럼 타입이 extensible한지 (enum vs text)
+- script-writer `/api/design/*/execute` 엔드포인트의 auth 요구사항 (hub proxy가 자체 토큰 전달 필요한지)
+- Gemini Free tier rate limit이 122 scenes 일괄 호출 허용하는지 (throttle 필요 시 queue 추가)
+
