@@ -211,6 +211,36 @@ export const PRODUCTION_DESIGN_NODES = [
     outputs: ['shot_list_xlsx'],
     phase: 'previz',
   },
+  // Sprint 3 — Charter #24.10
+  {
+    id: 'lighting_design',
+    label: 'Lighting Design',
+    labelKo: '조명 디자인',
+    agent: 'ART_DEPT',
+    sub: 'gaffer_dp',
+    description: '씬별 조명 계획 — 조명 방향/색온도/강도/장비 리스트 (Roger Deakins, Hoyte van Hoytema 스타일)',
+    inputs: ['visual_tone', 'set_design_docs', 'storyboard_frames', 'color_script_frames'],
+    outputs: ['lighting_plan', 'lighting_diagrams'],
+    phase: 'previz',
+    quality: 'concept',
+    charter: '#24.10',
+    referenceArtists: ['Roger Deakins', 'Hoyte van Hoytema', 'Emmanuel Lubezki', 'Bradford Young'],
+  },
+  // Sprint 3 — Charter #28
+  {
+    id: 'vfx_previs',
+    label: 'VFX Previs',
+    labelKo: 'VFX 프리비즈',
+    agent: 'PREVIS',
+    sub: 'vfx_supervisor',
+    description: 'VFX 씬 프리비즈 — 합성/CG/환경확장/시뮬레이션 샷 분석 (ILM/Weta 스타일)',
+    inputs: ['vfx_requirements', 'storyboard_frames', 'set_design_docs'],
+    outputs: ['vfx_previs_shots', 'vfx_breakdown'],
+    phase: 'previz',
+    quality: 'concept',
+    charter: '#28',
+    referenceArtists: ['ILM', 'Weta Digital', 'DNEG', 'Framestore'],
+  },
 
   // ── Phase 5: 통합 문서 (Art Bible) ──
   {
@@ -383,6 +413,8 @@ export const TRACK_HANDOFFS = [
   { from: 'graphic_design',   to: 'image_prompt',   data: 'graphic_props',     description: '그래픽 프랍 → 세트 내 디테일에 반영',       qualityShift: 'concept → production' },
   { from: 'storyboard',       to: 'video_prompt',   data: 'storyboard_frames', description: '스토리보드 구도 → 카메라 앵글/무빙 결정',   qualityShift: 'concept → production' },
   { from: 'shot_list',        to: 'video_prompt',   data: 'shot_list_xlsx',    description: '샷 리스트 → 카메라 무빙/렌즈 결정',        qualityShift: 'direct' },
+  { from: 'lighting_design', to: 'image_prompt',   data: 'lighting_plan',     description: '조명 계획 → 이미지 광원/색온도 반영',       qualityShift: 'concept → production' },
+  { from: 'vfx_previs',      to: 'video_prompt',   data: 'vfx_breakdown',     description: 'VFX 브레이크다운 → 합성 샷 생성 시 참고',   qualityShift: 'concept → production' },
 ];
 
 // ─── Phase 순서 정의 ───
@@ -412,7 +444,7 @@ export const AUDIO_POST_PHASES = [
 
 export const ACTIVE_NODES_BY_CATEGORY = {
   'Feature Film': {
-    design: ['script_analysis', 'production_breakdown', 'lookbook', 'visual_world', 'color_script', 'character_design', 'character_arc', 'set_design', 'set_dressing', 'costume_design', 'makeup_hair', 'props', 'graphic_design', 'storyboard', 'shot_list', 'art_bible'],
+    design: ['script_analysis', 'production_breakdown', 'lookbook', 'visual_world', 'color_script', 'character_design', 'character_arc', 'set_design', 'set_dressing', 'costume_design', 'makeup_hair', 'props', 'graphic_design', 'storyboard', 'shot_list', 'lighting_design', 'vfx_previs', 'art_bible'],
     video: ['script_node', 'image_prompt', 'image_gen', 'image_pick', 'video_prompt', 'video_gen', 'audio_gen', 'final_cut'],
   },
   'Short Film': {
@@ -420,7 +452,7 @@ export const ACTIVE_NODES_BY_CATEGORY = {
     video: ['script_node', 'image_prompt', 'image_gen', 'image_pick', 'video_prompt', 'video_gen', 'audio_gen', 'final_cut'],
   },
   'Netflix Original': {
-    design: ['script_analysis', 'production_breakdown', 'lookbook', 'visual_world', 'color_script', 'character_design', 'character_arc', 'set_design', 'set_dressing', 'costume_design', 'makeup_hair', 'props', 'graphic_design', 'storyboard', 'shot_list', 'art_bible'],
+    design: ['script_analysis', 'production_breakdown', 'lookbook', 'visual_world', 'color_script', 'character_design', 'character_arc', 'set_design', 'set_dressing', 'costume_design', 'makeup_hair', 'props', 'graphic_design', 'storyboard', 'shot_list', 'lighting_design', 'vfx_previs', 'art_bible'],
     video: ['script_node', 'image_prompt', 'image_gen', 'image_pick', 'video_prompt', 'video_gen', 'audio_gen', 'final_cut'],
   },
   'Commercial': {
