@@ -1,8 +1,107 @@
-# 현재 세션 상태 (2026-04-19)
+# 현재 세션 상태 (2026-04-20)
 
-> **branch**: `feat/integrate-dev-projects` — 27 commits ahead, PR #1 open, **push + PR CI 모두 green**
-> **Charter**: [`docs/pipeline-constitution.md`](../docs/pipeline-constitution.md) v2.0 (73공정 확정)
-> **이전 상태**는 아래 "레거시 세션 스냅샷" 참고
+> **branch**: `claude/great-cerf-2d510f` (worktree) — main과 0 커밋 차이 (빈 worktree, `.remember/now.md`만 수정)
+> **Charter**: [`docs/pipeline-constitution.md`](../docs/pipeline-constitution.md) v2.0 (73공정)
+
+---
+
+## 2026-04-20 (저녁) 세션 — Charter 상태 재집계 완료
+
+### 핵심 발견: Charter 상태표와 현실 크게 괴리
+
+Charter 최초 작성(2026-04-18) 이후 **Sprint 10/11/19/20/21** 머지로 상당수 ❌ 항목이 처리됨. 메모리(`now.md`) 상단은 Sprint 1~8까지만 기록 — **그 이후 10~21번 Sprint는 기록 누락**.
+
+### main 머지된 Charter 처리 현황 (커밋 실측)
+
+| Sprint | Charter # | 형태 |
+|---|---|---|
+| 10 | #19 #21 #22 #27 #31 #32 | Phase 2 Ops (hub lib+api+page+client) |
+| 11 | #37 #41 #53 #60 #61 #63 #64 #66 #68 #70 #73 #74 | Distribution/Analytics (hub 12개) |
+| 19 | #1 #6 #11 #12 #13 | Development Phase (Idea/Research/Rights/Pitch/Financing) |
+| 20 | #9 #24.10 #28 #29 #30 #36 #39 #40 #57 | 9 production modules (lib+api+page+client) |
+| 21 | #38 #46 #48 #54 #59 | Post-production 5개 |
+
+**결론: 73공정 중 거의 전부가 어떤 형태로든 touch됨.** 남은 debt는 "없는 공정 만들기"가 아니라 **"mock → real data 치환"** 및 **"layer 간 배선"**.
+
+### PR 리뷰 결과
+
+- **PR #15** `feat(sprint3): #24.10 + #28` OPEN
+  - +74/-2 (textDesigner.ts + productionPipeline.js)
+  - **MERGEABLE**, Lint/Typecheck ✅, Cloudflare Pages ❌ (플랫폼 이슈)
+  - Sprint 20 (hub page + mock entries)과 **보완 관계** (중복 아님): PR #15은 script-writer의 real 생성 endpoint
+  - 머지는 사용자 판단 보류
+- **PR #17** `feat(elements-core): PgLite-backed ElementStore — Sprint DB-1` OPEN — 미확인
+- **PR #19** `docs: blueprint SSoT 규칙 + DECODE 사본 정리` OPEN — 미확인
+
+### Hub 라우트 실측
+
+- `apps/contents-studio/apps/web/app/(dashboard)/` — **60 라우트**
+- `apps/contents-studio/apps/web/app/api/` — **59 라우트** (대부분 `/progress` 포함)
+- `apps/contents-studio/apps/api/src/routes/` — 14 Hono route 모듈 (projects/pipeline/agents/assets/screenplay/brainstorm/logline/prompt-guide/agent-outputs/export/snapshots/batch/auth/analysis)
+
+### CI 상태 (실측)
+
+- Lint/Typecheck/Test: ✅ 최근 PR들 green (`prompt-adapters` tsconfig 이슈 해소됨 — 메모리의 "duplicate identifier"는 stale)
+- Cloudflare Pages: ❌ 지속 (Charter §외 플랫폼 설정 이슈)
+
+### 이번 세션 완료 (2026-04-20 저녁)
+
+- PR #19 `f82e8f0` (docs SSoT) MERGED
+- PR #17 `e8016bf` (PgLite ElementStore, Sprint DB-1) MERGED
+- PR #15 `fc00f19` (Sprint 3 #24.10 Lighting + #28 VFX Previs) MERGED
+- main fast-forward 완료, 0 open PR
+- **Sprint 20 9개 모듈 깊이 오딧**: 전부 동일 패턴 (page + client + mock-entries + progress-only api, 실 데이터 배선 0)
+- **배선 plan 문서 작성**: [`docs/superpowers/plans/2026-04-20-hub-mock-to-real-wiring.md`](docs/superpowers/plans/2026-04-20-hub-mock-to-real-wiring.md) — Group A(LLM-wiring, 2개) vs Group B(DB-only, 7개) 분리, D1~D5 결정 항목 정리
+
+### 다음 세션 진입 가이드
+
+1. **plan 문서 D1~D5 결정** (grain/저장소/트리거UI/review/Group B 우선순위)
+2. **결정 후 `/lighting-design` 시범 배선** — Drizzle schema + Hono route proxy + page DB fetch + client generate 버튼
+3. **Sprint 10/11/19/21 모듈 (27개)** 동일 오딧 필요 — 이번 plan은 Sprint 20만 커버
+4. **analysis-web `@marionette/design-tokens/tokens.css` import 버그** — 잔존 여부 확인
+
+---
+
+## 2026-04-20 (오후) 세션 — 73공정 FE/BE audit 시도 (중단)
+
+### 시도한 작업
+사용자 요청: "프론트엔드(화면·이벤트·데이터송수신) / 백엔드(서버·DB·WAS) 기준으로 73공정 공정률 오딧 → 다음 세션 우선순위 구현계획"
+
+### 결과: 실패 (3 Explore agents 병렬 dispatch 방식)
+- **Hub audit agent**: autocompact thrashing으로 중단
+- **script-writer audit agent**: autocompact thrashing으로 중단
+- **독립앱+packages audit agent**: 반환은 됐으나 **내용 대부분 환각**. 메모리·Charter와 충돌:
+  - "analysis-system이 hub로 흡수됨" (실제: 여전히 :4006/:4007 standalone)
+  - "Postgres + Drizzle이 canonical" (실제: SQLite 현행, Postgres는 target)
+  - "apps/contents-studio/apps/api/src/schema.ts" 경로 환각
+  - "#18 Location Scouting를 '#18 Post (generic)'으로" Charter 직접 위배
+  - "storyboard-maker apiMap 전부 valid 검증" — 파일 읽지 않고 단정
+
+### 원인
+- 모노레포 규모(286 files, 151k words) + 3 에이전트 × 광범위 프롬프트 = 컨텍스트 압박
+- 에이전트가 메모리·Charter 단편에서 추측 생성
+
+### 다음 세션 진입 가이드 (경로 1 채택: /clear 후 새 세션)
+
+**절대 하지 말 것**:
+- 2026-04-20 독립앱 audit agent 출력 신뢰 금지 (이 세션 대화 로그에 남아 있으나 환각)
+- 한 agent에 20+ 공정을 한꺼번에 넘기는 광범위 프롬프트 금지
+
+**추천 접근**:
+1. agent 대신 **직접 Read/Glob/Grep로** 파트별 실측 (특히 apps/contents-studio app/ + api/ 구조 먼저)
+2. 오딧 범위는 **미완성(🟡/❌) 공정만** (B 경로, 약 30~40개)
+3. 한 번에 1개 앱만: hub → script-writer → 독립앱 순차
+4. 산출물: 오딧 표 → writing-plans 진입
+
+**우선순위 힌트 (Charter 기반, 환각 없음)**:
+- Sprint 3 deferred: #24.10 Lighting Design, #28 VFX Previs (Charter §7 "별도 세션" 명시)
+- Phase 1 미착수: #1 Idea, #6 Research, #9 Coverage, #11 Rights, #12 Pitch Deck, #13 Financing
+- Phase 2 미착수: #18 Location Scouting, #19 Location Contracts, #21 Casting Contract, #22 Crew Hiring, #27 Equipment, #29 Stunt, #30 Script Sup Prep, #31 Insurance, #32 Production Office
+- Phase 3 미착수: #36 Principal Photo, #37 Daily Report, #39 On-set Sound, #40 Continuity, #41 Wrap
+- Phase 4 미착수: #53 Music Licensing, #57 Conform
+- Phase 5 미착수: #60 QC, #61 DCP, #63 Sales, #64 Theatrical Plan, #66 PR, #68 Theatrical, #70 Intl
+- Phase 6 미착수: #73 Awards, #74 Archive
+- Technical debt: analysis-core 135 errors (§9 out-of-scope advisory), analysis-web design-tokens CSS import 버그
 
 ---
 
