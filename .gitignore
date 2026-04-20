@@ -15,6 +15,7 @@ dist/
 # 워크트리 (marionette-wt/ 는 main repo 외부 디렉토리이므로 무관하지만
 # 혹시 worktree 내부에서 git이 CLAUDE.md나 .env.local을 stage하지 않도록 보호)
 # Note: git worktrees share .gitignore from the linked repo automatically.
+CLAUDE.md
 CLAUDE.md.worktree
 .worktree-meta
 

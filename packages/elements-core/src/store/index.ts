@@ -133,3 +133,7 @@ export function createInMemoryElementStore(): ElementStore {
 
 /** Shared default instance — convenient for dev/test, not a requirement. */
 export const defaultElementStore: ElementStore = createInMemoryElementStore();
+
+// PgLite-backed store — exported for callers that need persistence.
+export { createPgLiteElementStore } from "./pglite.js";
+export type { PgLiteStoreOptions } from "./pglite.js";
