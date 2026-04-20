@@ -139,7 +139,7 @@ real-data 방식: **DB 테이블 + CRUD API + 폼 UI**.
 - **Script-writer LLM 비용 정책**: `apps/script-writer/CLAUDE.md` — 무료 모델 (Gemini Free / Ollama / HuggingFace / Groq Free) + Anthropic 크레딧 범위. 배선 시 Gemini Free 기본 사용.
 - **Auth guard**: `apps/contents-studio/apps/api/src/index.ts`의 `authGuard`는 `/api/auth`와 `/api/health` 제외 전부 보호. 새 route는 auth 고려 필요.
 - **Aggregator**: `/lighting-design/progress` 등 progress route는 이미 aggregator 49-leg에 연결. 실 데이터로 전환 시 progress 계산식만 갱신.
-- **Sprint 10/11/19/21 모듈 (27개)**: 동일 audit 필요 — 이 plan은 Sprint 20만 커버.
+- **Sprint 10/11/19/21 모듈 (27개)**: audit 완료 (§10). 전부 Sprint 20과 동일 패턴 — Group B로 합류.
 
 ---
 
@@ -191,4 +191,39 @@ real-data 방식: **DB 테이블 + CRUD API + 폼 UI**.
 - `packages/elements-core`의 현재 `kind` 컬럼 타입이 extensible한지 (enum vs text)
 - script-writer `/api/design/*/execute` 엔드포인트의 auth 요구사항 (hub proxy가 자체 토큰 전달 필요한지)
 - Gemini Free tier rate limit이 122 scenes 일괄 호출 허용하는지 (throttle 필요 시 queue 추가)
+
+---
+
+## 10. Sprint 10/11/19/21 audit 결과 (2026-04-20 추가)
+
+### Group A 최종: 2개 (Sprint 20만)
+- `/lighting-design`, `/vfx-previs` — script-writer `textDesigner.ts` 대응 spec 존재
+
+### Group B 최종: 27 + 7 = **34개 (Sprint 10/11/19/20/21 전체)**
+
+| Sprint | Charter # | 모듈 |
+|---|---|---|
+| 10 | #19 #21 #22 #27 #31 #32 | contracts, crew, equipment, insurance, production-office, talent-contracts |
+| 11 | #37 #41 #53 #60 #61 #63 #64 #66 #68 #70 #73 #74 | daily-report, wrap-report, music-licensing, qc, dcp, sales, theatrical, press-kit, international, awards, archive (11개 — #64·#68 병합) |
+| 19 | #1 #6 #11 #12 #13 | idea, research, rights, pitch, financing |
+| 20 | #9 #29 #30 #36 #39 #40 #57 | script-doctoring, stunt, script-supervisor-prep, photography, on-set-sound, continuity, conform |
+| 21 | #38 #46 #48 #54 #59 | dailies, picture-lock, vfx-review, final-mix, deliverables |
+
+모두 `lib/{m}/mock-entries.ts` + `api/{m}/progress/route.ts` + `(dashboard)/{m}/page.tsx + client.tsx` 패턴. 실 데이터 배선 0.
+
+### Group B 전체의 배선 방식
+
+동일 전략:
+- elements-core `kind` 확장 (모듈당 1 kind) — D2-c 일관
+- 모듈당 CRUD API (`POST/GET/PATCH/DELETE /api/hub/{m}`)
+- 모듈당 폼 UI (mock-entries 타입 필드를 입력 폼으로 변환)
+
+### 시범 이후 우선순위 (개정)
+
+Group A 2개 완료(C1~C7) → Group B 중 **가장 먼저 실 데이터가 들어오는 모듈** 선정:
+- **프리프로덕션 단계**: #20 casting (hub 이미 있음, Sprint 1 진행 — elements-core 이관 후보), #19 contracts, #22 crew
+- **프로덕션 단계**: #37 daily-report (현장 직접 입력 가치 큼)
+- 기타는 deferred
+
+— 배선은 모듈당 ~1일. 34개 × 1일 = 34일의 long-haul 작업. 시간/우선순위 제어를 위해 **분기별 배치** 권장 (6개/sprint).
 
