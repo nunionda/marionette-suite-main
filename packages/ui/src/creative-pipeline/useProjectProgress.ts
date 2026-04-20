@@ -362,6 +362,307 @@ export interface ReviewsStatus {
   } | null;
 }
 
+// ── Sprint 19: Development Phase ────────────────────────────────────────────
+
+export interface IdeaStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  status: string;
+  format: string | null;
+  genre: string | null;
+  logline: string | null;
+}
+
+export interface ResearchStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  overallStatus: string;
+  completedCategories: number;
+  totalCategories: number;
+  marketSize: string | null;
+}
+
+export interface RightsStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  overallStatus: string;
+  hasIssues: boolean;
+  allClear: boolean;
+  legalCounsel: string | null;
+}
+
+export interface PitchStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  status: string;
+  deckVersion: string | null;
+  meetingCount: number;
+  interestedCount: number;
+  askAmount: number | null;
+}
+
+export interface FinancingStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  status: string;
+  totalBudget: number | null;
+  totalRaised: number | null;
+  raisedPercent: number | null;
+  greenlitDate: string | null;
+}
+
+// ── Sprint 10: Pre-production Ops ───────────────────────────────────────────
+
+export interface ContractsStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topContracts: Array<Record<string, unknown>>;
+}
+
+export interface TalentContractsStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  leads: Array<Record<string, unknown>>;
+}
+
+export interface CrewStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  departments: Array<Record<string, unknown>>;
+}
+
+export interface EquipmentStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  categories: Array<Record<string, unknown>>;
+}
+
+export interface InsuranceStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  policyTypes: Array<Record<string, unknown>>;
+}
+
+export interface ProductionOfficeStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  categories: Array<Record<string, unknown>>;
+}
+
+// ── On-set Ops ───────────────────────────────────────────────────────────────
+
+export interface DailyReportStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  latestReport: Record<string, unknown> | null;
+}
+
+export interface WrapReportStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  wrapDate: string | null;
+}
+
+// ── Pre-production Creative ───────────────────────────────────────────────────
+
+export interface ScriptDoctoringStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topDoctors: Array<Record<string, unknown>>;
+}
+
+export interface LightingDesignStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topSetups: Array<Record<string, unknown>>;
+}
+
+export interface VfxPrevisStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topShots: Array<Record<string, unknown>>;
+}
+
+export interface StuntStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topSequences: Array<Record<string, unknown>>;
+}
+
+export interface ScriptSupervisorPrepStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topDocs: Array<Record<string, unknown>>;
+}
+
+// ── Production / On-set ──────────────────────────────────────────────────────
+
+export interface PhotographyStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  nextDay: Record<string, unknown> | null;
+}
+
+export interface OnSetSoundStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topSessions: Array<Record<string, unknown>>;
+}
+
+export interface ContinuityStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  criticalCount: number;
+}
+
+// ── Post-production (Sprint 21) ──────────────────────────────────────────────
+
+export interface DailiesStatus {
+  paperclipId: string;
+  steps: Array<{ label: string; done: boolean }> | Record<string, boolean>;
+  summary: Record<string, number>;
+  topSessions: Array<Record<string, unknown>>;
+}
+
+export interface PictureLockStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topVersions: Array<Record<string, unknown>>;
+}
+
+export interface VfxReviewStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topShots: Array<Record<string, unknown>>;
+}
+
+export interface FinalMixStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topSessions: Array<Record<string, unknown>>;
+}
+
+export interface DeliverablesStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topDeliverables: Array<Record<string, unknown>>;
+}
+
+export interface ConformStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  deliveredCount: number;
+}
+
+// ── Distribution / Post-release ──────────────────────────────────────────────
+
+export interface MusicLicensingStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topTracks: Array<Record<string, unknown>>;
+}
+
+export interface QCStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  passRate: number | null;
+}
+
+export interface DCPStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  masterFile: string | null;
+}
+
+export interface SalesStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  topDeals: Array<Record<string, unknown>>;
+}
+
+export interface TheatricalStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  openingDate: string | null;
+}
+
+export interface PressKitStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  readyCount: number;
+}
+
+export interface InternationalStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  closedDeals: number;
+  totalMG: number | null;
+}
+
+export interface AwardsStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  wonCount: number;
+  nominatedCount: number;
+}
+
+export interface ArchiveStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  activeCount: number;
+  restrictedCount: number;
+}
+
+// ── PART B Engines ───────────────────────────────────────────────────────────
+
+export interface CinemaEngineStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  totalUsages: number;
+  distinctNodeIds: number;
+}
+
+export interface MarketingEngineStatus {
+  paperclipId: string;
+  steps: Record<string, boolean>;
+  summary: Record<string, number>;
+  totalUsages: number;
+  distinctNodeIds: number;
+}
+
+// ── Aggregator contract (52 legs) ────────────────────────────────────────────
+
 interface AggregatorResponse {
   creativeSteps: StepProgress[];
   postProduction: PostProductionStatus | null;
@@ -378,6 +679,51 @@ interface AggregatorResponse {
   boxOffice: BoxOfficeStatus | null;
   reviews: ReviewsStatus | null;
   assembly: AssemblyStatus | null;
+  // Sprint 19
+  idea: IdeaStatus | null;
+  research: ResearchStatus | null;
+  rights: RightsStatus | null;
+  pitch: PitchStatus | null;
+  financing: FinancingStatus | null;
+  // Sprint 10
+  contracts: ContractsStatus | null;
+  talentContracts: TalentContractsStatus | null;
+  crew: CrewStatus | null;
+  equipment: EquipmentStatus | null;
+  insurance: InsuranceStatus | null;
+  productionOffice: ProductionOfficeStatus | null;
+  dailyReport: DailyReportStatus | null;
+  wrapReport: WrapReportStatus | null;
+  // Pre-production creative
+  scriptDoctoring: ScriptDoctoringStatus | null;
+  lightingDesign: LightingDesignStatus | null;
+  vfxPrevis: VfxPrevisStatus | null;
+  stunt: StuntStatus | null;
+  scriptSupervisorPrep: ScriptSupervisorPrepStatus | null;
+  // Production
+  photography: PhotographyStatus | null;
+  onSetSound: OnSetSoundStatus | null;
+  continuity: ContinuityStatus | null;
+  // Post-production
+  conform: ConformStatus | null;
+  dailies: DailiesStatus | null;
+  pictureLock: PictureLockStatus | null;
+  vfxReview: VfxReviewStatus | null;
+  finalMix: FinalMixStatus | null;
+  deliverables: DeliverablesStatus | null;
+  // Distribution / post-release
+  musicLicensing: MusicLicensingStatus | null;
+  qc: QCStatus | null;
+  dcp: DCPStatus | null;
+  sales: SalesStatus | null;
+  theatrical: TheatricalStatus | null;
+  pressKit: PressKitStatus | null;
+  international: InternationalStatus | null;
+  awards: AwardsStatus | null;
+  archive: ArchiveStatus | null;
+  // Engines (PART B)
+  cinemaEngine: CinemaEngineStatus | null;
+  marketingEngine: MarketingEngineStatus | null;
 }
 
 /**
@@ -405,6 +751,51 @@ export function useProjectProgress(projectId: string) {
   const [boxOffice, setBoxOffice] = useState<BoxOfficeStatus | null>(null);
   const [reviews, setReviews] = useState<ReviewsStatus | null>(null);
   const [assembly, setAssembly] = useState<AssemblyStatus | null>(null);
+  // Sprint 19 — Development Phase
+  const [idea, setIdea] = useState<IdeaStatus | null>(null);
+  const [research, setResearch] = useState<ResearchStatus | null>(null);
+  const [rights, setRights] = useState<RightsStatus | null>(null);
+  const [pitch, setPitch] = useState<PitchStatus | null>(null);
+  const [financing, setFinancing] = useState<FinancingStatus | null>(null);
+  // Sprint 10 — Pre-production Ops
+  const [contracts, setContracts] = useState<ContractsStatus | null>(null);
+  const [talentContracts, setTalentContracts] = useState<TalentContractsStatus | null>(null);
+  const [crew, setCrew] = useState<CrewStatus | null>(null);
+  const [equipment, setEquipment] = useState<EquipmentStatus | null>(null);
+  const [insurance, setInsurance] = useState<InsuranceStatus | null>(null);
+  const [productionOffice, setProductionOffice] = useState<ProductionOfficeStatus | null>(null);
+  const [dailyReport, setDailyReport] = useState<DailyReportStatus | null>(null);
+  const [wrapReport, setWrapReport] = useState<WrapReportStatus | null>(null);
+  // Pre-production creative
+  const [scriptDoctoring, setScriptDoctoring] = useState<ScriptDoctoringStatus | null>(null);
+  const [lightingDesign, setLightingDesign] = useState<LightingDesignStatus | null>(null);
+  const [vfxPrevis, setVfxPrevis] = useState<VfxPrevisStatus | null>(null);
+  const [stunt, setStunt] = useState<StuntStatus | null>(null);
+  const [scriptSupervisorPrep, setScriptSupervisorPrep] = useState<ScriptSupervisorPrepStatus | null>(null);
+  // Production
+  const [photography, setPhotography] = useState<PhotographyStatus | null>(null);
+  const [onSetSound, setOnSetSound] = useState<OnSetSoundStatus | null>(null);
+  const [continuity, setContinuity] = useState<ContinuityStatus | null>(null);
+  // Post-production
+  const [conform, setConform] = useState<ConformStatus | null>(null);
+  const [dailies, setDailies] = useState<DailiesStatus | null>(null);
+  const [pictureLock, setPictureLock] = useState<PictureLockStatus | null>(null);
+  const [vfxReview, setVfxReview] = useState<VfxReviewStatus | null>(null);
+  const [finalMix, setFinalMix] = useState<FinalMixStatus | null>(null);
+  const [deliverables, setDeliverables] = useState<DeliverablesStatus | null>(null);
+  // Distribution / post-release
+  const [musicLicensing, setMusicLicensing] = useState<MusicLicensingStatus | null>(null);
+  const [qc, setQc] = useState<QCStatus | null>(null);
+  const [dcp, setDcp] = useState<DCPStatus | null>(null);
+  const [sales, setSales] = useState<SalesStatus | null>(null);
+  const [theatrical, setTheatrical] = useState<TheatricalStatus | null>(null);
+  const [pressKit, setPressKit] = useState<PressKitStatus | null>(null);
+  const [international, setInternational] = useState<InternationalStatus | null>(null);
+  const [awards, setAwards] = useState<AwardsStatus | null>(null);
+  const [archive, setArchive] = useState<ArchiveStatus | null>(null);
+  // Engines (PART B)
+  const [cinemaEngine, setCinemaEngine] = useState<CinemaEngineStatus | null>(null);
+  const [marketingEngine, setMarketingEngine] = useState<MarketingEngineStatus | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -430,6 +821,51 @@ export function useProjectProgress(projectId: string) {
           setBoxOffice(data.boxOffice);
           setReviews(data.reviews);
           setAssembly(data.assembly);
+          // Sprint 19 — Development Phase
+          setIdea(data.idea);
+          setResearch(data.research);
+          setRights(data.rights);
+          setPitch(data.pitch);
+          setFinancing(data.financing);
+          // Sprint 10 — Pre-production Ops
+          setContracts(data.contracts);
+          setTalentContracts(data.talentContracts);
+          setCrew(data.crew);
+          setEquipment(data.equipment);
+          setInsurance(data.insurance);
+          setProductionOffice(data.productionOffice);
+          setDailyReport(data.dailyReport);
+          setWrapReport(data.wrapReport);
+          // Pre-production creative
+          setScriptDoctoring(data.scriptDoctoring);
+          setLightingDesign(data.lightingDesign);
+          setVfxPrevis(data.vfxPrevis);
+          setStunt(data.stunt);
+          setScriptSupervisorPrep(data.scriptSupervisorPrep);
+          // Production
+          setPhotography(data.photography);
+          setOnSetSound(data.onSetSound);
+          setContinuity(data.continuity);
+          // Post-production
+          setConform(data.conform);
+          setDailies(data.dailies);
+          setPictureLock(data.pictureLock);
+          setVfxReview(data.vfxReview);
+          setFinalMix(data.finalMix);
+          setDeliverables(data.deliverables);
+          // Distribution / post-release
+          setMusicLicensing(data.musicLicensing);
+          setQc(data.qc);
+          setDcp(data.dcp);
+          setSales(data.sales);
+          setTheatrical(data.theatrical);
+          setPressKit(data.pressKit);
+          setInternational(data.international);
+          setAwards(data.awards);
+          setArchive(data.archive);
+          // Engines (PART B)
+          setCinemaEngine(data.cinemaEngine);
+          setMarketingEngine(data.marketingEngine);
         }
       } catch {
         // Silent fail: keep defaults
@@ -446,5 +882,25 @@ export function useProjectProgress(projectId: string) {
     (p) => p.status === "in_progress" || p.status === "review",
   )?.key;
 
-  return { progress, currentStep, loading, postProduction, distribution, schedule, budget, casting, locations, rehearsals, ingest, titles, festivals, marketing, boxOffice, reviews, assembly };
+  return {
+    progress, currentStep, loading,
+    postProduction, distribution,
+    schedule, budget, casting, locations, rehearsals,
+    ingest, titles, festivals, marketing, boxOffice, reviews, assembly,
+    // Sprint 19 — Development Phase
+    idea, research, rights, pitch, financing,
+    // Sprint 10 — Pre-production Ops
+    contracts, talentContracts, crew, equipment, insurance, productionOffice,
+    dailyReport, wrapReport,
+    // Pre-production creative
+    scriptDoctoring, lightingDesign, vfxPrevis, stunt, scriptSupervisorPrep,
+    // Production
+    photography, onSetSound, continuity,
+    // Post-production
+    conform, dailies, pictureLock, vfxReview, finalMix, deliverables,
+    // Distribution / post-release
+    musicLicensing, qc, dcp, sales, theatrical, pressKit, international, awards, archive,
+    // Engines (PART B)
+    cinemaEngine, marketingEngine,
+  };
 }

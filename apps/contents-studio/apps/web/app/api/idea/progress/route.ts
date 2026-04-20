@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { findIdeaByProject } from "../../../../lib/idea/mock-entries";
 import { requireSession } from "../../../../lib/server-session";
+import { prisma } from "@marionette/db";
 
 export async function GET(req: Request) {
   const session = await requireSession(req);
@@ -12,17 +12,22 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "paperclipId required" }, { status: 400 });
   }
 
-  const idea = findIdeaByProject(pid);
+  const entry = await prisma.developmentEntry.findFirst({
+    where: { projectId: pid, stage: "idea" },
+    orderBy: { createdAt: "desc" },
+  });
+
+  const content = (entry?.content ?? {}) as Record<string, unknown>;
 
   return NextResponse.json({
-    found: !!idea,
+    found: !!entry,
     paperclipId: pid,
     steps: {
-      loglineDefined: !!idea?.logline,
-      formatSet: !!idea?.format,
-      approved: idea?.status === "approved",
+      loglineDefined: !!(content.logline as string | undefined)?.trim(),
+      formatSet: !!content.format,
+      approved: entry?.status === "approved",
     },
-    status: idea?.status ?? null,
-    title: idea?.title ?? null,
+    status: entry?.status ?? null,
+    title: entry?.title ?? null,
   });
 }

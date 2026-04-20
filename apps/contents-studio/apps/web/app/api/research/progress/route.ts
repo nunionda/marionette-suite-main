@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { findResearchByProject } from "../../../../lib/research/mock-entries";
 import { requireSession } from "../../../../lib/server-session";
+import { prisma } from "@marionette/db";
 
 export async function GET(req: Request) {
   const session = await requireSession(req);
@@ -12,24 +12,33 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "paperclipId required" }, { status: 400 });
   }
 
-  const research = findResearchByProject(pid);
+  const entry = await prisma.developmentEntry.findFirst({
+    where: { projectId: pid, stage: "research" },
+    orderBy: { createdAt: "desc" },
+  });
 
-  const categories = research?.categories ?? [];
+  const content = (entry?.content ?? {}) as Record<string, unknown>;
+  const categories = Array.isArray(content.categories)
+    ? (content.categories as Array<{ category: string; status: string }>)
+    : [];
+  const comparableTitles = Array.isArray(content.comparableTitles)
+    ? (content.comparableTitles as string[])
+    : [];
   const completedCount = categories.filter((c) => c.status === "complete").length;
 
   return NextResponse.json({
-    found: !!research,
+    found: !!entry,
     paperclipId: pid,
     steps: {
       marketResearchDone: categories.some(
-        (c) => c.category.includes("시장") && c.status === "complete"
+        (c) => c.category.includes("시장") && c.status === "complete",
       ),
-      comparableTitlesDone: (research?.comparableTitles?.length ?? 0) > 0,
-      allCategoriesComplete: research?.overallStatus === "complete",
+      comparableTitlesDone: comparableTitles.length > 0,
+      allCategoriesComplete: entry?.status === "complete",
     },
-    overallStatus: research?.overallStatus ?? null,
+    overallStatus: entry?.status ?? null,
     completedCategories: completedCount,
     totalCategories: categories.length,
-    marketSize: research?.marketSize ?? null,
+    marketSize: (content.marketSize as string | undefined) ?? null,
   });
 }

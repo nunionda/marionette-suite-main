@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { findRightsByProject } from "../../../../lib/rights/mock-entries";
 import { requireSession } from "../../../../lib/server-session";
+import { prisma } from "@marionette/db";
 
 export async function GET(req: Request) {
   const session = await requireSession(req);
@@ -12,23 +12,31 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "paperclipId required" }, { status: 400 });
   }
 
-  const rights = findRightsByProject(pid);
+  const entry = await prisma.developmentEntry.findFirst({
+    where: { projectId: pid, stage: "rights" },
+    orderBy: { createdAt: "desc" },
+  });
 
-  const items = rights?.items ?? [];
+  const content = (entry?.content ?? {}) as Record<string, unknown>;
+  const items = Array.isArray(content.items)
+    ? (content.items as Array<{ type: string; status: string }>)
+    : [];
   const hasIssues = items.some((i) => i.status === "issue");
-  const allClear = items.every((i) => i.status === "clear" || i.status === "not_applicable");
+  const allClear = items.every(
+    (i) => i.status === "clear" || i.status === "not_applicable",
+  );
 
   return NextResponse.json({
-    found: !!rights,
+    found: !!entry,
     paperclipId: pid,
     steps: {
       scriptIpClear: items.some((i) => i.type === "script_ip" && i.status === "clear"),
       noBlockingIssues: !hasIssues,
-      overallClear: rights?.overallStatus === "clear",
+      overallClear: entry?.status === "clear",
     },
-    overallStatus: rights?.overallStatus ?? null,
+    overallStatus: entry?.status ?? null,
     hasIssues,
     allClear,
-    legalCounsel: rights?.legalCounsel ?? null,
+    legalCounsel: (content.legalCounsel as string | undefined) ?? null,
   });
 }

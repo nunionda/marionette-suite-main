@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { findFinancingByProject } from "../../../../lib/financing/mock-entries";
 import { requireSession } from "../../../../lib/server-session";
+import { prisma } from "@marionette/db";
 
 export async function GET(req: Request) {
   const session = await requireSession(req);
@@ -12,26 +12,32 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "paperclipId required" }, { status: 400 });
   }
 
-  const financing = findFinancingByProject(pid);
+  const entry = await prisma.developmentEntry.findFirst({
+    where: { projectId: pid, stage: "financing" },
+    orderBy: { createdAt: "desc" },
+  });
 
-  // Guard against totalBudget === 0 to avoid NaN / Infinity
+  const content = (entry?.content ?? {}) as Record<string, unknown>;
+  const totalBudget = (content.totalBudget as number | undefined) ?? 0;
+  const totalRaised = (content.totalRaised as number | undefined) ?? 0;
+
   const pct =
-    financing && financing.totalBudget > 0
-      ? Math.round((financing.totalRaised / financing.totalBudget) * 100)
-      : 0;
+    totalBudget > 0 ? Math.round((totalRaised / totalBudget) * 100) : 0;
+
+  const status = entry?.status ?? null;
 
   return NextResponse.json({
-    found: !!financing,
+    found: !!entry,
     paperclipId: pid,
     steps: {
-      budgetDefined: !!financing?.totalBudget,
+      budgetDefined: totalBudget > 0,
       partiallyFinanced: pct >= 40,
-      fullyFinanced: financing?.status === "fully_financed" || financing?.status === "greenlit",
+      fullyFinanced: status === "fully_financed" || status === "greenlit",
     },
-    status: financing?.status ?? null,
-    totalBudget: financing?.totalBudget ?? null,
-    totalRaised: financing?.totalRaised ?? null,
+    status,
+    totalBudget: totalBudget || null,
+    totalRaised: totalRaised || null,
     raisedPercent: pct,
-    greenlitDate: financing?.greenlitDate ?? null,
+    greenlitDate: (content.greenlitDate as string | undefined) ?? null,
   });
 }

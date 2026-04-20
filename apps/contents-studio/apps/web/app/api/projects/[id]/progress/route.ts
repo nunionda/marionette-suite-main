@@ -1271,5 +1271,10 @@ export async function GET(
     onSetSound,
     continuity,
     conform,
+    dailies,
+    pictureLock,
+    vfxReview,
+    finalMix,
+    deliverables,
   });
 }

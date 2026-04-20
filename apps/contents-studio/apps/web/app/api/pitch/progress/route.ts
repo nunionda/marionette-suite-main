@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { findPitchByProject } from "../../../../lib/pitch/mock-entries";
 import { requireSession } from "../../../../lib/server-session";
+import { prisma } from "@marionette/db";
 
 export async function GET(req: Request) {
   const session = await requireSession(req);
@@ -12,23 +12,33 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "paperclipId required" }, { status: 400 });
   }
 
-  const pitch = findPitchByProject(pid);
+  const entry = await prisma.developmentEntry.findFirst({
+    where: { projectId: pid, stage: "pitch" },
+    orderBy: { createdAt: "desc" },
+  });
 
-  const meetings = pitch?.meetings ?? [];
-  const interestedCount = meetings.filter((m) => m.outcome === "interested" || m.outcome === "greenlit").length;
+  const content = (entry?.content ?? {}) as Record<string, unknown>;
+  const meetings = Array.isArray(content.meetings)
+    ? (content.meetings as Array<{ outcome: string }>)
+    : [];
+  const interestedCount = meetings.filter(
+    (m) => m.outcome === "interested" || m.outcome === "greenlit",
+  ).length;
+
+  const status = entry?.status ?? null;
 
   return NextResponse.json({
-    found: !!pitch,
+    found: !!entry,
     paperclipId: pid,
     steps: {
-      deckReady: pitch?.status === "ready" || pitch?.status === "pitched" || pitch?.status === "greenlit",
+      deckReady: status === "ready" || status === "pitched" || status === "greenlit",
       hasMeetings: meetings.length > 0,
-      greenlit: pitch?.status === "greenlit",
+      greenlit: status === "greenlit",
     },
-    status: pitch?.status ?? null,
-    deckVersion: pitch?.deckVersion ?? null,
+    status,
+    deckVersion: (content.deckVersion as string | undefined) ?? null,
     meetingCount: meetings.length,
     interestedCount,
-    askAmount: pitch?.askAmount ?? null,
+    askAmount: (content.askAmount as number | undefined) ?? null,
   });
 }
