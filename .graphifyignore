@@ -1,0 +1,43 @@
+# External dependencies (not first-party code)
+node_modules/
+
+# Build outputs / caches
+.next/
+.turbo/
+dist/
+build/
+out/
+coverage/
+.cache/
+
+# Lock files (huge, low semantic value)
+pnpm-lock.yaml
+bun.lock
+package-lock.json
+yarn.lock
+
+# Git + IDE + OS metadata
+.git/
+.DS_Store
+*.log
+
+# Dev tool caches
+.playwright-mcp/
+.gstack/
+
+# Claude / worktree recursion guard
+.claude/worktrees/
+
+# Virtual envs
+.venv/
+venv/
+__pycache__/
+
+# Graphify's own output (avoid re-ingesting)
+graphify-out/
+
+# Initial slice (option A): focus on packages + docs + root markdown
+# Comment these out for full-corpus runs later.
+apps/
+research/
+scripts/

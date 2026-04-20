@@ -17,3 +17,9 @@ dist/
 # Note: git worktrees share .gitignore from the linked repo automatically.
 CLAUDE.md.worktree
 .worktree-meta
+
+# Claude Code worktrees (managed by claude-cli, not for commit)
+.claude/worktrees/
+
+# Graphify extraction cache (large, regenerable; commit graph.* outputs only)
+graphify-out/cache/
